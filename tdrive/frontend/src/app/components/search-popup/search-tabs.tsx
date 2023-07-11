@@ -2,7 +2,9 @@
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import SearchResulsDriveItems from './tabs/drive';
 
-export const SearchResultsIndex = () => {
+export const SearchResultsIndex = (props: {
+  onClose: () => void
+}) => {
   return (
     <>
       <PerfectScrollbar
@@ -11,7 +13,7 @@ export const SearchResultsIndex = () => {
         options={{ suppressScrollX: true, suppressScrollY: false }}
         component="div"
       >
-        <SearchResulsDriveItems />
+        <SearchResulsDriveItems onClose={() => props.onClose()}/>
       </PerfectScrollbar>
     </>
   );

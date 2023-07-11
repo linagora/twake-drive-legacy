@@ -9,15 +9,21 @@ import { DriveItem } from '../types';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
 import useRouterCompany from '@features/router/hooks/use-router-company';
+import { DriveCurrentFolderAtom } from 'app/views/client/body/drive/browser';
 
 export const useDrivePreviewModal = () => {
   const history = useHistory();
   const company = useRouterCompany();
   const [status, setStatus] = useRecoilState(DriveViewerState);
+  const [ parentId, setParentId ] = useRecoilState(
+    DriveCurrentFolderAtom({ initialFolderId: 'root' }),
+  );
 
   const open: (item: DriveItem) => void = (item: DriveItem) => {
     if (item.last_version_cache?.file_metadata?.source === 'internal') {
       setStatus({ item, loading: true });
+    } else if (item.is_directory){
+      setParentId(item.id);
     }
   };
 
@@ -89,3 +95,4 @@ export const useDrivePreviewDisplayData = () => {
 
   return { download, id, name, type, extension, size: status.details?.item.size };
 };
+

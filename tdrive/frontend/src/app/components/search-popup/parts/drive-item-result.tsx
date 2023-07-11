@@ -31,7 +31,7 @@ import { DriveCurrentFolderAtom } from '@views/client/body/drive/browser';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
 
-export default (props: { driveItem: DriveItem & { user?: UserType } }) => {
+export default (props: { driveItem: DriveItem & { user?: UserType }, onClose: () => void }) => {
   const history = useHistory();
   const input = useRecoilValue(SearchInputState);
   const currentWorkspaceId = useRouterWorkspace();
@@ -48,12 +48,11 @@ export default (props: { driveItem: DriveItem & { user?: UserType } }) => {
   const { setOpen } = useSearchModal();
   const { open: openViewer } = useFileViewerModal();
   const { open } = useDrivePreview();
-  const company = useRouterCompany();
 
   return (
     <div
       className="flex items-center p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-md cursor-pointer"
-      onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, itemId: file.id})); open(file)}}
+      onClick={() => open(file)}
     >
       <FileResultMedia file={file} className="w-16 h-16 mr-3" />
       <div className="grow mr-3 overflow-hidden">
@@ -71,21 +70,23 @@ export default (props: { driveItem: DriveItem & { user?: UserType } }) => {
         </Text.Info>
         <ResultContext user={file.user} />
       </div>
-      <div
-        className="whitespace-nowrap"
-        onClick={e => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-      >
-        <Button
-          theme="outline"
-          className="w-9 !p-0 flex items-center justify-center ml-2 rounded-full border-none"
-          onClick={() => onDriveItemDownloadClick(file)}
+      {!file.is_directory && (
+        <div
+          className="whitespace-nowrap"
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
-          <DownloadIcon className="text-blue-500 w-6 h-6" />
-        </Button>
-      </div>
+          <Button
+            theme="outline"
+            className="w-9 !p-0 flex items-center justify-center ml-2 rounded-full border-none"
+            onClick={() => onDriveItemDownloadClick(file)}
+          >
+            <DownloadIcon className="text-blue-500 w-6 h-6" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
