@@ -58,7 +58,11 @@
     "type": "SEARCH_DRIVER",
     "elasticsearch": {
       "endpoint": "SEARCH_ES_ENDPOINT",
-      "flushInterval": "SEARCH_ES_FLUSHINTERVAL"
+      "flushInterval": "SEARCH_ES_FLUSHINTERVAL",
+      "useAuth": "SEARCH_ES_USE_AUTH",
+      "username": "SEARCH_ES_USERNAME",
+      "password": "SEARCH_ES_PASSWORD"
+
     }
   },
   "storage": {
