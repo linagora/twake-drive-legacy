@@ -40,6 +40,8 @@ import { Droppable } from 'app/features/dragndrop/hook/droppable';
 import { Draggable } from 'app/features/dragndrop/hook/draggable';
 import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
 import { ToasterService } from '@features/global/services/toaster-service';
+import { SelectorModalAtom } from './modals/selector';
+
 
 
 export const DriveCurrentFolderAtom = atomFamily<
@@ -162,6 +164,7 @@ export default memo(
     const buildFileTypeContextMenu = useOnBuildFileTypeContextMenu();
     const buildPeopleContextMen = useOnBuildPeopleContextMenu();
     const buildDateContextMenu = useOnBuildDateContextMenu();
+    const setSelectorModalState = useSetRecoilState(SelectorModalAtom);
     const [activeId, setActiveId] = useState();
     const {update} = useDriveActions();
     const sensors = useSensors(
@@ -183,14 +186,23 @@ export default memo(
 
     function handleDragEnd(event:any) {
       if (event.over){
-        update(
-          {
-            parent_id: event.over.data.current.child.props.item.id,
+        setSelectorModalState({
+          open: true,
+          parent_id: inTrash ? 'root' : event.over.data.current.child.props.item.id,
+          mode: 'move',
+          title:
+            Languages.t('components.item_context_menu.move.modal_header') +
+            ` '${event.active.data.current.child.props.item.name}'`,
+          onSelected: async ids => {
+            await update(
+              {
+                parent_id: ids[0],
+              },
+              event.active.data.current.child.props.item.id,
+              event.active.data.current.child.props.item.parent_id,
+            );
           },
-          event.active.data.current.child.props.item.id,
-          event.active.data.current.child.props.item.parent_id,
-        );
-        ToasterService.success(event.active.data.current.child.props.item.name+" "+Languages.t('components.dragndrop_info_move_to')+" "+event.over.data.current.child.props.item.name);
+        })
       }
       
     }
