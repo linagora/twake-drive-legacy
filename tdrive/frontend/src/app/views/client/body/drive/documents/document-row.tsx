@@ -12,14 +12,18 @@ import {
 } from '@atoms/icons-colored';
 import { Base, BaseSmall } from '@atoms/text';
 import Menu from '@components/menus/menu';
+import useRouterCompany from '@features/router/hooks/use-router-company';
 import { useDrivePreview } from '@features/drive/hooks/use-drive-preview';
 import { formatBytes } from '@features/drive/utils';
 import fileUploadApiClient from '@features/files/api/file-upload-api-client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Avatar from '../../../../../atoms/avatar';
 import { PublicIcon } from '../components/public-icon';
 import { CheckableIcon, DriveItemProps } from './common';
 import { getDevice } from '../../../../../features/global/utils/device';
+import { useHistory } from 'react-router-dom';
+import RouterServices from '@features/router/services/router-service';
+import useRouteState from 'app/features/router/hooks/use-route-state';
 
 export const DocumentRow = ({
   item,
@@ -29,8 +33,11 @@ export const DocumentRow = ({
   onClick,
   onBuildContextMenu,
 }: DriveItemProps) => {
+  const history = useHistory();
   const [hover, setHover] = useState(false);
   const { open } = useDrivePreview();
+  const company = useRouterCompany();
+  const { itemId } = useRouteState();
 
   const fileType = fileUploadApiClient.mimeToType(
     item?.last_version_cache?.file_metadata?.mime || '',
@@ -39,10 +46,17 @@ export const DocumentRow = ({
   const metadata = item.last_version_cache?.file_metadata || {};
   const hasThumbnails = !!metadata.thumbnails?.length || false;
 
+  useEffect(() => {
+    if(itemId == item.id) {
+      open(item);
+    }
+  }, [itemId]);
+
   const preview = () => {
     const device = getDevice();
     console.log("DEVICE:: " + device);
     if (device != "ios" && device != "android") {
+      history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "", itemId: item.id}));
       open(item);
     }
   };

@@ -15,6 +15,7 @@ import {
 } from '@atoms/icons-colored';
 import * as Text from '@atoms/text';
 import { useCompanyApplications } from '@features/applications/hooks/use-company-applications';
+import useRouterCompany from '@features/router/hooks/use-router-company';
 import { DriveItem } from '@features/drive/types';
 import FileUploadAPIClient from '@features/files/api/file-upload-api-client';
 import { formatDate } from '@features/global/utils/format-date';
@@ -27,9 +28,12 @@ import { useFileViewerModal } from '@features/viewer/hooks/use-viewer';
 import { useDrivePreview } from '@features/drive/hooks/use-drive-preview';
 import Media from '@molecules/media';
 import { DriveCurrentFolderAtom } from '@views/client/body/drive/browser';
+import { useHistory } from 'react-router-dom';
+import RouterServices from '@features/router/services/router-service';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 
 export default (props: { driveItem: DriveItem & { user?: UserType } }) => {
+  const history = useHistory();
   const input = useRecoilValue(SearchInputState);
   const currentWorkspaceId = useRouterWorkspace();
   const companyApplications = useCompanyApplications();
@@ -46,11 +50,12 @@ export default (props: { driveItem: DriveItem & { user?: UserType } }) => {
   const { setOpen } = useSearchModal();
   const { open: openViewer } = useFileViewerModal();
   const { open } = useDrivePreview();
+  const company = useRouterCompany();
 
   return (
     <div
       className="flex items-center p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-md cursor-pointer"
-      onClick={() => open(file)}
+      onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, itemId: file.id})); open(file)}}
     >
       <FileResultMedia file={file} className="w-16 h-16 mr-3" />
       <div className="grow mr-3 overflow-hidden">
