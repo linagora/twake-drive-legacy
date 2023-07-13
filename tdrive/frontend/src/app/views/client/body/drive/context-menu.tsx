@@ -58,6 +58,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
           //Add item related menus
           const upToDateItem = await DriveApiClient.get(item.company_id, item.id);
           const access = upToDateItem.access || 'none';
+          console.log(item);
           const newMenuActions = [
             {
               type: 'menu',
@@ -74,7 +75,13 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.download'),
-              onClick: () => download(item.last_version_cache.file_metadata.external_id),
+              onClick: () => {
+                if (item.is_directory) {
+                  downloadZip([item!.id]);
+                } else {
+                  download(item.last_version_cache.file_metadata.external_id);
+                }
+              }              
             },
             { type: 'separator' },
             {
