@@ -39,8 +39,7 @@ import {DndContext, useSensors, useSensor, PointerSensor} from '@dnd-kit/core';
 import { Droppable } from 'app/features/dragndrop/hook/droppable';
 import { Draggable } from 'app/features/dragndrop/hook/draggable';
 import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
-import { ToasterService } from '@features/global/services/toaster-service';
-import { SelectorModalAtom } from './modals/selector';
+import { ConfirmModalAtom } from './modals/confirm-move/index';
 
 
 
@@ -164,7 +163,7 @@ export default memo(
     const buildFileTypeContextMenu = useOnBuildFileTypeContextMenu();
     const buildPeopleContextMen = useOnBuildPeopleContextMenu();
     const buildDateContextMenu = useOnBuildDateContextMenu();
-    const setSelectorModalState = useSetRecoilState(SelectorModalAtom);
+    const setConfirmModalState = useSetRecoilState(ConfirmModalAtom);
     const [activeId, setActiveId] = useState();
     const {update} = useDriveActions();
     const sensors = useSensors(
@@ -186,7 +185,7 @@ export default memo(
 
     function handleDragEnd(event:any) {
       if (event.over){
-        setSelectorModalState({
+        setConfirmModalState({
           open: true,
           parent_id: inTrash ? 'root' : event.over.data.current.child.props.item.id,
           mode: 'move',

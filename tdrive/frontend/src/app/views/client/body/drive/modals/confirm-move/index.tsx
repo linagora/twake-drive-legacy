@@ -1,72 +1,85 @@
 import { Button } from '@atoms/button/button';
 import { Modal, ModalContent } from '@atoms/modal';
-import { Base } from '@atoms/text';
-import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
 import { useDriveItem } from '@features/drive/hooks/use-drive-item';
-import { DriveItemSelectedList } from '@features/drive/state/store';
 import { DriveItem } from '@features/drive/types';
 import { useEffect, useState } from 'react';
 import { atom, useRecoilState } from 'recoil';
 import Languages from '@features/global/services/languages-service';
-import { ToasterService } from '@features/global/services/toaster-service';
 
-
-
-export type ConfirmMoveModalType = {
+export type ConfirmModalType = {
   open: boolean;
-  event: any;
+  parent_id: string;
+  mode: 'move' | 'select-file' | 'select-files';
+  title: string;
+  onSelected: (ids: string[]) => Promise<void>;
 };
 
-export const ConfirmMoveModalAtom = atom<ConfirmMoveModalType>({
-  key: 'ConfirmMoveModalAtom',
+export const ConfirmModalAtom = atom<ConfirmModalType>({
+  key: 'ConfirmModalAtom',
   default: {
     open: false,
-    event: {},
+    parent_id: '',
+    mode: 'move',
+    title: '',
+    onSelected: async () => {},
   },
 });
 
-export const ConfirmMoveModal = (event:any) => {
-  const [state, setState] = useRecoilState(ConfirmMoveModalAtom);
+export const ConfirmModal = () => {
+  const [state, setState] = useRecoilState(ConfirmModalAtom);
 
   return (
     <Modal open={state.open} onClose={() => setState({ ...state, open: false })}>
-      {!!state.event && <ConfirmMoveModalContent event={event} />}
+      <ConfirmModalContent key={state.parent_id} showfiles={false}/>
     </Modal>
   );
 };
 
-const ConfirmMoveModalContent = (event:any) => {
-  const [loading, setLoading] = useState(false);
-  const [state, setState] = useRecoilState(ConfirmMoveModalAtom);
-  const [, setSelected] = useRecoilState(DriveItemSelectedList);
-  const {update} = useDriveActions();
 
+const ConfirmModalContent = (key:any,showfiles:boolean) => {
+  const [state, setState] = useRecoilState(ConfirmModalAtom);
+  const [selected, setSelected] = useState<DriveItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [parentId, setParentId] = useState(state.parent_id);
+
+  const { children, path, item: parent, refresh } = useDriveItem(parentId);
+
+  useEffect(() => {
+    if (state.mode === 'select-file' && parent) setSelected([]);
+    if (state.mode === 'move' && parent) setSelected([parent]);
+    refresh(parentId);
+  }, [parentId, parent?.id]);
+
+  const folders = (children?.filter(i => i.is_directory) || []).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+  const files = (children?.filter(i => !i.is_directory) || []).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
 
   return (
-    <ModalContent
-      title={
-        "Test"
-            }
-    >
-      <Base className="block my-3">
-        {Languages.t('compenents.ConfirmMoveModalContent_move_to_move_desc')}
-      </Base>
-      <br />
+    <ModalContent title={state.title}>
       <Button
-        className="float-right"
+        disabled={selected.length === 0}
         loading={loading}
+        theme="primary"
+        className="float-right"
         onClick={async () => {
-          update(
-            {
-              parent_id: event.over.data.current.child.props.item.id,
-            },
-            event.active.data.current.child.props.item.id,
-            event.active.data.current.child.props.item.parent_id,
-          );
-          ToasterService.success(event.active.data.current.child.props.item.name+" "+Languages.t('components.dragndrop_info_move_to')+" "+event.over.data.current.child.props.item.name);
+          setLoading(true);
+          await state.onSelected(selected.map(i => i.id));
+          setState({ ...state, open: false });
+          setLoading(false);
         }}
       >
-        {Languages.t('compenents.ConfirmMoveModalContent_move_to_move')}
+        {selected.length === 0 ? (
+          <>{Languages.t('components.SelectorModalContent_no_items')}</>
+        ) : state.mode === 'move' ? (
+          <>{Languages.t('components.SelectorModalContent_move_to')} '{selected[0]?.name}'</>
+        ) : selected.length > 1 ? (
+          <> {selected.length} {Languages.t('components.SelectorModalContent_select')} {Languages.t('components.SelectorModalContent_files')}</>
+        ) : (
+          <>{Languages.t('components.SelectorModalContent_select')} '{selected[0]?.name}'</>
+        )}
       </Button>
     </ModalContent>
   );
