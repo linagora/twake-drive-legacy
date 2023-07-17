@@ -1,4 +1,4 @@
-import { describe, beforeEach, afterEach, it, expect, afterAll } from "@jest/globals";
+import { describe, beforeEach, it, expect, afterAll } from "@jest/globals";
 import { deserialize } from "class-transformer";
 import { File } from "../../../src/services/files/entities/file";
 import { ResourceUpdateResponse } from "../../../src/utils/types";
@@ -236,7 +236,6 @@ describe("the Drive feature", () => {
 
     //then::
     expect(searchResponse.entities?.length).toEqual(1);
-    const actual = searchResponse.entities[0];
   })
 
   it("did search for an item that doesn't exist", async () => {
@@ -280,9 +279,7 @@ describe("the Drive feature", () => {
   it("did search by mime type", async () => {
     jest.setTimeout(10000);
     // given:: all the sample files uploaded and documents for them created
-    await Promise.all(
-      (await currentUser.uploadFiles()).map(f => currentUser.createDocumentFromFile(f)),
-    );
+    await currentUser.uploadAllFilesOneByOne();
 
     const filters = {
       mime_type: "application/pdf",

@@ -160,9 +160,10 @@ export const getAccessLevel = async (
   if (id === "shared_with_me") return "read";
 
   //If it is my personal folder, I have full access
-  if (context?.user?.id && id.startsWith("user_")) {
+  if (id.startsWith("user_")) {
     if (id === "user_" + context.user?.id) return "manage";
     if (await isCompanyApplication(context)) return "manage";
+    return "none";
   }
 
   let publicToken = context.public_token;

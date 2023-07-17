@@ -1,5 +1,5 @@
-import { CloudIcon } from '@heroicons/react/solid';
+import { LinkIcon } from '@heroicons/react/solid';
 
 export const PublicIcon = ({ className }: { className?: string }) => {
-  return <CloudIcon className={className} />;
+  return <LinkIcon className={className} />;
 };

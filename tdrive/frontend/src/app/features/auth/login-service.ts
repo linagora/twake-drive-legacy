@@ -89,10 +89,10 @@ class Login extends Observable {
         this.cookies.remove('pending-redirect');
         setTimeout(() => {
           document.location.href = redirectUrl;
-        }, 500);
+        }, 1000);
       }
 
-      this.updateUser((err, user) => this.logger.debug('User is updated', err, user));
+      await this.updateUser((err, user) => this.logger.debug('User is updated', err, user));
     }
   }
 

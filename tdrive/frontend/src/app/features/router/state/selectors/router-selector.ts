@@ -11,6 +11,11 @@ export const RouteViewSelector = selector<string>({
   get: ({ get }) => get(RouterState)?.viewId || '',
 });
 
+export const RoutePreviewSelector = selector<string>({
+  key: 'RouterPreviewSelector',
+  get: ({ get }) => get(RouterState)?.itemId || '',
+});
+
 export const RouterWorkspaceSelector = selector<string>({
   key: 'RouterWorkspaceSelector',
   get: ({ get }) => get(RouterState)?.workspaceId || '',

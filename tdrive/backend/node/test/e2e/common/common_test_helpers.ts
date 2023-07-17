@@ -1,16 +1,18 @@
 // @ts-ignore
 import fs from "fs";
-import {ResourceUpdateResponse, Workspace} from "../../../src/utils/types";
-import {File} from "../../../src/services/files/entities/file";
-import {deserialize} from "class-transformer";
+import { ResourceUpdateResponse, Workspace } from "../../../src/utils/types";
+import { File } from "../../../src/services/files/entities/file";
+import { deserialize } from "class-transformer";
 import formAutoContent from "form-auto-content";
-import {TestPlatform, User} from "../setup";
-import {v1 as uuidv1} from "uuid";
-import {TestDbService} from "../utils.prepare.db";
-import {DriveFile} from "../../../src/services/documents/entities/drive-file";
-import {FileVersion} from "../../../src/services/documents/entities/file-version";
-import { DriveItemDetailsMockClass, SearchResultMockClass } from "./entities/mock_entities";
-import {logger} from "../../../src/core/platform/framework";
+import { TestPlatform, User } from "../setup";
+import { v1 as uuidv1 } from "uuid";
+import { TestDbService } from "../utils.prepare.db";
+import { DriveFile } from "../../../src/services/documents/entities/drive-file";
+import { FileVersion } from "../../../src/services/documents/entities/file-version";
+import { AccessTokenMockClass, DriveItemDetailsMockClass, SearchResultMockClass } from "./entities/mock_entities";
+import { logger } from "../../../src/core/platform/framework";
+import { expect } from "@jest/globals";
+import { publicAccessLevel } from "../../../src/services/documents/types";
 
 export default class TestHelpers {
 
@@ -54,10 +56,6 @@ export default class TestHelpers {
         const helpers = new TestHelpers(platform);
         await helpers.init(newUser)
         return helpers;
-    }
-
-    async uploadFiles(parent_id = "root")  {
-        return Promise.all(TestHelpers.ALL_FILES.map(f => this.uploadFile(f)));
     }
 
     async uploadRandomFile() {
@@ -117,15 +115,28 @@ export default class TestHelpers {
         return files;
     };
 
-    async createDocument(
-        platform: TestPlatform,
+    async createDirectory(parent = "root") {
+        const directory = await this.createDocument({
+            company_id: this.platform.workspace.company_id,
+            name: "Test Folder Name",
+            parent_id: parent,
+            is_directory: true,
+        }, {});
+        expect(directory).toBeDefined();
+        expect(directory).not.toBeNull();
+        expect(directory.id).toBeDefined()
+        expect(directory.id).not.toBeNull();
+        return directory;
+    }
+
+    private async createDocument(
         item: Partial<DriveFile>,
         version: Partial<FileVersion>
     ) {
 
-        return await platform.app.inject({
+        const response = await this.platform.app.inject({
             method: "POST",
-            url: `${TestHelpers.DOC_URL}/companies/${platform.workspace.company_id}/item`,
+            url: `${TestHelpers.DOC_URL}/companies/${this.platform.workspace.company_id}/item`,
             headers: {
                 authorization: `Bearer ${this.jwt}`,
             },
@@ -134,6 +145,68 @@ export default class TestHelpers {
                 version,
             },
         });
+        return deserialize<DriveFile>(DriveFile, response.body);
+    };
+
+    async shareWithPublicLink(doc: Partial<DriveFile>, accessLevel: publicAccessLevel) {
+        return await this.updateDocument(doc.id, {
+            ...doc,
+            access_info: {
+                ...doc.access_info,
+                public: {
+                    ...doc.access_info.public!,
+                    level: accessLevel,
+                }
+            }
+        });
+    }
+
+    async getPublicLinkAccessToken(doc: Partial<DriveFile>) {
+        const accessRes = await this.platform.app.inject({
+            method: "POST",
+            url: `${TestHelpers.DOC_URL}/companies/${doc.company_id}/anonymous/token`,
+            headers: {},
+            payload: {
+                company_id: doc.company_id,
+                document_id: doc.id,
+                token: doc.access_info.public?.token,
+            },
+        });
+        const { access_token } = deserialize<AccessTokenMockClass>(
+          AccessTokenMockClass,
+          accessRes.body,
+        );
+        expect(access_token).toBeDefined();
+
+        return access_token;
+    }
+
+    async createRandomDocument(
+      parent_id = "root",
+    ) {
+        const file = await this.uploadRandomFile();
+        const item = {
+            name: file.metadata.name,
+            parent_id: parent_id,
+            company_id: file.company_id,
+        };
+
+        const version = {
+            file_metadata: {
+                name: file.metadata.name,
+                size: file.upload_data?.size,
+                thumbnails: [],
+                external_id: file.id
+            }
+        }
+
+        const doc = await this.createDocument(item, version);
+
+        expect(doc).toBeDefined();
+        expect(doc).not.toBeNull();
+        expect(doc.parent_id).toEqual(parent_id)
+
+        return doc;
     };
 
     async createDocumentFromFile(
@@ -155,8 +228,7 @@ export default class TestHelpers {
             }
         }
 
-        const response = await this.createDocument(this.platform, item, version);
-        return deserialize<DriveFile>(DriveFile, response.body);
+        return await this.createDocument(item, version);
     };
 
     async updateDocument(
@@ -208,14 +280,21 @@ export default class TestHelpers {
           response.body)
     };
 
-    async getDocument(platform: TestPlatform, id: string | "root" | "trash" | "shared_with_me") {
-        return await platform.app.inject({
+    async getDocument(id: string | "root" | "trash" | "shared_with_me") {
+        return await this.platform.app.inject({
             method: "GET",
-            url: `${TestHelpers.DOC_URL}/companies/${platform.workspace.company_id}/item/${id}`,
+            url: `${TestHelpers.DOC_URL}/companies/${this.platform.workspace.company_id}/item/${id}`,
             headers: {
                 authorization: `Bearer ${this.jwt}`,
             },
         });
+    };
+
+    async getDocumentOKCheck(id: string | "root" | "trash" | "shared_with_me") {
+        const response = await this.getDocument(id);
+        expect(response.statusCode).toBe(200);
+        const doc = deserialize<DriveItemDetailsMockClass>(DriveItemDetailsMockClass, response.body);
+        expect(doc.item?.id).toBe(id);
     };
 
     async sharedWithMeDocuments (

@@ -2,7 +2,7 @@ import { DriveFile } from "../../../src/services/documents/entities/drive-file";
 import { FileVersion } from "../../../src/services/documents/entities/file-version";
 import { TestPlatform } from "../setup";
 import formAutoContent from "form-auto-content";
-import fs from "fs";
+import * as fs from "fs";
 
 const url = "/internal/services/documents/v1";
 
@@ -73,7 +73,7 @@ export const e2e_searchDocument = async (
 ) => {
   const token = await platform.auth.getJWTToken();
 
-  const response = await platform.app.inject({
+  return await platform.app.inject({
     method: "POST",
     url: `${url}/companies/${platform.workspace.company_id}/search`,
     headers: {
@@ -81,8 +81,6 @@ export const e2e_searchDocument = async (
     },
     payload,
   });
-
-  return response;
 };
 
 export const e2e_createVersion = async (
