@@ -50,6 +50,7 @@ class AuthService {
 
     const config = InitService.server_infos?.configuration?.accounts[accountType];
 
+    console.log(`Use "${Globals.environment.env_dev_auth}" account type for authorization`)
     if (Globals.environment.env_dev_auth) accountType = Globals.environment.env_dev_auth;
 
     if (accountType === 'remote') {
@@ -104,7 +105,6 @@ class AuthService {
         onSessionExpired: () => this.onSessionExpired(),
         onNewToken: async token => {
           this.onNewToken(token);
-
           // TODO: Change the basic auth to return this new token on init
           if (this.initState === 'initializing') {
             const user = await this.comleteInit();
@@ -118,6 +118,8 @@ class AuthService {
           resolve(null);
         },
       });
+      this.logger.info("Init completed")
+      resolve(null);
     });
   }
 

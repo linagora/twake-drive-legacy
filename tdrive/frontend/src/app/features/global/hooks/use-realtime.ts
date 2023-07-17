@@ -22,7 +22,7 @@ export type RealtimeRoomService<T> = {
  *
  * Note: It will subscribe only once, even if the component using it re renders. If you need to unsubscribe and subscribe again, call unsubscribe on the returned object.
  *
- * @param roomName
+ * @param roomConf
  * @param tagName
  * @param onEvent
  * @returns
