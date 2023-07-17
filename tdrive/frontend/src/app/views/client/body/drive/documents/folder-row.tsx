@@ -7,6 +7,7 @@ import { formatBytes } from '@features/drive/utils';
 import { useState } from 'react';
 import { PublicIcon } from '../components/public-icon';
 import { CheckableIcon, DriveItemProps } from './common';
+import './style.scss';
 
 export const FolderRow = ({
   item,
@@ -45,14 +46,14 @@ export const FolderRow = ({
         />
       </div>
       <div className="grow text-ellipsis whitespace-nowrap overflow-hidden">
-        <Base className="!font-semibold">{item.name}</Base>
+        <Base className="!font-semibold flex maxWidth100">{item.name}</Base>
       </div>
       <div className="shrink-0 ml-4">
         {item?.access_info?.public?.level !== 'none' && (
           <PublicIcon className="h-5 w-5 text-blue-500" />
         )}
       </div>
-      <div className="shrink-0 ml-4 text-right" style={{ minWidth: 80 }}>
+      <div className="shrink-0 ml-4 text-right minWidth80">
         <BaseSmall>{formatBytes(item.size)}</BaseSmall>
       </div>
       <div className="shrink-0 ml-4">
