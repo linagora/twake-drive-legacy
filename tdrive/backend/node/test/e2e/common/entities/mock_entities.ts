@@ -43,3 +43,14 @@ export class DriveItemDetailsMockClass {
 export class SearchResultMockClass {
     entities: DriveFileMockClass[];
 }
+
+export class AccessTokenMockClass {
+    access_token: {
+        time: 0;
+        expiration: number;
+        refresh_expiration: number;
+        value: string;
+        refresh: string;
+        type: "Bearer";
+    };
+}

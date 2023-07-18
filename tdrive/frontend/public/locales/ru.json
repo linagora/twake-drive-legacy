@@ -289,7 +289,7 @@
     "components.item_context_menu.manage_access": "Управлять доступом",
     "components.item_context_menu.manage_access_to": "Управлять доступом",
     "components.item_context_menu.share": "Поделиться",
-    "components.item_context_menu.copy_link": "Скопировать публичную ссылку",
+    "components.item_context_menu.copy_link": "Скопировать ссылку",
     "components.item_context_menu.copy_link.success": "Ссылка скопирована в буфер обмена",
     "components.item_context_menu.versions": "История изменений",
     "components.item_context_menu.move": "Переместить",

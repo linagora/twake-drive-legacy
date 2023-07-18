@@ -58,7 +58,7 @@ export default class InternalAuthProviderService
 
     return new Promise<void>((resolve, reject) => {
       this.signinIn = true;
-
+      this.logger.log("Sign in in console");
       ConsoleAPIClient.login(
         {
           email: params.username,

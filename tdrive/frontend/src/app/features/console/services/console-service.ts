@@ -103,42 +103,6 @@ class ConsoleService {
     return res;
   }
 
-  /**
-   * @deprecated use ConsoleServiceAPIClient.getNewAccessToken
-   * @param currentToken
-   * @param callback
-   */
-  public getNewAccessToken(
-    currentToken: { access_token: string; id_token: string },
-    callback: (err?: Error, access_token?: JWTDataType) => void,
-  ): void {
-    this.logger.debug(
-      `getNewAccessToken, get new token from current token ${JSON.stringify(currentToken)}`,
-    );
-    Api.post(
-      '/internal/services/console/v1/login',
-      { oidc_id_token: currentToken.id_token },
-      (response: {
-        access_token: JWTDataType;
-        message: string;
-        error: string;
-        statusCode: number;
-      }) => {
-        if (response.statusCode && !response.access_token) {
-          this.logger.error(
-            'getNewAccessToken, Can not retrieve access_token from console. Response was',
-            response,
-          );
-          callback(new Error('Can not retrieve access_token from console'));
-          return;
-        }
-        // the input access_token is potentially expired and so the response contains an error.
-        // we should be able to refresh the token or renew it in some way...
-
-        callback(undefined, response.access_token);
-      },
-    );
-  }
 }
 
 export default new ConsoleService();

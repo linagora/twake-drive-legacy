@@ -9,6 +9,7 @@ import {
   UserIcon,
   UserGroupIcon,
 } from '@heroicons/react/outline';
+import { useEffect } from 'react';
 import useRouterCompany from '@features/router/hooks/use-router-company';
 import useRouterWorkspace from '@features/router/hooks/use-router-workspace';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
@@ -22,8 +23,12 @@ import DiskUsage from '../common/disk-usage';
 import Actions from './actions';
 import { useHistory, useLocation } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
+<<<<<<< HEAD
 import Languages from 'features/global/services/languages-service';
 import shared from '../body/drive/shared';
+=======
+import Languages from "features/global/services/languages-service";
+>>>>>>> main
 
 export default () => {
   const history = useHistory();
@@ -42,7 +47,10 @@ export default () => {
   if ((path || [])[0]?.id === 'user_' + user?.id) folderType = 'personal';
   if (inTrash) folderType = 'trash';
   if (sharedWithMe) folderType = 'shared';
-  const { viewId } = RouterServices.getStateFromRoute();
+  const { viewId, itemId } = RouterServices.getStateFromRoute();
+  useEffect(() => {
+    !itemId && viewId && setParentId(viewId);
+  }, [viewId, itemId]);
   return (
     <div className="grow flex flex-col overflow-auto -m-4 p-4 relative">
       <div className="grow">
@@ -63,10 +71,7 @@ export default () => {
         <div className="mt-4" />
         <Title>Drive</Title>
         <Button
-          onClick={() => {
-            history.push(RouterServices.generateRouteFromState({ companyId: company, viewId: '' }));
-            setParentId('user_' + user?.id);
-          }}
+          onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: 'user_' + user?.id})); setParentId('user_' + user?.id)}}
           size="lg"
           theme="white"
           className={
@@ -91,6 +96,7 @@ export default () => {
           </Button>
         ) : null}
         <Button
+<<<<<<< HEAD
           onClick={() => {
             setParentId('shared_with_me');
           }}
@@ -100,6 +106,22 @@ export default () => {
         >
           <UserGroupIcon className="w-5 h-5 mr-4" />{' '}
           {Languages.t('components.side_menu.shared_with_me')}
+=======
+          onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "root"})); setParentId('root')}}
+          size="lg"
+          theme="white"
+          className={'w-full mb-1 ' + (folderType === 'home' && viewId == '' ? activeClass : '')}
+        >
+          <CloudIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.home')}
+        </Button>
+        <Button
+          onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "shared_with_me"})); setParentId('shared_with_me')}}
+          size="lg"
+          theme="white"
+          className={'w-full mb-1 ' + (folderType === 'shared' && viewId == ''? activeClass : '')}
+        >
+          <UserGroupIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.shared_with_me')}
+>>>>>>> main
         </Button>
         {false && (
           <>

@@ -69,6 +69,10 @@ class LanguagesService extends Observable {
     this.notify();
   }
 
+  getLanguage(): string {
+    return this.language;
+  }
+
   t(route: string, parameters: any[] = [], fallback?: string) {
     let replace: any = {};
     try {

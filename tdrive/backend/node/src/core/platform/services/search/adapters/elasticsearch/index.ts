@@ -40,14 +40,36 @@ export default class ElasticSearch extends SearchAdapter implements SearchAdapte
 
   public async connect() {
     try {
-      this.client = new Client({
+      let clientOptions: any = {
         node: this.configuration.endpoint,
         ssl: {
           rejectUnauthorized: false,
         },
-      });
+      };
+
+      if (this.configuration.useAuth) {
+        logger.info(`Using auth for ES client`);
+        clientOptions.auth = {
+          username: this.configuration.username,
+          password: this.configuration.password,
+        };
+      }
+
+      this.client = new Client(clientOptions);
     } catch (e) {
-      logger.error(`Unable to connect to ElasticSearch at ${this.configuration.endpoint}`);
+      logger.error(
+        `Unable to connect to ElasticSearch for options: ${JSON.stringify({
+          node: this.configuration.endpoint,
+          auth: {
+            useAuth: this.configuration.useAuth,
+            username: this.configuration.username,
+            password: this.configuration.password,
+          },
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        })} at: ${this.configuration.endpoint}`,
+      );
     }
     this.startBulkReader();
   }

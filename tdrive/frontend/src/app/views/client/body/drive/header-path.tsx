@@ -25,6 +25,18 @@ export default ({
   return <PathRender inTrash={inTrash || false} path={path} onClick={id => setParentId(id)} />;
 };
 
+function cutFileName (name: any){
+  if (typeof name !== "undefined" ){
+    if (name.length >= 30){
+      return name.substring(0,30)+" ...";
+    } else {
+      return name;
+    }
+  } else {
+    return name;
+  }
+}
+
 export const PathRender = ({
   path,
   onClick,
@@ -34,6 +46,7 @@ export const PathRender = ({
   onClick: (id: string) => void;
 }) => {
   const pathLength = (path || []).reduce((acc, curr) => acc + curr.name.length, 0);
+
   return (
     <nav className="overflow-hidden whitespace-nowrap mr-2 pl-px inline-flex">
       {pathLength < 70 ? (
@@ -110,7 +123,7 @@ const PathItem = ({
           }
         }}
       >
-        <Title>{item?.name || ''}</Title>
+        <Title>{cutFileName(item?.name) || ''}</Title>
       </a>
       {item?.access_info?.public?.level && item?.access_info?.public?.level !== 'none' && (
         <PublicIcon className="h-5 w-5 ml-2" />

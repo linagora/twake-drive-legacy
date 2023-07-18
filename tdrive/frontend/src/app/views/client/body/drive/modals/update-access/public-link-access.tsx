@@ -8,11 +8,15 @@ import { Input } from 'app/atoms/input/input-text';
 import { useEffect, useRef, useState } from 'react';
 import { AccessLevel } from './common';
 import moment from 'moment';
+import 'moment/min/locales'
 import Languages from 'features/global/services/languages-service';
+
 
 export const PublicLinkManager = ({ id, disabled }: { id: string; disabled?: boolean }) => {
   const { item, loading, update } = useDriveItem(id);
   const publicLink = getPublicLink(item);
+
+
 
   return (
     <>
@@ -115,6 +119,11 @@ const PublicLinkOptions = (props: {
     props.onChangeExpiration(useExpiration ? expiration : 0);
   }, [useExpiration, expiration]);
 
+  function expirationDate(exp: moment.MomentInput) {
+    moment.locale(Languages.getLanguage());
+    return moment(exp).fromNow(true).toLocaleString();
+  }
+
   return (
     <>
       <Subtitle className="block mt-4 mb-1">{Languages.t('components.public-link-security')}</Subtitle>
@@ -156,6 +165,9 @@ const PublicLinkOptions = (props: {
         )}
       </div>
       <div className="flex items-center justify-center w-full h-10">
+
+
+        
         <Checkbox
           disabled={props.disabled}
           onChange={s => {
@@ -169,7 +181,7 @@ const PublicLinkOptions = (props: {
           <Info className="ml-2 text-red-500">({Languages.t('components.public-link-security_expired')})</Info>
         )}
         {useExpiration && (expiration || 0) > Date.now() && (
-          <Info className="ml-2">({moment(expiration).fromNow(true).toLocaleString()})</Info>
+          <Info className="ml-2">({expirationDate(expiration)})</Info>
         )}{' '}
         <div className="grow mr-2" />
         {!!useExpiration && (
