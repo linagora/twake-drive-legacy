@@ -6,7 +6,7 @@ import { DriveApiClient } from '../api-client/api-client';
 import { DriveItemAtom, DriveItemChildrenAtom } from '../state/store';
 import { BrowseFilter, DriveItem, DriveItemVersion } from '../types';
 import { SharedWithMeFilterState } from '../state/shared-with-me-filter';
-import Languages from "features/global/services/languages-service";
+import Languages from 'features/global/services/languages-service';
 
 /**
  * Returns the children of a drive item
@@ -21,7 +21,7 @@ export const useDriveActions = () => {
     ({ set, snapshot }) =>
       async (parentId: string) => {
         if (parentId) {
-          const filter:BrowseFilter = {
+          const filter: BrowseFilter = {
             company_id: companyId,
             mime_type: sharedFilter.mimeType.value,
           };
@@ -110,5 +110,22 @@ export const useDriveActions = () => {
     [refresh],
   );
 
-  return { create, refresh, download, downloadZip, remove, update };
+  const updateLevel = useCallback(
+    async (id: string, userId: string, level: string) => {
+      try {
+        const updateBody = {
+          company_id: companyId,
+          user_id: userId,
+          level: level
+        }
+        await DriveApiClient.updateLevel(companyId, id, updateBody);
+        await refresh(id || '');
+      } catch (e) {
+        ToasterService.error(Languages.t('hooks.use-drive-actions.unable_update_file'));
+      }
+    },
+    [refresh],
+  );
+
+  return { create, refresh, download, downloadZip, remove, update, updateLevel };
 };

@@ -175,4 +175,11 @@ export class DriveApiClient {
 
     return res;
   }
+
+  static async updateLevel(companyId: string, id: string, update: any) {
+    return await Api.post<any, any>(
+      `/internal/services/documents/v1/companies/${companyId}/item/${id}${appendTdriveToken()}/level`,
+      update,
+    );
+  }
 }

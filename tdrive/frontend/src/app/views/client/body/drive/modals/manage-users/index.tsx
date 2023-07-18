@@ -33,11 +33,11 @@ export const UsersModal = () => {
   return (
     <Modal open={state.open} onClose={() => setState({ open: false })}>
       <Base className="block mt-4 mb-1">
-        {Languages.t('components.internal-access_specific_rules')}
+        {Languages.t('components.internal-manage_root_users')}
       </Base>
       <div className="rounded-md border mt-2">
         {(userList || [])?.map(user => (
-          <UserAccessLevel key={user.id} id={user?.id || ""} userId={user?.id || ""} />
+          <UserAccessLevel key={user.id} id="root" userId={user?.id || ""} />
         ))}
         <div className="-mb-px" />
       </div>
@@ -52,9 +52,9 @@ const UserAccessLevel = ({
   id: string;
   userId: string;
 }) => {
-  const { item, loading, update } = useDriveItem(id);
   const user = useUser(userId);
   const { user: currentUser } = useCurrentUser();
+  const { item, loading, updateLevel } = useDriveItem(id);
   const level = "manage";
 
   return (
@@ -74,11 +74,11 @@ const UserAccessLevel = ({
       </div>
       <div className="shrink-0 ml-2">
         <AccessLevel
-          disabled={loading || user?.id === currentUser?.id}
+          disabled={user?.id === currentUser?.id}
           level={level}
           canRemove
           onChange={level => {
-            console.log(level)
+            updateLevel(user?.id || '', level);
           }}
         />
       </div>

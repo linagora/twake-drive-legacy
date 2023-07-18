@@ -21,13 +21,12 @@ import {
 } from "../../types";
 import { DriveFileDTO } from "../dto/drive-file-dto";
 import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
-import {
-  ExecutionContext,
-} from "../../../../core/platform/framework/api/crud-service";
+import { ExecutionContext } from "../../../../core/platform/framework/api/crud-service";
 import gr from "../../../global-resolver";
+
 export class DocumentsController {
   private driveFileDTOBuilder = new DriveFileDTOBuilder();
-  
+
   private getCompanyUserRole(companyId: string, userId: string, context?: ExecutionContext) {
     return gr.services.companies
       .getCompanyUser({ id: companyId }, { id: userId }, context)
@@ -167,7 +166,10 @@ export class DocumentsController {
     const context = getDriveExecutionContext(request);
     const { id } = request.params;
 
-    const companyUserRole = await this.getCompanyUserRole(request.body.company_id || context.company.id, context.user.id);
+    const companyUserRole = await this.getCompanyUserRole(
+      request.body.company_id || context.company.id,
+      context.user.id,
+    );
 
     const options: SearchDocumentsOptions = {
       ...request.body,
@@ -177,7 +179,7 @@ export class DocumentsController {
       onlyUploadedNotByMe: true,
     };
 
-    let data =  {
+    let data = {
       ...(await globalResolver.services.documents.documents.browse(id, options, context)),
       websockets: request.currentUser?.id
         ? globalResolver.platformServices.realtime.sign(
@@ -187,7 +189,7 @@ export class DocumentsController {
         : [],
     };
 
-    if(id == "root" && companyUserRole < 1) {
+    if (id == "root" && companyUserRole < 1) {
       data.children = [];
       data.access = "read";
     }
@@ -273,6 +275,39 @@ export class DocumentsController {
     if (!id) throw new CrudException("Missing id", 400);
 
     return await globalResolver.services.documents.documents.update(id, update, context);
+  };
+
+  updateLevel = async (
+    request: FastifyRequest<{
+      Params: ItemRequestParams;
+      Body: Partial<DriveFile> | any;
+      Querystring: { public_token?: string };
+    }>,
+  ): Promise<any> => {
+    const context = getDriveExecutionContext(request);
+    const { id } = request.params;
+    const update = request.body;
+
+    if (!id) throw new CrudException("Missing id", 400);
+    if (id == "root") {
+      const companyUser = await globalResolver.services.companies.getCompanyUser(
+        { id: update.company_id },
+        { id: update.user_id },
+      );
+      if (companyUser) {
+        let level = 0;
+        if (update.level == "manage") {
+          level = 1;
+        }
+        await globalResolver.services.companies.setUserRole(
+          update.company_id,
+          update.user_id,
+          companyUser.role,
+          level,
+        );
+      }
+    }
+    return {};
   };
 
   /**

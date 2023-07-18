@@ -38,6 +38,13 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
   });
 
   fastify.route({
+    method: "POST",
+    url: `${serviceUrl}/:id/level`,
+    preValidation: [fastify.authenticateOptional],
+    handler: documentsController.updateLevel.bind(documentsController),
+  });
+
+  fastify.route({
     method: "DELETE",
     url: `${serviceUrl}/:id`,
     preValidation: [fastify.authenticateOptional],

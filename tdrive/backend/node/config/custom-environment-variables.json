@@ -98,5 +98,8 @@
   },
   "plugins": {
     "server": "PLUGINS_SERVER"
+  },
+  "drive": {
+    "rootAdmins": "DRIVE_ROOT_ADMINS"
   }
 }
