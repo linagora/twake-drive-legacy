@@ -208,6 +208,7 @@
     "components.internal-access_cannal_info_give_back":"You will need to go to Tdrive chat to give back access to this item.",
     "components.internal-access_specific_rules":"Specific access rules",
     "components.internal-access_specific_rules_you":"(you)",
+    "components.internal-manage_root_users":"Shared drive access rules",
     "components.select-users_search_users":"Search users",
     "common.access-level_full_acess":"Full access",
     "common.access-level_read":"Read",

@@ -30,6 +30,7 @@ import { CreateModalAtom } from './modals/create';
 import { PropertiesModal } from './modals/properties';
 import { AccessModal } from './modals/update-access';
 import { VersionsModal } from './modals/versions';
+import { UsersModal } from './modals/manage-users';
 import { SharedFilesTable } from './shared-files-table';
 import useRouteState from 'app/features/router/hooks/use-route-state';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
@@ -188,6 +189,7 @@ export default memo(
 
           >
             <DriveRealtimeObject id={parentId} key={parentId} />
+            <UsersModal />
             <VersionsModal />
             <AccessModal />
             <PropertiesModal />
