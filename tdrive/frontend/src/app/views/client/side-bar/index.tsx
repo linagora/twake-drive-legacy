@@ -23,12 +23,7 @@ import DiskUsage from '../common/disk-usage';
 import Actions from './actions';
 import { useHistory, useLocation } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
-<<<<<<< HEAD
-import Languages from 'features/global/services/languages-service';
-import shared from '../body/drive/shared';
-=======
 import Languages from "features/global/services/languages-service";
->>>>>>> main
 
 export default () => {
   const history = useHistory();
@@ -96,17 +91,6 @@ export default () => {
           </Button>
         ) : null}
         <Button
-<<<<<<< HEAD
-          onClick={() => {
-            setParentId('shared_with_me');
-          }}
-          size="lg"
-          theme="white"
-          className={'w-full mb-1 ' + (folderType === 'shared' && viewId == '' ? activeClass : '')}
-        >
-          <UserGroupIcon className="w-5 h-5 mr-4" />{' '}
-          {Languages.t('components.side_menu.shared_with_me')}
-=======
           onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "root"})); setParentId('root')}}
           size="lg"
           theme="white"
@@ -121,7 +105,6 @@ export default () => {
           className={'w-full mb-1 ' + (folderType === 'shared' && viewId == ''? activeClass : '')}
         >
           <UserGroupIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.shared_with_me')}
->>>>>>> main
         </Button>
         {false && (
           <>
