@@ -43,6 +43,9 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
   const setPropertiesModalState = useSetRecoilState(PropertiesModalAtom);
   const setUsersModalState = useSetRecoilState(UsersModalAtom);
   const { open: preview } = useDrivePreview();
+  function getIdsFromArray(arr: DriveItem[]): string[] {
+    return arr.map((obj) => obj.id);
+  }
 
   return useCallback(
     async (parent?: Partial<DriveItemDetails> | null, item?: DriveItem) => {
@@ -260,7 +263,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                   type: 'menu',
                   text: Languages.t('components.item_context_menu.download_folder'),
                   hide: inTrash,
-                  onClick: () => downloadZip([parent.item!.id]),
+                  onClick: () => downloadZip(getIdsFromArray(parent.children!)),
                 },
                 {
                   type: 'menu',
