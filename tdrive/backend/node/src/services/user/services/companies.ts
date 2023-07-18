@@ -276,7 +276,7 @@ export class CompanyServiceImpl {
     }
 
     entity.role = role;
-    if(level) {
+    if (level) {
       entity.level = level;
     }
     entity.applications = applications;

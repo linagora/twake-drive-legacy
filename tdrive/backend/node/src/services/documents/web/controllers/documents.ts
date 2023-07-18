@@ -179,7 +179,7 @@ export class DocumentsController {
       onlyUploadedNotByMe: true,
     };
 
-    let data = {
+    const data = {
       ...(await globalResolver.services.documents.documents.browse(id, options, context)),
       websockets: request.currentUser?.id
         ? globalResolver.platformServices.realtime.sign(
@@ -284,7 +284,6 @@ export class DocumentsController {
       Querystring: { public_token?: string };
     }>,
   ): Promise<any> => {
-    const context = getDriveExecutionContext(request);
     const { id } = request.params;
     const update = request.body;
 
