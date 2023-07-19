@@ -49,10 +49,15 @@ export default (props: { driveItem: DriveItem & { user?: UserType }, onClose: ()
   const { open: openViewer } = useFileViewerModal();
   const { open } = useDrivePreview();
 
+  function openDoc(file: DriveItem){
+    open(file);
+    if (file.is_directory) props.onClose();
+  }
+
   return (
     <div
       className="flex items-center p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-md cursor-pointer"
-      onClick={() => open(file)}
+      onClick={() => openDoc(file)}
     >
       <FileResultMedia file={file} className="w-16 h-16 mr-3" />
       <div className="grow mr-3 overflow-hidden">
