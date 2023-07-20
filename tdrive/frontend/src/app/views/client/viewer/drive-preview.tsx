@@ -51,7 +51,7 @@ export const DrivePreview = (): React.ReactElement => {
       positioned={false}
     >
       <XIcon
-        className="z-10 cursor-pointer absolute right-5 top-5 w-12 h-12 text-zinc-300 hover:text-white rounded-full p-1 bg-black bg-opacity-25"
+        className="z-10 cursor-pointer absolute right-5 top-5 w-20 h-20 text-white hover:text-black rounded-full p-1 bg-gray-500 hover:bg-white bg-opacity-25"
         onClick={() => close()}
       />
 
