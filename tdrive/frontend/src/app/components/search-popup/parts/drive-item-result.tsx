@@ -1,7 +1,7 @@
 import { FolderIcon } from '@heroicons/react/solid';
 import Highlighter from 'react-highlight-words';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { onDriveItemDownloadClick, openDriveItem } from '../common';
+import { onDriveItemDownloadClick } from '../common';
 import ResultContext from './result-context';
 import { Button } from '@atoms/button/button';
 import { DownloadIcon } from '@atoms/icons-agnostic';
@@ -23,14 +23,12 @@ import useRouterWorkspace from '@features/router/hooks/use-router-workspace';
 import { useSearchModal } from '@features/search/hooks/use-search';
 import { SearchInputState } from '@features/search/state/search-input';
 import { UserType } from '@features/users/types/user';
-import { useFileViewerModal } from '@features/viewer/hooks/use-viewer';
 import { useDrivePreview } from '@features/drive/hooks/use-drive-preview';
 import Media from '@molecules/media';
 import { DriveCurrentFolderAtom } from '@views/client/body/drive/browser';
 import { useHistory } from 'react-router-dom';
-import RouterServices from '@features/router/services/router-service';
 
-export default (props: { driveItem: DriveItem & { user?: UserType }, onClose: () => void }) => {
+export default (props: { driveItem: DriveItem & { user?: UserType }}) => {
   const history = useHistory();
   const input = useRecoilValue(SearchInputState);
   const currentWorkspaceId = useRouterWorkspace();
@@ -45,12 +43,11 @@ export default (props: { driveItem: DriveItem & { user?: UserType }, onClose: ()
   const extension = name?.split('.').pop();
 
   const { setOpen } = useSearchModal();
-  const { open: openViewer } = useFileViewerModal();
   const { open } = useDrivePreview();
 
   function openDoc(file: DriveItem){
     open(file);
-    if (file.is_directory) props.onClose();
+    if (file.is_directory) setOpen(false);
   }
 
   return (

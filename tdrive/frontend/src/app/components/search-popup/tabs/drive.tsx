@@ -6,7 +6,7 @@ import { useRecoilValue } from 'recoil';
 import DriveItemResult from '../parts/drive-item-result';
 import NothingFound from '../parts/nothing-found';
 
-export default (props: { onClose: () => void }) => {
+export default () => {
   const input = useRecoilValue(SearchInputState);
   const isRecent = input?.query?.trim()?.length === 0;
   const { driveItems, loading } = useSearchDriveItems();
@@ -22,13 +22,13 @@ export default (props: { onClose: () => void }) => {
       )}
 
       <div className={'-mx-2'}>
-        <DriveItemsResults onClose={() => props.onClose()}/>
+        <DriveItemsResults/>
       </div>
     </div>
   );
 };
 
-export const DriveItemsResults = (props: { max?: number, onClose: () => void }) => {
+export const DriveItemsResults = (props: { max?: number}) => {
   const { driveItems, loading } = useSearchDriveItems();
 
   if (driveItems.length === 0 && !loading) return <NothingFound />;
@@ -36,7 +36,7 @@ export const DriveItemsResults = (props: { max?: number, onClose: () => void }) 
   return (
     <>
       {driveItems.slice(0, props?.max || driveItems.length).map(item => (
-        <DriveItemResult key={item.id} driveItem={item} onClose={() => props.onClose()}/>
+        <DriveItemResult key={item.id} driveItem={item}/>
       ))}
     </>
   );

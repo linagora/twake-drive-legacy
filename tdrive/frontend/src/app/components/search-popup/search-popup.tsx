@@ -9,18 +9,16 @@ export default () => {
 
   return (
     <Modal open={open} onClose={() => setOpen(false)} className="sm:w-[80vw] sm:max-w-4xl">
-      <SearchBox onClose={() => setOpen(false)}/>
+      <SearchBox/>
     </Modal>
   );
 };
 
-const SearchBox = (props: {
-  onClose: () => void
-}) => {
+const SearchBox = () => {
   return (
     <ModalContent textCenter title={Languages.t('components.searchpopup.header_title')}>
       <SearchInput />
-      <SearchResultsIndex onClose={() => props.onClose()}/>
+      <SearchResultsIndex/>
     </ModalContent>
   );
 };
