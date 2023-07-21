@@ -276,6 +276,7 @@
     "babel-plugin-named-exports-order": "^0.0.2",
     "craco-alias": "^2.1.1",
     "eslint-plugin-storybook": "=0.5.12",
+    "jest": "^29.6.1",
     "prettier": "^2.0.5",
     "prop-types": "^15.8.1",
     "sass": "^1.49.9",
