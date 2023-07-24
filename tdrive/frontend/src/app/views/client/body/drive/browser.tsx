@@ -163,7 +163,7 @@ export default memo(
         {viewId == 'shared-with-me' ? (
           <>
             <Suspense fallback={<></>}>
-              <DrivePreview />
+              <DrivePreview items={documents} />
             </Suspense>
             <SharedFilesTable />
           </>
@@ -196,7 +196,7 @@ export default memo(
             <ConfirmDeleteModal />
             <ConfirmTrashModal />
             <Suspense fallback={<></>}>
-              <DrivePreview />
+              <DrivePreview items={documents} />
             </Suspense>
             <div
               className={

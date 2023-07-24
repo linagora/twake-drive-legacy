@@ -1,28 +1,54 @@
-import { Transition } from '@headlessui/react';
-import { DownloadIcon, XIcon } from '@heroicons/react/outline';
 import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { Transition } from '@headlessui/react';
 import { fadeTransition } from 'src/utils/transitions';
-import Controls from './controls';
-import DriveDisplay from './drive-display';
-import { Button } from '@atoms/button/button';
-import { Loader } from '@atoms/loader';
-import { Modal } from '@atoms/modal';
-import * as Text from '@atoms/text';
+import { DownloadIcon, XIcon } from '@heroicons/react/outline';
+import { addShortcut, removeShortcut } from '@features/global/services/shortcut-service';
+import { getDevice } from '@features/global/utils/device';
+import RouterServices from '@features/router/services/router-service';
+import useRouterCompany from '@features/router/hooks/use-router-company';
 import {
   useDrivePreview,
   useDrivePreviewDisplayData,
   useDrivePreviewLoading,
 } from '@features/drive/hooks/use-drive-preview';
-import { addShortcut, removeShortcut } from '@features/global/services/shortcut-service';
-import { formatDate } from '@features/global/utils/format-date';
 import { formatSize } from '@features/global/utils/format-file-size';
+import { formatDate } from '@features/global/utils/format-date';
+import { DriveItem } from 'app/features/drive/types';
+import { Modal } from '@atoms/modal';
+import { Button } from '@atoms/button/button';
+import { Loader } from '@atoms/loader';
+import * as Text from '@atoms/text';
+import DriveDisplay from './drive-display';
+import Controls from './controls';
 
-export const DrivePreview = (): React.ReactElement => {
-  const { isOpen, close, loading } = useDrivePreview();
+interface DrivePreviewProps {
+  items: DriveItem[];
+}
+
+export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
+  const history = useHistory();
+  const company = useRouterCompany();
+  const { status, isOpen, open, close, loading } = useDrivePreview();
   const [modalLoading, setModalLoading] = useState(true);
   const { loading: loadingData } = useDrivePreviewLoading();
   const { type = '' } = useDrivePreviewDisplayData();
   let animationTimeout: number = setTimeout(() => undefined);
+  const handleSwitchRight = () => {
+    const currentItem = status.item;
+    if (currentItem) {
+      const currentItemPos = items.findIndex(x => x.id === currentItem.id);
+      switchPreview(items[(currentItemPos + 1) % items.length]);
+    }
+  };
+
+  const handleSwitchLeft = () => {
+    const currentItem = status.item;
+    if (currentItem) {
+      const currentItemPos = items.findIndex(x => x.id === currentItem.id);
+      switchPreview(items[(currentItemPos - 1 + items.length) % items.length]);
+    }
+  };
 
   useEffect(() => {
     addShortcut({ shortcut: 'esc', handler: close });
@@ -33,6 +59,16 @@ export const DrivePreview = (): React.ReactElement => {
   }, []);
 
   useEffect(() => {
+    addShortcut({ shortcut: 'Right', handler: handleSwitchRight });
+    addShortcut({ shortcut: 'Left', handler: handleSwitchLeft });
+
+    return () => {
+      removeShortcut({ shortcut: 'Right', handler: handleSwitchRight });
+      removeShortcut({ shortcut: 'Left', handler: handleSwitchLeft });
+    };
+  }, [status]);
+
+  useEffect(() => {
     clearTimeout(animationTimeout);
 
     if (loading) {
@@ -41,6 +77,17 @@ export const DrivePreview = (): React.ReactElement => {
       }, 400);
     }
   }, [loading]);
+
+  const switchPreview = (item: DriveItem) => {
+    const device = getDevice();
+    if (device != 'ios' && device != 'android') {
+      close();
+      history.push(
+        RouterServices.generateRouteFromState({ companyId: company, viewId: '', itemId: item.id }),
+      );
+      open(item);
+    }
+  };
 
   return (
     <Modal
