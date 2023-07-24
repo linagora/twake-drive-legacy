@@ -334,4 +334,28 @@ describe("the public links feature", () => {
 
   });
 
-});
+  describe("Download Folder from shared link", () => {
+
+    it("Share folder", async () => {
+      const user = await TestHelpers.getInstance(platform, true);
+      const anotherUser = await TestHelpers.getInstance(platform, true);
+
+      //create directory in "My Drive" and upload a file
+      const directory = await user.createDirectory("user_" + user.user.id);
+      const doc = await user.createRandomDocument(directory.id);
+
+      //check that another user doesn't see any file
+      expect((await anotherUser.getDocument(directory.id)).statusCode).toBe(401);
+
+      //share folder with the public link
+      await user.shareWithPublicLink(directory, "read");
+
+      const token = await anotherUser.getPublicLinkAccessToken(directory);
+
+      anotherUser.jwt = token.value;
+      await anotherUser.getDocumentOKCheck(directory.id);
+
+    });
+  });
+
+  });
