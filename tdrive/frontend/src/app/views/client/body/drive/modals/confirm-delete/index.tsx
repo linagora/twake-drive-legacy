@@ -23,12 +23,15 @@ export const ConfirmDeleteModalAtom = atom<ConfirmDeleteModalType>({
 
 export const ConfirmDeleteModal = () => {
   const [state, setState] = useRecoilState(ConfirmDeleteModalAtom);
-
-  return (
-    <Modal open={state.open} onClose={() => setState({ ...state, open: false })}>
-      {!!state.items.length && <ConfirmDeleteModalContent items={state.items} />}
-    </Modal>
-  );
+    return (
+        <>
+            {state.items.length > 0 && (
+                <Modal open={state.open} onClose={() => setState({ ...state, open: false })}>
+                    <ConfirmDeleteModalContent items={state.items} />
+                </Modal>
+            )}
+        </>
+    )
 };
 
 const ConfirmDeleteModalContent = ({ items }: { items: DriveItem[] }) => {
