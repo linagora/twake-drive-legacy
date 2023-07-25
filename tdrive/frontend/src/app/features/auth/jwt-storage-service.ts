@@ -84,7 +84,7 @@ class JWTStorage {
       this.timeDelta = new Date().getTime() / 1000 - jwtData.time;
       this.jwtData.expiration += this.timeDelta - 5 * 60; //Force reduce expiration by 5 minutes
       this.jwtData.refresh_expiration += this.timeDelta - 5 * 60; //Force reduce expiration by 5 minutes
-
+      this.logger.info("Update jwt token in local storage")
       LocalStorage.setItem('jwt', this.jwtData);
     }
   }
@@ -147,7 +147,7 @@ class JWTStorage {
   }
 
   async renew(): Promise<JWTDataType> {
-    const token = await ConsoleAPIClient.getNewAccessToken();
+    const token = await ConsoleAPIClient.renewAccessToken();
 
     if (!token) {
       throw new Error('Can not get a new access token');

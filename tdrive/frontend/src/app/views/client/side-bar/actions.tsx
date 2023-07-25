@@ -12,6 +12,7 @@ import { ConfirmDeleteModalAtom } from '../body/drive/modals/confirm-delete';
 import { CreateModal, CreateModalAtom } from '../body/drive/modals/create';
 import { Button } from '@atoms/button/button';
 import Languages from "features/global/services/languages-service";
+import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 
 export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentId?: string }) => {
   const companyId = useRouterCompany();
@@ -19,8 +20,9 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
   const uploadFolderZoneRef = useRef<UploadZone | null>(null);
   const setCreationModalState = useSetRecoilState(CreateModalAtom);
   const { uploadTree, uploadFromUrl } = useDriveUpload();
+  const { user } = useCurrentUser();
   const [parentId, _] = useRecoilState(
-    DriveCurrentFolderAtom({ initialFolderId: initialParentId || 'root' }),
+    DriveCurrentFolderAtom({ initialFolderId: initialParentId || 'user_'+user?.id }),
   );
 
   console.log("Upload Zone:: " + parentId);
@@ -78,7 +80,8 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
 };
 
 export default () => {
-  const [parentId, _] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: 'root' }));
+  const { user } = useCurrentUser();
+  const [parentId, _] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id  }));
   const { access, item, inTrash } = useDriveItem(parentId);
   const { children: trashChildren } = useDriveItem('trash');
   const uploadZoneRef = useRef<UploadZone | null>(null);

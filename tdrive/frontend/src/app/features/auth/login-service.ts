@@ -11,8 +11,13 @@ import Application from '../applications/services/application-service';
 import { UserType } from '@features/users/types/user';
 import { Cookies } from 'react-cookie';
 import InitService from '../global/services/init-service';
+import { useRecoilState } from "recoil";
+import { CurrentUserState } from "features/users/state/atoms/current-user";
 
 class Login extends Observable {
+
+  private static logInOngoing = false;
+
   // Promise resolved when user is defined
   userIsSet!: Promise<string>;
   resolveUser!: (userId: string) => void;
@@ -80,12 +85,14 @@ class Login extends Observable {
     }
 
     if (!AuthService.isInitialized()) {
+      this.logger.log("Auth service is not initialized, init ...")
       this.reset();
       await AuthService.init();
+      this.logger.info("Auth service initialized");
 
       const redirectUrl = this.cookies.get('pending-redirect');
       if (redirectUrl) {
-        console.log('Got pending redirect to', redirectUrl);
+        this.logger.info('Got pending redirect to', redirectUrl);
         this.cookies.remove('pending-redirect');
         setTimeout(() => {
           document.location.href = redirectUrl;
@@ -104,6 +111,8 @@ class Login extends Observable {
   }
 
   async updateUser(callback?: (err: Error | null, user?: UserType) => void): Promise<void> {
+    this.logger.info("LoginService:: Try to update user info ")
+
     if (Globals.store_public_access_get_data) {
       this.firstInit = true;
       this.state = 'logged_out';
@@ -114,7 +123,7 @@ class Login extends Observable {
     AuthService.updateUser(async user => {
       this.logger.debug('User update result', user);
       if (!user) {
-        if (!this.pingServer()) {
+        if (!(await this.pingServer())) {
           //We are disconnected
           console.log('We are disconnected, we will get user again in 10 seconds');
           setTimeout(() => {
@@ -167,15 +176,17 @@ class Login extends Observable {
     });
   }
 
-  login(params: any, hide_load = false) {
-    if (!hide_load) {
-      this.login_loading = true;
-    }
-    this.login_error = false;
-    this.notify();
+  async login(params: any, hide_load = false) {
+    if (!Login.logInOngoing) {
+      this.logger.debug("Try to login");
+      if (!hide_load) {
+        this.login_loading = true;
+      }
+      this.login_error = false;
+      this.notify();
 
-    AuthService.login(params)
-      .then(async result => {
+      try {
+        const result = await AuthService.login(params);
         this.login_loading = false;
         if (!result) {
           this.login_error = true;
@@ -183,11 +194,15 @@ class Login extends Observable {
           return;
         }
         await this.updateUser();
-      })
-      .catch(err => {
+      } catch (err) {
         this.logger.error('Can not login', err);
-        // TODO display a modal message
-      });
+      } finally {
+        this.logger.debug('Login process finished');
+        Login.logInOngoing = false;
+      }
+    } else {
+      this.logger.debug("Login is already in process ...");
+    }
   }
 
   async logout(reload = false) {

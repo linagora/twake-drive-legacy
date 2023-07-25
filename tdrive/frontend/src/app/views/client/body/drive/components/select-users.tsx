@@ -72,7 +72,7 @@ export default (props: {
                       }}
                       size="sm"
                     >
-                      Add
+                      {Languages.t('general.add')}
                     </Button>
                   </div>
                 </div>

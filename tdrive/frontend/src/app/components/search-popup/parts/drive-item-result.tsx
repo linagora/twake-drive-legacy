@@ -30,13 +30,16 @@ import Media from '@molecules/media';
 import { DriveCurrentFolderAtom } from '@views/client/body/drive/browser';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
+import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
+
 
 export default (props: { driveItem: DriveItem & { user?: UserType } }) => {
   const history = useHistory();
   const input = useRecoilValue(SearchInputState);
   const currentWorkspaceId = useRouterWorkspace();
   const companyApplications = useCompanyApplications();
-  const [_, setParentId] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: 'root' }));
+  const { user } = useCurrentUser();
+  const [_, setParentId] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id }));
   const tdriveDriveApplicationId =
     companyApplications.applications.find(application => {
       return application.identity.code === 'tdrive_drive';

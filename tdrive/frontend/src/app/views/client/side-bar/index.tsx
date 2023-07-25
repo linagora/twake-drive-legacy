@@ -27,15 +27,15 @@ import Languages from "features/global/services/languages-service";
 
 export default () => {
   const history = useHistory();
+  const { user } = useCurrentUser();
   const location = useLocation();
   const company = useRouterCompany();
   const workspace = useRouterWorkspace();
   const [parentId, setParentId] = useRecoilState(
-    DriveCurrentFolderAtom({ initialFolderId: 'root' }),
+    DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id }),
   );
-  const { user } = useCurrentUser();
   const active = false;
-  const { access: rootAccess } = useDriveItem('root');
+  const { access: rootAccess } = useDriveItem('user_'+user?.id);
   const { sharedWithMe, inTrash, path } = useDriveItem(parentId);
   const activeClass = 'bg-zinc-50 dark:bg-zinc-800 !text-blue-500';
   let folderType = 'home';
