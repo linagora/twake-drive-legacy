@@ -29,6 +29,7 @@ import { DriveCurrentFolderAtom } from '@views/client/body/drive/browser';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
+import useRouterCompany from 'app/features/router/hooks/use-router-company';
 
 export default (props: { driveItem: DriveItem & { user?: UserType }}) => {
   const history = useHistory();
@@ -47,6 +48,7 @@ export default (props: { driveItem: DriveItem & { user?: UserType }}) => {
 
   const { setOpen } = useSearchModal();
   const { open } = useDrivePreview();
+  const company = useRouterCompany();
 
   function openDoc(file: DriveItem){
     open(file);
@@ -56,7 +58,7 @@ export default (props: { driveItem: DriveItem & { user?: UserType }}) => {
   return (
     <div
       className="flex items-center p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-md cursor-pointer"
-      onClick={() => openDoc(file)}
+      onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, itemId: file.id})); open(file)}}
     >
       <FileResultMedia file={file} className="w-16 h-16 mr-3" />
       <div className="grow mr-3 overflow-hidden">
