@@ -1,8 +1,9 @@
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 import {useDraggable} from '@dnd-kit/core';
 
 type DraggableProps={
   children: React.ReactNode
+  //TODO[ASH] in it's an int why it's wny?
   index: any
 }
 

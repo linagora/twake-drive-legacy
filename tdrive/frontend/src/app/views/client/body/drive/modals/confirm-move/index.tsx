@@ -8,6 +8,7 @@ import Languages from '@features/global/services/languages-service';
 
 export type ConfirmModalType = {
   open: boolean;
+  //TODO[ASH] what does it mean "parent_id" in terms of ModalWindow?
   parent_id: string;
   mode: 'move' | 'select-file' | 'select-files';
   title: string;
@@ -36,6 +37,7 @@ export const ConfirmModal = () => {
 };
 
 
+//TODO[ASH] and you don't use this params: "key" and "showfiles"
 const ConfirmModalContent = (key:any,showfiles:boolean) => {
   const [state, setState] = useRecoilState(ConfirmModalAtom);
   const [selected, setSelected] = useState<DriveItem[]>([]);
@@ -50,6 +52,7 @@ const ConfirmModalContent = (key:any,showfiles:boolean) => {
     refresh(parentId);
   }, [parentId, parent?.id]);
 
+  //TODO[ASH] why do you need this?
   const folders = (children?.filter(i => i.is_directory) || []).sort((a, b) =>
     a.name.localeCompare(b.name),
   );
@@ -71,6 +74,8 @@ const ConfirmModalContent = (key:any,showfiles:boolean) => {
           setLoading(false);
         }}
       >
+        # TODO[ASH] can we move this if the function near "state.mode === 'select-file' && parent"
+        # it will be more readable
         {selected.length === 0 ? (
           <>{Languages.t('components.SelectorModalContent_no_items')}</>
         ) : state.mode === 'move' ? (

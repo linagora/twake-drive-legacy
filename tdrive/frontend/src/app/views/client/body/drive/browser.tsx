@@ -180,7 +180,7 @@ export default memo(
     function handleDragStart(event:any) {
       const { active } = event;
       const { id } = active;
-  
+      //TODO[ASH] why you are setting activeId if you don't use it later
       setActiveId(id);
     }
 
@@ -207,9 +207,11 @@ export default memo(
       
     }
 
+    //
     function draggableMarkup(index: number, child: any) {
       return (
           isMobile ? (
+            //TODO[ASH] you are duplicating this code, can we move this logic inside the DocumentRow?
             <DocumentRow
               key={index}
               className={
