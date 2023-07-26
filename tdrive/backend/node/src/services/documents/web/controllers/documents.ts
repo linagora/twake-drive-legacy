@@ -189,7 +189,7 @@ export class DocumentsController {
         : [],
     };
 
-    if (id == "root" && companyUserRole < 1) {
+    if (id == "root" && companyUserRole == 1) {
       data.children = [];
       data.access = "read";
     }
