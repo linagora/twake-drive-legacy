@@ -11,7 +11,7 @@ export const SearchResultsIndex = () => {
         options={{ suppressScrollX: true, suppressScrollY: false }}
         component="div"
       >
-        <SearchResulsDriveItems />
+        <SearchResulsDriveItems/>
       </PerfectScrollbar>
     </>
   );

@@ -22,13 +22,13 @@ export default () => {
       )}
 
       <div className={'-mx-2'}>
-        <DriveItemsResults />
+        <DriveItemsResults/>
       </div>
     </div>
   );
 };
 
-export const DriveItemsResults = (props: { max?: number }) => {
+export const DriveItemsResults = (props: { max?: number}) => {
   const { driveItems, loading } = useSearchDriveItems();
 
   if (driveItems.length === 0 && !loading) return <NothingFound />;
@@ -36,7 +36,7 @@ export const DriveItemsResults = (props: { max?: number }) => {
   return (
     <>
       {driveItems.slice(0, props?.max || driveItems.length).map(item => (
-        <DriveItemResult key={item.id} driveItem={item} />
+        <DriveItemResult key={item.id} driveItem={item}/>
       ))}
     </>
   );

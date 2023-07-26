@@ -36,6 +36,7 @@ import useRouteState from 'app/features/router/hooks/use-route-state';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
 import MenusManager from '@components/menus/menus-manager.jsx';
 import Languages from 'features/global/services/languages-service';
+import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 
 export const DriveCurrentFolderAtom = atomFamily<
   string,
@@ -57,12 +58,13 @@ export default memo(
     tdriveTabContextToken?: string;
     inPublicSharing?: boolean;
   }) => {
+    const { user } = useCurrentUser();
     const companyId = useRouterCompany();
     setTdriveTabToken(tdriveTabContextToken || null);
     const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
 
     const [parentId, _setParentId] = useRecoilState(
-      DriveCurrentFolderAtom({ context: context, initialFolderId: initialParentId || 'root' }),
+      DriveCurrentFolderAtom({ context: context, initialFolderId: initialParentId || 'user_'+user?.id }),
     );
 
     const [loadingParentChange, setLoadingParentChange] = useState(false);
@@ -106,7 +108,7 @@ export default memo(
 
     //In case we are kicked out of the current folder, we need to reset the parent id
     useEffect(() => {
-      if (!loading && !path?.length && !inPublicSharing && !sharedWithMe) setParentId('root');
+      if (!loading && !path?.length && !inPublicSharing && !sharedWithMe) setParentId('user_'+user?.id);
     }, [path, loading, setParentId]);
 
     useEffect(() => {
@@ -162,7 +164,7 @@ export default memo(
         {viewId == 'shared-with-me' ? (
           <>
             <Suspense fallback={<></>}>
-              <DrivePreview />
+              <DrivePreview items={documents} />
             </Suspense>
             <SharedFilesTable />
           </>
@@ -196,7 +198,7 @@ export default memo(
             <ConfirmDeleteModal />
             <ConfirmTrashModal />
             <Suspense fallback={<></>}>
-              <DrivePreview />
+              <DrivePreview items={documents} />
             </Suspense>
             <div
               className={
