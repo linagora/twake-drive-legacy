@@ -5,7 +5,11 @@ import { CrudException, ListResult } from "../../../../core/platform/framework/a
 import { File } from "../../../../services/files/entities/file";
 import { UploadOptions } from "../../../../services/files/types";
 import globalResolver from "../../../../services/global-resolver";
-import { PaginationQueryParameters, ResourceWebsocket } from "../../../../utils/types";
+import {
+  PaginationQueryParameters,
+  ResourceWebsocket,
+  CompanyUserRole,
+} from "../../../../utils/types";
 import { DriveFile } from "../../entities/drive-file";
 import { FileVersion } from "../../entities/file-version";
 import {
@@ -189,7 +193,7 @@ export class DocumentsController {
         : [],
     };
 
-    if (id == "root" && companyUserRole == 1) {
+    if (id == "root" && companyUserRole == CompanyUserRole.member) {
       data.children = [];
       data.access = "read";
     }
@@ -294,9 +298,9 @@ export class DocumentsController {
         { id: update.user_id },
       );
       if (companyUser) {
-        let level = 0;
+        let level = CompanyUserRole.member;
         if (update.level == "manage") {
-          level = 1;
+          level = CompanyUserRole.admin;
         }
         await globalResolver.services.companies.setUserRole(
           update.company_id,
@@ -304,6 +308,8 @@ export class DocumentsController {
           companyUser.role,
           level,
         );
+      } else {
+        throw new CrudException("User is not part of this company.", 406);
       }
     }
     return {};

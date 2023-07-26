@@ -272,6 +272,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                 {
                   type: 'menu',
                   text: Languages.t('components.item_context_menu.manage_users'),
+                  hide: parent.item!.id != 'root',
                   onClick: () => setUsersModalState({ open: true }),
                 },
                 { type: 'separator', hide: inTrash || parent.access === 'read' },
