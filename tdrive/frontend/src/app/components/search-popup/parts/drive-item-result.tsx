@@ -58,7 +58,7 @@ export default (props: { driveItem: DriveItem & { user?: UserType }}) => {
   return (
     <div
       className="flex items-center p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-md cursor-pointer"
-      onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, itemId: file.id})); open(file)}}
+      onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, itemId: file.id})); openDoc(file)}}
     >
       <FileResultMedia file={file} className="w-16 h-16 mr-3" />
       <div className="grow mr-3 overflow-hidden">
