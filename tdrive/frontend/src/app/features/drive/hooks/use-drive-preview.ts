@@ -23,7 +23,7 @@ export const useDrivePreviewModal = () => {
 
   const close = () => {
     setStatus({ item: null, loading: true });
-    history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "", itemId: ""}));
+    history.push(RouterServices.generateRouteFromState({companyId: company, itemId: ""}));
   }
 
   return { open, close, isOpen: !!status.item };
