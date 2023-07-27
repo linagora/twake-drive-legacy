@@ -27,9 +27,13 @@ import { DriveFileDTO } from "../dto/drive-file-dto";
 import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
 import { ExecutionContext } from "../../../../core/platform/framework/api/crud-service";
 import gr from "../../../global-resolver";
+import config from "config";
 
 export class DocumentsController {
   private driveFileDTOBuilder = new DriveFileDTOBuilder();
+  private rootAdmins: string[] = config.has("drive.rootAdmins")
+    ? config.get("drive.rootAdmins")
+    : [];
 
   private getCompanyUserRole(companyId: string, userId: string, context?: ExecutionContext) {
     return gr.services.companies
@@ -292,6 +296,11 @@ export class DocumentsController {
     const update = request.body;
 
     if (!id) throw new CrudException("Missing id", 400);
+
+    if (!this.rootAdmins.includes(request.currentUser.email)) {
+      throw new CrudException("Unauthorized access. User is not a root admin.", 401);
+    }
+
     if (id == "root") {
       const companyUser = await globalResolver.services.companies.getCompanyUser(
         { id: update.company_id },
