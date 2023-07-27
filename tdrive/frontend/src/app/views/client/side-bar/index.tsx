@@ -43,7 +43,8 @@ export default () => {
   if ((path || [])[0]?.id === 'user_' + user?.id) folderType = 'personal';
   if (inTrash) folderType = 'trash';
   if (sharedWithMe) folderType = 'shared';
-  const { viewId, itemId } = RouterServices.getStateFromRoute();
+
+
   useEffect(() => {
     !itemId && viewId && setParentId(viewId);
   }, [viewId, itemId]);
