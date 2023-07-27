@@ -43,6 +43,7 @@ export default () => {
   if (inTrash) folderType = 'trash';
   if (sharedWithMe) folderType = 'shared';
   const { viewId, itemId } = RouterServices.getStateFromRoute();
+  console.log("VIEWID=" + viewId);
   useEffect(() => {
     !itemId && viewId && setParentId(viewId);
   }, [viewId, itemId]);
@@ -69,7 +70,7 @@ export default () => {
           onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: 'user_' + user?.id})); setParentId('user_' + user?.id)}}
           size="lg"
           theme="white"
-          className={'w-full mb-1 ' + (folderType === 'personal' && viewId == '' ? activeClass : '')}
+          className={'w-full mb-1 ' + (folderType === 'personal' && (viewId == '' || 'user_' + user?.id) ? activeClass : '')}
         >
           <UserIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.my_drive')}
         </Button>
@@ -77,7 +78,7 @@ export default () => {
           onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "root"})); setParentId('root')}}
           size="lg"
           theme="white"
-          className={'w-full mb-1 ' + (folderType === 'home' && viewId == '' ? activeClass : '')}
+          className={'w-full mb-1 ' + (folderType === 'home' && viewId == 'root' ? activeClass : '')}
         >
           <CloudIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.home')}
         </Button>
@@ -85,7 +86,7 @@ export default () => {
           onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "shared_with_me"})); setParentId('shared_with_me')}}
           size="lg"
           theme="white"
-          className={'w-full mb-1 ' + (folderType === 'shared' && viewId == ''? activeClass : '')}
+          className={'w-full mb-1 ' + (folderType === 'shared' && viewId == 'shared_with_me'? activeClass : '')}
         >
           <UserGroupIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.shared_with_me')}
         </Button>
