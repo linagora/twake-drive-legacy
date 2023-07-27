@@ -19,7 +19,7 @@ import fileUploadApiClient from '@features/files/api/file-upload-api-client';
 import { useEffect, useState } from 'react';
 import Avatar from '../../../../../atoms/avatar';
 import { PublicIcon } from '../components/public-icon';
-import { CheckableIcon, DriveItemProps } from './common';
+import {CheckableIcon, DriveItemOverlayProps, DriveItemProps} from './common';
 import { getDevice } from '../../../../../features/global/utils/device';
 import './style.scss';
 import { useHistory } from 'react-router-dom';
@@ -143,3 +143,21 @@ export const DocumentRow = ({
     </div>
   );
 };
+
+export const DocumentRowOverlay = ({
+                              item,
+                              className,
+                            }: DriveItemOverlayProps) => {
+  return (
+      <div
+          className={
+              'flex flex-row items-center border border-zinc-200 dark:border-zinc-800 -mt-px px-4 py-3 cursor-pointer ' +
+              (className || '')
+          }
+      >
+        <div className="grow text-ellipsis whitespace-nowrap overflow-hidden">
+          <Base>{item?.name}</Base>
+        </div>
+      </div>
+  )}
+

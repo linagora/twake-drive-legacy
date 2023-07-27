@@ -21,7 +21,7 @@ import {
   useOnBuildPeopleContextMenu,
   useOnBuildDateContextMenu,
 } from './context-menu';
-import { DocumentRow } from './documents/document-row';
+import {DocumentRow, DocumentRowOverlay} from './documents/document-row';
 import { FolderRow } from './documents/folder-row';
 import HeaderPath from './header-path';
 import { ConfirmDeleteModal } from './modals/confirm-delete';
@@ -35,12 +35,12 @@ import useRouteState from 'app/features/router/hooks/use-route-state';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
 import MenusManager from '@components/menus/menus-manager.jsx';
 import Languages from 'features/global/services/languages-service';
-import {DndContext, useSensors, useSensor, PointerSensor} from '@dnd-kit/core';
+import {DndContext, useSensors, useSensor, PointerSensor, DragOverlay} from '@dnd-kit/core';
 import { Droppable } from 'app/features/dragndrop/hook/droppable';
 import { Draggable } from 'app/features/dragndrop/hook/draggable';
 import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
 import { ConfirmModalAtom } from './modals/confirm-move/index';
-import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
+
 
 
 export const DriveCurrentFolderAtom = atomFamily<
@@ -64,13 +64,12 @@ export default memo(
     tdriveTabContextToken?: string;
     inPublicSharing?: boolean;
   }) => {
-    const { user } = useCurrentUser();
     const companyId = useRouterCompany();
     setTdriveTabToken(tdriveTabContextToken || null);
     const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
 
     const [parentId, _setParentId] = useRecoilState(
-      DriveCurrentFolderAtom({ context: context, initialFolderId: initialParentId || 'user_'+user?.id }),
+      DriveCurrentFolderAtom({ context: context, initialFolderId: initialParentId || 'root' }),
     );
 
     const [loadingParentChange, setLoadingParentChange] = useState(false);
@@ -114,7 +113,7 @@ export default memo(
 
     //In case we are kicked out of the current folder, we need to reset the parent id
     useEffect(() => {
-      if (!loading && !path?.length && !inPublicSharing && !sharedWithMe) setParentId('user_'+user?.id);
+      if (!loading && !path?.length && !inPublicSharing && !sharedWithMe) setParentId('root');
     }, [path, loading, setParentId]);
 
     useEffect(() => {
@@ -165,7 +164,8 @@ export default memo(
     const buildPeopleContextMen = useOnBuildPeopleContextMenu();
     const buildDateContextMenu = useOnBuildDateContextMenu();
     const setConfirmModalState = useSetRecoilState(ConfirmModalAtom);
-    const [activeId, setActiveId] = useState();
+    const [activeIndex, setActiveIndex] = useState(null);
+    const [activeChild, setActiveChild] = useState(null);
     const {update} = useDriveActions();
     const sensors = useSensors(
       useSensor(PointerSensor, {
@@ -176,15 +176,13 @@ export default memo(
     );
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-
     function handleDragStart(event:any) {
-      const { active } = event;
-      const { id } = active;
-      //TODO[ASH] why you are setting activeId if you don't use it later
-      setActiveId(id);
+      setActiveIndex(event.active.id);
+      setActiveChild(event.active.data.current.child.props.item);
     }
-
     function handleDragEnd(event:any) {
+      setActiveIndex(null);
+      setActiveChild(null);
       if (event.over){
         setConfirmModalState({
           open: true,
@@ -207,39 +205,24 @@ export default memo(
       
     }
 
-    //
     function draggableMarkup(index: number, child: any) {
+      const commonProps = {
+        key: index,
+        className:
+            (index === 0 ? 'rounded-t-md ' : '') +
+            (index === documents.length - 1 ? 'rounded-b-md ' : ''),
+        item: child,
+        checked: checked[child.id] || false,
+        onCheck: (v: boolean) =>
+            setChecked(_.pickBy({ ...checked, [child.id]: v }, _.identity)),
+        onBuildContextMenu: () => onBuildContextMenu(details, child),
+      };
       return (
           isMobile ? (
-            //TODO[ASH] you are duplicating this code, can we move this logic inside the DocumentRow?
-            <DocumentRow
-              key={index}
-              className={
-                (index === 0 ? 'rounded-t-md ' : '') +
-                (index === documents.length - 1 ? 'rounded-b-md ' : '')
-              }
-              item={child}
-              checked={checked[child.id] || false}
-              onCheck={v =>
-                setChecked(_.pickBy({ ...checked, [child.id]: v }, _.identity))
-              }
-              onBuildContextMenu={() => onBuildContextMenu(details, child)}
-            />
+            <DocumentRow {...commonProps} />
           ) : (
-            <Draggable index={index}>
-              <DocumentRow
-                key={index}
-                className={
-                  (index === 0 ? 'rounded-t-md ' : '') +
-                  (index === documents.length - 1 ? 'rounded-b-md ' : '')
-                }
-                item={child}
-                checked={checked[child.id] || false}
-                onCheck={v =>
-                  setChecked(_.pickBy({ ...checked, [child.id]: v }, _.identity))
-                }
-                onBuildContextMenu={() => onBuildContextMenu(details, child)}
-              />
+            <Draggable id={index}>
+              <DocumentRow {...commonProps} />
             </Draggable>
           )
       );
@@ -251,7 +234,7 @@ export default memo(
         {viewId == 'shared-with-me' ? (
           <>
             <Suspense fallback={<></>}>
-              <DrivePreview items={documents} />
+              <DrivePreview />
             </Suspense>
             <SharedFilesTable />
           </>
@@ -284,7 +267,7 @@ export default memo(
             <ConfirmDeleteModal />
             <ConfirmTrashModal />
             <Suspense fallback={<></>}>
-              <DrivePreview items={documents} />
+              <DrivePreview />
             </Suspense>
             <div
               className={
@@ -437,6 +420,15 @@ export default memo(
                   {documents.map((child, index) => (
                     draggableMarkup(index, child)
                   ))}
+                  <DragOverlay>
+                    {activeIndex ? (
+                        <DocumentRowOverlay className={
+                            (activeIndex === 0 ? 'rounded-t-md ' : '') +
+                            (activeIndex === documents.length - 1 ? 'rounded-b-md ' : '')}
+                            item={activeChild}
+                        ></DocumentRowOverlay>
+                    ): null}
+                  </DragOverlay>
 
                 </div>
               </DndContext>
@@ -446,6 +438,5 @@ export default memo(
 
       </>
     );
-    
   },
 );
