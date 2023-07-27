@@ -1,4 +1,4 @@
-import { ChevronDownIcon, DotsHorizontalIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon } from '@heroicons/react/outline';
 import { Button } from '@atoms/button/button';
 import { Base, BaseSmall, Subtitle, Title } from '@atoms/text';
 import Menu from '@components/menus/menu';
@@ -40,6 +40,8 @@ import { Droppable } from 'app/features/dragndrop/hook/droppable';
 import { Draggable } from 'app/features/dragndrop/hook/draggable';
 import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
 import { ConfirmModalAtom } from './modals/confirm-move/index';
+import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
+
 
 
 
@@ -48,9 +50,9 @@ export const DriveCurrentFolderAtom = atomFamily<
   { context?: string; initialFolderId: string }
 >({
   key: 'DriveCurrentFolderAtom',
-  default: options => options.initialFolderId || 'root',
+  default: options => options.initialFolderId || 'user_'+user?.id,
 });
-
+const { user } = useCurrentUser();
 
 export default memo(
   ({
@@ -113,7 +115,7 @@ export default memo(
 
     //In case we are kicked out of the current folder, we need to reset the parent id
     useEffect(() => {
-      if (!loading && !path?.length && !inPublicSharing && !sharedWithMe) setParentId('root');
+      if (!loading && !path?.length && !inPublicSharing && !sharedWithMe) setParentId('user_'+user?.id);
     }, [path, loading, setParentId]);
 
     useEffect(() => {
