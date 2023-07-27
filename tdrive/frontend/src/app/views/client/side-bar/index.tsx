@@ -31,8 +31,9 @@ export default () => {
   const location = useLocation();
   const company = useRouterCompany();
   const workspace = useRouterWorkspace();
+  const { viewId, itemId } = RouterServices.getStateFromRoute();
   const [parentId, setParentId] = useRecoilState(
-    DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id }),
+    DriveCurrentFolderAtom({ initialFolderId: viewId || 'user_'+user?.id }),
   );
   const active = false;
   const { access: rootAccess } = useDriveItem('user_'+user?.id);
@@ -43,7 +44,6 @@ export default () => {
   if (inTrash) folderType = 'trash';
   if (sharedWithMe) folderType = 'shared';
   const { viewId, itemId } = RouterServices.getStateFromRoute();
-  console.log("VIEWID=" + viewId);
   useEffect(() => {
     !itemId && viewId && setParentId(viewId);
   }, [viewId, itemId]);
