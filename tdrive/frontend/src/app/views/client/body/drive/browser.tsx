@@ -69,9 +69,10 @@ export default memo(
     const companyId = useRouterCompany();
     setTdriveTabToken(tdriveTabContextToken || null);
     const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
-
+    const { viewId } = useRouteState();
     const [parentId, _setParentId] = useRecoilState(
-      DriveCurrentFolderAtom({ context: context, initialFolderId: initialParentId || 'root' }),
+    DriveCurrentFolderAtom({ context: context, initialFolderId: viewId || initialParentId || 'user_'+user?.id }),
+
     );
 
     const [loadingParentChange, setLoadingParentChange] = useState(false);
@@ -144,7 +145,6 @@ export default memo(
       .sort((a, b) => a.name.localeCompare(b.name));
 
     const onBuildContextMenu = useOnBuildContextMenu(children, initialParentId);
-    const { viewId } = useRouteState();
 
     const handleDragOver = (event: { preventDefault: () => void; }) => {
       event.preventDefault();

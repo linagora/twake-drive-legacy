@@ -9,21 +9,29 @@ import { DriveItem } from '../types';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
 import useRouterCompany from '@features/router/hooks/use-router-company';
+import { DriveCurrentFolderAtom } from 'app/views/client/body/drive/browser';
+import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 
 export const useDrivePreviewModal = () => {
   const history = useHistory();
   const company = useRouterCompany();
   const [status, setStatus] = useRecoilState(DriveViewerState);
+  const { user } = useCurrentUser();
+  const [ parentId, setParentId ] = useRecoilState(
+    DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id }),
+  );
 
   const open: (item: DriveItem) => void = (item: DriveItem) => {
     if (item.last_version_cache?.file_metadata?.source === 'internal') {
       setStatus({ item, loading: true });
+    } else if (item.is_directory){
+      setParentId(item.id);
     }
   };
 
   const close = () => {
     setStatus({ item: null, loading: true });
-    history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "", itemId: ""}));
+    history.push(RouterServices.generateRouteFromState({companyId: company, itemId: ""}));
   }
 
   return { open, close, isOpen: !!status.item };
@@ -89,3 +97,4 @@ export const useDrivePreviewDisplayData = () => {
 
   return { download, id, name, type, extension, size: status.details?.item.size };
 };
+

@@ -1,7 +1,7 @@
 import { FolderIcon } from '@heroicons/react/solid';
 import Highlighter from 'react-highlight-words';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { onDriveItemDownloadClick, openDriveItem } from '../common';
+import { onDriveItemDownloadClick } from '../common';
 import ResultContext from './result-context';
 import { Button } from '@atoms/button/button';
 import { DownloadIcon } from '@atoms/icons-agnostic';
@@ -15,7 +15,6 @@ import {
 } from '@atoms/icons-colored';
 import * as Text from '@atoms/text';
 import { useCompanyApplications } from '@features/applications/hooks/use-company-applications';
-import useRouterCompany from '@features/router/hooks/use-router-company';
 import { DriveItem } from '@features/drive/types';
 import FileUploadAPIClient from '@features/files/api/file-upload-api-client';
 import { formatDate } from '@features/global/utils/format-date';
@@ -24,16 +23,15 @@ import useRouterWorkspace from '@features/router/hooks/use-router-workspace';
 import { useSearchModal } from '@features/search/hooks/use-search';
 import { SearchInputState } from '@features/search/state/search-input';
 import { UserType } from '@features/users/types/user';
-import { useFileViewerModal } from '@features/viewer/hooks/use-viewer';
 import { useDrivePreview } from '@features/drive/hooks/use-drive-preview';
 import Media from '@molecules/media';
 import { DriveCurrentFolderAtom } from '@views/client/body/drive/browser';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
+import useRouterCompany from 'app/features/router/hooks/use-router-company';
 
-
-export default (props: { driveItem: DriveItem & { user?: UserType } }) => {
+export default (props: { driveItem: DriveItem & { user?: UserType }}) => {
   const history = useHistory();
   const input = useRecoilValue(SearchInputState);
   const currentWorkspaceId = useRouterWorkspace();
@@ -49,14 +47,18 @@ export default (props: { driveItem: DriveItem & { user?: UserType } }) => {
   const extension = name?.split('.').pop();
 
   const { setOpen } = useSearchModal();
-  const { open: openViewer } = useFileViewerModal();
   const { open } = useDrivePreview();
   const company = useRouterCompany();
+
+  function openDoc(file: DriveItem){
+    open(file);
+    if (file.is_directory) setOpen(false);
+  }
 
   return (
     <div
       className="flex items-center p-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 rounded-md cursor-pointer"
-      onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, itemId: file.id})); open(file)}}
+      onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, itemId: file.id})); openDoc(file)}}
     >
       <FileResultMedia file={file} className="w-16 h-16 mr-3" />
       <div className="grow mr-3 overflow-hidden">
@@ -74,21 +76,23 @@ export default (props: { driveItem: DriveItem & { user?: UserType } }) => {
         </Text.Info>
         <ResultContext user={file.user} />
       </div>
-      <div
-        className="whitespace-nowrap"
-        onClick={e => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-      >
-        <Button
-          theme="outline"
-          className="w-9 !p-0 flex items-center justify-center ml-2 rounded-full border-none"
-          onClick={() => onDriveItemDownloadClick(file)}
+      {!file.is_directory && (
+        <div
+          className="whitespace-nowrap"
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
-          <DownloadIcon className="text-blue-500 w-6 h-6" />
-        </Button>
-      </div>
+          <Button
+            theme="outline"
+            className="w-9 !p-0 flex items-center justify-center ml-2 rounded-full border-none"
+            onClick={() => onDriveItemDownloadClick(file)}
+          >
+            <DownloadIcon className="text-blue-500 w-6 h-6" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

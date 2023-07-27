@@ -51,6 +51,7 @@ class RouterServices extends Observable {
     '/client/:companyId',
     '/client/:companyId/v/:viewId',
     '/client/:companyId/preview/:itemId',
+    '/client/:companyId/v/:viewId/preview/:itemId',
     '/client/:companyId/w/:workspaceId',
     '/client/:companyId/w/:workspaceId/c/:channelId',
     '/client/:companyId/w/:workspaceId/c/:channelId/t/:threadId',

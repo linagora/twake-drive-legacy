@@ -9,7 +9,7 @@ export default () => {
 
   return (
     <Modal open={open} onClose={() => setOpen(false)} className="sm:w-[80vw] sm:max-w-4xl">
-      <SearchBox />
+      <SearchBox/>
     </Modal>
   );
 };
@@ -18,7 +18,7 @@ const SearchBox = () => {
   return (
     <ModalContent textCenter title={Languages.t('components.searchpopup.header_title')}>
       <SearchInput />
-      <SearchResultsIndex />
+      <SearchResultsIndex/>
     </ModalContent>
   );
 };
