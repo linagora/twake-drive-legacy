@@ -46,34 +46,33 @@ import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 
 
 export const DriveCurrentFolderAtom = atomFamily<
-  string,
-  { context?: string; initialFolderId: string }
+    string,
+    { context?: string; initialFolderId: string }
 >({
   key: 'DriveCurrentFolderAtom',
-  default: options => options.initialFolderId || 'user_'+user?.id,
+  default: options => options.initialFolderId || 'root',
 });
-const { user } = useCurrentUser();
 
 export default memo(
-  ({
-    context,
-    initialParentId,
-    tdriveTabContextToken,
-    inPublicSharing,
-  }: {
-    context?: string;
-    initialParentId?: string;
-    tdriveTabContextToken?: string;
-    inPublicSharing?: boolean;
-  }) => {
-    const companyId = useRouterCompany();
-    setTdriveTabToken(tdriveTabContextToken || null);
-    const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
-    const { viewId } = useRouteState();
-    const [parentId, _setParentId] = useRecoilState(
-    DriveCurrentFolderAtom({ context: context, initialFolderId: viewId || initialParentId || 'user_'+user?.id }),
-
-    );
+    ({
+       context,
+       initialParentId,
+       tdriveTabContextToken,
+       inPublicSharing,
+     }: {
+      context?: string;
+      initialParentId?: string;
+      tdriveTabContextToken?: string;
+      inPublicSharing?: boolean;
+    }) => {
+      const { user } = useCurrentUser();
+      const companyId = useRouterCompany();
+      setTdriveTabToken(tdriveTabContextToken || null);
+      const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
+      const { viewId } = useRouteState();
+      const [parentId, _setParentId] = useRecoilState(
+          DriveCurrentFolderAtom({ context: context, initialFolderId: viewId || initialParentId || 'user_'+user?.id }),
+      );
 
     const [loadingParentChange, setLoadingParentChange] = useState(false);
     const {
@@ -236,7 +235,7 @@ export default memo(
         {viewId == 'shared-with-me' ? (
           <>
             <Suspense fallback={<></>}>
-              <DrivePreview />
+              <DrivePreview items={documents}/>
             </Suspense>
             <SharedFilesTable />
           </>
@@ -269,7 +268,7 @@ export default memo(
             <ConfirmDeleteModal />
             <ConfirmTrashModal />
             <Suspense fallback={<></>}>
-              <DrivePreview />
+              <DrivePreview items={documents}/>
             </Suspense>
             <div
               className={
