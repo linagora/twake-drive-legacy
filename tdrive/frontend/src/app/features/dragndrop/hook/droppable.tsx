@@ -7,7 +7,7 @@ type DroppableProps={
 }
 
 export function Droppable(props:DroppableProps) {
-  const {setNodeRef} = useDroppable({
+  const { isOver, setNodeRef } = useDroppable({
     id: `droppable-${props.id}`,
     data: {
       child: props.children
@@ -15,7 +15,7 @@ export function Droppable(props:DroppableProps) {
   });
   
   return (
-    <div ref={setNodeRef}>
+    <div ref={setNodeRef} className={isOver ? "bg-sky-500/[.18] rounded-t-md rounded-b-md" : ""}>
       {props.children}
     </div>
   );
