@@ -204,10 +204,6 @@ export const getAccessLevel = async (
       throw Error("Drive item doesn't exist");
     }
 
-    if (item.creator != context.user.id && isMember) {
-      return "read";
-    }
-
     if (await isCompanyApplication(context)) {
       return "manage";
     }
