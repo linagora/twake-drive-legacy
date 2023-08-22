@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: docker/tdrive-node/Dockerfile
-      target: production
+      target: development
     container_name: tdrive-node
     hostname: tdrive_node
     ports:
@@ -28,6 +28,7 @@ services:
       - PUBSUB_TYPE=local
       - ./docker-data/documents/:/storage/
     volumes:
+      - ./backend/node/src:/usr/src/app/src
       - ./docker-data/documents/:/storage/
     depends_on:
       - mongo

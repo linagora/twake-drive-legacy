@@ -62,6 +62,26 @@ export const isCompanyGuest = async (context: CompanyExecutionContext): Promise<
 };
 
 /**
+ * checks the current user is a member
+ * Company members can access shared drive
+ *
+ * @param {CompanyExecutionContext} context
+ * @returns {Promise<boolean>}
+ */
+export const isCompanyMember = async (context: CompanyExecutionContext): Promise<boolean> => {
+  if (await isCompanyApplication(context)) {
+    return false;
+  }
+
+  const userRole = await globalResolver.services.companies.getUserRole(
+    context.company.id,
+    context.user?.id,
+  );
+
+  return userRole === "member" || !userRole;
+};
+
+/**
  * checks the current user is a admin
  *
  * @param {CompanyExecutionContext} context
@@ -149,8 +169,11 @@ export const getAccessLevel = async (
   repository: Repository<DriveFile>,
   context: CompanyExecutionContext & { public_token?: string; tdrive_tab_token?: string },
 ): Promise<DriveFileAccessLevel | "none"> => {
-  if (!id || id === "root")
+  const isMember = !context?.user?.id || (await isCompanyMember(context));
+  if (!id || id === "root") {
+    if (isMember) return "read";
     return !context?.user?.id || (await isCompanyGuest(context)) ? "none" : "manage";
+  }
   if (id === "trash")
     return (await isCompanyGuest(context)) || !context?.user?.id
       ? "none"
@@ -179,6 +202,10 @@ export const getAccessLevel = async (
 
     if (!item) {
       throw Error("Drive item doesn't exist");
+    }
+
+    if (item.creator != context.user.id && isMember) {
+      return "read";
     }
 
     if (await isCompanyApplication(context)) {
@@ -246,6 +273,9 @@ export const getAccessLevel = async (
       const parentFolderLevel = await getAccessLevel(item.parent_id, null, repository, context);
       otherLevels.push(parentFolderLevel);
     }
+
+    // Return "read" for new members
+    return "read";
 
     //Return least restrictive level of otherLevels
     return otherLevels.reduce(

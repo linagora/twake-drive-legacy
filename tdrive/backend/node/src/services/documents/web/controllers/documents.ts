@@ -174,11 +174,6 @@ export class DocumentsController {
     const context = getDriveExecutionContext(request);
     const { id } = request.params;
 
-    const companyUserRole = await this.getCompanyUserRole(
-      request.body.company_id || context.company.id,
-      context.user.id,
-    );
-
     const options: SearchDocumentsOptions = {
       ...request.body,
       company_id: request.body.company_id || context.company.id,
@@ -196,11 +191,6 @@ export class DocumentsController {
           )
         : [],
     };
-
-    if (id == "root" && companyUserRole == CompanyUserRole.member) {
-      data.children = [];
-      data.access = "read";
-    }
 
     return data;
   };
