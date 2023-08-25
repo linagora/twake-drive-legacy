@@ -171,8 +171,12 @@ export const getAccessLevel = async (
 ): Promise<DriveFileAccessLevel | "none"> => {
   const isMember = !context?.user?.id || (await isCompanyMember(context));
   if (!id || id === "root") {
-    if (isMember) return "read";
-    return !context?.user?.id || (await isCompanyGuest(context)) ? "none" : "manage";
+    if (!context?.user?.id || (await isCompanyGuest(context))) {
+      return "none";
+    } else {
+      if (isMember) return "read";
+      return "manage";
+    }
   }
   if (id === "trash")
     return (await isCompanyGuest(context)) || !context?.user?.id
@@ -205,6 +209,9 @@ export const getAccessLevel = async (
     }
 
     if (await isCompanyApplication(context)) {
+      if (!id.startsWith("user_") && isMember && item.creator != context.user.id) {
+        return "read";
+      }
       return "manage";
     }
 
@@ -269,9 +276,6 @@ export const getAccessLevel = async (
       const parentFolderLevel = await getAccessLevel(item.parent_id, null, repository, context);
       otherLevels.push(parentFolderLevel);
     }
-
-    // Return "read" for new members
-    return "read";
 
     //Return least restrictive level of otherLevels
     return otherLevels.reduce(

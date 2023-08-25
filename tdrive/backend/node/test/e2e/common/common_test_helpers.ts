@@ -39,12 +39,12 @@ export default class TestHelpers {
         this.platform = platform
     }
 
-    private async init(newUser: boolean) {
+    private async init(newUser: boolean, options?: {}) {
         this.dbService = await TestDbService.getInstance(this.platform, true);
         if (newUser) {
             this.workspace = this.platform.workspace;
             const workspacePK = {id: this.workspace.workspace_id, company_id: this.workspace.company_id};
-            this.user = await this.dbService.createUser([workspacePK], {}, uuidv1());
+            this.user = await this.dbService.createUser([workspacePK], options, uuidv1());
         } else {
             this.user = this.platform.currentUser;
             this.workspace = this.platform.workspace;
@@ -52,9 +52,9 @@ export default class TestHelpers {
         this.jwt = this.getJWTTokenForUser(this.user.id);
     }
 
-    public static async getInstance(platform: TestPlatform, newUser = false): Promise<TestHelpers> {
+    public static async getInstance(platform: TestPlatform, newUser = false, options?: {}): Promise<TestHelpers> {
         const helpers = new TestHelpers(platform);
-        await helpers.init(newUser)
+        await helpers.init(newUser, options)
         return helpers;
     }
 

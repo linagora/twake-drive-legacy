@@ -66,7 +66,7 @@ describe("the public links feature", () => {
   describe("Basic Flow", () => {
 
     const createItem = async (): Promise<DriveFileMockClass> => {
-      await TestDbService.getInstance(platform, true);
+      await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
 
       const item = {
         name: "public file",
