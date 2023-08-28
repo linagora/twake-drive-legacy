@@ -13,6 +13,11 @@ export interface UserParameters {
   id: string;
 }
 
+export interface CompanyUsersParameters {
+  /* user id */
+  companyId: string;
+}
+
 export interface CompanyParameters {
   /* company id */
   id: string;

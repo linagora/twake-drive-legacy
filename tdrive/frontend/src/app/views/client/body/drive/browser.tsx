@@ -60,6 +60,7 @@ export default memo(
   }) => {
     const { user } = useCurrentUser();
     const companyId = useRouterCompany();
+    const role = user ? (user?.companies || []).find(company => company?.company.id === companyId)?.role : "member";
     setTdriveTabToken(tdriveTabContextToken || null);
     const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
 
@@ -191,7 +192,7 @@ export default memo(
 
           >
             <DriveRealtimeObject id={parentId} key={parentId} />
-            <UsersModal />
+            {role == "admin" && <UsersModal />}
             <VersionsModal />
             <AccessModal />
             <PropertiesModal />

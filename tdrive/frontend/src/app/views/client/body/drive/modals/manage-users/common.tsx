@@ -23,12 +23,11 @@ export const AccessLevel = ({
         ' w-auto ' +
         (level === 'none' ? '!text-rose-500 !bg-rose-100 dark-bg-rose-800' : '')
       }
-      value={level || 'none'}
+      value={level || 'read'}
       onChange={e => onChange(e.target.value as DriveFileAccessLevel & 'remove')}
     >
       {!hiddenLevels?.includes('manage') && <option value={'manage'}>{Languages.t('common.access-level_full_acess')}</option>}
-      {!hiddenLevels?.includes('none') && <option value={'none'}>{Languages.t('common.access-level_no_access')}</option>}
-      {canRemove && <option value={'remove'}>Remove</option>}
+      {!hiddenLevels?.includes('read') && <option value={'read'}>{Languages.t('common.access-level_read')}</option>}
     </Select>
   );
 };

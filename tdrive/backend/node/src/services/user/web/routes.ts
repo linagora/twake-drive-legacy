@@ -60,6 +60,15 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     handler: usersController.list.bind(usersController),
   });
 
+  fastify.route({
+    method: "POST",
+    url: `${usersUrl}/:companyId/all`,
+    preHandler: accessControl,
+    preValidation: [fastify.authenticate],
+    schema: getUsersSchema,
+    handler: usersController.all.bind(usersController),
+  });
+
   // Get a list of companies for a user, only common companies with current user are returned.
   fastify.route({
     method: "GET",

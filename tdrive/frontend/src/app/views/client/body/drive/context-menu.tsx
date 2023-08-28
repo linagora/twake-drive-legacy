@@ -268,7 +268,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                     );
                   },
                 },
-                { type: 'separator', hide: inTrash || parent.access === 'read' },
+                { type: 'separator', hide: parent.item!.id != 'root', },
                 {
                   type: 'menu',
                   text: Languages.t('components.item_context_menu.manage_users'),

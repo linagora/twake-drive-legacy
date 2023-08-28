@@ -26,6 +26,7 @@ import {
   UserListQueryParameters,
   UserObject,
   UserParameters,
+  CompanyUsersParameters,
 } from "./types";
 import Company from "../entities/company";
 import CompanyUser from "../entities/company_user";
@@ -141,6 +142,36 @@ export class UsersCrudController
     return {
       resources: resUsers,
       websockets: gr.platformServices.realtime.sign([], context.user.id),
+    };
+  }
+
+  async all(
+    request: FastifyRequest<{
+      Querystring: UserListQueryParameters;
+      Params: CompanyUsersParameters;
+    }>,
+  ): Promise<ResourceListResponse<UserObject>> {
+    const companyId = request.params.companyId;
+
+    const users = await gr.services.users.search(
+      new Pagination(request.query.page_token, request.query.limit),
+      {
+        search: "",
+        companyId,
+      },
+    );
+
+    const resUsers = await Promise.all(
+      users.getEntities().map(user =>
+        formatUser(user, {
+          includeCompanies: true,
+        }),
+      ),
+    );
+
+    // return users;
+    return {
+      resources: resUsers,
     };
   }
 

@@ -3,15 +3,11 @@ import Avatar from '@atoms/avatar';
 import { Base, Info } from '@atoms/text';
 import { atom, useRecoilState } from 'recoil';
 import { useDriveItem } from '@features/drive/hooks/use-drive-item';
-import { DriveFileAccessLevel } from '@features/drive/types';
 import AlertManager from '@features/global/services/alert-manager-service';
 import { useCurrentUser } from '@features/users/hooks/use-current-user';
 import { useUser } from '@features/users/hooks/use-user';
 import currentUserService from '@features/users/services/current-user-service';
-import { UserType } from '@features/users/types/user';
-import { useUserList } from '@features/users/hooks/use-user-list';
-import { useState } from 'react';
-import SelectUsers from '../../components/select-users';
+import { useUserCompanyList } from '@features/users/hooks/use-user-company-list';
 import { AccessLevel } from './common';
 import Languages from 'features/global/services/languages-service';
 
@@ -28,16 +24,15 @@ export const UsersModalAtom = atom<UsersModalType>({
 
 export const UsersModal = () => {
   const [state, setState] = useRecoilState(UsersModalAtom);
-  const { userList } = useUserList();
-
+  const userList = useUserCompanyList();
   return (
     <Modal open={state.open} onClose={() => setState({ open: false })}>
       <Base className="block mt-4 mb-1">
         {Languages.t('components.internal-manage_root_users')}
       </Base>
       <div className="rounded-md border mt-2">
-        {(userList || [])?.map(user => (
-          <UserAccessLevel key={user.id} id="root" userId={user?.id || ""} />
+        {userList?.map(user => (
+          <UserAccessLevel key={user.id} id="root" userId={user?.id || ""} username={user.username} role={user?.companies?.[0]?.role || ""} />
         ))}
         <div className="-mb-px" />
       </div>
@@ -47,15 +42,19 @@ export const UsersModal = () => {
 
 const UserAccessLevel = ({
   id,
-  userId
+  userId,
+  username,
+  role
 }: {
   id: string;
   userId: string;
+  username: string;
+  role: string;
 }) => {
   const user = useUser(userId);
   const { user: currentUser } = useCurrentUser();
   const { item, loading, updateLevel } = useDriveItem(id);
-  const level = "manage";
+  const level = role == "admin" ? "manage" : "read";
 
   return (
     <div className="p-4 border-t flex flex-row items-center justify-center">
@@ -67,7 +66,7 @@ const UserAccessLevel = ({
         />
       </div>
       <div className="grow ml-2">
-        <Base>{!!user && currentUserService.getFullName(user)}</Base>{' '}
+        <Base>{username} </Base>{' '}
         {user?.id === currentUser?.id && (
           <Info>{Languages.t('components.internal-access_specific_rules_you')}</Info>
         )}
