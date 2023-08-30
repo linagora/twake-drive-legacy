@@ -8,6 +8,7 @@ import { PropertiesModalAtom } from './modals/properties';
 import { SelectorModalAtom } from './modals/selector';
 import { AccessModalAtom } from './modals/update-access';
 import { VersionsModalAtom } from './modals/versions';
+import { UsersModalAtom } from './modals/manage-users';
 import { DriveApiClient, getPublicLinkToken } from '@features/drive/api-client/api-client';
 import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
 import { getPublicLink } from '@features/drive/hooks/use-drive-item';
@@ -40,6 +41,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
   const setVersionModal = useSetRecoilState(VersionsModalAtom);
   const setAccessModalState = useSetRecoilState(AccessModalAtom);
   const setPropertiesModalState = useSetRecoilState(PropertiesModalAtom);
+  const setUsersModalState = useSetRecoilState(UsersModalAtom);
   const { open: preview } = useDrivePreview();
   function getIdsFromArray(arr: DriveItem[]): string[] {
     return arr.map((obj) => obj.id);
@@ -82,7 +84,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                 } else {
                   download(item.last_version_cache.file_metadata.external_id);
                 }
-              }              
+              }
             },
             { type: 'separator' },
             {
