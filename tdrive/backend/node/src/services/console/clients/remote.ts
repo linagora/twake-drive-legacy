@@ -22,13 +22,18 @@ import User, { getInstance } from "../../user/entities/user";
 import { getInstance as getCompanyInstance } from "../../user/entities/company";
 import { ConsoleServiceImpl } from "../service";
 import coalesce from "../../../utils/coalesce";
-
+import config from "config";
+import { CompanyUserRole } from "src/services/user/web/types";
 export class ConsoleRemoteClient implements ConsoleServiceClient {
   version: "1";
   client: AxiosInstance;
 
   private infos: ConsoleOptions;
   private verifier: OidcJwtVerifier;
+
+  private rootAdmins: string[] = config.has("drive.rootAdmins")
+    ? config.get("drive.rootAdmins")
+    : [];
 
   constructor(consoleInstance: ConsoleServiceImpl) {
     this.infos = consoleInstance.consoleOptions;
@@ -167,7 +172,12 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
       );
     }
 
-    await gr.services.companies.setUserRole(company.id, user.id, "admin");
+    let userRole: CompanyUserRole = "member";
+    if (this.rootAdmins.includes(userDTO.email)) {
+      userRole = "admin";
+    }
+
+    await gr.services.companies.setUserRole(company.id, user.id, userRole);
 
     await gr.services.users.save(user, { user: { id: user.id, server_request: true } });
 
