@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Modal } from '@atoms/modal';
 import Avatar from '@atoms/avatar';
 import { Base, Info } from '@atoms/text';
@@ -10,6 +11,7 @@ import currentUserService from '@features/users/services/current-user-service';
 import { useUserCompanyList } from '@features/users/hooks/use-user-company-list';
 import { AccessLevel } from './common';
 import Languages from 'features/global/services/languages-service';
+import { DriveFileAccessLevel } from 'app/features/drive/types';
 
 export type UsersModalType = {
   open: boolean;
@@ -54,7 +56,8 @@ const UserAccessLevel = ({
   const user = useUser(userId);
   const { user: currentUser } = useCurrentUser();
   const { item, loading, updateLevel } = useDriveItem(id);
-  const level = role == "admin" ? "manage" : "read";
+  const [level, setLevel] = useState<DriveFileAccessLevel>(role == "admin" ? "manage" : "read");
+  //const level = role == "admin" ? "manage" : "read";
 
   return (
     <div className="p-4 border-t flex flex-row items-center justify-center">
@@ -73,11 +76,12 @@ const UserAccessLevel = ({
       </div>
       <div className="shrink-0 ml-2">
         <AccessLevel
-          disabled={user?.id === currentUser?.id}
+          disabled={userId === currentUser?.id}
           level={level}
           canRemove
           onChange={level => {
-            updateLevel(user?.id || '', level);
+            setLevel(level);
+            updateLevel(userId || '', level);
           }}
         />
       </div>
