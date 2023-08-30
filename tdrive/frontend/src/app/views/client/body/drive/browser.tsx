@@ -1,4 +1,4 @@
-import { ChevronDownIcon, DotsHorizontalIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon } from '@heroicons/react/outline';
 import { Button } from '@atoms/button/button';
 import { Base, BaseSmall, Subtitle, Title } from '@atoms/text';
 import Menu from '@components/menus/menu';
@@ -62,7 +62,7 @@ export default memo(
     const companyId = useRouterCompany();
     const role = user ? (user?.companies || []).find(company => company?.company.id === companyId)?.role : "member";
     setTdriveTabToken(tdriveTabContextToken || null);
-    const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
+    const [filter, __] = useRecoilState(SharedWithMeFilterState);
     const { viewId } = useRouteState();
     const [parentId, _setParentId] = useRecoilState(
       DriveCurrentFolderAtom({ context: context, initialFolderId: viewId || initialParentId || 'user_'+user?.id }),

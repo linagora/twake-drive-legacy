@@ -130,11 +130,10 @@ export class DriveApiClient {
   }
 
   static async getDownloadZipUrl(companyId: string, ids: string[]) {
-    const { token } = await DriveApiClient.getDownloadToken(companyId, ids);
+    // const { token } = await DriveApiClient.getDownloadToken(companyId, ids);
     return Api.route(
       `/internal/services/documents/v1/companies/${companyId}/item/download/zip` +
-        `?items=${ids.join(',')}&token=${token}` +
-        appendTdriveToken(true),
+        `?items=${ids.join(',')}`
     );
   }
 
