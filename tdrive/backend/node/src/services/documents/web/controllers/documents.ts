@@ -557,7 +557,7 @@ export class DocumentsController {
     if (!document || !document.access || document.access === "none")
       throw new CrudException("You don't have access to this document", 401);
 
-    const email = `anonymous@${document.item.company_id}.tdrive.com`;
+    const email = `anonymous@tdrive.${document.item.company_id}.com`;
     let user = await globalResolver.services.users.getByEmail(email);
     if (!user) {
       user = (
@@ -568,9 +568,12 @@ export class DocumentsController {
             email_canonical: email,
             username_canonical: (email.replace("@", ".") || "").toLocaleLowerCase(),
             phone: "",
+            // TODO fix the identity provider after creating migration script mechanics,
+            // this is user type of the user account and not the provider
             identity_provider: "anonymous",
             identity_provider_id: email,
             mail_verified: true,
+            type: "anonymous",
           }),
         )
       ).entity;

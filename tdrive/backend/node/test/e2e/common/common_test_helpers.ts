@@ -30,6 +30,7 @@ export default class TestHelpers {
     platform: TestPlatform;
     dbService: TestDbService;
     user: User;
+    anonymous: User;
     workspace: Workspace;
     jwt: string;
 
@@ -45,6 +46,11 @@ export default class TestHelpers {
             this.workspace = this.platform.workspace;
             const workspacePK = {id: this.workspace.workspace_id, company_id: this.workspace.company_id};
             this.user = await this.dbService.createUser([workspacePK], options, uuidv1());
+            this.anonymous = await this.dbService.createUser([workspacePK],
+              { ...options,
+                  identity_provider: "anonymous",
+                },
+              uuidv1());
         } else {
             this.user = this.platform.currentUser;
             this.workspace = this.platform.workspace;

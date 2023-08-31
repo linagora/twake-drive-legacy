@@ -3,6 +3,7 @@ import { init, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import { v1 as uuidv1 } from "uuid";
 import { CompanyLimitsEnum } from "../../../src/services/user/web/types";
+import TestHelpers from "../common/common_test_helpers";
 
 describe("The /users API", () => {
   const url = "/internal/services/users/v1";
@@ -211,6 +212,29 @@ describe("The /users API", () => {
       expect(json).toMatchObject({ resources: expect.any(Array) });
       const resources = json.resources;
     });
+
+    it("shouldn't return anonymous accounts ", async () => {
+      const oneUser = await TestHelpers.getInstance(platform, true);
+
+      const response = await platform.app.inject({
+        method: "GET",
+        url: `${url}/users`,
+        headers: {
+          authorization: `Bearer ${oneUser.jwt}`,
+        },
+        query: {
+          company_ids: oneUser.workspace.company_id,
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const json = response.json();
+      expect(json).toMatchObject({ resources: expect.any(Array) });
+      const resources = json.resources;
+      expect(resources.length).toBe(1);
+
+    });
+
   });
 
   describe("The GET /users/:user_id/companies route", () => {

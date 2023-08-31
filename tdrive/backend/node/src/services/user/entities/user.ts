@@ -4,6 +4,7 @@ import search from "./user.search";
 import { uuid } from "../../../utils/types";
 
 export const TYPE = "user";
+export type UserType = "anonymous" | "tech" | "regular";
 
 @Entity(TYPE, {
   primaryKey: [["id"]],
@@ -91,6 +92,9 @@ export default class User {
 
   @Column("timezone", "string")
   timezone: string; //Depreciated (php legacy)
+
+  @Column("type", "string")
+  type: UserType;
 
   @Column("preferences", "encoded_json")
   preferences: null | {

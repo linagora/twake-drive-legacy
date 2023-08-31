@@ -1,5 +1,5 @@
 import { TestPlatform } from "./setup";
-import User from "./../../src/services/user/entities/user";
+import User, { UserType } from "./../../src/services/user/entities/user";
 import Company, {
   getInstance as getCompanyInstance,
 } from "./../../src/services/user/entities/company";
@@ -128,6 +128,8 @@ export class TestDbService {
       username?: string;
       password?: string;
       cache?: User["cache"];
+      identity_provider?: string;
+      type?: UserType;
     } = {},
     id: string = uuidv1(),
   ): Promise<User> {
@@ -140,6 +142,8 @@ export class TestDbService {
     user.email_canonical = options.email || `test${random}@tdrive.app`;
     user.identity_provider_id = user.id;
     user.cache = options.cache || user.cache || { companies: [] };
+    user.identity_provider = options.identity_provider || "console";
+    user.type = options.type || "regular";
 
     //Fixme this is cheating, we should correctly set the cache in internal mode in the code
     user.cache.companies = [

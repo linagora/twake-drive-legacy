@@ -163,18 +163,23 @@ export class UserServiceImpl {
     options?: SearchUserOptions,
     context?: ExecutionContext,
   ): Promise<ListResult<User>> {
-    return await this.searchRepository.search(
-      {},
-      {
-        pagination,
-        ...(options.companyId ? { $in: [["companies", [options.companyId]]] } : {}),
-        ...(options.workspaceId ? { $in: [["workspaces", [options.workspaceId]]] } : {}),
-        $text: {
-          $search: options.search,
+    return await this.searchRepository
+      .search(
+        {},
+        {
+          pagination,
+          ...(options.companyId ? { $in: [["companies", [options.companyId]]] } : {}),
+          ...(options.workspaceId ? { $in: [["workspaces", [options.workspaceId]]] } : {}),
+          $text: {
+            $search: options.search,
+          },
         },
-      },
-      context,
-    );
+        context,
+      )
+      .then(users => {
+        users.filterEntities(u => u.identity_provider != "anonymous" && u.type != "anonymous");
+        return users;
+      });
   }
 
   async list(
