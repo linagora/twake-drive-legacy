@@ -210,7 +210,6 @@ describe("The /users API", () => {
       expect(response.statusCode).toBe(200);
       const json = response.json();
       expect(json).toMatchObject({ resources: expect.any(Array) });
-      const resources = json.resources;
     });
 
     it("shouldn't return anonymous accounts ", async () => {
@@ -223,7 +222,8 @@ describe("The /users API", () => {
           authorization: `Bearer ${oneUser.jwt}`,
         },
         query: {
-          company_ids: oneUser.workspace.company_id,
+          search: "anon",
+          company_ids: oneUser.workspace.company_id
         },
       });
 
@@ -231,7 +231,8 @@ describe("The /users API", () => {
       const json = response.json();
       expect(json).toMatchObject({ resources: expect.any(Array) });
       const resources = json.resources;
-      expect(resources.length).toBe(1);
+      console.log(resources);
+      expect(resources.length).toBe(0);
 
     });
 
