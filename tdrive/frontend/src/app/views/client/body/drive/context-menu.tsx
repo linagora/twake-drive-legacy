@@ -8,6 +8,7 @@ import { PropertiesModalAtom } from './modals/properties';
 import { SelectorModalAtom } from './modals/selector';
 import { AccessModalAtom } from './modals/update-access';
 import { VersionsModalAtom } from './modals/versions';
+import { UsersModalAtom } from './modals/manage-users';
 import { DriveApiClient, getPublicLinkToken } from '@features/drive/api-client/api-client';
 import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
 import { getPublicLink } from '@features/drive/hooks/use-drive-item';
@@ -17,7 +18,7 @@ import { DriveItem, DriveItemDetails } from '@features/drive/types';
 import { ToasterService } from '@features/global/services/toaster-service';
 import { copyToClipboard } from '@features/global/utils/CopyClipboard';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
-import { getCurrentUserList, getUser } from '@features/users/hooks/use-user-list';
+import { getCurrentUserList } from '@features/users/hooks/use-user-list';
 import _ from 'lodash';
 import Languages from 'features/global/services/languages-service';
 
@@ -40,7 +41,11 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
   const setVersionModal = useSetRecoilState(VersionsModalAtom);
   const setAccessModalState = useSetRecoilState(AccessModalAtom);
   const setPropertiesModalState = useSetRecoilState(PropertiesModalAtom);
+  const setUsersModalState = useSetRecoilState(UsersModalAtom);
   const { open: preview } = useDrivePreview();
+  function getIdsFromArray(arr: DriveItem[]): string[] {
+    return arr.map((obj) => obj.id);
+  }
 
   return useCallback(
     async (parent?: Partial<DriveItemDetails> | null, item?: DriveItem) => {
@@ -72,7 +77,14 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.download'),
-              onClick: () => download(item.last_version_cache.file_metadata.external_id),
+              onClick: () => {
+                if (item.is_directory) {
+                  downloadZip([item!.id]);
+                  console.log(item!.id);
+                } else {
+                  download(item.last_version_cache.file_metadata.external_id);
+                }
+              }
             },
             { type: 'separator' },
             {
@@ -251,7 +263,18 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                   type: 'menu',
                   text: Languages.t('components.item_context_menu.download_folder'),
                   hide: inTrash,
-                  onClick: () => downloadZip([parent.item!.id]),
+                  onClick: () => {
+                    if (parent.children && parent.children.length > 0) {
+                      const idsFromArray = getIdsFromArray(parent.children);
+                      console.log("Download zip file with docs: " + idsFromArray);
+                      downloadZip(idsFromArray);
+                    } else if (parent.item) {
+                      console.log("Download folder itself");
+                      download(parent.item.last_version_cache.file_metadata.external_id);
+                    } else {
+                      console.error("Very strange, everything is null, you are trying to download undefined");
+                    }
+                  },
                 },
                 {
                   type: 'menu',
@@ -265,6 +288,13 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                       Languages.t('components.item_context_menu.copy_link.success'),
                     );
                   },
+                },
+                { type: 'separator', hide: parent.item!.id != 'root', },
+                {
+                  type: 'menu',
+                  text: Languages.t('components.item_context_menu.manage_users'),
+                  hide: parent.item!.id != 'root',
+                  onClick: () => setUsersModalState({ open: true }),
                 },
                 { type: 'separator', hide: inTrash || parent.access === 'read' },
                 {
@@ -444,7 +474,6 @@ export const useOnBuildFileContextMenu = () => {
   const { open: preview } = useDrivePreview();
   return useCallback(
     (item: DriveItem) => {
-      console.log(item);
       const menuItems = [
         {
           type: 'menu',

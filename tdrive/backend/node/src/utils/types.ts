@@ -130,3 +130,8 @@ export interface JWTObject {
   email: string;
   track: boolean;
 }
+
+export enum CompanyUserRole {
+  member = 1,
+  admin = 0,
+}

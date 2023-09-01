@@ -147,7 +147,7 @@ describe("the Drive feature", () => {
   });
 
   it("did search for an item", async () => {
-    jest.setTimeout(10000);
+    // jest.setTimeout(10000);
     const createItemResult = await createItem();
 
     expect(createItemResult.id).toBeDefined();
@@ -171,10 +171,10 @@ describe("the Drive feature", () => {
   });
 
   it("did search for an item and check that all the fields for 'shared_with_me' view", async () => {
-    jest.setTimeout(20000);
+    // jest.setTimeout(20000);
     //given:: user uploaded one doc and give permission to another user
-    const oneUser = await TestHelpers.getInstance(platform, true);
-    const anotherUser = await TestHelpers.getInstance(platform, true);
+    const oneUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
+    const anotherUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
     //upload files
     const doc = await oneUser.uploadRandomFileAndCreateDocument();
     await new Promise(r => setTimeout(r, 3000));
@@ -212,10 +212,10 @@ describe("the Drive feature", () => {
   });
 
   it("'shared_with_me' shouldn't return files uploaded by me", async () => {
-    jest.setTimeout(20000);
+    // jest.setTimeout(20000);
     //given:: user uploaded one doc and give permission to another user
-    const oneUser = await TestHelpers.getInstance(platform, true);
-    const anotherUser = await TestHelpers.getInstance(platform, true);
+    const oneUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
+    const anotherUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
     const doc = await oneUser.uploadRandomFileAndCreateDocument();
     await new Promise(r => setTimeout(r, 3000));
     //give permissions to the file
@@ -277,7 +277,7 @@ describe("the Drive feature", () => {
   });
 
   it("did search by mime type", async () => {
-    jest.setTimeout(10000);
+    // jest.setTimeout(10000);
     // given:: all the sample files uploaded and documents for them created
     await currentUser.uploadAllFilesOneByOne();
 
@@ -295,8 +295,8 @@ describe("the Drive feature", () => {
   });
 
   it("did search by last modified", async () => {
-    jest.setTimeout(10000);
-    const user = await TestHelpers.getInstance(platform, true);
+    // jest.setTimeout(10000);
+    const user = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
     // given:: all the sample files uploaded and documents for them created
     const start = new Date().getTime();
     await user.uploadAllFilesOneByOne();
@@ -320,8 +320,8 @@ describe("the Drive feature", () => {
 
   it("did search a file shared by another user", async () => {
     //given:
-    const oneUser = await TestHelpers.getInstance(platform, true);
-    const anotherUser = await TestHelpers.getInstance(platform, true);
+    const oneUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
+    const anotherUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
     //upload files
     let files = await oneUser.uploadAllFilesOneByOne();
 
@@ -348,10 +348,10 @@ describe("the Drive feature", () => {
   }, 30000000);
 
   it("did search a file by file owner", async () => {
-    jest.setTimeout(30000);
+    // jest.setTimeout(30000);
     //given:
-    const oneUser = await TestHelpers.getInstance(platform, true);
-    const anotherUser = await TestHelpers.getInstance(platform, true);
+    const oneUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
+    const anotherUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
     //upload files
     let files = await oneUser.uploadAllFilesOneByOne();
     await anotherUser.uploadAllFilesOneByOne();
@@ -386,8 +386,8 @@ describe("the Drive feature", () => {
   });
 
   it("did search by 'added' date", async () => {
-    jest.setTimeout(10000);
-    const user = await TestHelpers.getInstance(platform, true);
+    // jest.setTimeout(10000);
+    const user = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
     // given:: all the sample files uploaded and documents for them created
     await user.uploadRandomFileAndCreateDocument();
     const start = new Date().getTime();
@@ -411,7 +411,7 @@ describe("the Drive feature", () => {
   });
 
   it("did search order by name", async () => {
-    const user = await TestHelpers.getInstance(platform, true);
+    const user = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
     // given:: all the sample files uploaded and documents for them created
     await user.uploadAllFilesAndCreateDocuments();
     //wait for putting docs to elastic and its indexing
@@ -430,8 +430,8 @@ describe("the Drive feature", () => {
   }, 30000);
 
   it("did search order by name desc", async () => {
-    jest.setTimeout(10000);
-    const user = await TestHelpers.getInstance(platform, true);
+    // jest.setTimeout(10000);
+    const user = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
     // given:: all the sample files uploaded and documents for them created
     await user.uploadAllFilesOneByOne();
     //wait for putting docs to elastic and its indexing
@@ -450,8 +450,8 @@ describe("the Drive feature", () => {
   });
 
   it("did search order by added date", async () => {
-    jest.setTimeout(10000);
-    const user = await TestHelpers.getInstance(platform, true);
+    // jest.setTimeout(10000);
+    const user = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
     // given:: all the sample files uploaded and documents for them created
     await user.uploadAllFilesOneByOne();
     //wait for putting docs to elastic and its indexing
@@ -470,8 +470,8 @@ describe("the Drive feature", () => {
   });
 
   it("did search order by added date desc", async () => {
-    jest.setTimeout(10000);
-    const user = await TestHelpers.getInstance(platform, true);
+    // jest.setTimeout(10000);
+    const user = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
     // given:: all the sample files uploaded and documents for them created
     await user.uploadAllFilesOneByOne();
     //wait for putting docs to elastic and its indexing

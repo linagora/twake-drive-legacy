@@ -5,7 +5,11 @@ import { CrudException, ListResult } from "../../../../core/platform/framework/a
 import { File } from "../../../../services/files/entities/file";
 import { UploadOptions } from "../../../../services/files/types";
 import globalResolver from "../../../../services/global-resolver";
-import { PaginationQueryParameters, ResourceWebsocket } from "../../../../utils/types";
+import {
+  PaginationQueryParameters,
+  ResourceWebsocket,
+  CompanyUserRole,
+} from "../../../../utils/types";
 import { DriveFile } from "../../entities/drive-file";
 import { FileVersion } from "../../entities/file-version";
 import {
@@ -21,9 +25,21 @@ import {
 } from "../../types";
 import { DriveFileDTO } from "../dto/drive-file-dto";
 import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
+import { ExecutionContext } from "../../../../core/platform/framework/api/crud-service";
+import gr from "../../../global-resolver";
+import config from "config";
 
 export class DocumentsController {
   private driveFileDTOBuilder = new DriveFileDTOBuilder();
+  private rootAdmins: string[] = config.has("drive.rootAdmins")
+    ? config.get("drive.rootAdmins")
+    : [];
+
+  private getCompanyUserRole(companyId: string, userId: string, context?: ExecutionContext) {
+    return gr.services.companies
+      .getCompanyUser({ id: companyId }, { id: userId }, context)
+      .then(a => (a ? a.level : null));
+  }
 
   /**
    * Creates a DriveFile item
@@ -166,7 +182,7 @@ export class DocumentsController {
       onlyUploadedNotByMe: true,
     };
 
-    return {
+    const data = {
       ...(await globalResolver.services.documents.documents.browse(id, options, context)),
       websockets: request.currentUser?.id
         ? globalResolver.platformServices.realtime.sign(
@@ -175,6 +191,8 @@ export class DocumentsController {
           )
         : [],
     };
+
+    return data;
   };
 
   sharedWithMe = async (
@@ -255,6 +273,45 @@ export class DocumentsController {
     if (!id) throw new CrudException("Missing id", 400);
 
     return await globalResolver.services.documents.documents.update(id, update, context);
+  };
+
+  updateLevel = async (
+    request: FastifyRequest<{
+      Params: ItemRequestParams;
+      Body: Partial<DriveFile> | any;
+      Querystring: { public_token?: string };
+    }>,
+  ): Promise<any> => {
+    const { id } = request.params;
+    const update = request.body;
+
+    if (!id) throw new CrudException("Missing id", 400);
+
+    if (!this.rootAdmins.includes(request.currentUser.email)) {
+      throw new CrudException("Unauthorized access. User is not a root admin.", 401);
+    }
+
+    if (id == "root") {
+      const companyUser = await globalResolver.services.companies.getCompanyUser(
+        { id: update.company_id },
+        { id: update.user_id },
+      );
+      if (companyUser) {
+        let level = CompanyUserRole.member;
+        if (update.level == "manage") {
+          level = CompanyUserRole.admin;
+        }
+        await globalResolver.services.companies.setUserRole(
+          update.company_id,
+          update.user_id,
+          companyUser.role,
+          level,
+        );
+      } else {
+        throw new CrudException("User is not part of this company.", 406);
+      }
+    }
+    return {};
   };
 
   /**

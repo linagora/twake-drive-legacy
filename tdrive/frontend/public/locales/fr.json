@@ -192,6 +192,7 @@
     "components.internal-access_cannal_info_give_back":"Vous devez aller sur Tdrive chat pour redonner accès à ce fichier",
     "components.internal-access_specific_rules":"Droit d'accès spécifique",
     "components.internal-access_specific_rules_you":"(Vous)",
+    "components.internal-manage_root_users":"Règles d'accès à l'espace de travail partagé",
     "components.select-users_search_users":"Chercher un utilisateur",
     "common.access-level_full_acess":"Accès Total",
     "common.access-level_read":"Lecture",

@@ -30,6 +30,7 @@ import { CreateModalAtom } from './modals/create';
 import { PropertiesModal } from './modals/properties';
 import { AccessModal } from './modals/update-access';
 import { VersionsModal } from './modals/versions';
+import { UsersModal } from './modals/manage-users';
 import { SharedFilesTable } from './shared-files-table';
 import useRouteState from 'app/features/router/hooks/use-route-state';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
@@ -54,6 +55,7 @@ export const DriveCurrentFolderAtom = atomFamily<
 });
 
 export default memo(
+<<<<<<< HEAD
     ({
        context,
        initialParentId,
@@ -73,6 +75,28 @@ export default memo(
       const [parentId, _setParentId] = useRecoilState(
           DriveCurrentFolderAtom({ context: context, initialFolderId: viewId || initialParentId || 'user_'+user?.id }),
       );
+=======
+  ({
+    context,
+    initialParentId,
+    tdriveTabContextToken,
+    inPublicSharing,
+  }: {
+    context?: string;
+    initialParentId?: string;
+    tdriveTabContextToken?: string;
+    inPublicSharing?: boolean;
+  }) => {
+    const { user } = useCurrentUser();
+    const companyId = useRouterCompany();
+    const role = user ? (user?.companies || []).find(company => company?.company.id === companyId)?.role : "member";
+    setTdriveTabToken(tdriveTabContextToken || null);
+    const [filter, __] = useRecoilState(SharedWithMeFilterState);
+    const { viewId } = useRouteState();
+    const [parentId, _setParentId] = useRecoilState(
+      DriveCurrentFolderAtom({ context: context, initialFolderId: viewId || initialParentId || 'user_'+user?.id }),
+    );
+>>>>>>> main
 
     const [loadingParentChange, setLoadingParentChange] = useState(false);
     const {
@@ -262,6 +286,7 @@ export default memo(
 
           >
             <DriveRealtimeObject id={parentId} key={parentId} />
+            {role == "admin" && <UsersModal />}
             <VersionsModal />
             <AccessModal />
             <PropertiesModal />

@@ -19,7 +19,7 @@ export const useDriveItem = (id: string) => {
   const item = useRecoilValue(DriveItemAtom(id));
   const children = useRecoilValue(DriveItemChildrenAtom(id));
   const [loading, setLoading] = useRecoilState(LoadingStateInitTrue('useDriveItem-' + id));
-  const { refresh: refreshItem, create, update: _update, remove: _remove } = useDriveActions();
+  const { refresh: refreshItem, create, update: _update, updateLevel: _updateLevel, remove: _remove } = useDriveActions();
   const { uploadVersion: _uploadVersion } = useDriveUpload();
 
   const refresh = useCallback(
@@ -57,6 +57,19 @@ export const useDriveItem = (id: string) => {
     [id, setLoading, refresh, item?.item?.parent_id],
   );
 
+  const updateLevel = useCallback(
+    async (userId: string, level: string) => {
+      setLoading(true);
+      try {
+        await _updateLevel(id, userId, level);
+      } catch (e) {
+        ToasterService.error('Unable to update user access.');
+      }
+      setLoading(false);
+    },
+    [id, setLoading, refresh, item?.item?.parent_id],
+  );
+
   const uploadVersion = useCallback(
     async (file: File) => {
       setLoading(true);
@@ -87,6 +100,7 @@ export const useDriveItem = (id: string) => {
     uploadVersion,
     create,
     update,
+    updateLevel,
     remove,
     refresh,
   };

@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-import { ChevronDownIcon, ChevronUpIcon, DotsHorizontalIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon, DotsHorizontalIcon } from '@heroicons/react/outline';
 import { Button } from '@atoms/button/button';
-import { Base, BaseSmall, Title } from '@atoms/text';
+import { Title } from '@atoms/text';
 import Menu from '@components/menus/menu';
 import { useRecoilState } from 'recoil';
 import {
@@ -17,7 +16,7 @@ import Languages from '@features/global/services/languages-service';
 
 export const SharedFilesTable = () => {
   const { driveItems, loading } = useSharedWithMeDriveItems();
-  const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
+  const [filter] = useRecoilState(SharedWithMeFilterState);
 
   // FILTER HOOKS
   const buildFileTypeContextMenu = useOnBuildFileTypeContextMenu();
@@ -26,7 +25,7 @@ export const SharedFilesTable = () => {
   const buildDateContextMenu = useOnBuildDateContextMenu();
 
   const fileAddedDate = (timestamp: number) => {
-    const [formattedDate, formattedTime] = new Date(timestamp).toLocaleString().split(', ');
+    const [formattedDate] = new Date(timestamp).toLocaleString().split(', ');
     return formattedDate;
   };
   return (

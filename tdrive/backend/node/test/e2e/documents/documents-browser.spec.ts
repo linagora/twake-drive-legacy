@@ -54,7 +54,7 @@ describe("The Documents Browser Window and API", () => {
 
     it("Should not be visible for other users", async () => {
       const myDriveId = "user_" + currentUser.user.id;
-      const anotherUser = await TestHelpers.getInstance(platform, true);
+      const anotherUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
       await currentUser.uploadAllFilesOneByOne(myDriveId);
       await new Promise(r => setTimeout(r, 5000));
 
@@ -107,8 +107,8 @@ describe("The Documents Browser Window and API", () => {
 
     it("Should contain files that were shared with the user", async () => {
       const sharedWIthMeFolder = "shared_with_me";
-      const oneUser = await TestHelpers.getInstance(platform, true);
-      const anotherUser = await TestHelpers.getInstance(platform, true);
+      const oneUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
+      const anotherUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
       let files = await oneUser.uploadAllFilesOneByOne();
       await new Promise(r => setTimeout(r, 5000));
 

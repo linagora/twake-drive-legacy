@@ -40,7 +40,7 @@ export default class ElasticSearch extends SearchAdapter implements SearchAdapte
 
   public async connect() {
     try {
-      let clientOptions: any = {
+      const clientOptions: any = {
         node: this.configuration.endpoint,
         ssl: {
           rejectUnauthorized: false,
@@ -48,7 +48,7 @@ export default class ElasticSearch extends SearchAdapter implements SearchAdapte
       };
 
       if (this.configuration.useAuth) {
-        logger.info(`Using auth for ES client`);
+        logger.info("Using auth for ES client");
         clientOptions.auth = {
           username: this.configuration.username,
           password: this.configuration.password,

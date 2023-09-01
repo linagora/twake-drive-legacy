@@ -97,6 +97,28 @@ class UserAPIClientService {
     return res;
   }
 
+  async all(
+    companyId: string,
+    options?: { bufferize?: boolean; callback?: (res: UserType[]) => void },
+  ): Promise<UserType[]> {
+
+    const res = await new Promise<UserType[]>(resolve =>
+      Api.post(
+        `/internal/services/users/v1/users/${companyId}/all`,
+        {
+          include_companies: true,
+        },
+        (res: { resources: UserType[] }): void => {
+          resolve(res.resources && res.resources.length ? res.resources : []);
+        },
+      ),
+    );
+
+    if (options?.callback) options.callback(res);
+
+    return res;
+  }
+
   async getCurrentUserCompanies(): Promise<CompanyType[]> {
     return this.listCompanies(CurrentUser.get()?.id || '');
   }

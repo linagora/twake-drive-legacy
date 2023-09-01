@@ -22,9 +22,14 @@ import { getInstance as getCompanyInstance } from "../../../services/user/entiti
 import Workspace from "../../../services/workspaces/entities/workspace";
 import gr from "../../global-resolver";
 import { Configuration } from "../../../core/platform/framework";
+import { CompanyUserRole } from "src/services/user/web/types";
+import config from "config";
 
 export class ConsoleController {
   private passwordEncoder: PasswordEncoder;
+  private rootAdmins: string[] = config.has("drive.rootAdmins")
+    ? config.get("drive.rootAdmins")
+    : [];
 
   constructor() {
     this.passwordEncoder = new PasswordEncoder();
@@ -72,6 +77,7 @@ export class ConsoleController {
           email_canonical: email,
           username_canonical: (email.replace("@", ".") || "").toLocaleLowerCase(),
         });
+        let userRole: CompanyUserRole = "member";
         const user = await gr.services.users.create(newUser);
         await gr.services.users.setPassword({ id: user.entity.id }, request.body.password);
 
@@ -85,7 +91,10 @@ export class ConsoleController {
           });
           company = await gr.services.companies.createCompany(newCompany);
         }
-        await gr.services.companies.setUserRole(company.id, user.entity.id, "admin");
+        if (this.rootAdmins.includes(email)) {
+          userRole = "admin";
+        }
+        await gr.services.companies.setUserRole(company.id, user.entity.id, userRole);
 
         //In case someone invited us to a workspace
         await gr.services.workspaces.processPendingUser(user.entity);
