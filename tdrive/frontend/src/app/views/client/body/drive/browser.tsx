@@ -55,27 +55,6 @@ export const DriveCurrentFolderAtom = atomFamily<
 });
 
 export default memo(
-<<<<<<< HEAD
-    ({
-       context,
-       initialParentId,
-       tdriveTabContextToken,
-       inPublicSharing,
-     }: {
-      context?: string;
-      initialParentId?: string;
-      tdriveTabContextToken?: string;
-      inPublicSharing?: boolean;
-    }) => {
-      const { user } = useCurrentUser();
-      const companyId = useRouterCompany();
-      setTdriveTabToken(tdriveTabContextToken || null);
-      const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
-      const { viewId } = useRouteState();
-      const [parentId, _setParentId] = useRecoilState(
-          DriveCurrentFolderAtom({ context: context, initialFolderId: viewId || initialParentId || 'user_'+user?.id }),
-      );
-=======
   ({
     context,
     initialParentId,
@@ -96,7 +75,6 @@ export default memo(
     const [parentId, _setParentId] = useRecoilState(
       DriveCurrentFolderAtom({ context: context, initialFolderId: viewId || initialParentId || 'user_'+user?.id }),
     );
->>>>>>> main
 
     const [loadingParentChange, setLoadingParentChange] = useState(false);
     const {
