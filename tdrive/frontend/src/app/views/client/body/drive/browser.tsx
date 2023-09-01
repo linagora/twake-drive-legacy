@@ -41,7 +41,7 @@ import { Draggable } from 'app/features/dragndrop/hook/draggable';
 import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
 import { ConfirmModalAtom } from './modals/confirm-move/index';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
-
+import { ConfirmModal } from './modals/confirm-move';
 
 
 
@@ -267,6 +267,7 @@ export default memo(
             <PropertiesModal />
             <ConfirmDeleteModal />
             <ConfirmTrashModal />
+            <ConfirmModal />
             <Suspense fallback={<></>}>
               <DrivePreview items={documents}/>
             </Suspense>

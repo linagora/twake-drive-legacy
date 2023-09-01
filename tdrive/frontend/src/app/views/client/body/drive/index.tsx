@@ -1,7 +1,6 @@
 import { useCompanyApplications } from 'app/features/applications/hooks/use-company-applications';
 import Browser from './browser';
 import { SelectorModal } from './modals/selector';
-import { ConfirmModal } from './modals/confirm-move';
 
 export type EmbedContext = {
   companyId?: string;
@@ -21,7 +20,6 @@ export default ({
   return (
     <>
       <SelectorModal />
-      <ConfirmModal />
       <Browser initialParentId={initialParentId} inPublicSharing={inPublicSharing} />
     </>
   );

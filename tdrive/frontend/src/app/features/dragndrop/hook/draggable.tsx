@@ -13,8 +13,6 @@ export function Draggable(props:DraggableProps) {
       child: props.children
     },
   });
-  console.log(props.children);
-
 
   return (
     <div ref={setNodeRef} {...listeners} {...attributes}>
