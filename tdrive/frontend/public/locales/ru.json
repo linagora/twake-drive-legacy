@@ -311,7 +311,7 @@
     "components.item_context_menu.today": "Сегодня",
     "components.item_context_menu.last_week": "За неделю",
     "components.item_context_menu.last_month": "За месяц",
-    "components.item_context_menu.open_new_window": "Открыть в новом окно",
+    "components.item_context_menu.open_new_window": "Открыть в новом окне",
     "scenes.app.shared_with_me.shared_with_me": "Доступные мне",
     "scenes.app.shared_with_me.file_type": "Тип файла",
     "scenes.app.shared_with_me.people": "Люди",
