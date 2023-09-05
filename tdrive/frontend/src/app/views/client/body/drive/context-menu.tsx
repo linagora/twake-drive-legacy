@@ -95,7 +95,10 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
               type: 'menu',
               text: Languages.t('components.item_context_menu.open_new_window'),
               onClick: () => {
-                const route = RouterServices.generateRouteFromState({ companyId: company, viewId: item.parent_id, itemId: item.id });
+                const itemId = !item.is_directory ? item.id : "";
+                const viewId = item.is_directory ? item.id : item.parent_id;
+                const route = RouterServices.generateRouteFromState({ companyId: company, viewId, itemId });
+                window.open(route, '_blank');
                 window.open(route, '_blank');
               }
             },
