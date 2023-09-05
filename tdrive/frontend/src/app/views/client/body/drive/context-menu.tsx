@@ -19,10 +19,8 @@ import { ToasterService } from '@features/global/services/toaster-service';
 import { copyToClipboard } from '@features/global/utils/CopyClipboard';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
 import { getCurrentUserList } from '@features/users/hooks/use-user-list';
-import { useCurrentUser } from '@features/users/hooks/use-current-user';
 import RouterServices from '@features/router/services/router-service';
 import useRouterCompany from '@features/router/hooks/use-router-company';
-import useRouteView from '@features/router/hooks/use-router-view';
 import _ from 'lodash';
 import Languages from 'features/global/services/languages-service';
 
@@ -48,8 +46,6 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
   const setUsersModalState = useSetRecoilState(UsersModalAtom);
   const { open: preview } = useDrivePreview();
   const company = useRouterCompany();
-  const { user } = useCurrentUser();
-  const currentView = useRouteView();
   
   function getIdsFromArray(arr: DriveItem[]): string[] {
     return arr.map((obj) => obj.id);
@@ -99,9 +95,8 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
               type: 'menu',
               text: Languages.t('components.item_context_menu.open_new_window'),
               onClick: () => {
-                const view = currentView ? currentView : 'user_'+user?.id;
-                const route = RouterServices.generateRouteFromState({ companyId: company, viewId: view, itemId: item.id });
-                const newWindow = window.open(route, '_blank');
+                const route = RouterServices.generateRouteFromState({ companyId: company, viewId: item.parent_id, itemId: item.id });
+                window.open(route, '_blank');
               }
             },
             { type: 'separator' },
