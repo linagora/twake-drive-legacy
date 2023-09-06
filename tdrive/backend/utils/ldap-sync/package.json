@@ -1,0 +1,26 @@
+{
+  "name": "ldap_project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run build:clean && npm run build:ts",
+    "build:ts": "tsc",
+    "build:clean": "rimraf ./dist",
+    "sync": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "dotenv": "^16.0.3",
+    "ldapjs": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/ldapjs": "^2.2.5",
+    "typescript": "^5.0.4",
+    "rimraf": "^3.0.2"
+  }
+}
