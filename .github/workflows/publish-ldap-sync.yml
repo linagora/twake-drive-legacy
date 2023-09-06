@@ -1,7 +1,7 @@
 name: publish-ldap-sync
 
 on:
-  pull_request:
+  push:
     branches: [main]
     paths:
       - "tdrive/utils/ldap-sync/**"
