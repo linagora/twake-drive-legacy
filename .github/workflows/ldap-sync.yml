@@ -1,31 +1,15 @@
-name: backend-build
+name: ldap-sync-build
 
 on:
   pull_request:
     branches: [main]
     paths:
-      - "tdrive/utils/ldap-sync/**"
+      - "tdrive/backend/utils/**"
 
 jobs:
-  publish-node:
+  lint:
     runs-on: ubuntu-20.04
     steps:
-      - name: Set env to production
-        if: endsWith(github.ref, '/main')
-        run: 'echo "DOCKERTAG=latest" >> $GITHUB_ENV'
-      - name: "Push to the registry following labels:"
-        run: |
-          echo "${{ env.DOCKERTAG }},${{ env.DOCKERTAGVERSION }}"
       - uses: actions/checkout@v2
-      - name: Publish to Registry
-        uses: elgohr/Publish-Docker-Github-Action@v5
-        with:
-          name: tdrive/tdrive-ldap-sync
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-          workdir: tdrive
-          registry: docker-registry.linagora.com
-          context: .
-          target: production
-          buildoptions: "-t docker-registry.linagora.com/tdrive/tdrive-ldap-sync -f docker/tdrive-ldap-sync/Dockerfile"
-          tags: "${{ env.DOCKERTAG }},${{ env.DOCKERTAGVERSION }}"
+      - name: Build ldap sync
+        run: cd tdrive/backend/utils/ldap-sync && npm run build

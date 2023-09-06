@@ -10,7 +10,7 @@ interface UserAttributes {
 
 dotenv.config();
 
-console.log("Run script with the following env: ");
+console.log("Run script with the following env:");
 console.log(process.env);
 
 // LDAP server configuration
