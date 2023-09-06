@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "tdrive/utils/ldap-sync/**"
+      - "tdrive/docker/**"
 
 jobs:
   publish-node:
