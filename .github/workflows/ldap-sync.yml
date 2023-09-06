@@ -12,4 +12,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build ldap sync
-        run: cd tdrive/backend/utils/ldap-sync && npm run build
+        run: cd tdrive/backend/utils/ldap-sync && npm i && npm run build
