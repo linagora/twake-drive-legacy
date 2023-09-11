@@ -153,7 +153,6 @@ export class DocumentsService {
         throw Error("user does not have access to this item");
       }
     } catch (error) {
-      console.log(error);
       this.logger.error({ error: `${error}` }, "Failed to grant access to the drive item");
       throw new CrudException("User does not have access to this item or its children", 401);
     }
@@ -179,7 +178,22 @@ export class DocumentsService {
           await this.repository.find(
             {
               company_id: context.company.id,
-              parent_id: id,
+              ...(id.includes(this.TRASH)
+                ? {
+                    is_in_trash: true,
+                    ...(id == this.TRASH
+                      ? {
+                          scope: "shared",
+                        }
+                      : {
+                          scope: "personal",
+                          creator: context?.user?.id,
+                        }),
+                  }
+                : {
+                    parent_id: id,
+                    is_in_trash: { $ne: true },
+                  }),
             },
             {},
             context,
@@ -257,6 +271,28 @@ export class DocumentsService {
     try {
       const driveItem = getDefaultDriveItem(content, context);
       const driveItemVersion = getDefaultDriveItemVersion(version, context);
+
+      /**
+       * Set the drive item scope
+       */
+      let scope: "personal" | "shared";
+      if (driveItem.parent_id === "user_" + context.user?.id) {
+        scope = "personal";
+      } else if (driveItem.parent_id === "root") {
+        scope = "shared";
+      } else {
+        const driveItemParent = await this.repository.findOne(
+          {
+            company_id: context.company.id,
+            id: driveItem.parent_id,
+          },
+          {},
+          context,
+        );
+        scope = driveItemParent.scope;
+      }
+
+      driveItem.scope = scope;
 
       const hasAccess = await checkAccess(
         driveItem.parent_id,
@@ -564,7 +600,7 @@ export class DocumentsService {
         await this.repository.remove(item);
       } else {
         //This item is not in trash, we move it to trash
-        item.parent_id = this.TRASH;
+        item.is_in_trash = true;
         await this.update(item.id, item, context);
       }
       await updateItemSize(previousParentId, this.repository, context);

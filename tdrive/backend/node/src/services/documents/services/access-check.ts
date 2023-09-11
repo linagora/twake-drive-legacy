@@ -169,7 +169,45 @@ export const getAccessLevel = async (
   repository: Repository<DriveFile>,
   context: CompanyExecutionContext & { public_token?: string; tdrive_tab_token?: string },
 ): Promise<DriveFileAccessLevel | "none"> => {
+  const isAdmin = !context?.user?.id || (await isCompanyAdmin(context));
   const isMember = !context?.user?.id || (await isCompanyMember(context));
+
+  if (context?.user?.id) {
+    /**
+     * Drive root directories access management
+     */
+    if (id === "user_" + context.user?.id) return "manage";
+    if (id === "trash_" + context.user?.id) return "manage";
+
+    if (id === "root") {
+      if (isAdmin) return "manage";
+      if (isMember) return "read";
+
+      return "none";
+    }
+
+    if (id === "trash") {
+      if (isAdmin) return "manage";
+
+      return "read";
+    }
+
+    if (id === "shared_with_me") return "read";
+
+    /**
+     * Entity based access management
+     */
+
+    if (item.scope === "personal" && item.creator == context.user.id) return "manage";
+
+    if (item.scope === "shared") {
+      if (isAdmin) return "manage";
+      if (isMember) return "read";
+
+      return "none";
+    }
+  }
+  /*const isMember = !context?.user?.id || (await isCompanyMember(context));
   if (!id || id === "root") {
     if (!context?.user?.id || (await isCompanyGuest(context))) {
       return "none";
@@ -191,13 +229,13 @@ export const getAccessLevel = async (
     if (id === "user_" + context.user?.id) return "manage";
     if (await isCompanyApplication(context)) return "manage";
     return "none";
-  }
+  }*/
 
   let publicToken = context.public_token;
   const prevalidatedPublicTokenDocumentId = context?.user?.public_token_document_id;
 
   try {
-    if (!item) {
+    /*  if (!item) {
       item = await repository.findOne({
         id,
         company_id: context.company.id,

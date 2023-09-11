@@ -111,7 +111,7 @@ export default () => {
         )}
         {rootAccess === 'manage' && (
           <Button
-            onClick={() =>{history.push(RouterServices.generateRouteFromState({companyId: company, viewId: ""}));setParentId('trash')}}
+            onClick={() =>{history.push(RouterServices.generateRouteFromState({companyId: company, viewId: 'trash'}));setParentId('trash')}}
             size="lg"
             theme="white"
             className={'w-full mb-1 ' + (folderType === 'trash' && viewId == ''? activeClass : '')}
@@ -119,6 +119,14 @@ export default () => {
             <TrashIcon className="w-5 h-5 mr-4 text-rose-500" /> {Languages.t('components.side_menu.trash')}
           </Button>
         )}
+        <Button
+          onClick={() =>{history.push(RouterServices.generateRouteFromState({companyId: company, viewId: 'trash_'+user?.id}));setParentId('trash_'+user?.id)}}
+          size="lg"
+          theme="white"
+          className={'w-full mb-1 ' + (folderType === 'trash' && viewId == ''? activeClass : '')}
+        >
+          <TrashIcon className="w-5 h-5 mr-4 text-rose-500" /> {Languages.t('components.side_menu.trash')} (personal)
+        </Button>
 
         {false && (
           <>

@@ -3,7 +3,7 @@ import { UpsertOptions } from "..";
 import { ListResult, Paginable, Pagination } from "../../../../../../framework/api/crud-service";
 import { FindOptions } from "../../repository/repository";
 import { ColumnDefinition, EntityDefinition, ObjectType } from "../../types";
-import { getEntityDefinition, unwrapIndexes, unwrapPrimarykey } from "../../utils";
+import { getEntityDefinition, unwrapPrimarykey } from "../../utils";
 import { AbstractConnector } from "../abstract-connector";
 import { buildSelectQuery } from "./query-builder";
 import { transformValueFromDbString, transformValueToDbString } from "./typeTransforms";
@@ -185,24 +185,6 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions, mo
   ): Promise<ListResult<Table>> {
     const instance = new (entityType as any)();
     const { columnsDefinition, entityDefinition } = getEntityDefinition(instance);
-
-    const pk = unwrapPrimarykey(entityDefinition);
-
-    const indexes = unwrapIndexes(entityDefinition);
-    if (
-      Object.keys(filters).some(key => pk.indexOf(key) < 0) &&
-      Object.keys(filters).some(key => indexes.indexOf(key) < 0)
-    ) {
-      //Filter not in primary key
-      throw Error(
-        "All filter parameters must be defined in entity primary key, got: " +
-          JSON.stringify(Object.keys(filters)) +
-          " on table " +
-          entityDefinition.name +
-          " but pk is " +
-          JSON.stringify(pk),
-      );
-    }
 
     const db = await this.getDatabase();
     const collection = db.collection(`${entityDefinition.name}`);

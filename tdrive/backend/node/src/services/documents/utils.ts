@@ -30,7 +30,13 @@ const TRASH: TrashType = "trash";
 const SHARED_WITH_ME: SharedWithMeType = "shared_with_me";
 
 export const isVirtualFolder = (id: string) => {
-  return id === ROOT || id === TRASH || id.startsWith("user_") || id == SHARED_WITH_ME;
+  return (
+    id === ROOT ||
+    id === TRASH ||
+    id.startsWith("trash_") ||
+    id.startsWith("user_") ||
+    id == SHARED_WITH_ME
+  );
 };
 
 export const isSharedWithMeFolder = (id: string) => {
