@@ -1,10 +1,12 @@
 {
     "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
+        "target": "esnext",
+        "module": "esnext",
+        "moduleResolution": "node",
         "outDir": "dist",
         "strict": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "useUnknownInCatchVariables": false
     },
     "include": ["src"]
 }
