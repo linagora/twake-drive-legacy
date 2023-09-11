@@ -24,12 +24,17 @@ export interface IApiServiceApplicationTokenResponse {
   };
 }
 
+dotenv.config();
+console.log("Run script with the following env: ");
+console.log(process.env);
+
 const ldapConfig = {
   url: process.env.LDAP_URL || "localhost",
   bindDN: process.env.LDAP_BIND_DN || "",
   bindCredentials: process.env.LDAP_BIND_CREDENTIALS || "",
   searchBase: process.env.LDAP_SEARCH_BASE || "dc=example,dc=com",
   searchFilter: process.env.LDAP_SEARCH_FILTER || "(objectClass=inetorgperson)",
+  mappings: JSON.parse(process.env.LDAP_ATTRIBUTE_MAPPINGS || "{}"),
   timeout: 120,
   version: 3,
 };
@@ -75,10 +80,6 @@ const refreshToken = async (): Promise<string> => {
   }
 };
 
-dotenv.config();
-
-console.log("Run script with the following env: ");
-console.log(process.env);
 
 // Create LDAP client
 const client = ldap.createClient({
@@ -106,7 +107,7 @@ client.bind(ldapConfig.bindDN, ldapConfig.bindCredentials, (err) => {
     ldapConfig.searchBase,
     {
       filter: ldapConfig.searchFilter,
-      attributes: ["uid", "mail", "cn", "sn", "mobile"],
+      attributes: [ldapConfig.mappings.firstName, ldapConfig.mappings.lastName, ldapConfig.mappings.email],
       scope: "sub",
       derefAliases: 2,
     },
@@ -119,15 +120,21 @@ client.bind(ldapConfig.bindDN, ldapConfig.bindCredentials, (err) => {
       const apiRequests: Promise<any>[] = [];
 
       searchRes.on("searchEntry", (entry: any) => {
+        console.log('entry: ' + JSON.stringify(entry.pojo));
+
         // Handle each search result entry
         const userAttributes: UserAttributes = {
-          first_name: entry.attributes[1]?.values[0],
-          last_name: entry.attributes[2]?.values[0],
-          email: entry.attributes[3]?.values[0],
+          first_name: entry.attributes[0]?.values[0],
+          last_name: entry.attributes[1]?.values[0],
+          email: entry.attributes[2]?.values[0],
         };
 
-        // Make API call to tdrive backend with the userAttributes
-        apiRequests.push(axiosClient.post(process.env.API_URL || "", userAttributes));
+        if (userAttributes.email) {
+          // Make API call to tdrive backend with the userAttributes
+          apiRequests.push(axiosClient.post(process.env.API_URL || "", userAttributes));
+        } else {
+          console.log(`user ${userAttributes} doesn't have an email`);
+        }
       });
 
       searchRes.on("error", (err) => {
