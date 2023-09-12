@@ -1,5 +1,5 @@
 import ldap from "ldapjs";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import dotenv from "dotenv";
 
 interface UserAttributes {
@@ -120,7 +120,7 @@ client.bind(ldapConfig.bindDN, ldapConfig.bindCredentials, (err) => {
       const apiRequests: Promise<any>[] = [];
 
       searchRes.on("searchEntry", (entry: any) => {
-        console.log('entry: ' + JSON.stringify(entry.pojo));
+        console.log('Receive entry:: ' + JSON.stringify(entry.pojo));
 
         // Handle each search result entry
         const userAttributes: UserAttributes = {
@@ -130,10 +130,13 @@ client.bind(ldapConfig.bindDN, ldapConfig.bindCredentials, (err) => {
         };
 
         if (userAttributes.email) {
-          // Make API call to tdrive backend with the userAttributes
-          apiRequests.push(axiosClient.post(process.env.API_URL || "", userAttributes));
+          //Make API call to tdrive backend with the userAttributes
+          apiRequests.push(axiosClient.post(process.env.API_URL || "", userAttributes)
+            .catch((e: AxiosError<any>) => {
+              console.log(`Error for ${JSON.stringify(userAttributes)}: ${e.message}, body: ${e.response?.data?.message}`);
+            }));
         } else {
-          console.log(`user ${userAttributes} doesn't have an email`);
+          console.log(`user ${JSON.stringify(userAttributes)} doesn't have an email`);
         }
       });
 
@@ -148,19 +151,8 @@ client.bind(ldapConfig.bindDN, ldapConfig.bindCredentials, (err) => {
             console.error("LDAP unbind error:", unbindErr);
           } else {
 
-            Promise.all(apiRequests)
-              .then((responses) => {
-                console.log(
-                  "API responses:",
-                  responses.map((r) => r.data)
-                );
-              })
-              .catch((error) => {
-                console.error("API error:", error);
-              })
-              .finally(() => {
-                console.log("LDAP search completed successfully.");
-              });
+            Promise.allSettled(apiRequests)
+              .finally(() => console.log("LDAP search COMPLETED."));
           }
         });
       });

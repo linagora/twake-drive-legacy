@@ -14,6 +14,7 @@ import {
   getApplicationObject,
 } from "../../../applications/entities/application";
 import gr from "../../../global-resolver";
+import { logger } from "../../../../core/platform/framework/logger";
 import {
   ApplicationApiExecutionContext,
   ApplicationLoginRequest,
@@ -203,6 +204,7 @@ export class ApplicationsApiController {
         user: { id: user.entity.id, server_request: true },
       });
     } catch (err) {
+      logger.error(err);
       throw new Error("An unknown error occured");
     }
     return {};
