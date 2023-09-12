@@ -147,6 +147,7 @@ client.bind(ldapConfig.bindDN, ldapConfig.bindCredentials, (err) => {
           if (unbindErr) {
             console.error("LDAP unbind error:", unbindErr);
           } else {
+
             Promise.all(apiRequests)
               .then((responses) => {
                 console.log(

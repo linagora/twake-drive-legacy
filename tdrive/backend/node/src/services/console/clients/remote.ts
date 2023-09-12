@@ -1,4 +1,3 @@
-import { AxiosInstance } from "axios";
 import { ConsoleServiceClient } from "../client-interface";
 import {
   ConsoleCompany,
@@ -26,7 +25,6 @@ import config from "config";
 import { CompanyUserRole } from "src/services/user/web/types";
 export class ConsoleRemoteClient implements ConsoleServiceClient {
   version: "1";
-  client: AxiosInstance;
 
   private infos: ConsoleOptions;
   private verifier: OidcJwtVerifier;
