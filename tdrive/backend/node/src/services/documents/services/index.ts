@@ -508,6 +508,8 @@ export class DocumentsService {
       return;
     }
 
+    console.log("🗑️ Begin deleting item.");
+
     //In the case of the trash we definitively delete the items
     if (id === "trash") {
       //Only administrators can execute this action
@@ -599,6 +601,7 @@ export class DocumentsService {
         }
         await this.repository.remove(item);
       } else {
+        console.log("🗑️ Will update item now.");
         //This item is not in trash, we move it to trash
         item.is_in_trash = true;
         await this.update(item.id, item, context);
@@ -607,6 +610,52 @@ export class DocumentsService {
 
       this.notifyWebsocket(previousParentId, context);
     }
+
+    this.notifyWebsocket("trash", context);
+  };
+
+  /**
+   * restore a Drive Document and its children
+   *
+   * @param {string} id - the item id
+   * @param {DriveExecutionContext} context - the execution context
+   * @returns {Promise<void>}
+   */
+   restore = async (
+    id: string | RootType | TrashType,
+    item?: DriveFile,
+    context?: DriveExecutionContext,
+  ): Promise<void> => {
+    if (!id) {
+      //We can't remove the root folder
+      return;
+    }
+
+    item =
+      item ||
+      (await this.repository.findOne({
+        company_id: context.company.id,
+        id,
+      }));
+
+    if (!item) {
+      this.logger.error("item to delete not found");
+      throw new CrudException("Drive item not found", 404);
+    }
+
+    try {
+      if (!(await checkAccess(item.id, item, "manage", this.repository, context))) {
+        this.logger.error("user does not have access drive item ", id);
+        throw Error("user does not have access to this item");
+      }
+    } catch (error) {
+      this.logger.error({ error: `${error}` }, "Failed to grant access to the drive item");
+      throw new CrudException("User does not have access to this item or its children", 401);
+    }
+
+    // Restore item
+    item.is_in_trash = false;
+    this.repository.save(item);
 
     this.notifyWebsocket("trash", context);
   };

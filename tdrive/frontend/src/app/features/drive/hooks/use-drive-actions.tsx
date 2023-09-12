@@ -96,6 +96,18 @@ export const useDriveActions = () => {
     [refresh],
   );
 
+  const restore = useCallback(
+    async (id: string, parentId: string) => {
+      try {
+        await DriveApiClient.restore(companyId, id);
+        await refresh(parentId || '');
+      } catch (e) {
+        ToasterService.error(Languages.t('hooks.use-drive-actions.unable_restore_file'));
+      }
+    },
+    [refresh],
+  );
+
   const update = useCallback(
     async (update: Partial<DriveItem>, id: string, parentId: string) => {
       try {
@@ -127,5 +139,5 @@ export const useDriveActions = () => {
     [refresh],
   );
 
-  return { create, refresh, download, downloadZip, remove, update, updateLevel };
+  return { create, refresh, download, downloadZip, remove, restore, update, updateLevel };
 };

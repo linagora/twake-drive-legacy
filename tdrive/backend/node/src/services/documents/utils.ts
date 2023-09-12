@@ -78,6 +78,7 @@ export const getDefaultDriveItem = (
     last_modified: new Date().getTime(),
     parent_id: item.parent_id || "root",
     content_keywords: item.content_keywords || "",
+    scope: "personal",
     description: item.description || "",
     access_info: item.access_info || {
       entities: [

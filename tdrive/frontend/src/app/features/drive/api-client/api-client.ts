@@ -83,6 +83,13 @@ export class DriveApiClient {
     );
   }
 
+  static async restore(companyId: string, id: string | 'trash' | '') {
+    return await Api.post<any, any>(
+      `/internal/services/documents/v1/companies/${companyId}/item/${id}/restore${appendTdriveToken()}`,
+      {}
+    );
+  }
+
   static async update(companyId: string, id: string, update: Partial<DriveItem>) {
     return await Api.post<Partial<DriveItem>, DriveItem>(
       `/internal/services/documents/v1/companies/${companyId}/item/${id}${appendTdriveToken()}`,

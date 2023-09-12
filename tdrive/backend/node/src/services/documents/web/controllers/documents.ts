@@ -115,6 +115,29 @@ export class DocumentsController {
   };
 
   /**
+   * Restore a DriveFile item from the trashÒ
+   *
+   * @param {FastifyRequest} request
+   * @param {FastifyReply} reply
+   * @returns {Promise<void>}
+   */
+   restore = async (
+    request: FastifyRequest<{ Params: ItemRequestParams; Querystring: { public_token?: string } }>,
+    reply: FastifyReply,
+  ): Promise<void> => {
+    try {
+      const context = getDriveExecutionContext(request);
+
+      await globalResolver.services.documents.documents.restore(request.params.id, null, context);
+
+      reply.status(200).send();
+    } catch (error) {
+      logger.error({ error: `${error}` }, "Failed to restore drive item");
+      throw new CrudException("Failed to restore drive item", 500);
+    }
+  };
+
+  /**
    * Lists the drive root folder.
    *
    * @param {FastifyRequest} request

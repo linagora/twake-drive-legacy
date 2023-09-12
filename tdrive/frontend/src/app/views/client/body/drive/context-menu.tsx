@@ -33,7 +33,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
     DriveCurrentFolderAtom({ initialFolderId: initialParentId || 'root' }),
   );
 
-  const { download, downloadZip, update } = useDriveActions();
+  const { download, downloadZip, update, restore } = useDriveActions();
   const setCreationModalState = useSetRecoilState(CreateModalAtom);
   const setSelectorModalState = useSetRecoilState(SelectorModalAtom);
   const setConfirmDeleteModalState = useSetRecoilState(ConfirmDeleteModalAtom);
@@ -146,6 +146,13 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
               className: 'error',
               hide: inTrash || access !== 'manage',
               onClick: () => setConfirmTrashModalState({ open: true, items: [item] }),
+            },
+            {
+              type: 'menu',
+              text: Languages.t('components.item_context_menu.restore'),
+              className: 'error',
+              hide: !inTrash || access !== 'manage',
+              onClick: () => restore(item.id, ""),
             },
             {
               type: 'menu',

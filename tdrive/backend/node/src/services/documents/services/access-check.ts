@@ -198,6 +198,17 @@ export const getAccessLevel = async (
      * Entity based access management
      */
 
+    if (!item) {
+      item = await repository.findOne({
+        id,
+        company_id: context.company.id,
+      });
+    }
+
+    if (!item) {
+      throw Error("Drive item doesn't exist");
+    }
+
     if (item.scope === "personal" && item.creator == context.user.id) return "manage";
 
     if (item.scope === "shared") {

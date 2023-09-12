@@ -52,6 +52,13 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
   });
 
   fastify.route({
+    method: "POST",
+    url: `${serviceUrl}/:id/restore`,
+    preValidation: [fastify.authenticateOptional],
+    handler: documentsController.restore.bind(documentsController),
+  });
+
+  fastify.route({
     method: "GET",
     url: `${serviceUrl}/:id/user/:user_id/access`,
     preValidation: [fastify.authenticateOptional],
