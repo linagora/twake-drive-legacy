@@ -121,7 +121,7 @@ export class DocumentsController {
    * @param {FastifyReply} reply
    * @returns {Promise<void>}
    */
-   restore = async (
+  restore = async (
     request: FastifyRequest<{ Params: ItemRequestParams; Querystring: { public_token?: string } }>,
     reply: FastifyReply,
   ): Promise<void> => {

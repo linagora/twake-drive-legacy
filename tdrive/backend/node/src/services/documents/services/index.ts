@@ -467,6 +467,29 @@ export class DocumentsService {
       await updateItemSize(item.parent_id, this.repository, context);
 
       if (oldParent) {
+        /**
+         * Set the drive item scope
+         */
+        let scope: "personal" | "shared";
+        if (item.parent_id === "user_" + context.user?.id) {
+          scope = "personal";
+        } else if (item.parent_id === "root") {
+          scope = "shared";
+        } else {
+          const driveItemParent = await this.repository.findOne(
+            {
+              company_id: context.company.id,
+              id: item.parent_id,
+            },
+            {},
+            context,
+          );
+          scope = driveItemParent.scope;
+        }
+
+        item.scope = scope;
+        this.repository.save(item);
+
         await updateItemSize(oldParent, this.repository, context);
         this.notifyWebsocket(oldParent, context);
       }
@@ -507,8 +530,6 @@ export class DocumentsService {
       //We can't remove the root folder
       return;
     }
-
-    console.log("🗑️ Begin deleting item.");
 
     //In the case of the trash we definitively delete the items
     if (id === "trash") {
@@ -601,7 +622,6 @@ export class DocumentsService {
         }
         await this.repository.remove(item);
       } else {
-        console.log("🗑️ Will update item now.");
         //This item is not in trash, we move it to trash
         item.is_in_trash = true;
         await this.update(item.id, item, context);
@@ -621,7 +641,7 @@ export class DocumentsService {
    * @param {DriveExecutionContext} context - the execution context
    * @returns {Promise<void>}
    */
-   restore = async (
+  restore = async (
     id: string | RootType | TrashType,
     item?: DriveFile,
     context?: DriveExecutionContext,
