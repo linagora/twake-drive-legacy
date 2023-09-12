@@ -184,6 +184,7 @@ export class ApplicationsApiController {
     } catch (err) {
       logger.error(err);
       throw err;
+
     }
     return {};
   }
