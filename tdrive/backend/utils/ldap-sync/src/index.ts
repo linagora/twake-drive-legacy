@@ -1,4 +1,4 @@
-import ldap from "ldapjs";
+import ldap, { SearchEntry } from "ldapjs";
 import axios, { AxiosError } from "axios";
 import dotenv from "dotenv";
 
@@ -119,14 +119,14 @@ client.bind(ldapConfig.bindDN, ldapConfig.bindCredentials, (err) => {
 
       const apiRequests: Promise<any>[] = [];
 
-      searchRes.on("searchEntry", (entry: any) => {
-        console.log('Receive entry:: ' + JSON.stringify(entry.pojo));
+      searchRes.on("searchEntry", (entry: SearchEntry) => {
+        console.log('Receive entry:: ' + JSON.stringify(entry.attributes));
 
         // Handle each search result entry
         const userAttributes: UserAttributes = {
-          first_name: entry.attributes[0]?.values[0],
-          last_name: entry.attributes[1]?.values[0],
-          email: entry.attributes[2]?.values[0],
+          first_name: entry.attributes.find(a=> a.type == ldapConfig.mappings.firstName)?.vals[0]!,
+          last_name: entry.attributes.find(a=> a.type == ldapConfig.mappings.lastName)?.vals[0]!,
+          email: entry.attributes.find(a=> a.type == ldapConfig.mappings.email)?.vals[0]!,
         };
 
         if (userAttributes.email) {

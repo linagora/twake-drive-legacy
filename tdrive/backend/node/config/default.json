@@ -81,7 +81,7 @@
      }
   },
   "database":{
-     "secret":"ab63bb3e90c0271c9a1c06651a7c0967eab8851a7a897766",
+     "secret":"",
      "type":"cassandra",
      "mongodb":{
         "uri":"mongodb://mongo:27017",

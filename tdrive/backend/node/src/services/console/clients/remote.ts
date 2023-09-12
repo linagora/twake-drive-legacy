@@ -99,12 +99,13 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
       throw CrudException.badRequest("User not found on Console");
     }
 
-    const roles = userDTO.roles.filter(
-      role => role.applications === undefined || role.applications.find(a => a.code === "tdrive"),
-    );
-
-    //REMOVE LATER
-    logger.info(`Roles are: ${roles}.`);
+    if (userDTO.roles) {
+      const roles = userDTO.roles.filter(
+        role => role.applications === undefined || role.applications.find(a => a.code === "tdrive"),
+      );
+      //REMOVE LATER
+      logger.info(`Roles are: ${roles}.`);
+    }
 
     let user = await gr.services.users.getByConsoleId(userDTO.email);
 
@@ -151,7 +152,9 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
       user.preferences.timezone = coalesce(userDTO.preference.timeZone, user.preferences?.timezone);
     }
 
-    user.picture = userDTO.avatar.value;
+    if (userDTO.avatar) {
+      user.picture = userDTO.avatar.value;
+    }
 
     await gr.services.users.save(user);
 

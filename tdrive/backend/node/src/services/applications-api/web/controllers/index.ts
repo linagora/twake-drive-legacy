@@ -8,7 +8,6 @@ import {
   RealtimeBaseBusEvent,
 } from "../../../../core/platform/services/realtime/types";
 import { ResourceGetResponse } from "../../../../utils/types";
-import { getInstance } from "../../../user/entities/user";
 import {
   ApplicationObject,
   getApplicationObject,
@@ -21,6 +20,7 @@ import {
   ApplicationLoginResponse,
   ConfigureRequest,
 } from "../types";
+import { ConsoleHookUser } from "src/services/console/types";
 
 export class ApplicationsApiController {
   async token(
@@ -175,37 +175,15 @@ export class ApplicationsApiController {
       };
     }>,
   ): Promise<any> {
-    const email = request.body.email.trim().toLocaleLowerCase();
-
-    if (await gr.services.users.getByEmail(email)) {
-      throw new Error("This email is already used");
-    }
-
     try {
-      const newUser = getInstance({
-        first_name: request.body.first_name,
-        last_name: request.body.last_name,
-        email_canonical: email,
-        username_canonical: (email.replace("@", ".") || "").toLocaleLowerCase(),
-        phone: "",
-        identity_provider: "console",
-        identity_provider_id: email,
-        mail_verified: true,
-      });
-      const user = await gr.services.users.create(newUser);
-
-      const company = await gr.services.companies.getCompany({
-        id: "00000000-0000-4000-0000-000000000000",
-      });
-
-      await gr.services.companies.setUserRole(company.id, user.entity.id, "member");
-
-      await gr.services.users.save(user.entity, {
-        user: { id: user.entity.id, server_request: true },
-      });
+      await gr.services.console.getClient().updateLocalUserFromConsole({
+        email: request.body.email.trim().toLocaleLowerCase(),
+        name: request.body.first_name,
+        surname: request.body.last_name,
+      } as ConsoleHookUser);
     } catch (err) {
       logger.error(err);
-      throw new Error("An unknown error occured");
+      throw err;
     }
     return {};
   }
