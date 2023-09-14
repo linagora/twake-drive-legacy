@@ -56,8 +56,8 @@ class FileUploadService {
       this.currentTaskId = uuid();
     }
 
-    fileList.forEach(async file => {
-      if (!file) return;
+    for (const file of fileList) {
+      if (!file) continue;
 
       const pendingFile: PendingFileType = {
         id: uuid(),
@@ -140,7 +140,7 @@ class FileUploadService {
         options?.callback?.(null, options?.context || {});
         this.notify();
       });
-    });
+    }
 
     return this.pendingFiles.filter(f => f.uploadTaskId === this.currentTaskId);
   }
@@ -257,6 +257,7 @@ class FileUploadService {
       fileId: fileId,
     });
   }
+
 
   public getDownloadRoute({ companyId, fileId }: { companyId: string; fileId: string }): string {
     return FileUploadAPIClient.getDownloadRoute({

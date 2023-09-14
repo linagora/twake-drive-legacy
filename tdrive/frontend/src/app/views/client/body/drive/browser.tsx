@@ -156,7 +156,7 @@ export default memo(
               if (dataTransfer) {
                 const tree = await getFilesTree(dataTransfer);
                 setCreationModalState({ parent_id: '', open: false });
-                uploadTree(tree, {
+                await uploadTree(tree, {
                   companyId,
                   parentId,
               });
