@@ -170,7 +170,17 @@ export const calculateItemSize = async (
 ): Promise<number> => {
   if (item.id === "trash") {
     const trashedItems = await repository.find(
-      { company_id: context.company.id, parent_id: "trash" },
+      { company_id: context.company.id, is_in_trash: true, scope: "shared" },
+      {},
+      context,
+    );
+
+    return trashedItems.getEntities().reduce((acc, curr) => acc + curr.size, 0);
+  }
+
+  if (item.id === "trash_" + context.user.id) {
+    const trashedItems = await repository.find(
+      { company_id: context.company.id, is_in_trash: true, scope: "personal" },
       {},
       context,
     );
@@ -180,7 +190,7 @@ export const calculateItemSize = async (
 
   if (isVirtualFolder(item.id) || !item) {
     const rootFolderItems = await repository.find(
-      { company_id: context.company.id, parent_id: item.id || "root" },
+      { company_id: context.company.id, parent_id: item.id || "root", is_in_trash: false },
       {},
       context,
     );
@@ -193,6 +203,7 @@ export const calculateItemSize = async (
       {
         company_id: context.company.id,
         parent_id: item.id,
+        is_in_trash: false,
       },
       {},
       context,
