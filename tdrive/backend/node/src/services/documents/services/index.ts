@@ -46,6 +46,7 @@ import {
   getAccessLevel,
   hasAccessLevel,
   makeStandaloneAccessLevel,
+  getItemScope,
 } from "./access-check";
 import { websocketEventBus } from "../../../core/platform/services/realtime/bus";
 
@@ -271,28 +272,7 @@ export class DocumentsService {
     try {
       const driveItem = getDefaultDriveItem(content, context);
       const driveItemVersion = getDefaultDriveItemVersion(version, context);
-
-      /**
-       * Set the drive item scope
-       */
-      let scope: "personal" | "shared";
-      if (driveItem.parent_id === "user_" + context.user?.id) {
-        scope = "personal";
-      } else if (driveItem.parent_id === "root") {
-        scope = "shared";
-      } else {
-        const driveItemParent = await this.repository.findOne(
-          {
-            company_id: context.company.id,
-            id: driveItem.parent_id,
-          },
-          {},
-          context,
-        );
-        scope = driveItemParent.scope;
-      }
-
-      driveItem.scope = scope;
+      driveItem.scope = await getItemScope(driveItem, this.repository, context);
 
       const hasAccess = await checkAccess(
         driveItem.parent_id,
@@ -467,27 +447,7 @@ export class DocumentsService {
       await updateItemSize(item.parent_id, this.repository, context);
 
       if (oldParent) {
-        /**
-         * Set the drive item scope
-         */
-        let scope: "personal" | "shared";
-        if (item.parent_id === "user_" + context.user?.id) {
-          scope = "personal";
-        } else if (item.parent_id === "root") {
-          scope = "shared";
-        } else {
-          const driveItemParent = await this.repository.findOne(
-            {
-              company_id: context.company.id,
-              id: item.parent_id,
-            },
-            {},
-            context,
-          );
-          scope = driveItemParent.scope;
-        }
-
-        item.scope = scope;
+        item.scope = await getItemScope(item, this.repository, context);
         this.repository.save(item);
 
         await updateItemSize(oldParent, this.repository, context);

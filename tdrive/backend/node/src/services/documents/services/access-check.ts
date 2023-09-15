@@ -432,6 +432,30 @@ export const getSharedByUser = (
   return null;
 };
 
+export const getItemScope = async (
+  item: DriveFile | null,
+  repository: Repository<DriveFile>,
+  context: CompanyExecutionContext,
+): Promise<"personal" | "shared"> => {
+  let scope: "personal" | "shared";
+  if (item.parent_id === "user_" + context.user?.id) {
+    scope = "personal";
+  } else if (item.parent_id === "root") {
+    scope = "shared";
+  } else {
+    const driveItemParent = await repository.findOne(
+      {
+        company_id: context.company.id,
+        id: item.parent_id,
+      },
+      {},
+      context,
+    );
+    scope = driveItemParent.scope;
+  }
+  return scope;
+};
+
 const getGrantorAndThrowIfEmpty = (entity: AuthEntity) => {
   if (!entity.grantor) {
     logger.warn(`For the file permissions ${entity.id} grantor is not defined`);
