@@ -5,7 +5,10 @@ import { useEffect, useState } from 'react';
 import { PublicIcon } from './components/public-icon';
 import MenusManager from '@components/menus/menus-manager.jsx';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
-import Languages from "features/global/services/languages-service";
+import Languages from 'features/global/services/languages-service';
+import { useHistory } from 'react-router-dom';
+import useRouterCompany from '@features/router/hooks/use-router-company';
+import RouterServices from '@features/router/services/router-service';
 
 export default ({
   path: livePath,
@@ -17,18 +20,35 @@ export default ({
   setParentId: (id: string) => void;
 }) => {
   const [savedPath, setSavedPath] = useState<DriveItem[]>([]);
+  const { user } = useCurrentUser();
+  const history = useHistory();
+  const company = useRouterCompany();
   useEffect(() => {
     if (livePath) setSavedPath(livePath);
   }, [livePath]);
   const path = livePath || savedPath;
 
-  return <PathRender inTrash={inTrash || false} path={path} onClick={id => setParentId(id)} />;
+  return (
+    <PathRender
+      inTrash={inTrash || false}
+      path={path}
+      onClick={id => {
+        history.push(
+          RouterServices.generateRouteFromState({
+            companyId: company,
+            viewId: id,
+          }),
+        );
+        setParentId(id);
+      }}
+    />
+  );
 };
 
-function cutFileName (name: any){
-  if (typeof name !== "undefined" ){
-    if (name.length >= 30){
-      return name.substring(0,30)+" ...";
+function cutFileName(name: any) {
+  if (typeof name !== 'undefined') {
+    if (name.length >= 30) {
+      return name.substring(0, 30) + ' ...';
     } else {
       return name;
     }
@@ -103,27 +123,55 @@ const PathItem = ({
   onClick: (id: string) => void;
 }) => {
   const { user } = useCurrentUser();
+  const { viewId } = RouterServices.getStateFromRoute();
   return (
     <div className="flex items-center">
       <a
         href="#"
         className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
         onClick={evt => {
-        if (first && user?.id) {
-            MenusManager.openMenu(
-              [
-                { type: 'menu', text: Languages.t('components.side_menu.home'), onClick: () => onClick('root') },
-                { type: 'menu', text: Languages.t('components.side_menu.my_drive'), onClick: () => onClick('user_' + user?.id) },
-              ],
-              { x: evt.clientX, y: evt.clientY },
-              'center',
-            );
+          const driveMenuItems = [
+            {
+              type: 'menu',
+              text: Languages.t('components.side_menu.home'),
+              onClick: () => onClick('root'),
+            },
+            {
+              type: 'menu',
+              text: Languages.t('components.side_menu.my_drive'),
+              onClick: () => onClick('user_' + user?.id),
+            },
+          ];
+
+          const trashMenuItems = [
+            {
+              type: 'menu',
+              text: Languages.t('components.header_path.my_trash'),
+              onClick: () => onClick('trash_' + user?.id),
+            },
+            {
+              type: 'menu',
+              text: Languages.t('components.header_path.shared_trash'),
+              onClick: () => onClick('trash'),
+            },
+          ];
+
+          if (first && user?.id) {
+            if (viewId?.includes('trash')) {
+              MenusManager.openMenu(trashMenuItems, { x: evt.clientX, y: evt.clientY }, 'center');
+            } else {
+              MenusManager.openMenu(driveMenuItems, { x: evt.clientX, y: evt.clientY }, 'center');
+            }
           } else {
             onClick(item?.id || '');
           }
         }}
       >
-        <Title>{cutFileName(item?.name) || ''}</Title>
+        <Title>
+          {viewId?.includes('trash_') && Languages.t('components.header_path.my_trash')}
+          {viewId === 'trash' && Languages.t('components.header_path.shared_trash')}
+          {!viewId?.includes('trash') && (cutFileName(item?.name) || '')}
+        </Title>
       </a>
       {item?.access_info?.public?.level && item?.access_info?.public?.level !== 'none' && (
         <PublicIcon className="h-5 w-5 ml-2" />
