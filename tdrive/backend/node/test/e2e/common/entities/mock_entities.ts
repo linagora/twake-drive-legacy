@@ -29,6 +29,7 @@ export class DriveFileMockClass {
     access_info: MockAccessInformation;
     creator: string;
     is_directory: boolean;
+    scope: "personal" | "shared";
     created_by: Record<string, any>;
     shared_by: Record<string, any>;
 }

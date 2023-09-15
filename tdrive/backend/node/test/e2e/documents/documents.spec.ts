@@ -59,11 +59,12 @@ describe("the Drive feature", () => {
 
   const createItem = async (): Promise<DriveFileMockClass> => {
     await TestDbService.getInstance(platform, true);
-
+    const scope: "personal" | "shared" = "shared";
     const item = {
       name: "new test file",
       parent_id: "root",
       company_id: platform.workspace.company_id,
+      scope,
     };
 
     const version = {};
@@ -143,6 +144,7 @@ describe("the Drive feature", () => {
     );
 
     expect(listTrashResult.item.name).toEqual("Trash");
+    expect(createItemResult.scope).toEqual("shared");
     expect(listTrashResult.children.some(({ id }) => id === createItemResult.id)).toBeTruthy();
   });
 
