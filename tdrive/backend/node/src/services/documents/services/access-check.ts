@@ -246,7 +246,7 @@ export const getAccessLevel = async (
   const prevalidatedPublicTokenDocumentId = context?.user?.public_token_document_id;
 
   try {
-    /*  if (!item) {
+    if (!item) {
       item = await repository.findOne({
         id,
         company_id: context.company.id,
@@ -256,14 +256,6 @@ export const getAccessLevel = async (
     if (!item) {
       throw Error("Drive item doesn't exist");
     }
-
-    if (await isCompanyApplication(context)) {
-      if (!id.startsWith("user_") && isMember && item.creator != context.user.id) {
-        return "read";
-      }
-      return "manage";
-    }
-
     /*
      * Specific user or channel rule is applied first. Then less restrictive level will be chosen
      * between the parent folder and company accesses.
