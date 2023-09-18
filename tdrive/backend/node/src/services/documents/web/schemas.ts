@@ -83,6 +83,7 @@ const documentSchema = {
     last_user: { type: "string" },
     attachements: { type: "array" },
     last_version_cache: fileVersionSchema,
+    scope: { type: "string" },
   },
 };
 

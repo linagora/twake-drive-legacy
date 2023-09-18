@@ -172,6 +172,16 @@ export const getAccessLevel = async (
   const isAdmin = !context?.user?.id || (await isCompanyAdmin(context));
   const isMember = !context?.user?.id || (await isCompanyMember(context));
 
+  if (!id || id === "root") {
+    if (!context?.user?.id || (await isCompanyGuest(context))) {
+      return "none";
+    }
+  }
+
+  if (id.startsWith("user_")) {
+    if (await isCompanyApplication(context)) return "read";
+  }
+
   if (context?.user?.id) {
     /**
      * Drive root directories access management
@@ -181,9 +191,8 @@ export const getAccessLevel = async (
 
     if (id === "root") {
       if (isAdmin) return "manage";
-      if (isMember) return "read";
 
-      return "none";
+      return "read";
     }
 
     if (id === "trash") {
@@ -214,33 +223,8 @@ export const getAccessLevel = async (
     if (item.scope === "shared") {
       if (isAdmin) return "manage";
       if (isMember) return "read";
-
-      return "none";
     }
   }
-  /*const isMember = !context?.user?.id || (await isCompanyMember(context));
-  if (!id || id === "root") {
-    if (!context?.user?.id || (await isCompanyGuest(context))) {
-      return "none";
-    } else {
-      if (isMember) return "read";
-      return "manage";
-    }
-  }
-  if (id === "trash")
-    return (await isCompanyGuest(context)) || !context?.user?.id
-      ? "none"
-      : (await isCompanyAdmin(context))
-      ? "manage"
-      : "write";
-  if (id === "shared_with_me") return "read";
-
-  //If it is my personal folder, I have full access
-  if (id.startsWith("user_")) {
-    if (id === "user_" + context.user?.id) return "manage";
-    if (await isCompanyApplication(context)) return "manage";
-    return "none";
-  }*/
 
   let publicToken = context.public_token;
   const prevalidatedPublicTokenDocumentId = context?.user?.public_token_document_id;
@@ -256,6 +240,7 @@ export const getAccessLevel = async (
     if (!item) {
       throw Error("Drive item doesn't exist");
     }
+
     /*
      * Specific user or channel rule is applied first. Then less restrictive level will be chosen
      * between the parent folder and company accesses.

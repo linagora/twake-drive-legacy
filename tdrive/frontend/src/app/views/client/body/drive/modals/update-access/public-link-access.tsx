@@ -111,9 +111,9 @@ const PublicLinkOptions = (props: {
   };
   
 
-  /* useEffect(() => {
+  useEffect(() => {
     props.onChangePassword(usePassword ? password : '');
-  }, [usePassword, password]); */
+  }, [usePassword, password]);
 
   useEffect(() => {
     props.onChangeExpiration(useExpiration ? expiration : 0);
@@ -144,18 +144,6 @@ const PublicLinkOptions = (props: {
             className="max-w-xs"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            onBlur={handlePasswordBlur}
-            // changes password only when press enter
-            onKeyPress={e => {
-              if (e.key === 'Enter') {
-                props.onChangePassword(password);
-                e.preventDefault();
-                if (password) {
-                  copyToClipboard(password);
-                  ToasterService.success(Languages.t('components.public-link-security_password_copied'));
-                }
-              }
-            }}
             // saves and copies password
             onClick={() => {
               if (password) copyToClipboard(password);

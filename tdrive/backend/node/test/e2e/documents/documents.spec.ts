@@ -142,8 +142,8 @@ describe("the Drive feature", () => {
       DriveItemDetailsMockClass,
       listTrashResponse.body,
     );
-
     expect(listTrashResult.item.name).toEqual("Trash");
+    expect(createItemResult).toBeDefined();
     expect(createItemResult.scope).toEqual("shared");
     expect(listTrashResult.children.some(({ id }) => id === createItemResult.id)).toBeTruthy();
   });

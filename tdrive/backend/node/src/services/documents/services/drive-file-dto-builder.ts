@@ -34,6 +34,7 @@ export class DriveFileDTOBuilder {
         "access_info",
         "content_keywords",
         "creator",
+        "scope",
       ],
     ],
     [

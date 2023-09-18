@@ -400,7 +400,7 @@ export class DocumentsService {
         throw Error("content mismatch");
       }
 
-      const updatable = ["access_info", "name", "tags", "parent_id", "description"];
+      const updatable = ["access_info", "name", "tags", "parent_id", "description", "is_in_trash"];
 
       for (const key of updatable) {
         if ((content as any)[key]) {

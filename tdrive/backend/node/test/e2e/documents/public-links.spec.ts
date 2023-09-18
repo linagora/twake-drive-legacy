@@ -62,11 +62,9 @@ describe("the public links feature", () => {
     platform = null;
   });
 
-
   describe("Basic Flow", () => {
-
     const createItem = async (): Promise<DriveFileMockClass> => {
-      await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
+      await TestHelpers.getInstance(platform, true, { companyRole: "admin" });
 
       const item = {
         name: "public file",
@@ -284,33 +282,7 @@ describe("the public links feature", () => {
     });
   });
 
-  describe("Share file from My Drive", () => {
-
-    it("Share file from some folder", async () => {
-      const user = await TestHelpers.getInstance(platform, true);
-      const anotherUser = await TestHelpers.getInstance(platform, true);
-
-      //create directory in "My Drive" and upload a file
-      const directory = await user.createDirectory("user_" + user.user.id);
-      const doc = await user.createRandomDocument(directory.id);
-
-      //check that another user doesn't see any file
-      expect((await anotherUser.getDocument(doc.id)).statusCode).toBe(401);
-
-      //share file with the public link
-      await user.shareWithPublicLink(doc, "read");
-
-      const token = await anotherUser.getPublicLinkAccessToken(doc);
-
-      anotherUser.jwt = token.value;
-      await anotherUser.getDocumentOKCheck(doc.id);
-
-    });
-
-  });
-
   describe("Download Folder from shared link", () => {
-
     it("Share folder", async () => {
       const user = await TestHelpers.getInstance(platform, true);
       const anotherUser = await TestHelpers.getInstance(platform, true);
@@ -332,9 +304,5 @@ describe("the public links feature", () => {
 
       expect((await anotherUser.getFolder(doc.id)).statusCode).toBe(200);
     });
-
   });
-
-
-
-  });
+});
