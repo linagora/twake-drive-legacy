@@ -193,7 +193,7 @@ export class DocumentsService {
                   }
                 : {
                     parent_id: id,
-                    is_in_trash: { $ne: true },
+                    is_in_trash: false,
                   }),
             },
             {},
