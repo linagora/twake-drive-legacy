@@ -5,7 +5,7 @@ import { defer, Subject, throwError, timer } from "rxjs";
 import { concat, delayWhen, retryWhen, take, tap } from "rxjs/operators";
 import { UpsertOptions } from "..";
 import { logger } from "../../../../../../framework";
-import { getEntityDefinition, unwrapIndexes, unwrapPrimarykey } from "../../utils";
+import { getEntityDefinition, unwrapPrimarykey } from "../../utils";
 import { EntityDefinition, ColumnDefinition, ObjectType } from "../../types";
 import { AbstractConnector } from "../abstract-connector";
 import {
@@ -450,22 +450,6 @@ export class CassandraConnector extends AbstractConnector<
   ): Promise<ListResult<Table>> {
     const instance = new (entityType as any)();
     const { columnsDefinition, entityDefinition } = getEntityDefinition(instance);
-
-    const pk = unwrapPrimarykey(entityDefinition);
-    const indexes = unwrapIndexes(entityDefinition);
-
-    if (
-      Object.keys(filters).some(key => pk.indexOf(key) < 0) &&
-      Object.keys(filters).some(key => indexes.indexOf(key) < 0)
-    ) {
-      //Filter not in primary key
-      throw new Error(
-        `All filter parameters must be defined in entity primary key,
-          got: ${JSON.stringify(Object.keys(filters))}
-          on table ${entityDefinition.name} but pk is ${JSON.stringify(pk)},
-          instance was ${JSON.stringify(instance)}`,
-      );
-    }
 
     const query = buildSelectQuery<Table>(
       entityType as unknown as ObjectType<Table>,
