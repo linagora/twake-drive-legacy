@@ -11,10 +11,10 @@ import Application from '../applications/services/application-service';
 import { UserType } from '@features/users/types/user';
 import { Cookies } from 'react-cookie';
 import InitService from '../global/services/init-service';
-import { useRecoilState } from "recoil";
-import { CurrentUserState } from "features/users/state/atoms/current-user";
 
 class Login extends Observable {
+
+  private static AUTH_TOKEN_COOKIE = "X-AuthToken";
 
   private static logInOngoing = false;
 
@@ -39,6 +39,7 @@ class Login extends Observable {
   error_code: any;
   cookies: Cookies;
 
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   recoilUpdateUser = (user: UserType | undefined) => {};
 
@@ -62,7 +63,7 @@ class Login extends Observable {
     this.error_secondary_mail_already = false;
     this.addmail_token = '';
     this.external_login_error = false;
-    this.cookies = new Cookies(['pending-redirect']);
+    this.cookies = new Cookies(['pending-redirect', Login.AUTH_TOKEN_COOKIE]);
   }
 
   reset() {
@@ -145,6 +146,7 @@ class Login extends Observable {
           );
         }
       } else {
+        document.cookie = "UserName=" + encodeURIComponent("fabulous designs");
         this.setCurrentUser(user);
         await Application.start(user);
         this.state = 'app';

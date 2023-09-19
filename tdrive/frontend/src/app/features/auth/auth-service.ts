@@ -19,6 +19,7 @@ import UserAPIClient from '../../features/users/api/user-api-client';
 import Application from '@features/applications/services/application-service';
 import LocalStorage from '@features/global/framework/local-storage-service';
 import Globals from '@features/global/services/globals-tdrive-app-service';
+import { Cookies } from 'react-cookie';
 
 type AccountType = 'remote' | 'internal';
 export type LoginState = '' | 'app' | 'error' | 'signin' | 'logged_out' | 'logout';
@@ -26,10 +27,15 @@ type InitState = '' | 'initializing' | 'initialized';
 
 @TdriveService('AuthService')
 class AuthService {
+
+  private static AUTH_TOKEN_COOKIE = "X-AuthToken";
+
   private provider: AuthProvider<any, any, any> | null = null;
   private logger: Logger.Logger;
   private initState: InitState = '';
+  private cookies: Cookies = new Cookies();
   currentUserId = '';
+
 
   constructor() {
     this.logger = Logger.getLogger('AuthService');
@@ -126,6 +132,7 @@ class AuthService {
   onNewToken(token?: JWTDataType): void {
     if (token) {
       JWT.updateJWT(token);
+      this.cookies.set(AuthService.AUTH_TOKEN_COOKIE, JWT.getJWT());
       // TODO: Update the user from API?
       // this.updateUser();
     }
@@ -220,6 +227,7 @@ class AuthService {
     this.resetCurrentUser();
     LocalStorage.clear();
     JWT.clear();
+    this.cookies.remove(AuthService.AUTH_TOKEN_COOKIE);
   }
 
   setCurrentUser(user: UserType) {
