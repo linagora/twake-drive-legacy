@@ -77,7 +77,7 @@ export function buildSelectQuery<Entity>(
     whereClause.trim().length ? "WHERE " + whereClause : ""
   } ${orderByClause.trim().length ? "ORDER BY " + orderByClause : ""}`
     .trimEnd()
-    .concat(";");
+    .concat(" ALLOW FILTERING;");
 
   return query;
 }
