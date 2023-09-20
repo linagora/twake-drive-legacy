@@ -1,12 +1,12 @@
-import { SearchIcon } from '@heroicons/react/solid';
-import { useEffect, useRef } from 'react';
-import { useRecoilState } from 'recoil';
-import { InputDecorationIcon } from '@atoms/input/input-decoration-icon';
-import { Input } from '@atoms/input/input-text';
-import { Loader } from '@atoms/loader';
-import Languages from '@features/global/services/languages-service';
-import { useSearchDriveItemsLoading } from '@features/search/hooks/use-search-drive-items';
-import { SearchInputState } from '@features/search/state/search-input';
+import { SearchIcon } from "@heroicons/react/solid";
+import { useEffect, useRef } from "react";
+import { useRecoilState } from "recoil";
+import { InputDecorationIcon } from "@atoms/input/input-decoration-icon";
+import { Input } from "@atoms/input/input-text";
+import { Loader } from "@atoms/loader";
+import Languages from "@features/global/services/languages-service";
+import { useSearchDriveItemsLoading } from "@features/search/hooks/use-search-drive-items";
+import { SearchInputState } from "@features/search/state/search-input";
 
 export const SearchInput = () => {
   const [input, setInput] = useRecoilState(SearchInputState);
@@ -16,9 +16,7 @@ export const SearchInput = () => {
     if (inputElement.current) inputElement.current.focus();
   }, []);
 
-  const driveItemsLoading = useSearchDriveItemsLoading();
-
-  const loading = driveItemsLoading;
+  const loading = useSearchDriveItemsLoading();
 
   return (
     <div className="relative flex mt-2 w-full">

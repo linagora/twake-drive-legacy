@@ -111,7 +111,7 @@ export class DriveApiClient {
     );
   }
 
-  static async getDownloadUrl(companyId: string, id: string, versionId?: string) {
+  static getDownloadUrl(companyId: string, id: string, versionId?: string) {
     if (versionId)
       return Api.route(`/internal/services/documents/v1/companies/${companyId}/item/${id}/download?version_id=${versionId}`);
     return Api.route(`/internal/services/documents/v1/companies/${companyId}/item/${id}/download`);
