@@ -1,3 +1,4 @@
+import { isObject } from "lodash";
 import { FindOptions } from "../../repository/repository";
 import { ObjectType } from "../../types";
 import { getEntityDefinition, secureOperators } from "../../utils";
@@ -25,6 +26,10 @@ export function buildSelectQuery<Entity>(
 
       if (!filter) {
         return;
+      }
+      if (isObject(filter)) {
+        result = `${key} IN (NULL, false)`;
+        return result;
       }
 
       if (Array.isArray(filter)) {
