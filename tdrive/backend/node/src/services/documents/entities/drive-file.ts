@@ -9,7 +9,7 @@ export type DriveScope = "personal" | "shared";
 
 @Entity(TYPE, {
   globalIndexes: [["company_id", "parent_id"]],
-  primaryKey: [["company_id"], "id"],
+  primaryKey: [["company_id"], "is_in_trash", "scope", "id"],
   type: TYPE,
   search,
 })

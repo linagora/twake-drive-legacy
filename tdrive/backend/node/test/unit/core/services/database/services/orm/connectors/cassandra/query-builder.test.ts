@@ -17,7 +17,7 @@ describe("The QueryBuilder module", () => {
       const result = buildSelectQuery<DriveFile>(DriveFile, filters, {}, { keyspace: "tdrive" });
 
       expect(result).toEqual(
-        "SELECT * FROM tdrive.drive_files WHERE company_id = comp1 AND parent_id = 'parent1' ALLOW FILTERING;",
+        "SELECT * FROM tdrive.drive_files WHERE company_id = comp1 AND parent_id = 'parent1';",
       );
     });
 
@@ -36,7 +36,7 @@ describe("The QueryBuilder module", () => {
       );
 
       expect(result).toEqual(
-        "SELECT * FROM tdrive.drive_files WHERE company_id = comp1 AND parent_id = 'parent1' AND size < 1000 ALLOW FILTERING;",
+        "SELECT * FROM tdrive.drive_files WHERE company_id = comp1 AND parent_id = 'parent1' AND size < 1000;",
       );
     });
 
@@ -49,7 +49,7 @@ describe("The QueryBuilder module", () => {
       const result = buildSelectQuery<DriveFile>(DriveFile, filters, {}, { keyspace: "tdrive" });
 
       expect(result).toEqual(
-        "SELECT * FROM tdrive.drive_files WHERE company_id = comp1 AND parent_id = 'parent1' AND creator IN (u1,u2,u3) ALLOW FILTERING;",
+        "SELECT * FROM tdrive.drive_files WHERE company_id = comp1 AND parent_id = 'parent1' AND creator IN (u1,u2,u3);",
       );
     });
 
@@ -62,7 +62,7 @@ describe("The QueryBuilder module", () => {
       const result = buildSelectQuery<DriveFile>(DriveFile, filters, {}, { keyspace: "tdrive" });
 
       expect(result).toEqual(
-        "SELECT * FROM tdrive.drive_files WHERE company_id = comp1 AND parent_id = 'parent1' ALLOW FILTERING;",
+        "SELECT * FROM tdrive.drive_files WHERE company_id = comp1 AND parent_id = 'parent1';",
       );
     });
   });
