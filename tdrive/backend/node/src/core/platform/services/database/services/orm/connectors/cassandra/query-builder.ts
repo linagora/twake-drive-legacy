@@ -18,6 +18,7 @@ export function buildSelectQuery<Entity>(
 ): string {
   const instance = new (entityType as any)();
   const { columnsDefinition, entityDefinition } = getEntityDefinition(instance);
+  let allowFiltering = false;
 
   const where = Object.keys(filters)
     .map(key => {
@@ -28,6 +29,7 @@ export function buildSelectQuery<Entity>(
         return;
       }
       if (isObject(filter) && JSON.stringify(filter).includes("ne")) {
+        allowFiltering = true;
         result = `${key} IN (NULL, false)`;
         return result;
       }
@@ -47,6 +49,7 @@ export function buildSelectQuery<Entity>(
 
         result = `${key} IN (${inClause.join(",")})`;
       } else {
+        if (key === "is_in_trash" || key === "scope") allowFiltering = true;
         result = `${key} = ${transformValueToDbString(filter, columnsDefinition[key].type, {
           columns: columnsDefinition[key].options,
           secret: options.secret || "",
@@ -82,7 +85,7 @@ export function buildSelectQuery<Entity>(
     whereClause.trim().length ? "WHERE " + whereClause : ""
   } ${orderByClause.trim().length ? "ORDER BY " + orderByClause : ""}`
     .trimEnd()
-    .concat(";");
+    .concat(allowFiltering ? " ALLOW FILTERING;" : ";");
 
   return query;
 }
