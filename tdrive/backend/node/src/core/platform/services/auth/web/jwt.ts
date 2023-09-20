@@ -21,10 +21,6 @@ const jwtPlugin: FastifyPluginCallback = (fastify, _opts, next) => {
       // TODO  in the future we must invalidate the refresh token (because it should be single use)
     }
 
-    request.log.debug("Got cookies: " + request.cookies.toString());
-
-    request.cookies.toString();
-
     request.currentUser = {
       ...{ email: jwt.email },
       ...{ id: jwt.sub },

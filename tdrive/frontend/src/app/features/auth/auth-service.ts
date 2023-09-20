@@ -28,7 +28,7 @@ type InitState = '' | 'initializing' | 'initialized';
 @TdriveService('AuthService')
 class AuthService {
 
-  private static AUTH_TOKEN_COOKIE = "X-AuthToken";
+  public static AUTH_TOKEN_COOKIE = "X-AuthToken";
 
   private provider: AuthProvider<any, any, any> | null = null;
   private logger: Logger.Logger;
@@ -131,8 +131,9 @@ class AuthService {
 
   onNewToken(token?: JWTDataType): void {
     if (token) {
+      console.log("Save auth token to storage and cookie")
       JWT.updateJWT(token);
-      this.cookies.set(AuthService.AUTH_TOKEN_COOKIE, JWT.getJWT());
+      this.cookies.set(AuthService.AUTH_TOKEN_COOKIE, JWT.getJWT(), { path: "/" });
       // TODO: Update the user from API?
       // this.updateUser();
     }

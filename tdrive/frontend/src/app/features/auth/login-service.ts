@@ -14,8 +14,6 @@ import InitService from '../global/services/init-service';
 
 class Login extends Observable {
 
-  private static AUTH_TOKEN_COOKIE = "X-AuthToken";
-
   private static logInOngoing = false;
 
   // Promise resolved when user is defined
@@ -63,7 +61,7 @@ class Login extends Observable {
     this.error_secondary_mail_already = false;
     this.addmail_token = '';
     this.external_login_error = false;
-    this.cookies = new Cookies(['pending-redirect', Login.AUTH_TOKEN_COOKIE]);
+    this.cookies = new Cookies(['pending-redirect']);
   }
 
   reset() {
@@ -146,7 +144,6 @@ class Login extends Observable {
           );
         }
       } else {
-        document.cookie = "UserName=" + encodeURIComponent("fabulous designs");
         this.setCurrentUser(user);
         await Application.start(user);
         this.state = 'app';
@@ -226,18 +223,6 @@ class Login extends Observable {
     this.userIsSet = new Promise(resolve => (this.resolveUser = resolve));
   }
 
-  getIsPublicAccess() {
-    let publicAccess = false;
-    const viewParameter = WindowState.findGetParameter('view') || '';
-    if (
-      (viewParameter && ['drive_publicAccess'].indexOf(viewParameter) >= 0) ||
-      Globals.store_public_access_get_data
-    ) {
-      publicAccess = true;
-      Globals.store_public_access_get_data = WindowState.allGetParameter();
-    }
-    return publicAccess;
-  }
 }
 
 export default new Login();

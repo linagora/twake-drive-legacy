@@ -134,7 +134,7 @@ class JWTStorage {
       this.logger.debug('authenticateCall: Updating user because the access token expired');
       this.renew()
         .then(() => {
-          LoginService.updateUser(callback);
+          return LoginService.updateUser(callback);
         })
         .catch(async () => {
           this.clear();

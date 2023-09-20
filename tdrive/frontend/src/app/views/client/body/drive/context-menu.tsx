@@ -86,7 +86,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                   downloadZip([item!.id]);
                   console.log(item!.id);
                 } else {
-                  download(item.last_version_cache.file_metadata.external_id);
+                  download(item.id);
                 }
               }
             },
@@ -286,7 +286,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                       downloadZip(idsFromArray);
                     } else if (parent.item) {
                       console.log("Download folder itself");
-                      download(parent.item.last_version_cache.file_metadata.external_id);
+                      download(parent.item.id);
                     } else {
                       console.error("Very strange, everything is null, you are trying to download undefined");
                     }
