@@ -27,7 +27,7 @@ export function buildSelectQuery<Entity>(
       if (!filter) {
         return;
       }
-      if (isObject(filter)) {
+      if (isObject(filter) && JSON.stringify(filter).includes("ne")) {
         result = `${key} IN (NULL, false)`;
         return result;
       }
