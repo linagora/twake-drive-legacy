@@ -8,7 +8,10 @@ export const TYPE = "drive_files";
 export type DriveScope = "personal" | "shared";
 
 @Entity(TYPE, {
-  globalIndexes: [["company_id", "parent_id"]],
+  globalIndexes: [
+    ["company_id", "parent_id"],
+    ["company_id", "is_in_trash"],
+  ],
   primaryKey: [["company_id"], "id"],
   type: TYPE,
   search,

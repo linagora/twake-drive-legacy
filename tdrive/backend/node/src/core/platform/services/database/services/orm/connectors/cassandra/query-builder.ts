@@ -1,7 +1,6 @@
-import { isObject } from "lodash";
 import { FindOptions } from "../../repository/repository";
 import { ObjectType } from "../../types";
-import { getEntityDefinition, secureOperators } from "../../utils";
+import { getEntityDefinition, secureOperators, filteringRequired } from "../../utils";
 import { transformValueToDbString } from "./typeTransforms";
 
 export function buildSelectQuery<Entity>(
@@ -25,13 +24,12 @@ export function buildSelectQuery<Entity>(
       let result: string;
       const filter = filters[key];
 
+      if (filteringRequired(key)) {
+        allowFiltering = true;
+      }
+
       if (!filter) {
         return;
-      }
-      if (isObject(filter) && JSON.stringify(filter).includes("ne")) {
-        allowFiltering = true;
-        result = `${key} IN (NULL, false)`;
-        return result;
       }
 
       if (Array.isArray(filter)) {
@@ -49,7 +47,6 @@ export function buildSelectQuery<Entity>(
 
         result = `${key} IN (${inClause.join(",")})`;
       } else {
-        if (key === "is_in_trash" || key === "scope") allowFiltering = true;
         result = `${key} = ${transformValueToDbString(filter, columnsDefinition[key].type, {
           columns: columnsDefinition[key].options,
           secret: options.secret || "",

@@ -106,3 +106,12 @@ export function toMongoDbOrderable(timeuuid?: string): string {
   const time_str = [uuid_arr[2], uuid_arr[1], uuid_arr[0], uuid_arr[3], uuid_arr[4]].join("-");
   return time_str;
 }
+
+/**
+ * Check if filtering is necessary
+ * @param {string} key
+ * @returns {boolean} Returns true if key is "is_in_trash" or "scope", otherwise returns false.
+ */
+export const filteringRequired = (key: string) => {
+  return key === "is_in_trash" || key === "scope";
+};
