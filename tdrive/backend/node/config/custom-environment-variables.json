@@ -27,7 +27,8 @@
   "websocket": {
     "auth": {
       "jwt": {
-        "secret": "AUTH_JWT_SECRET"
+        "secret": "AUTH_JWT_SECRET",
+        "expiration": "AUTH_JWT_EXPIRATION"
       }
     }
   },
