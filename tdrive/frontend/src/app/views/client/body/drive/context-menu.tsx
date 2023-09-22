@@ -52,7 +52,8 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
       if (!parent || !parent.access) return [];
 
       try {
-        const inTrash = parent.path?.[0]?.id === 'trash';
+        const inTrash = parent.path?.[0]?.id.includes('trash') || item?.scope === 'personal';
+        const isPersonal = item?.scope === 'personal';
         const selectedCount = checked.length;
 
         let menu: any[] = [];
@@ -71,7 +72,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.share'),
-              hide: access === 'read' || getPublicLinkToken(),
+              hide: access === 'read' || getPublicLinkToken() || inTrash,
               onClick: () => setAccessModalState({ open: true, id: item.id }),
             },
             {
@@ -90,13 +91,13 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.manage_access'),
-              hide: access === 'read' || getPublicLinkToken(),
+              hide: access === 'read' || getPublicLinkToken() || inTrash,
               onClick: () => setAccessModalState({ open: true, id: item.id }),
             },
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.move'),
-              hide: access === 'read',
+              hide: access === 'read' || inTrash,
               onClick: () =>
                 setSelectorModalState({
                   open: true,
@@ -119,13 +120,13 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.rename'),
-              hide: access === 'read',
+              hide: access === 'read' || inTrash,
               onClick: () => setPropertiesModalState({ open: true, id: item.id }),
             },
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.copy_link'),
-              hide: !item.access_info.public?.level || item.access_info.public?.level === 'none',
+              hide: !item.access_info.public?.level || item.access_info.public?.level === 'none' || inTrash,
               onClick: () => {
                 copyToClipboard(getPublicLink(item || parent?.item));
                 ToasterService.success(
@@ -136,10 +137,10 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.versions'),
-              hide: item.is_directory,
+              hide: item.is_directory || inTrash,
               onClick: () => setVersionModal({ open: true, id: item.id }),
             },
-            { type: 'separator', hide: access !== 'manage' },
+            { type: 'separator', hide: access !== 'manage' || inTrash, },
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.move_to_trash'),
@@ -151,7 +152,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
               type: 'menu',
               text: Languages.t('components.item_context_menu.restore'),
               className: 'error',
-              hide: !inTrash || access !== 'manage',
+              hide: !inTrash || (access !== 'manage' && !isPersonal),
               onClick: () => restore(item.id, ""),
             },
             {
@@ -248,7 +249,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                   type: 'menu',
                   text: Languages.t('components.item_context_menu.trash.empty'),
                   className: 'error',
-                  hide: parent.item!.id != 'trash' || parent.access !== 'manage',
+                  hide: !inTrash,
                   onClick: () => {
                     setConfirmDeleteModalState({
                       open: true,

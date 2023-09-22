@@ -21,7 +21,7 @@ export type DriveItem = {
   workspace_id: string;
 
   parent_id: string;
-  in_trash: boolean;
+  is_in_trash: boolean;
   is_directory: boolean;
   name: string;
   extension: string;
@@ -35,6 +35,7 @@ export type DriveItem = {
   access_info: DriveItemAccessInfo;
 
   size: number;
+  scope: string;
 };
 
 export type DriveFileAccessLevel = 'none' | 'read' | 'write' | 'manage';

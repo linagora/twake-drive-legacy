@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { PublicIcon } from './components/public-icon';
 import MenusManager from '@components/menus/menus-manager.jsx';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
+import { useDriveItem } from '@features/drive/hooks/use-drive-item';
 import Languages from 'features/global/services/languages-service';
 import { useHistory } from 'react-router-dom';
 import useRouterCompany from '@features/router/hooks/use-router-company';
@@ -124,6 +125,7 @@ const PathItem = ({
 }) => {
   const { user } = useCurrentUser();
   const { viewId } = RouterServices.getStateFromRoute();
+  const { access: trashAccess } = useDriveItem('trash');
   return (
     <div className="flex items-center">
       <a
@@ -153,6 +155,7 @@ const PathItem = ({
               type: 'menu',
               text: Languages.t('components.header_path.shared_trash'),
               onClick: () => onClick('trash'),
+              hide: trashAccess === 'read',
             },
           ];
 
@@ -168,10 +171,11 @@ const PathItem = ({
         }}
       >
         <Title>
-          {viewId?.includes('trash_') && Languages.t('components.header_path.my_trash')}
-          {viewId === 'trash' && Languages.t('components.header_path.shared_trash')}
-          {!viewId?.includes('trash') && (cutFileName(item?.name) || '')}
-        </Title>
+           {viewId?.includes('trash_') && first && Languages.t('components.header_path.my_trash')}
+           {viewId === 'trash' && first && Languages.t('components.header_path.shared_trash')}
+           {(viewId === 'trash' || viewId?.includes('trash_')) && !first && (cutFileName(item?.name) || '')}
+           {!viewId?.includes('trash') && (cutFileName(item?.name) || '')}
+         </Title>
       </a>
       {item?.access_info?.public?.level && item?.access_info?.public?.level !== 'none' && (
         <PublicIcon className="h-5 w-5 ml-2" />

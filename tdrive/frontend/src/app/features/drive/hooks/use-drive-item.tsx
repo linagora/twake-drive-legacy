@@ -93,7 +93,7 @@ export const useDriveItem = (id: string) => {
     [companyId, id, setLoading, refresh, item?.item?.parent_id],
   );
 
-  const inTrash = id === 'trash' || item?.path?.some(i => i.parent_id === 'trash');
+  const inTrash = id.includes('trash') || item?.path?.some(i => i?.parent_id === 'trash') || item?.item?.is_in_trash;
   const sharedWithMe = id =="shared_with_me";
 
   return {

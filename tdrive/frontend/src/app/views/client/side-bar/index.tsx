@@ -113,7 +113,7 @@ export default () => {
           onClick={() =>{history.push(RouterServices.generateRouteFromState({companyId: company, viewId: 'trash_'+user?.id}));setParentId('trash_'+user?.id)}}
           size="lg"
           theme="white"
-          className={'w-full mb-1 ' + (folderType === 'trash' && viewId == ''? activeClass : '')}
+          className={'w-full mb-1 ' + (viewId?.includes("trash")? activeClass : '')}
         >
           <TrashIcon className="w-5 h-5 mr-4 text-rose-500" /> {Languages.t('components.side_menu.trash')}
         </Button>
