@@ -13,6 +13,7 @@ import { CreateModal, CreateModalAtom } from '../body/drive/modals/create';
 import { Button } from '@atoms/button/button';
 import Languages from "features/global/services/languages-service";
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
+import RouterServices from '@features/router/services/router-service';
 
 export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentId?: string }) => {
   const companyId = useRouterCompany();
@@ -24,8 +25,6 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
   const [parentId, _] = useRecoilState(
     DriveCurrentFolderAtom({ initialFolderId: initialParentId || 'user_'+user?.id }),
   );
-
-  console.log("Upload Zone:: " + parentId);
 
   return (
     <>
@@ -82,11 +81,13 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
 export default () => {
   const { user } = useCurrentUser();
   const [parentId, _] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id  }));
-  const { access, item, inTrash } = useDriveItem(parentId);
+  const { access, item } = useDriveItem(parentId);
   const { children: trashChildren } = useDriveItem('trash');
   const uploadZoneRef = useRef<UploadZone | null>(null);
   const { uploadTree } = useDriveUpload();
   const companyId = useRouterCompany();
+  const { viewId } = RouterServices.getStateFromRoute();
+  const inTrash = viewId?.includes("trash");
 
   const setConfirmDeleteModalState = useSetRecoilState(ConfirmDeleteModalAtom);
   const setCreationModalState = useSetRecoilState(CreateModalAtom);

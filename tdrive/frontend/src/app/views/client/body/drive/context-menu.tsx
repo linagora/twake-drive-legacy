@@ -19,6 +19,7 @@ import { ToasterService } from '@features/global/services/toaster-service';
 import { copyToClipboard } from '@features/global/utils/CopyClipboard';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
 import { getCurrentUserList } from '@features/users/hooks/use-user-list';
+import useRouteState from 'app/features/router/hooks/use-route-state';
 import _ from 'lodash';
 import Languages from 'features/global/services/languages-service';
 
@@ -43,6 +44,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
   const setPropertiesModalState = useSetRecoilState(PropertiesModalAtom);
   const setUsersModalState = useSetRecoilState(UsersModalAtom);
   const { open: preview } = useDrivePreview();
+  const { viewId } = useRouteState();
   function getIdsFromArray(arr: DriveItem[]): string[] {
     return arr.map((obj) => obj.id);
   }
@@ -52,7 +54,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
       if (!parent || !parent.access) return [];
 
       try {
-        const inTrash = parent.path?.[0]?.id.includes('trash') || item?.scope === 'personal';
+        const inTrash = parent.path?.[0]?.id.includes('trash') || viewId?.includes("trash");
         const isPersonal = item?.scope === 'personal';
         const selectedCount = checked.length;
 

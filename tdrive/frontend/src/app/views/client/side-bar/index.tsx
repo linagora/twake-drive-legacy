@@ -68,15 +68,15 @@ export default () => {
         <div className="mt-4" />
         <Title>Drive</Title>
         <Button
-          onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: 'user_' + user?.id})); setParentId('user_' + user?.id)}}
+          onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: 'user_' + user?.id, itemId: ''})); setParentId('user_' + user?.id)}}
           size="lg"
           theme="white"
-          className={'w-full mb-1 ' + (folderType === 'personal' && (viewId == '' || 'user_' + user?.id) ? activeClass : '')}
+          className={'w-full mb-1 ' + (folderType === 'personal' && (viewId == '' || viewId == 'user_' + user?.id) ? activeClass : '')}
         >
           <UserIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.my_drive')}
         </Button>
         <Button
-          onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "root"})); setParentId('root')}}
+          onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "root", itemId: ''})); setParentId('root')}}
           size="lg"
           theme="white"
           className={'w-full mb-1 ' + (folderType === 'home' && viewId == 'root' ? activeClass : '')}
@@ -84,7 +84,7 @@ export default () => {
           <CloudIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.home')}
         </Button>
         <Button
-          onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "shared_with_me"})); setParentId('shared_with_me')}}
+          onClick={() => {history.push(RouterServices.generateRouteFromState({companyId: company, viewId: "shared_with_me", itemId: ''})); setParentId('shared_with_me')}}
           size="lg"
           theme="white"
           className={'w-full mb-1 ' + (folderType === 'shared' && viewId == 'shared_with_me'? activeClass : '')}
@@ -110,7 +110,7 @@ export default () => {
           </>
         )}
         <Button
-          onClick={() =>{history.push(RouterServices.generateRouteFromState({companyId: company, viewId: 'trash_'+user?.id}));setParentId('trash_'+user?.id)}}
+          onClick={() =>{history.push(RouterServices.generateRouteFromState({companyId: company, viewId: 'trash_'+user?.id, itemId: ''}));setParentId('trash_'+user?.id)}}
           size="lg"
           theme="white"
           className={'w-full mb-1 ' + (viewId?.includes("trash")? activeClass : '')}
