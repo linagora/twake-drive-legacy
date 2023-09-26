@@ -11,8 +11,6 @@ import Application from '../applications/services/application-service';
 import { UserType } from '@features/users/types/user';
 import { Cookies } from 'react-cookie';
 import InitService from '../global/services/init-service';
-import { useRecoilState } from "recoil";
-import { CurrentUserState } from "features/users/state/atoms/current-user";
 
 class Login extends Observable {
 
@@ -38,6 +36,7 @@ class Login extends Observable {
   parsed_error_code: any;
   error_code: any;
   cookies: Cookies;
+
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   recoilUpdateUser = (user: UserType | undefined) => {};
@@ -224,18 +223,6 @@ class Login extends Observable {
     this.userIsSet = new Promise(resolve => (this.resolveUser = resolve));
   }
 
-  getIsPublicAccess() {
-    let publicAccess = false;
-    const viewParameter = WindowState.findGetParameter('view') || '';
-    if (
-      (viewParameter && ['drive_publicAccess'].indexOf(viewParameter) >= 0) ||
-      Globals.store_public_access_get_data
-    ) {
-      publicAccess = true;
-      Globals.store_public_access_get_data = WindowState.allGetParameter();
-    }
-    return publicAccess;
-  }
 }
 
 export default new Login();

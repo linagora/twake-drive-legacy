@@ -31,12 +31,10 @@ class Requests {
         .then(response => {
           if (options.withBlob) {
             response.blob().then(blob => {
-              this.retrieveJWTToken(JSON.stringify(blob));
               callback && callback(blob);
             });
           } else {
             response.text().then(text => {
-              if (text) this.retrieveJWTToken(text);
               callback && callback(text);
             });
           }
@@ -53,17 +51,6 @@ class Requests {
       options.disableJWTAuthentication = true;
       this.request(type, route, data, callback, options);
     });
-  }
-
-  retrieveJWTToken(rawBody: string) {
-    try {
-      const body = JSON.parse(rawBody);
-      if (body.access_token) {
-        JWTStorage.updateJWT(body.access_token);
-      }
-    } catch (err) {
-      console.error('Error while reading jwt tokens from: ' + rawBody, err);
-    }
   }
 }
 

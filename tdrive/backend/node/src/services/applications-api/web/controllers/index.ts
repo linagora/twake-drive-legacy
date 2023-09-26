@@ -8,18 +8,19 @@ import {
   RealtimeBaseBusEvent,
 } from "../../../../core/platform/services/realtime/types";
 import { ResourceGetResponse } from "../../../../utils/types";
-import { getInstance } from "../../../user/entities/user";
 import {
   ApplicationObject,
   getApplicationObject,
 } from "../../../applications/entities/application";
 import gr from "../../../global-resolver";
+import { logger } from "../../../../core/platform/framework/logger";
 import {
   ApplicationApiExecutionContext,
   ApplicationLoginRequest,
   ApplicationLoginResponse,
   ConfigureRequest,
 } from "../types";
+import { ConsoleHookUser } from "src/services/console/types";
 
 export class ApplicationsApiController {
   async token(
@@ -171,45 +172,18 @@ export class ApplicationsApiController {
         email: string;
         first_name: string;
         last_name: string;
-        application_id: string;
-        company_id: string;
       };
     }>,
   ): Promise<any> {
-    const email = request.body.email.trim().toLocaleLowerCase();
-    const checkApplication = gr.services.applications.companyApps.get({
-      application_id: request.body.application_id,
-      company_id: request.body.company_id,
-    });
-
-    if (!checkApplication) {
-      throw new Error("Application is not allowed to sync users for this company.");
-    }
-
-    if (await gr.services.users.getByEmail(email)) {
-      throw new Error("This email is already used");
-    }
-
     try {
-      const newUser = getInstance({
-        first_name: request.body.first_name,
-        last_name: request.body.last_name,
-        email_canonical: email,
-        username_canonical: (email.replace("@", ".") || "").toLocaleLowerCase(),
-        phone: "",
-        identity_provider: "console",
-        identity_provider_id: email,
-        mail_verified: true,
-      });
-      const user = await gr.services.users.create(newUser);
-
-      await gr.services.companies.setUserRole(request.body.company_id, user.entity.id, "admin");
-
-      await gr.services.users.save(user.entity, {
-        user: { id: user.entity.id, server_request: true },
-      });
+      await gr.services.console.getClient().updateLocalUserFromConsole({
+        email: request.body.email.trim().toLocaleLowerCase(),
+        name: request.body.first_name,
+        surname: request.body.last_name,
+      } as ConsoleHookUser);
     } catch (err) {
-      throw new Error("An unknown error occured");
+      logger.error(err);
+      throw err;
     }
     return {};
   }

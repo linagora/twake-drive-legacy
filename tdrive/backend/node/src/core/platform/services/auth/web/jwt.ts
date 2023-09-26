@@ -1,12 +1,18 @@
 import { FastifyPluginCallback, FastifyRequest } from "fastify";
 import fastifyJwt from "fastify-jwt";
+import cookie from "@fastify/cookie";
 import fp from "fastify-plugin";
 import config from "../../../../config";
 import { JwtType } from "../../types";
 
 const jwtPlugin: FastifyPluginCallback = (fastify, _opts, next) => {
+  fastify.register(cookie);
   fastify.register(fastifyJwt, {
     secret: config.get("auth.jwt.secret"),
+    cookie: {
+      cookieName: "X-AuthToken",
+      signed: false,
+    },
   });
 
   const authenticate = async (request: FastifyRequest) => {

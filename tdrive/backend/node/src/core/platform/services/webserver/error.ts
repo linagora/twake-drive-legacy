@@ -9,7 +9,7 @@ function serverErrorHandler(server: FastifyInstance): void {
         ? {
             statusCode: reply.statusCode,
             error: "Internal Server Error",
-            message: "Something went wrong",
+            message: "Something went wrong, " + err.message,
             requestId: request.id,
           }
         : err,

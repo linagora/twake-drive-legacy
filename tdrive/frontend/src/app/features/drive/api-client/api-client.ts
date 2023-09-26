@@ -118,22 +118,10 @@ export class DriveApiClient {
     );
   }
 
-  static async getDownloadToken(companyId: string, ids: string[], versionId?: string) {
-    return Api.get<{ token: string }>(
-      `/internal/services/documents/v1/companies/${companyId}/item/download/token` +
-        `?items=${ids.join(',')}&version_id=${versionId}` +
-        appendTdriveToken(true),
-    );
-  }
-
-  static async getDownloadUrl(companyId: string, id: string, versionId?: string) {
+  static getDownloadUrl(companyId: string, id: string, versionId?: string) {
     if (versionId)
-      return Api.route(
-        `/internal/services/files/v1/companies/${companyId}/files/${id}/download?version_id=${versionId}`,
-      );
-    return Api.route(
-      `/internal/services/files/v1/companies/${companyId}/files/${id}/download`,
-    );
+      return Api.route(`/internal/services/documents/v1/companies/${companyId}/item/${id}/download?version_id=${versionId}`);
+    return Api.route(`/internal/services/documents/v1/companies/${companyId}/item/${id}/download`);
   }
 
   static async getDownloadZipUrl(companyId: string, ids: string[]) {

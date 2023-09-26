@@ -20,6 +20,8 @@ import { copyToClipboard } from '@features/global/utils/CopyClipboard';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
 import { getCurrentUserList } from '@features/users/hooks/use-user-list';
 import useRouteState from 'app/features/router/hooks/use-route-state';
+import RouterServices from '@features/router/services/router-service';
+import useRouterCompany from '@features/router/hooks/use-router-company';
 import _ from 'lodash';
 import Languages from 'features/global/services/languages-service';
 
@@ -45,6 +47,8 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
   const setUsersModalState = useSetRecoilState(UsersModalAtom);
   const { open: preview } = useDrivePreview();
   const { viewId } = useRouteState();
+  const company = useRouterCompany();
+  
   function getIdsFromArray(arr: DriveItem[]): string[] {
     return arr.map((obj) => obj.id);
   }
@@ -85,8 +89,20 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                   downloadZip([item!.id]);
                   console.log(item!.id);
                 } else {
-                  download(item.last_version_cache.file_metadata.external_id);
+                  download(item.id);
                 }
+              }
+            },
+            { type: 'separator' },
+            {
+              type: 'menu',
+              text: Languages.t('components.item_context_menu.open_new_window'),
+              onClick: () => {
+                const itemId = !item.is_directory ? item.id : "";
+                const viewId = item.is_directory ? item.id : item.parent_id;
+                const route = RouterServices.generateRouteFromState({ companyId: company, viewId, itemId });
+                window.open(route, '_blank');
+                window.open(route, '_blank');
               }
             },
             { type: 'separator' },
@@ -280,7 +296,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                       downloadZip(idsFromArray);
                     } else if (parent.item) {
                       console.log("Download folder itself");
-                      download(parent.item.last_version_cache.file_metadata.external_id);
+                      download(parent.item.id);
                     } else {
                       console.error("Very strange, everything is null, you are trying to download undefined");
                     }

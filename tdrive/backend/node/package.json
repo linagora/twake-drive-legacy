@@ -105,6 +105,7 @@
     "@fastify/caching": "^7.0.0",
     "@fastify/formbody": "^6.0.0",
     "@fastify/static": "^5.0.1",
+    "@fastify/cookie": "^6.0.0",
     "@ffprobe-installer/ffprobe": "^1.4.1",
     "@sentry/node": "^6.19.7",
     "@sentry/tracing": "^6.19.7",

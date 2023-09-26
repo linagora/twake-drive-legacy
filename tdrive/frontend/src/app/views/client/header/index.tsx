@@ -2,21 +2,30 @@ import { MenuIcon } from '@heroicons/react/outline';
 import Account from '../common/account';
 import AppGrid from '../common/app-grid';
 import Search from '../common/search';
+import { Info } from "@atoms/text";
+import version from '../../../environment/version';
 
 export default ({ openSideMenu }: { openSideMenu: () => void }) => {
   return (
     <div className="bg-white dark:bg-zinc-900 h-16 sm:h-20 p-4 sm:p-6 flex space-between items-center">
       <div className="sm:block hidden shrink-0 w-1/6 max-w-xs" style={{ minWidth: 100 }}>
-        <img
-          src="/public/img/logo/logo-text-black.png"
-          className="h-6 ml-1 dark:hidden block"
-          alt="Tdrive"
-        />
-        <img
-          src="/public/img/logo/logo-text-white.png"
-          className="h-6 ml-1 dark:block hidden"
-          alt="Tdrive"
-        />
+        <div className="sm:inline-grid">
+          <img
+            src="/public/img/logo/logo-text-black.png"
+            className="h-6 ml-1 dark:hidden block"
+            alt="Tdrive"
+          />
+          <img
+            src="/public/img/logo/logo-text-white.png"
+            className="h-6 ml-1 dark:block hidden"
+            alt="Tdrive"
+          />
+        </div>
+        <div className="sm:inline-grid">
+          <Info className="font-bold overflow-hidden text-ellipsis whitespace-nowrap w-full block -mb-1">
+            &nbsp;v{version.version}
+          </Info>
+        </div>
       </div>
       <div
         onClick={() => openSideMenu()}

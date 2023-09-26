@@ -16,6 +16,8 @@ import { ToasterService } from 'app/features/global/services/toaster-service';
 import { useParams } from 'react-router-dom';
 import shortUUID from 'short-uuid';
 import Avatar from '../../../../atoms/avatar';
+import AuthService from '@features/auth/auth-service';
+
 import {
   DriveApiClient,
   setPublicLinkToken,
@@ -122,12 +124,11 @@ const AccessChecker = ({
         throw new Error('Invalid password or token, or expired link.');
       }
 
-      JWTStorage.updateJWT(access_token);
+      AuthService.onNewToken(access_token);
 
-      //Everything alright, load the drive
       setAccessGranted(true);
-      refresh(folderId);
-      refreshApplications();
+      await refresh(folderId);
+      await refreshApplications();
     } catch (e) {
       console.error(e);
       ToasterService.error('Unable to access documents: ' + e);

@@ -48,12 +48,14 @@ export const useDriveUpload = () => {
     const filesPerParentId: { [key: string]: File[] } = {};
 
     // Create all directories
+    console.debug("Start creating directories ...");
     const createDirectories = async (tree: FileTreeObject['tree'], parentId: string) => {
       for (const directory of Object.keys(tree)) {
         if (tree[directory] instanceof File) {
           if (!filesPerParentId[parentId]) filesPerParentId[parentId] = [];
           filesPerParentId[parentId].push(tree[directory] as File);
         } else {
+          console.debug(`Create directory ${directory}`);
           const driveItem = await create(
             {
               company_id: context.companyId,
@@ -63,6 +65,7 @@ export const useDriveUpload = () => {
             },
             {},
           );
+          console.debug(`Directory ${directory} created`);
           if (driveItem?.id) {
             await createDirectories(tree[directory] as FileTreeObject['tree'], driveItem.id);
           } else {
@@ -72,10 +75,11 @@ export const useDriveUpload = () => {
       }
     };
     await createDirectories(tree.tree, context.parentId);
+    console.debug("All directories created");
 
     // Upload files into directories
     for (const parentId of Object.keys(filesPerParentId)) {
-      FileUploadService.upload(filesPerParentId[parentId], {
+      await FileUploadService.upload(filesPerParentId[parentId], {
         context: {
           companyId: context.companyId,
           parentId: parentId,

@@ -317,6 +317,7 @@
     "components.item_context_menu.today": "Today",
     "components.item_context_menu.last_week": "Last week",
     "components.item_context_menu.last_month": "Last month",
+    "components.item_context_menu.open_new_window": "Open in new window",
     "scenes.app.shared_with_me.shared_with_me": "Shared with me",
     "scenes.app.shared_with_me.file_type": "File type",
     "scenes.app.shared_with_me.people": "People",

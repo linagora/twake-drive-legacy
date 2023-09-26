@@ -21,27 +21,6 @@ export const useUpload = () => {
     if (companyId) FileUploadService.deleteOneFile({ companyId, fileId: id });
   };
 
-  const downloadOneFile = ({
-    companyId,
-    fileId,
-    blob,
-  }: {
-    companyId: string;
-    fileId: string;
-    blob?: boolean;
-  }) => {
-    if (blob) {
-      return FileUploadService.download({ companyId, fileId });
-    }
-
-    const url = FileUploadService.getDownloadRoute({
-      companyId,
-      fileId,
-    });
-
-    url && (window.location.href = url);
-  };
-
   const retryUpload = (id: string) => FileUploadService.retry(id);
 
   return {
@@ -51,7 +30,6 @@ export const useUpload = () => {
     getOnePendingFile,
     currentTask,
     deleteOneFile,
-    downloadOneFile,
     retryUpload,
   };
 };

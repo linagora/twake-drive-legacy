@@ -1,0 +1,15 @@
+name: ldap-sync-build
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "tdrive/backend/utils/**"
+
+jobs:
+  ldap-sync-build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build ldap sync
+        run: cd tdrive/backend/utils/ldap-sync && npm i && npm run build
