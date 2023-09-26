@@ -21,7 +21,7 @@ export class Configuration implements TdriveServiceConfiguration {
       if (name) {
         value =
           this.serviceConfiguration &&
-          (this.serviceConfiguration.get(name) || configuration.get(name));
+          (this.serviceConfiguration.get<T>(name) || configuration.get<T>(name));
       }
     } catch {
       value = defaultValue || null;

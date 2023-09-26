@@ -3,7 +3,7 @@ import { Stream, Readable } from "stream";
 import Multistream from "multistream";
 import { Consumes, logger, TdriveService } from "../../framework";
 import LocalConnectorService, { LocalConfiguration } from "./connectors/local/service";
-import S3ConnectorService, { S3Configuration } from "./connectors/S3/service";
+import S3ConnectorService from "./connectors/S3/service";
 import StorageAPI, {
   DeleteOptions,
   ReadOptions,
@@ -37,7 +37,15 @@ export default class StorageService extends TdriveService<StorageAPI> implements
     const type = this.getConnectorType();
     if (type === "S3") {
       logger.info("Using 'S3' connector for storage.");
-      return new S3ConnectorService(this.configuration.get<S3Configuration>("S3"));
+      return new S3ConnectorService({
+        bucket: this.configuration.get<string>("S3.bucket"),
+        region: this.configuration.get<string>("S3.region"),
+        endPoint: this.configuration.get<string>("S3.endPoint"),
+        port: Number(this.configuration.get<number>("S3.port")),
+        useSSL: Boolean(this.configuration.get<boolean>("S3.useSSL")),
+        accessKey: this.configuration.get<string>("S3.accessKey"),
+        secretKey: this.configuration.get<string>("S3.secretKey"),
+      });
     }
     logger.info(
       `Using 'local' connector for storage${

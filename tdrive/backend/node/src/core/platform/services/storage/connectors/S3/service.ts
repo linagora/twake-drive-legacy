@@ -3,14 +3,22 @@ import { logger } from "../../../../../../core/platform/framework";
 import { Readable } from "stream";
 import { StorageConnectorAPI, WriteMetadata } from "../../provider";
 
-export type S3Configuration = Minio.ClientOptions & { bucket: string };
+export type S3Configuration = {
+  bucket: string;
+  region: string;
+  endPoint: string;
+  port: number;
+  useSSL: boolean;
+  accessKey: string;
+  secretKey: string;
+};
 
 export default class S3ConnectorService implements StorageConnectorAPI {
   client: Minio.Client;
   minioConfiguration: S3Configuration;
 
   constructor(S3Configuration: S3Configuration) {
-    this.client = new Minio.Client({ ...S3Configuration });
+    this.client = new Minio.Client(S3Configuration);
     this.minioConfiguration = S3Configuration;
   }
 
