@@ -23,6 +23,7 @@ export default class StorageService extends TdriveService<StorageAPI> implements
 
   private encryptionOptions: EncryptionConfiguration;
   private algorithm = "aes-256-cbc";
+  private homeDir = "tdrive";
 
   api(): StorageAPI {
     return this;
@@ -37,6 +38,7 @@ export default class StorageService extends TdriveService<StorageAPI> implements
     const type = this.getConnectorType();
     if (type === "S3") {
       logger.info("Using 'S3' connector for storage.");
+      this.homeDir = this.configuration.get<string>("S3.bucket");
       return new S3ConnectorService({
         bucket: this.configuration.get<string>("S3.bucket"),
         region: this.configuration.get<string>("S3.region"),
@@ -54,6 +56,10 @@ export default class StorageService extends TdriveService<StorageAPI> implements
       type,
     );
     return new LocalConnectorService(this.configuration.get<LocalConfiguration>("local"));
+  }
+
+  getHomeDir(): string {
+    return this.homeDir;
   }
 
   async write(path: string, stream: Stream, options?: WriteOptions): Promise<WriteMetadata> {

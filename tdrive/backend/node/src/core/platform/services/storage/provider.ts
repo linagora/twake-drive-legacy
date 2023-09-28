@@ -54,4 +54,5 @@ export interface StorageConnectorAPI {
 export default interface StorageAPI extends TdriveServiceProvider, StorageConnectorAPI {
   getConnector(): StorageConnectorAPI;
   getConnectorType(): string;
+  getHomeDir(): string;
 }

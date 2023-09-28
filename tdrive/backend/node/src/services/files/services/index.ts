@@ -311,5 +311,7 @@ export class FileServiceImpl {
 }
 
 function getFilePath(entity: File): string {
-  return `/tdrive/files/${entity.company_id}/${entity.user_id || "anonymous"}/${entity.id}`;
+  return `/${gr.platformServices.storage.getHomeDir()}/files/${entity.company_id}/${
+    entity.user_id || "anonymous"
+  }/${entity.id}`;
 }
