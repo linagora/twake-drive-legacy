@@ -579,3 +579,26 @@ export function isFileType(
   const fileExtensions = [extension, ...secondaryExtensions];
   return fileExtensions.some(e => requiredExtensions.includes(e));
 }
+
+export const isInTrash = async (
+  item: DriveFile,
+  repository: Repository<DriveFile>,
+  context: CompanyExecutionContext,
+) => {
+  if (item.is_in_trash === true) {
+    return true;
+  }
+
+  if (isVirtualFolder(item.parent_id)) {
+    return false; // Stop condition
+  }
+
+  // Retrieve the parent item
+  const parentItem = await repository.findOne({
+    company_id: context.company.id,
+    id: item.parent_id,
+  });
+
+  // Recursively check the parent item
+  return isInTrash(parentItem, repository, context);
+};

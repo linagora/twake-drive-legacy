@@ -40,6 +40,7 @@ import {
   isSharedWithMeFolder,
   isVirtualFolder,
   updateItemSize,
+  isInTrash,
 } from "../utils";
 import {
   checkAccess,
@@ -633,8 +634,17 @@ export class DocumentsService {
       throw new CrudException("User does not have access to this item or its children", 401);
     }
 
-    // Restore item
-    item.is_in_trash = false;
+    if (isInTrash(item, this.repository, context)) {
+      if (item.is_in_trash != true) {
+        if (item.scope === "personal") {
+          item.parent_id = "user_" + context.user.id;
+        } else {
+          item.parent_id = "root";
+        }
+      } else {
+        item.is_in_trash = false;
+      }
+    }
     this.repository.save(item);
 
     this.notifyWebsocket("trash", context);

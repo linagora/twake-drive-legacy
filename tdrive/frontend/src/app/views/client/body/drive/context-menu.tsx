@@ -171,13 +171,16 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
               text: Languages.t('components.item_context_menu.restore'),
               className: 'error',
               hide: !inTrash || (access !== 'manage' && !isPersonal),
-              onClick: () => restore(item.id, ""),
+              onClick: () => {
+                const parentId = item.is_in_trash ? viewId || '' : item.parent_id;
+                restore(item.id, parentId);
+              },
             },
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.delete'),
               className: 'error',
-              hide: !inTrash || access !== 'manage',
+              hide: inTrash || access !== 'manage',
               onClick: () => setConfirmDeleteModalState({ open: true, items: [item] }),
             },
           ];

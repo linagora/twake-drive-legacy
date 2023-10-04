@@ -113,13 +113,6 @@ export default memo(
       [_setParentId],
     );
 
-    
-
-    //In case we are kicked out of the current folder, we need to reset the parent id
-    useEffect(() => {
-      if (!loading && !path?.length && !inPublicSharing && !sharedWithMe) setParentId('user_'+user?.id);
-    }, [path, loading, setParentId]);
-
     useEffect(() => {
       setChecked({});
       refresh(parentId);
