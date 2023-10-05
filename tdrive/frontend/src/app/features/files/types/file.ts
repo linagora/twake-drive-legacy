@@ -66,14 +66,20 @@ export type PendingFileRecoilType = {
   file: FileType | null;
 };
 
+/**
+ * It could be not only a file, but also a task with creating folders
+ */
 export type PendingFileType = {
+  type: "file" | "folder"
   resumable: typeof Resumable | null; //Contain the resumable instance in charge of this file
   uploadTaskId: string;
   id: string;
   status: 'pending' | 'error' | 'success' | 'pause' | 'cancel';
   progress: number; //Between 0 and 1
-  originalFile: File; //Will be used to get filename, temporary thumbnail
+  originalFile: File | null; //Will be used to get filename, temporary thumbnail
   backendFile: FileType | null; //Will contain the final object returned by API
   lastProgress: number;
   speed: number;
+  label: string | null;
+  pausable: boolean;
 };

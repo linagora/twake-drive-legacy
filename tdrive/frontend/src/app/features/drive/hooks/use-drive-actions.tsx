@@ -10,7 +10,6 @@ import Languages from 'features/global/services/languages-service';
 
 /**
  * Returns the children of a drive item
- * @param id
  * @returns
  */
 export const useDriveActions = () => {
@@ -47,11 +46,12 @@ export const useDriveActions = () => {
 
   const create = useCallback(
     async (item: Partial<DriveItem>, version: Partial<DriveItemVersion>) => {
+      if (!item || !version) throw new Error("All ");
       let driveFile = null;
       if (!item.company_id) item.company_id = companyId;
       try {
         driveFile = await DriveApiClient.create(companyId, { item, version });
-        await refresh(item.parent_id!);
+        await refresh(driveFile.parent_id!);
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_create_file'));
       }
@@ -63,7 +63,7 @@ export const useDriveActions = () => {
   const download = useCallback(
     async (id: string, versionId?: string) => {
       try {
-        const url = await DriveApiClient.getDownloadUrl(companyId, id, versionId);
+        const url = DriveApiClient.getDownloadUrl(companyId, id, versionId);
         (window as any).open(url, '_blank').focus();
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_download_file'));

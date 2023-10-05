@@ -22,7 +22,6 @@ import Globals from '@features/global/services/globals-tdrive-app-service';
 import { Cookies } from 'react-cookie';
 
 type AccountType = 'remote' | 'internal';
-export type LoginState = '' | 'app' | 'error' | 'signin' | 'logged_out' | 'logout';
 type InitState = '' | 'initializing' | 'initialized';
 
 @TdriveService('AuthService')
@@ -131,11 +130,13 @@ class AuthService {
 
   onNewToken(token?: JWTDataType): void {
     if (token) {
-      console.log("Save auth token to storage and cookie")
+      this.logger.info("Save auth token to storage and cookie")
       JWT.updateJWT(token);
       this.cookies.set(AuthService.AUTH_TOKEN_COOKIE, JWT.getJWT(), { path: "/" });
       // TODO: Update the user from API?
       // this.updateUser();
+    } else {
+      this.logger.warn("Try to initialize storage with empty access token")
     }
   }
 

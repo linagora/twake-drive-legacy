@@ -67,7 +67,7 @@ export default ({ pendingFileState, pendingFile }: PropsType) => {
         }}
       >
         <Col className="small-left-margin" flex="auto" style={{ lineHeight: '16px' }}>
-          {pendingFile?.originalFile.name ? (
+          {pendingFile?.originalFile?.name ? (
             <Row justify="start" align="middle" wrap={false}>
               <Text
                 ellipsis
@@ -84,6 +84,29 @@ export default ({ pendingFileState, pendingFile }: PropsType) => {
                   (paused)
                 </Text>
               )}
+            </Row>
+          ) : (
+            <div
+              style={{
+                marginTop: 8,
+                height: 8,
+                maxWidth: 160,
+                borderRadius: 8,
+                backgroundColor: 'var(--grey-background)',
+              }}
+            />
+          )}
+          {pendingFile?.label ? (
+            <Row justify="start" align="middle" wrap={false}>
+              <Text
+                ellipsis
+                style={{
+                  maxWidth: isPendingFileStatusPause(pendingFile.status) ? 130 : 160,
+                  verticalAlign: 'middle',
+                }}
+              >
+                {pendingFile?.label}
+              </Text>
             </Row>
           ) : (
             <div

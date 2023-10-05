@@ -10,6 +10,8 @@ import RouterServices from '@features/router/services/router-service';
 import _ from 'lodash';
 import FileUploadAPIClient from '../api/file-upload-api-client';
 import { isPendingFileStatusPending } from '../utils/pending-files';
+import { FileTreeObject } from "components/uploads/file-tree-utils";
+import { DriveApiClient } from "features/drive/api-client/api-client";
 
 export enum Events {
   ON_CHANGE = 'notify',
@@ -20,6 +22,7 @@ class FileUploadService {
   private pendingFiles: PendingFileType[] = [];
   public currentTaskId = '';
   private recoilHandler: Function = () => undefined;
+  private logger: Logger.Logger = Logger.getLogger('FileUploadService');
 
   setRecoilHandler(handler: Function) {
     this.recoilHandler = handler;
@@ -37,6 +40,69 @@ class FileUploadService {
     this.recoilHandler(_.cloneDeep(updatedState));
   }
 
+  public async createDirectories(root: FileTreeObject['tree'], context: { companyId: string; parentId: string }) {
+    // Create all directories
+    const filesPerParentId: { [key: string]: File[] } = {};
+    filesPerParentId[context.parentId] = []
+
+    const traverserTreeLevel = async (tree: FileTreeObject['tree'], parentId: string) => {
+      for (const directory of Object.keys(tree)) {
+        if (tree[directory] instanceof File) {
+          logger.trace(`${directory} is a file, save it for future upload`);
+          filesPerParentId[parentId].push(tree[directory] as File);
+        } else {
+          logger.debug(`Create directory ${directory}`);
+
+          const item = {
+            company_id: context.companyId,
+            parent_id: parentId,
+            name: directory,
+            is_directory: true,
+          };
+
+          if (!this.pendingFiles.some(f => isPendingFileStatusPending(f.status))) {
+            //New upload task when all previous task is finished
+            this.currentTaskId = uuid();
+          }
+          const pendingFile: PendingFileType = {
+            id: uuid(),
+            status: 'pending',
+            progress: 0,
+            lastProgress: new Date().getTime(),
+            speed: 0,
+            uploadTaskId: this.currentTaskId,
+            originalFile: null,
+            backendFile: null,
+            resumable: null,
+            label: directory,
+            type: "file",
+            pausable: false,
+          };
+
+          this.pendingFiles.push(pendingFile);
+          this.notify();
+
+          try {
+            const driveItem = await DriveApiClient.create(context.companyId, { item: item, version: {}});
+            this.logger.debug(`Directory ${directory} created`);
+            pendingFile.status = 'success';
+            this.notify();
+            if (driveItem?.id) {
+              filesPerParentId[driveItem.id] = []
+              await traverserTreeLevel(tree[directory] as FileTreeObject['tree'], driveItem.id);
+            }
+          } catch (e) {
+            this.logger.error(e);
+            throw new Error('Could not create directory');
+          }
+        }
+      }
+    }
+
+    await traverserTreeLevel(root, context.parentId);
+    return filesPerParentId;
+  }
+
   public async upload(
     fileList: File[],
     options?: {
@@ -47,7 +113,7 @@ class FileUploadService {
     const { companyId } = RouterServices.getStateFromRoute();
 
     if (!fileList || !companyId) {
-      logger.log('FileList or companyId is undefined', [fileList, companyId]);
+      this.logger.log('FileList or companyId is undefined', [fileList, companyId]);
       return [];
     }
 
@@ -69,6 +135,9 @@ class FileUploadService {
         originalFile: file,
         backendFile: null,
         resumable: null,
+        type: "file",
+        label: null,
+        pausable: true
       };
 
       this.pendingFiles.push(pendingFile);
@@ -108,7 +177,7 @@ class FileUploadService {
 
       pendingFile.resumable.on('fileProgress', (f: any) => {
         const bytesDelta =
-          (f.progress() - pendingFile.progress) * (pendingFile?.originalFile.size || 0);
+          (f.progress() - pendingFile.progress) * (pendingFile?.originalFile?.size || 0);
         const timeDelta = new Date().getTime() - pendingFile.lastProgress;
 
         // To avoid jumping time ?
@@ -167,14 +236,17 @@ class FileUploadService {
     const fileToCancel = this.pendingFiles.filter(f => f.id === id)[0];
 
     fileToCancel.status = 'cancel';
-    fileToCancel.resumable.cancel();
-    this.notify();
 
-    if (fileToCancel.backendFile)
-      this.deleteOneFile({
-        companyId: fileToCancel.backendFile.company_id,
-        fileId: fileToCancel.backendFile.id,
-      });
+    if (fileToCancel.resumable) {
+      fileToCancel.resumable.cancel();
+      this.notify();
+
+      if (fileToCancel.backendFile)
+        this.deleteOneFile({
+          companyId: fileToCancel.backendFile.company_id,
+          fileId: fileToCancel.backendFile.id,
+        });
+    }
 
     setTimeout(() => {
       this.pendingFiles = this.pendingFiles.filter(f => f.id !== id);

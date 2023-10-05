@@ -3,14 +3,16 @@ import FileUploadService from '@features/files/services/file-upload-service';
 import { ToasterService } from '@features/global/services/toaster-service';
 import { DriveApiClient } from '../api-client/api-client';
 import { useDriveActions } from './use-drive-actions';
+import Logger from '@features/global/framework/logger-service';
 
 /**
  * Returns the children of a drive item
- * @param id
  * @returns
  */
 export const useDriveUpload = () => {
-  const { create } = useDriveActions();
+  const { create, refresh } = useDriveActions();
+
+  const logger = Logger.getLogger('useDriveUpload')
 
   const uploadVersion = async (file: File, context: { companyId: string; id: string }) => {
     return new Promise(r => {
@@ -45,47 +47,23 @@ export const useDriveUpload = () => {
     tree: FileTreeObject,
     context: { companyId: string; parentId: string },
   ) => {
-    const filesPerParentId: { [key: string]: File[] } = {};
-
     // Create all directories
-    console.debug("Start creating directories ...");
-    const createDirectories = async (tree: FileTreeObject['tree'], parentId: string) => {
-      for (const directory of Object.keys(tree)) {
-        if (tree[directory] instanceof File) {
-          if (!filesPerParentId[parentId]) filesPerParentId[parentId] = [];
-          filesPerParentId[parentId].push(tree[directory] as File);
-        } else {
-          console.debug(`Create directory ${directory}`);
-          const driveItem = await create(
-            {
-              company_id: context.companyId,
-              parent_id: parentId,
-              name: directory,
-              is_directory: true,
-            },
-            {},
-          );
-          console.debug(`Directory ${directory} created`);
-          if (driveItem?.id) {
-            await createDirectories(tree[directory] as FileTreeObject['tree'], driveItem.id);
-          } else {
-            throw new Error('Could not create directory');
-          }
-        }
-      }
-    };
-    await createDirectories(tree.tree, context.parentId);
-    console.debug("All directories created");
+    logger.debug("Start creating directories ...");
+    const filesPerParentId = await FileUploadService.createDirectories(tree.tree, context);
+    await refresh(context.parentId);
+    logger.debug("All directories created");
 
     // Upload files into directories
+    logger.debug("Start file uploading")
     for (const parentId of Object.keys(filesPerParentId)) {
+      logger.debug(`Upload files for directory ${parentId}`);
       await FileUploadService.upload(filesPerParentId[parentId], {
         context: {
           companyId: context.companyId,
           parentId: parentId,
         },
         callback: (file, context) => {
-          console.log('created file: ', file);
+          logger.debug('created file: ', file);
           if (file) {
             create(
               {

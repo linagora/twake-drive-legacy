@@ -319,8 +319,11 @@ export class DocumentsService {
       driveItem.last_version_cache = driveItemVersion;
 
       await this.repository.save(driveItem);
+
+      //TODO[ASH] update item size only for files, there is not need to do during direcotry creation
       await updateItemSize(driveItem.parent_id, this.repository, context);
 
+      //TODO[ASH] there is no need to notify websocket, until we implement user notification
       await this.notifyWebsocket(driveItem.parent_id, context);
 
       await globalResolver.platformServices.messageQueue.publish<DocumentsMessageQueueRequest>(
@@ -459,6 +462,7 @@ export class DocumentsService {
    * deletes or moves to Trash a Drive Document and its children
    *
    * @param {string} id - the item id
+   * @param item
    * @param {DriveExecutionContext} context - the execution context
    * @returns {Promise<void>}
    */
@@ -569,10 +573,10 @@ export class DocumentsService {
       }
       await updateItemSize(previousParentId, this.repository, context);
 
-      this.notifyWebsocket(previousParentId, context);
+      await this.notifyWebsocket(previousParentId, context);
     }
 
-    this.notifyWebsocket("trash", context);
+    await this.notifyWebsocket("trash", context);
   };
 
   /**

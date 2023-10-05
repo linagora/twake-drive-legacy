@@ -33,6 +33,7 @@ export default class InternalAuthProviderService
   private logger: Logger.Logger;
   private initialized = false;
   private signinIn = false;
+  private params?: InitParameters;
 
   constructor(private configuration?: InternalConfiguration) {
     super();
@@ -45,6 +46,7 @@ export default class InternalAuthProviderService
       this.logger.warn('Already initialized');
       return this;
     }
+    this.params = params;
 
     this.initialized = true;
     params.onInitialized();
@@ -56,26 +58,27 @@ export default class InternalAuthProviderService
       return Promise.reject('"username" and "password" are required');
     }
 
-    return new Promise<void>((resolve, reject) => {
-      this.signinIn = true;
-      this.logger.log("Sign in in console");
-      ConsoleAPIClient.login(
+    this.signinIn = true;
+    this.logger.log("Sign in in console");
+    try {
+      const access_token = await ConsoleAPIClient.login(
         {
           email: params.username,
           password: params.password,
           remember_me: params.remember_me,
         },
         true,
-      )
-        .then(accessToken => (accessToken ? resolve() : reject(new Error('Can not login'))))
-        .catch(err => {
-          this.logger.error('Error on login', err);
-          reject(new Error('Can not login'));
-        })
-        .finally(() => {
-          this.signinIn = false;
-        });
-    });
+      );
+      this.logger.debug("Got access token from server");
+      await this.params?.onNewToken(access_token);
+      this.signinIn = true;
+    } catch (e) {
+      this.signinIn = false;
+      throw new Error('Can not login');
+    } finally {
+      this.signinIn = false;
+    }
+
   }
 
   async signOut(params: SignOutParameters): Promise<void> {
