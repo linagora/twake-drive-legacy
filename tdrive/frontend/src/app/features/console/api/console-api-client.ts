@@ -90,7 +90,7 @@ class ConsoleAPIClient {
         response.access_token
           ? resolve(response.access_token)
           : reject(new Error('Can not get access token'));
-      });
+      }, false, {disableJWTAuthentication: true});
     });
   }
 }
