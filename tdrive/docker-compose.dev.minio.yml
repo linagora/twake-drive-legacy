@@ -11,6 +11,24 @@ services:
     networks:
       - tdrive_network
 
+  minio:
+    image: minio/minio
+    container_name: minio
+    hostname: minio
+    ports:
+      - "9000-9001:9000-9001"
+    environment:
+      MINIO_ACCESS_KEY: your_access_key
+      MINIO_SECRET_KEY: your_secret_key
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: miniopassword
+    volumes:
+      - ./minio/minio_data:/data
+      - ./minio/minio_config:/root/.minio
+    networks:
+      - tdrive_network
+    command: minio server /data --console-address ":9001"
+
   node:
     build:
       context: .
@@ -26,17 +44,22 @@ services:
       - SEARCH_DRIVER=mongodb
       - DB_DRIVER=mongodb
       - PUBSUB_TYPE=local
-      - ./docker-data/documents/:/storage/
+      - STORAGE_DRIVER=S3
+      - STORAGE_S3_BUCKET=tdrive-dev
+      - STORAGE_S3_ENDPOINT=minio
+      - STORAGE_S3_ACCESS_KEY=rdIhSodMBxG2Mi62s4IB
+      - STORAGE_S3_SECRET_KEY=Hak2Ml5KLF6WxjBil1msKE7oQRXKKZAqj9X5FHeH
     volumes:
       - ./backend/node/src:/usr/src/app/src
       - ./docker-data/documents/:/storage/
     depends_on:
       - mongo
+      - minio # Make sure the node service depends on Minio
     links:
       - mongo
     networks:
       - tdrive_network
-  
+
   frontend:
     build:
       context: .
@@ -59,7 +82,7 @@ services:
       - ./docker-data/ssl:/etc/nginx/ssl
     networks:
       - tdrive_network
-    
+
   onlyoffice-connector:
     image: onlyoffice-connector
     environment:
@@ -75,8 +98,8 @@ services:
     depends_on:
       - onlyoffice
     networks:
-    - tdrive_network
-  
+      - tdrive_network
+
   onlyoffice-rabbitmq:
     image: rabbitmq:management
     hostname: onlyoffice-rabbitmq
@@ -88,11 +111,11 @@ services:
       - "5672:5672"
       - "15672:15672"
     volumes:
-        - ./.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
-        - ./.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+      - ./.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     networks:
       - tdrive_network
-    
+
   onlyoffice-postgresql:
     image: postgres:13
     hostname: onlyoffice-postgresql
@@ -106,7 +129,7 @@ services:
       - ./onlyoffice_postgres_data:/var/lib/postgresql/data
     networks:
       - tdrive_network
-  
+
   onlyoffice:
     image: docker.io/onlyoffice/documentserver
     hostname: onlyoffice
@@ -131,4 +154,3 @@ services:
 networks:
   tdrive_network:
     driver: bridge
-         
