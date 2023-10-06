@@ -2,7 +2,6 @@ import { merge } from "lodash";
 import { Column, Entity } from "../../../core/platform/services/database/services/orm/decorators";
 import { CompanyUserRole } from "../web/types";
 
-// backward compatibility with PHP where companies used to be `group`
 export const TYPE = "group_user";
 
 /**

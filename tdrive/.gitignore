@@ -1,7 +1,3 @@
-### PhpStorm ###
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
-
 *.DS_Store
 *.dccache
 .dccache
@@ -58,9 +54,6 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-### PhpStorm Patch ###
-# Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
-
 # *.iml
 # modules.xml
 # .idea/misc.xml
@@ -91,22 +84,11 @@ fabric.properties
 /app/config/parameters.yml
 /app/config/parameters.ini
 
-# Managed by Composer
-/app/bootstrap.php.cache
-/var/bootstrap.php.cache
-/bin/*
-!bin/console
-!bin/symfony_requirements
-
 # Assets and user uploads
 /web/bundles/
 /web/uploads/
 /web/upload/
 /web/public/
-
-# PHPUnit
-/app/phpunit.xml
-/phpunit.xml
 
 # Build data
 /build/

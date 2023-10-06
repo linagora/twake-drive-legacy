@@ -12,7 +12,6 @@ const versions = {
 
 const files = [
   "frontend/src/app/environment/version.ts",
-  "backend/core/src/Tdrive/Core/Controller/Version.php",
   "backend/node/src/version.ts",
   "../.github/workflows/publish-backend.yml",
   "../.github/workflows/publish-frontend.yml",

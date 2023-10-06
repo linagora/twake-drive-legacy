@@ -16,14 +16,6 @@ Copy the content of this file and put it in `[docker-compose.yml location]/confi
 
 > **Tip:** you can put a 'cert' directory with apns.cert keys (mobile push notifications) beside the backend-node/production.json file.
 
-#### Backend configuration, PHP (only for scalable mode)
-
-An example is available here: [https://github.com/TDriveApp/TDrive/blob/main/tdrive/backend/core/app/Configuration/Parameters.php.dist](https://github.com/TDriveApp/TDrive/blob/main/tdrive/backend/core/app/Configuration/Parameters.php.dist)
-
-Copy the content of this file and put it in `[docker-compose.yml location]/configuration/backend/Parameters.php`
-
-> **Tip:** you can also put a 'cert' directory with apns.cert keys (mobile push notifications) beside the Parameters.php file.
-
 #### Frontend configuration (only for scalable mode)
 
 You can find an example of TDrive configuration (default configuration) here: [https://github.com/TDriveApp/TDrive/blob/main/tdrive/frontend/src/app/environment/environment.ts.dist](https://github.com/TDriveApp/TDrive/blob/main/tdrive/frontend/src/app/environment/environment.ts.dist)

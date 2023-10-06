@@ -40,7 +40,6 @@ esac
 
 NODE_HOST="${NODE_HOST:-http://node:3000}"
 export NODE_HOST
-export PHP_UPSTREAM
 envsubst '$${NODE_HOST} $${NGINX_LISTEN}' < /etc/nginx/sites-available/site.template > /etc/nginx/sites-enabled/site
 
 nginx -g "daemon off;"
