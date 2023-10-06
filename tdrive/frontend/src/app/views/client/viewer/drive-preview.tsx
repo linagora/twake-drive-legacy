@@ -83,7 +83,7 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
     if (device != 'ios' && device != 'android') {
       close();
       history.push(
-        RouterServices.generateRouteFromState({ companyId: company, viewId: '', itemId: item.id }),
+        RouterServices.generateRouteFromState({ companyId: company, viewId: '', itemId: item.id, dirId: '' }),
       );
       open(item);
     }

@@ -33,14 +33,15 @@ export default ({
     <PathRender
       inTrash={inTrash || false}
       path={path}
-      onClick={id => {
+      onClick={(viewId, dirId) => {
         history.push(
           RouterServices.generateRouteFromState({
             companyId: company,
-            viewId: id,
+            viewId,
+            dirId
           }),
         );
-        setParentId(id);
+        setParentId(dirId? dirId: viewId)
       }}
     />
   );
@@ -64,7 +65,7 @@ export const PathRender = ({
 }: {
   path: DriveItem[];
   inTrash: boolean;
-  onClick: (id: string) => void;
+  onClick: (viewId: string, dirId: string) => void;
 }) => {
   const pathLength = (path || []).reduce((acc, curr) => acc + curr.name.length, 0);
 
@@ -121,7 +122,7 @@ const PathItem = ({
   item: Partial<DriveItem>;
   last?: boolean;
   first?: boolean;
-  onClick: (id: string) => void;
+  onClick: (viewId: string, dirId: string) => void;
 }) => {
   const { user } = useCurrentUser();
   const { viewId } = RouterServices.getStateFromRoute();
@@ -135,13 +136,13 @@ const PathItem = ({
           const driveMenuItems = [
             {
               type: 'menu',
-              text: Languages.t('components.side_menu.home'),
-              onClick: () => onClick('root'),
+              text: Languages.t('components.side_menu.home',),
+              onClick: () => onClick('root', ''),
             },
             {
               type: 'menu',
               text: Languages.t('components.side_menu.my_drive'),
-              onClick: () => onClick('user_' + user?.id),
+              onClick: () => onClick('user_' + user?.id, ''),
             },
           ];
 
@@ -149,12 +150,12 @@ const PathItem = ({
             {
               type: 'menu',
               text: Languages.t('components.header_path.my_trash'),
-              onClick: () => onClick('trash_' + user?.id),
+              onClick: () => onClick('trash_' + user?.id, ''),
             },
             {
               type: 'menu',
               text: Languages.t('components.header_path.shared_trash'),
-              onClick: () => onClick('trash'),
+              onClick: () => onClick('trash', ''),
               hide: trashAccess === 'read',
             },
           ];
@@ -166,7 +167,7 @@ const PathItem = ({
               MenusManager.openMenu(driveMenuItems, { x: evt.clientX, y: evt.clientY }, 'center');
             }
           } else {
-            onClick(item?.id || '');
+            onClick(viewId || '',item?.id || '');
           }
         }}
       >

@@ -16,6 +16,11 @@ export const RoutePreviewSelector = selector<string>({
   get: ({ get }) => get(RouterState)?.itemId || '',
 });
 
+export const RouteDirectorySelector = selector<string>({
+  key: 'RouterDirectorySelector',
+  get: ({ get }) => get(RouterState)?.dirId || '',
+});
+
 export const RouterWorkspaceSelector = selector<string>({
   key: 'RouterWorkspaceSelector',
   get: ({ get }) => get(RouterState)?.workspaceId || '',

@@ -27,6 +27,7 @@ export type ClientStateType = {
   companyId?: string;
   viewId?: string;
   itemId?: string;
+  dirId?: string;
   workspaceId?: string;
   channelId?: string;
   messageId?: string;
@@ -52,6 +53,7 @@ class RouterServices extends Observable {
     '/client/:companyId/v/:viewId',
     '/client/:companyId/preview/:itemId',
     '/client/:companyId/v/:viewId/preview/:itemId',
+    '/client/:companyId/v/:viewId/d/:dirId',
     '/client/:companyId/w/:workspaceId',
     '/client/:companyId/w/:workspaceId/c/:channelId',
     '/client/:companyId/w/:workspaceId/c/:channelId/t/:threadId',
@@ -185,6 +187,7 @@ class RouterServices extends Observable {
       companyId: match?.params?.companyId || '',
       viewId: match?.params?.viewId || '',
       itemId: match?.params?.itemId || '',
+      dirId: match?.params?.dirId || '',
       workspaceId: match?.params?.workspaceId || '',
       channelId: match?.params?.channelId || '',
       messageId: match?.params?.messageId || '',
@@ -291,6 +294,7 @@ class RouterServices extends Observable {
       (state.companyId ? `/${state.companyId}` : '') +
       (state.viewId ? `/v/${state.viewId}` : '') +
       (state.itemId ? `/preview/${state.itemId}` : '') +
+      (state.dirId ? `/d/${state.dirId}` : '') +
       (state.sharedWithMe ? `/shared-with-me` : '') +
       (state.workspaceId ? `/w/${state.workspaceId}` : '') +
       (state.channelId ? `/c/${state.channelId}` : '') +

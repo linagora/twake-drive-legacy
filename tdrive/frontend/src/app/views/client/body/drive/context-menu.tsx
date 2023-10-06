@@ -180,7 +180,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
               type: 'menu',
               text: Languages.t('components.item_context_menu.delete'),
               className: 'error',
-              hide: inTrash || access !== 'manage',
+              hide: !inTrash || access !== 'manage',
               onClick: () => setConfirmDeleteModalState({ open: true, items: [item] }),
             },
           ];

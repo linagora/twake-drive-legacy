@@ -7,6 +7,7 @@ import { DriveItemSelectedList } from '@features/drive/state/store';
 import { DriveItem } from '@features/drive/types';
 import { useEffect, useState } from 'react';
 import { atom, useRecoilState } from 'recoil';
+import RouterServices from '@features/router/services/router-service';
 
 export type ConfirmDeleteModalType = {
   open: boolean;
@@ -40,6 +41,7 @@ const ConfirmDeleteModalContent = ({ items }: { items: DriveItem[] }) => {
   const [loading, setLoading] = useState(false);
   const [state, setState] = useRecoilState(ConfirmDeleteModalAtom);
   const [, setSelected] = useRecoilState(DriveItemSelectedList);
+  const { viewId } = RouterServices.getStateFromRoute();
 
   useEffect(() => {
     refresh(items[0].id);
@@ -64,7 +66,7 @@ const ConfirmDeleteModalContent = ({ items }: { items: DriveItem[] }) => {
         onClick={async () => {
           setLoading(true);
           for (const item of items) {
-            await remove(item.id, item.parent_id);
+            await remove(item.id, viewId || "");
           }
           setLoading(false);
           setSelected({});

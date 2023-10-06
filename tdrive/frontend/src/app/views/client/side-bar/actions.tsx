@@ -80,14 +80,14 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
 
 export default () => {
   const { user } = useCurrentUser();
+  const { viewId } = RouterServices.getStateFromRoute();
   const [parentId, _] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id  }));
   const { access, item } = useDriveItem(parentId);
-  const { children: trashChildren } = useDriveItem('trash');
+  const { children: trashChildren } = useDriveItem(viewId === 'trash' ? 'trash' : 'trash_'+user?.id);
   const uploadZoneRef = useRef<UploadZone | null>(null);
   const { uploadTree } = useDriveUpload();
   const companyId = useRouterCompany();
-  const { viewId } = RouterServices.getStateFromRoute();
-  const inTrash = viewId?.includes("trash");
+  const inTrash = viewId?.includes("trash") || false;
 
   const setConfirmDeleteModalState = useSetRecoilState(ConfirmDeleteModalAtom);
   const setCreationModalState = useSetRecoilState(CreateModalAtom);
@@ -102,7 +102,7 @@ export default () => {
         <div className="p-4">
           <CreateModalWithUploadZones initialParentId={parentId} />
 
-          {inTrash && access === 'manage' && (
+          {inTrash && (
             <>
               <Button
                 onClick={() =>
@@ -114,6 +114,7 @@ export default () => {
                 size="lg"
                 theme="danger"
                 className="w-full mb-2 justify-center"
+                disabled={!(trashChildren.length > 0)}
               >
                 <TruckIcon className="w-5 h-5 mr-2" /> { Languages.t('components.side_menu.buttons.empty_trash') }
               </Button>

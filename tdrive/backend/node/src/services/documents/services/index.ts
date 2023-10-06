@@ -545,6 +545,7 @@ export class DocumentsService {
 
       const previousParentId = item.parent_id;
       if (
+        (await isInTrash(item, this.repository, context)) ||
         item.parent_id === this.TRASH ||
         (await getPath(item.parent_id, this.repository, true, context))[0].id === this.TRASH
       ) {
