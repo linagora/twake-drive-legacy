@@ -21,6 +21,10 @@
   </p>
 </p>
 
+## About
+
+<img width="100%!" alt="booking-screen" src="https://github.com/linagora/TDrive/assets/14924963/e19079c6-99c4-41f5-83a2-b4ed4a8816d7">
+
 ## Getting Started
 
 To get a local copy up and running, please follow these simple steps.
