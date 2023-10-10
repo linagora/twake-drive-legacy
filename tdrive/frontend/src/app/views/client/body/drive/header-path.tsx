@@ -21,7 +21,6 @@ export default ({
   setParentId: (id: string) => void;
 }) => {
   const [savedPath, setSavedPath] = useState<DriveItem[]>([]);
-  const { user } = useCurrentUser();
   const history = useHistory();
   const company = useRouterCompany();
   useEffect(() => {
@@ -38,10 +37,10 @@ export default ({
           RouterServices.generateRouteFromState({
             companyId: company,
             viewId,
-            dirId
+            dirId,
           }),
         );
-        setParentId(dirId? dirId: viewId)
+        setParentId(dirId ? dirId : viewId);
       }}
     />
   );
@@ -67,26 +66,28 @@ export const PathRender = ({
   inTrash: boolean;
   onClick: (viewId: string, dirId: string) => void;
 }) => {
-  const pathLength = (path || []).reduce((acc, curr) => acc + curr.name.length, 0);
+  const parentIndex = path.findIndex(item => item.is_in_trash);
+  const pathToRender = parentIndex > -1 ? path.slice(parentIndex - 1) : path;
+  const pathLength = (pathToRender || []).reduce((acc, curr) => acc + curr.name.length, 0);
 
   return (
     <nav className="overflow-hidden whitespace-nowrap mr-2 pl-px inline-flex">
       {pathLength < 70 ? (
-        (path || [])?.map((a, i) => (
+        (pathToRender || [])?.map((a, i) => (
           <PathItem
             key={a.id}
             item={a}
             first={i === 0}
-            last={i + 1 === path?.length}
+            last={i + 1 === pathToRender?.length}
             onClick={onClick}
           />
         ))
       ) : (
         <>
           <PathItem
-            key={path[path.length - 3]?.id}
+            key={pathToRender[pathToRender.length - 3]?.id}
             item={{
-              ...path[path?.length - 3],
+              ...pathToRender[pathToRender?.length - 3],
               name: '...',
             }}
             first={true}
@@ -94,15 +95,15 @@ export const PathRender = ({
             onClick={onClick}
           />
           <PathItem
-            key={path[path.length - 2]?.id}
-            item={path[path?.length - 2]}
+            key={pathToRender[pathToRender.length - 2]?.id}
+            item={pathToRender[pathToRender?.length - 2]}
             first={false}
             last={false}
             onClick={onClick}
           />
           <PathItem
-            key={path[path.length - 1]?.id}
-            item={path[path?.length - 1]}
+            key={pathToRender[pathToRender.length - 1]?.id}
+            item={pathToRender[pathToRender?.length - 1]}
             first={false}
             last={true}
             onClick={onClick}
@@ -136,7 +137,7 @@ const PathItem = ({
           const driveMenuItems = [
             {
               type: 'menu',
-              text: Languages.t('components.side_menu.home',),
+              text: Languages.t('components.side_menu.home'),
               onClick: () => onClick('root', ''),
             },
             {
@@ -167,16 +168,18 @@ const PathItem = ({
               MenusManager.openMenu(driveMenuItems, { x: evt.clientX, y: evt.clientY }, 'center');
             }
           } else {
-            onClick(viewId || '',item?.id || '');
+            onClick(viewId || '', item?.id || '');
           }
         }}
       >
         <Title>
-           {viewId?.includes('trash_') && first && Languages.t('components.header_path.my_trash')}
-           {viewId === 'trash' && first && Languages.t('components.header_path.shared_trash')}
-           {(viewId === 'trash' || viewId?.includes('trash_')) && !first && (cutFileName(item?.name) || '')}
-           {!viewId?.includes('trash') && (cutFileName(item?.name) || '')}
-         </Title>
+          {viewId?.includes('trash_') && first && Languages.t('components.header_path.my_trash')}
+          {viewId === 'trash' && first && Languages.t('components.header_path.shared_trash')}
+          {(viewId === 'trash' || viewId?.includes('trash_')) &&
+            !first &&
+            (cutFileName(item?.name) || '')}
+          {!viewId?.includes('trash') && (cutFileName(item?.name) || '')}
+        </Title>
       </a>
       {item?.access_info?.public?.level && item?.access_info?.public?.level !== 'none' && (
         <PublicIcon className="h-5 w-5 ml-2" />
