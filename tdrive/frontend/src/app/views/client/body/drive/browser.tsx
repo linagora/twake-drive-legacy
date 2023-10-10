@@ -32,6 +32,7 @@ import { AccessModal } from './modals/update-access';
 import { VersionsModal } from './modals/versions';
 import { UsersModal } from './modals/manage-users';
 import { SharedFilesTable } from './shared-files-table';
+import RouterServices from '@features/router/services/router-service';
 import useRouteState from 'app/features/router/hooks/use-route-state';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
 import MenusManager from '@components/menus/menus-manager.jsx';
@@ -43,8 +44,7 @@ import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
 import { ConfirmModalAtom } from './modals/confirm-move/index';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 import { ConfirmModal } from './modals/confirm-move';
-
-
+import { useHistory } from 'react-router-dom';
 
 export const DriveCurrentFolderAtom = atomFamily<
     string,
@@ -68,12 +68,13 @@ export default memo(
   }) => {
     const { user } = useCurrentUser();
     const companyId = useRouterCompany();
+    const history = useHistory();
     const role = user ? (user?.companies || []).find(company => company?.company.id === companyId)?.role : "member";
     setTdriveTabToken(tdriveTabContextToken || null);
     const [filter, __] = useRecoilState(SharedWithMeFilterState);
-    const { viewId } = useRouteState();
+    const { viewId, dirId } = useRouteState();
     const [parentId, _setParentId] = useRecoilState(
-      DriveCurrentFolderAtom({ context: context, initialFolderId: viewId || initialParentId || 'user_'+user?.id }),
+      DriveCurrentFolderAtom({ context: context, initialFolderId: dirId || viewId || initialParentId || 'user_'+user?.id }),
     );
 
     const [loadingParentChange, setLoadingParentChange] = useState(false);
@@ -382,6 +383,8 @@ export default memo(
                             }
                             item={child}
                             onClick={() => {
+                              const route = RouterServices.generateRouteFromState({dirId: child.id});
+                              history.push(route);
                               return setParentId(child.id);
                             }}
                             checked={checked[child.id] || false}

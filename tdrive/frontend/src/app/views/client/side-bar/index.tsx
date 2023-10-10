@@ -33,7 +33,6 @@ export default () => {
     DriveCurrentFolderAtom({ initialFolderId: viewId || 'user_'+user?.id }),
   );
   const active = false;
-  const { access: rootAccess } = useDriveItem('user_'+user?.id);
   const { sharedWithMe, inTrash, path } = useDriveItem(parentId);
   const activeClass = 'bg-zinc-50 dark:bg-zinc-800 !text-blue-500';
   let folderType = 'home';
@@ -45,7 +44,7 @@ export default () => {
   useEffect(() => {
     !itemId && !dirId && viewId && setParentId(viewId);
     dirId && viewId && setParentId(dirId);
-  }, [viewId, itemId]);
+  }, [viewId, itemId, dirId]);
   return (
     <div className="grow flex flex-col overflow-auto -m-4 p-4 relative">
       <div className="grow">
