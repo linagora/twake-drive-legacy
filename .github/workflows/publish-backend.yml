@@ -43,3 +43,14 @@ jobs:
           target: production
           buildoptions: "-t docker-registry.linagora.com/tdrive/tdrive-node -f docker/tdrive-node/Dockerfile"
           tags: "${{ env.DOCKERTAG }},${{ env.DOCKERTAGVERSION }}"
+      - name: Publish to dockerhub
+        uses: elgohr/Publish-Docker-Github-Action@v5
+        with:
+          name: twakedrive/tdrive-node
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          workdir: tdrive
+          context: .
+          target: production
+          buildoptions: "-t twakedrive/tdrive-node -f docker/tdrive-node/Dockerfile"
+          tags: "${{ env.DOCKERTAG }},${{ env.DOCKERTAGVERSION }}"

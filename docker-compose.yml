@@ -10,7 +10,7 @@ services:
       - tdrive_network
 
   node:
-    image: docker-registry.linagora.com/tdrive/tdrive-node
+    image: twakedrive/tdrive-node
     hostname: tdrive_node
     environment:
       - DEV=production
@@ -26,7 +26,7 @@ services:
       - tdrive_network
 
   fronend:
-    image: docker-registry.linagora.com/tdrive/tdrive-frontend
+    image: twakedrive/tdrive-frontend
     environment:
       - DEV=production
       - SSL_CERTS=selfsigned

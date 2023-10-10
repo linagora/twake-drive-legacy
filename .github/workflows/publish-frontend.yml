@@ -72,3 +72,13 @@ jobs:
           workdir: tdrive
           buildoptions: "-t docker-registry.linagora.com/tdrive/tdrive-frontend -f docker/tdrive-frontend/Dockerfile"
           tags: "${{ env.DOCKERTAG }},${{ env.DOCKERTAGVERSION }}"
+      - name: Publish to dockerhub
+        uses: elgohr/Publish-Docker-Github-Action@v5
+        with:
+          name: twakedrive/tdrive-frontend
+          registry: docker-registry.linagora.com
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          workdir: tdrive
+          buildoptions: "-t twakedrive/tdrive-frontend -f docker/tdrive-frontend/Dockerfile"
+          tags: "${{ env.DOCKERTAG }},${{ env.DOCKERTAGVERSION }}"
