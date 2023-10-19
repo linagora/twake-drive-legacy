@@ -229,9 +229,9 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
     };
     logger.info(`User from getUserByAccessToken is ${JSON.stringify(user)} for token ${idToken}`);
     return {
-      _id: user.email || user.sub,
+      _id: user.sub,
       roles: [] as any,
-      email: user.email || user.sub,
+      email: user.email,
       name: user?.given_name,
       surname: user?.family_name,
       isVerified: true,
