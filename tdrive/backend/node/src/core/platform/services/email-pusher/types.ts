@@ -51,7 +51,7 @@ export type SMTPClientConfigType = {
   port: number;
   secure?: boolean;
   requireTLS: boolean;
-  auth: {
+  auth?: {
     user: string;
     pass: string;
   };
