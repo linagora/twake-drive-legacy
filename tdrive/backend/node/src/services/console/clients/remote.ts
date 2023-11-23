@@ -111,7 +111,12 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
 
     if (!user) {
       if (!userDTO.email) {
-        throw CrudException.badRequest(`Email is required: ${JSON.stringify(userDTO)}`);
+        // if the id is an email, use it as email
+        if (userDTO._id.includes("@")) {
+          userDTO.email = userDTO._id;
+        } else {
+          throw CrudException.badRequest(`Email is required: ${JSON.stringify(userDTO)}`);
+        }
       }
 
       let username = userDTO.email
