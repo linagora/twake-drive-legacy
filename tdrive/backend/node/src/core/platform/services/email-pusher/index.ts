@@ -148,7 +148,10 @@ export default class EmailPusherClass
 
             this.logger.info("Message sent: %s", info.response);
           } catch (err) {
-            this.logger.error({ error: `${err}` }, "Failed to send email");
+            this.logger.error(
+              { error: `${err}`, secure: this.configuration.get<boolean>("smtp_tls", false) },
+              "Failed to send email",
+            );
           }
         } else {
           this.logger.info("sending email via api interface.");
