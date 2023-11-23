@@ -107,7 +107,7 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
       logger.info(`Roles are: ${roles}.`);
     }
 
-    let user = await gr.services.users.getByConsoleId(userDTO.email);
+    let user = await gr.services.users.getByConsoleId(userDTO.email || userDTO._id);
 
     if (!user) {
       if (!userDTO.email) {
