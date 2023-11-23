@@ -44,6 +44,7 @@ export default class EmailPusherClass
         host: this.configuration.get<string>("smtp_host", ""),
         port: this.configuration.get<number>("smtp_port", 25),
         requireTLS: this.configuration.get<boolean>("smtp_tls", false),
+        secure: this.configuration.get<boolean>("smtp_tls", false),
         auth: {
           user: this.configuration.get<string>("smtp_user", ""),
           pass: this.configuration.get<string>("smtp_password", ""),
