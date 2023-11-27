@@ -33,16 +33,26 @@ export const CreateModalAtom = atom<CreateModalAtomType>({
   },
 });
 
+export const UploadModelAtom = atom<CreateModalAtomType>({
+  key: 'UploadModalAtom',
+  default: {
+    open: false,
+    parent_id: 'root',
+  },
+});
+
 export const CreateModal = ({
   selectFromDevice,
   selectFolderFromDevice,
   addFromUrl,
+  uploadModal,
 }: {
   selectFromDevice: () => void;
   selectFolderFromDevice: () => void;
   addFromUrl: (url: string, name: string) => void;
+  uploadModal: boolean;
 }) => {
-  const [state, setState] = useRecoilState(CreateModalAtom);
+  const [state, setState] = useRecoilState(uploadModal ? UploadModelAtom : CreateModalAtom);
   const { applications } = useCompanyApplications();
 
   return (
@@ -78,21 +88,23 @@ export const CreateModal = ({
             as="div"
             {...(!state.type ? slideXTransitionReverted : slideXTransition)}
           >
+            {uploadModal ? <div className="-m-2" >
+                  <CreateModalOption
+                      icon={<DocumentDownloadIcon className="w-5 h-5" />}
+                      text={Languages.t('components.create_modal.upload_files')}
+                      onClick={() => selectFromDevice()}
+                  />
+                  <CreateModalOption
+                      icon={<FolderDownloadIcon className="w-5 h-5" />}
+                      text={Languages.t('components.create_modal.upload_folders')}
+                      onClick={() => selectFolderFromDevice()}
+                  />
+                </div> :
             <div className="-m-2">
               <CreateModalOption
                 icon={<FolderAddIcon className="w-5 h-5" />}
                 text={Languages.t('components.create_modal.create_folder')}
                 onClick={() => setState({ ...state, type: 'folder' })}
-              />
-              <CreateModalOption
-                icon={<DocumentDownloadIcon className="w-5 h-5" />}
-                text={Languages.t('components.create_modal.upload_files')}
-                onClick={() => selectFromDevice()}
-              />
-              <CreateModalOption
-                icon={<FolderDownloadIcon className="w-5 h-5" />}
-                text={Languages.t('components.create_modal.upload_folders')}
-                onClick={() => selectFolderFromDevice()}
               />
               <CreateModalOption
                 icon={<LinkIcon className="w-5 h-5" />}
@@ -141,6 +153,7 @@ export const CreateModal = ({
                   );
                 })}
             </div>
+            }
           </Transition>
 
           <Transition

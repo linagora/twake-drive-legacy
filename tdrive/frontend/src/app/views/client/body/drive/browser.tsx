@@ -26,7 +26,7 @@ import { FolderRow } from './documents/folder-row';
 import HeaderPath from './header-path';
 import { ConfirmDeleteModal } from './modals/confirm-delete';
 import { ConfirmTrashModal } from './modals/confirm-trash';
-import { CreateModalAtom } from './modals/create';
+import {CreateModalAtom, UploadModelAtom} from './modals/create';
 import { PropertiesModal } from './modals/properties';
 import { AccessModal } from './modals/update-access';
 import { VersionsModal } from './modals/versions';
@@ -97,6 +97,7 @@ export default memo(
     const uploadZoneRef = useRef<UploadZone | null>(null);
 
     const setCreationModalState = useSetRecoilState(CreateModalAtom);
+    const setUploadModalState = useSetRecoilState(UploadModelAtom);
 
     const [checked, setChecked] = useRecoilState(DriveItemSelectedList);
 
@@ -120,9 +121,9 @@ export default memo(
       if (!inPublicSharing) refresh('trash');
     }, [parentId, refresh, filter]);
 
-    const openItemModal = useCallback(() => {
-      if (item?.id) setCreationModalState({ open: true, parent_id: item.id });
-    }, [item?.id, setCreationModalState]);
+    const uploadItemModal = useCallback(() => {
+      if (item?.id) setUploadModalState({ open: true, parent_id: item.id });
+    }, [item?.id, setUploadModalState]);
 
     const selectedCount = Object.values(checked).filter(v => v).length;
     const folders = children
@@ -410,7 +411,7 @@ export default memo(
                         <>
                           <Base>{Languages.t('scenes.app.drive.drag_and_drop')}</Base>
                           <br />
-                          <Button onClick={() => openItemModal()} theme="primary" className="mt-4">
+                          <Button onClick={() => uploadItemModal()} theme="primary" className="mt-4">
                             {Languages.t('scenes.app.drive.add_doc')}
                           </Button>
                         </>

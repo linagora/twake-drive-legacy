@@ -3,7 +3,7 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 import { DriveCurrentFolderAtom } from './browser';
 import { ConfirmDeleteModalAtom } from './modals/confirm-delete';
 import { ConfirmTrashModalAtom } from './modals/confirm-trash';
-import { CreateModalAtom } from './modals/create';
+import {CreateModalAtom, UploadModelAtom} from './modals/create';
 import { PropertiesModalAtom } from './modals/properties';
 import { SelectorModalAtom } from './modals/selector';
 import { AccessModalAtom } from './modals/update-access';
@@ -38,6 +38,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
 
   const { download, downloadZip, update, restore } = useDriveActions();
   const setCreationModalState = useSetRecoilState(CreateModalAtom);
+  const setUploadModalState = useSetRecoilState(UploadModelAtom);
   const setSelectorModalState = useSetRecoilState(SelectorModalAtom);
   const setConfirmDeleteModalState = useSetRecoilState(ConfirmDeleteModalAtom);
   const setConfirmTrashModalState = useSetRecoilState(ConfirmTrashModalAtom);
@@ -285,7 +286,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                   hide: inTrash || parent.access === 'read',
                   onClick: () =>
                     parent?.item?.id &&
-                    setCreationModalState({ open: true, parent_id: parent?.item?.id }),
+                    setUploadModalState({ open: true, parent_id: parent?.item?.id }),
                 },
                 {
                   type: 'menu',
@@ -357,6 +358,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
       preview,
       setParentId,
       setCreationModalState,
+      setUploadModalState,
       setVersionModal,
       setAccessModalState,
       setPropertiesModalState,
