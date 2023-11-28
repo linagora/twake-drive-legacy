@@ -76,9 +76,19 @@ class InitService extends Observable {
   }
 
   async getServer() {
-    return await Api.get<ServerInfoType>('/internal/services/general/v1/server', undefined, false, {
-      disableJWTAuthentication: true,
-    });
+    try {
+      return await Api.get<ServerInfoType>(
+        '/internal/services/general/v1/server',
+        undefined,
+        false,
+        {
+          disableJWTAuthentication: true,
+        },
+      );
+    } catch (e) {
+      this.logger.error('Error while getting server infos', e);
+      throw e;
+    }
   }
 
   async init() {
