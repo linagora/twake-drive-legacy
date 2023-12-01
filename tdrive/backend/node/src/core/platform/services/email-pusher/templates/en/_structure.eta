@@ -5,8 +5,8 @@
    privacy: "Privacy Policy",
    terms: "Terms of Service",
    links: {
-       help: "https://tdrive.app/",
-       privacy: "https://tdrive.app/en/privacy-policy/",
-       terms: "https://tdrive.app/en/terms-of-service/"
+       help: "#",
+       privacy: "#",
+       terms: "#"
    }
 })) %>

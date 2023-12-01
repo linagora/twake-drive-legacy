@@ -15,6 +15,7 @@ import { convert } from "html-to-text";
 import path from "path";
 import { existsSync } from "fs";
 import axios from "axios";
+import short, { Translator } from "short-uuid";
 
 export default class EmailPusherClass
   extends TdriveService<EmailPusherAPI>
@@ -29,6 +30,7 @@ export default class EmailPusherClass
   sender: string;
   transporter: any;
   debug: boolean;
+  platformUrl: string;
 
   api(): EmailPusherAPI {
     return this;
@@ -39,6 +41,7 @@ export default class EmailPusherClass
       views: path.join(__dirname, "templates"),
     });
     this.interface = this.configuration.get<string>("email_interface", "");
+    this.platformUrl = this.configuration.get<string>("platform_url", "");
     if (this.interface === "smtp") {
       const smtpConfig: SMTPClientConfigType = {
         host: this.configuration.get<string>("smtp_host", ""),
@@ -73,8 +76,12 @@ export default class EmailPusherClass
   ): Promise<EmailBuilderRenderedResult> {
     try {
       language = ["en", "fr"].find(l => language.toLocaleLowerCase().includes(l)) || "en";
+      const translator: Translator = short();
       const templatePath = path.join(__dirname, "templates", language, `${template}.eta`);
       const subjectPath = path.join(__dirname, "templates", language, `${template}.subject.eta`);
+      const encodedCompanyId = translator.fromUUID(data.notifications[0].item.company_id);
+      const encodedFileId = translator.fromUUID(data.notifications[0].item.id);
+      const encodedUrl = `${this.platformUrl}/client/${encodedCompanyId}/v/shared_with_me/preview/${encodedFileId}`;
 
       if (!existsSync(templatePath)) {
         throw Error(`template not found: ${templatePath}`);
@@ -83,8 +90,11 @@ export default class EmailPusherClass
       if (!existsSync(subjectPath)) {
         throw Error(`subject template not found: ${subjectPath}`);
       }
-
-      const html = await Eta.renderFile(templatePath, data);
+      console.log("🚀 FILE LINK: ", encodedUrl);
+      const html = await Eta.renderFile(templatePath, {
+        ...data,
+        encodedUrl,
+      });
 
       if (!html || !html.length) {
         throw Error("Failed to render template");
@@ -134,7 +144,7 @@ export default class EmailPusherClass
           try {
             this.logger.info("sending email via smtp interface.");
             const info = await this.transporter.sendMail({
-              from: `"Sender Name" <${this.sender}>`,
+              from: `"Twake Drive" <${this.sender}>`,
               to: to,
               subject: subject,
               text: text_body,

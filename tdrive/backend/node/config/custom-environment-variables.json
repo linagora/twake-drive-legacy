@@ -63,7 +63,6 @@
       "useAuth": "SEARCH_ES_USE_AUTH",
       "username": "SEARCH_ES_USERNAME",
       "password": "SEARCH_ES_PASSWORD"
-
     }
   },
   "storage": {
@@ -83,17 +82,18 @@
       "secretKey": "STORAGE_S3_SECRET_KEY"
     }
   },
-  "email-pusher":{
+  "email-pusher": {
     "email_interface": "EMAIL_INTERFACE",
-    "endpoint":"EMAIL_ENDPOINT",
-    "api_key":"EMAIL_API_KEY",
-    "sender":"EMAIL_SENDER",
+    "endpoint": "EMAIL_ENDPOINT",
+    "api_key": "EMAIL_API_KEY",
+    "sender": "EMAIL_SENDER",
     "smtp_user": "EMAIL_SMTP_USER",
     "smtp_password": "EMAIL_SMTP_PASSWORD",
     "smtp_host": "EMAIL_SMTP_HOST",
     "smtp_port": "EMAIL_SMTP_PORT",
     "smtp_tls": "EMAIL_SMTP_SECURE",
-    "debug": "EMAIL_DEBUG"
+    "debug": "EMAIL_DEBUG",
+    "platform_url": "PLATFORM_URL"
   },
   "message-queue": {
     "type": "PUBSUB_TYPE",

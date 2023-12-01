@@ -175,6 +175,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.3",
     "sharp": "^0.30.5",
+    "short-uuid": "^4.2.2",
     "socket.io": "^4.6.2",
     "socket.io-client": "^3.0.0",
     "unoconv-promise": "^1.0.8",

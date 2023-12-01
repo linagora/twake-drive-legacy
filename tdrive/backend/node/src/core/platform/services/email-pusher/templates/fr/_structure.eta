@@ -5,8 +5,8 @@
    privacy: "Confidentialité",
    terms: "CGU",
    links: {
-       help: "https://tdrive.app/",
-       privacy: "https://tdrive.app/fr/privacy-policy/",
-       terms: "https://tdrive.app/fr/terms-of-service/"
+       help: "#",
+       privacy: "#",
+       terms: "#"
    }
 })) %>

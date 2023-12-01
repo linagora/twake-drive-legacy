@@ -18,7 +18,9 @@ export type EmailBuilderRenderedResult = {
   subject: string;
 };
 
-export type EmailBuilderTemplateName = "notification-digest" | "notification-document";
+export type EmailBuilderTemplateName =
+  | "notification-document-shared"
+  | "notification-document-version-updated";
 
 export type EmailPusherPayload = {
   subject: string;

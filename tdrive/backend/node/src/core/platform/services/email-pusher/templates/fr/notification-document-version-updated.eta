@@ -1,6 +1,5 @@
 <% layout('./_structure') %>
-<% it.title = 'Notifications manquées de l\'entreprise ' +  it.company.name  %>
-
+<% it.title = 'Missed notifications from company '  %>
 
 <%~ includeFile("../common/_body.eta", {
   paragraphs: [
@@ -10,7 +9,7 @@
           <tr>
               <td align="center" style="font-size:0px;padding:0 0 8px;word-break:break-word;">
                   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:24px;font-weight:800;line-height:29px;text-align:center;color:#000000;">
-                    Pendant votre absense
+                    Vous avez des nouvelles concernant votre Twake Drive !
                   </div>
               </td>
           </tr>
@@ -23,21 +22,20 @@
           <tr>
               <td align="center" style="font-size:0px;padding:0 0 16px;word-break:break-word;" >
                   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
-                    Vous avez reçu de nouveaux messages! 😉
+                    <span style="text-transform: capitalize; font-weight: 500">${it.sender.first_name}</span> updated this ${it.notifications[0].item.is_directory ? "folder" : "file" }! ${it.notifications[0].item.is_directory ? "📁" : "📄" }
+                  </div>
+                  <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
+                    <span style="font-weight: 500">
+                      ${!it.notifications[0].item.is_directory ? `${it.notifications[0].item.name}.${it.notifications[0].item.extension}` : `${it.notifications[0].item.name}.${it.notifications[0].item.extension}`}
+                    </span>
                   </div>
               </td>
           </tr>
       </tbody>
   </table>
-  `,
-  ...it.notifications.map(notification =>
-    includeFile("./notification-digest/notification.eta", notification)
-  )
-  ,
-  `
   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;">
-    <a class="main-button" href="https://web.tdrive.app/">
-    ${it.notifications.length>1 ? `Voir les ${it.notifications.length} messages` : `Voir sur Twake Drive`}
+    <a class="main-button" href="${it.encodedUrl}">
+    ${it.notifications.length>1 ? `See all ${it.notifications.length} messages` : `See on Twake Drive`}
     </a>
   </div>
   `

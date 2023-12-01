@@ -35,7 +35,7 @@
   `
   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;">
     <a class="main-button" href="https://web.tdrive.app/">
-    ${it.notifications.length>1 ? `See all ${it.notifications.length} messages` : `See on Tdrive`}
+    ${it.notifications.length>1 ? `See all ${it.notifications.length} messages` : `See on Twake Drive`}
     </a>
   </div>
   `
