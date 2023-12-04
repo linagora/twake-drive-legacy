@@ -123,7 +123,6 @@ export default memo(
     }, [parentId, refresh, filter]);
 
     const uploadItemModal = useCallback(() => {
-      console.log("here i am")
       if (item?.id) setUploadModalState({ open: true, parent_id: item.id });
     }, [item?.id, setUploadModalState]);
 

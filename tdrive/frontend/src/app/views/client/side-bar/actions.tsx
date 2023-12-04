@@ -71,8 +71,8 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
         addFromUrl={(url, name) => {
           setCreationModalState({ parent_id: '', open: false });
           uploadFromUrl(url, name, {
-              companyId,
-              parentId,
+            companyId,
+            parentId,
           });
         }}
     />
