@@ -10,7 +10,7 @@ import useRouterCompany from '../../../features/router/hooks/use-router-company'
 import { DriveCurrentFolderAtom } from '../body/drive/browser';
 import { ConfirmDeleteModalAtom } from '../body/drive/modals/confirm-delete';
 import { CreateModal, CreateModalAtom } from '../body/drive/modals/create';
-    import { UploadModelAtom, UploadModal } from '../body/drive/modals/upload'
+import { UploadModelAtom, UploadModal } from '../body/drive/modals/upload'
 import { Button } from '@atoms/button/button';
 import Languages from "features/global/services/languages-service";
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
