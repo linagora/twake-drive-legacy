@@ -3,7 +3,8 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 import { DriveCurrentFolderAtom } from './browser';
 import { ConfirmDeleteModalAtom } from './modals/confirm-delete';
 import { ConfirmTrashModalAtom } from './modals/confirm-trash';
-import {CreateModalAtom, UploadModelAtom} from './modals/create';
+import { CreateModalAtom } from './modals/create';
+import { UploadModelAtom } from './modals/upload'
 import { PropertiesModalAtom } from './modals/properties';
 import { SelectorModalAtom } from './modals/selector';
 import { AccessModalAtom } from './modals/update-access';
@@ -102,6 +103,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                 const itemId = !item.is_directory ? item.id : "";
                 const viewId = item.is_directory ? item.id : item.parent_id;
                 const route = RouterServices.generateRouteFromState({ companyId: company, viewId, itemId });
+                window.open(route, '_blank');
                 window.open(route, '_blank');
               }
             },

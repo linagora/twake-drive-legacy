@@ -9,7 +9,8 @@ import { useDriveUpload } from '../../../features/drive/hooks/use-drive-upload';
 import useRouterCompany from '../../../features/router/hooks/use-router-company';
 import { DriveCurrentFolderAtom } from '../body/drive/browser';
 import { ConfirmDeleteModalAtom } from '../body/drive/modals/confirm-delete';
-import { CreateModal, CreateModalAtom, UploadModelAtom } from '../body/drive/modals/create';
+import { CreateModal, CreateModalAtom } from '../body/drive/modals/create';
+    import { UploadModelAtom, UploadModal } from '../body/drive/modals/upload'
 import { Button } from '@atoms/button/button';
 import Languages from "features/global/services/languages-service";
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
@@ -64,30 +65,28 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
           });
         }}
       />
-      <CreateModal
+    <CreateModal
         selectFolderFromDevice={() => uploadFolderZoneRef.current?.open()}
-        uploadModal={false}
         selectFromDevice={() => uploadZoneRef.current?.open()}
         addFromUrl={(url, name) => {
-          setCreationModalState({ parent_id: '', open: false });
-          uploadFromUrl(url, name, {
-            companyId,
-            parentId,
-          });
+            setCreationModalState({ parent_id: '', open: false });
+            uploadFromUrl(url, name, {
+                companyId,
+                parentId,
+            });
         }}
-      />
-      <CreateModal
+    />
+    <UploadModal
         selectFolderFromDevice={() => uploadFolderZoneRef.current?.open()}
-        uploadModal={true}
         selectFromDevice={() => uploadZoneRef.current?.open()}
         addFromUrl={(url, name) => {
-          setUploadModalState({ parent_id: '', open: false });
-          uploadFromUrl(url, name, {
-            companyId,
-            parentId,
-          });
+            setUploadModalState({ parent_id: '', open: false });
+            uploadFromUrl(url, name, {
+                companyId,
+                parentId,
+            });
         }}
-      />
+     />
     </>
   );
 };
@@ -107,13 +106,14 @@ export default () => {
   const setCreationModalState = useSetRecoilState(CreateModalAtom);
   const setUploadModalState = useSetRecoilState(UploadModelAtom);
 
-  const openItemModal = useCallback(() => {
+    const openItemModal = useCallback(() => {
     if (item?.id) setCreationModalState({ open: true, parent_id: item.id });
   }, [item?.id, setCreationModalState]);
 
-  const uploadItemModal = useCallback(() => {
-    if (item?.id) setUploadModalState({ open: true, parent_id: item.id });
-  }, [item?.id, setUploadModalState]);
+    const uploadItemModal = useCallback(() => {
+        console.log("here i am")
+        if (item?.id) setUploadModalState({ open: true, parent_id: item.id });
+    }, [item?.id, setUploadModalState]);
 
   return (
     <div className="-m-4 overflow-hidden">
@@ -160,15 +160,15 @@ export default () => {
               />
 
               <Button
-                onClick={() => uploadItemModal()}
-                size="lg"
-                theme="primary"
-                className="w-full mb-2 justify-center"
-                style={{ boxShadow: '0 0 10px 0 rgba(0, 122, 255, 0.5)' }}
+                  onClick={() => uploadItemModal()}
+                  size="lg"
+                  theme="primary"
+                  className="w-full mb-2 justify-center"
+                  style={{ boxShadow: '0 0 10px 0 rgba(0, 122, 255, 0.5)' }}
               >
-                <UploadIcon className="w-5 h-5 mr-2" /> {Languages.t('components.side_menu.buttons.upload')}
+                  <UploadIcon className="w-5 h-5 mr-2" /> {Languages.t('components.side_menu.buttons.upload')}
               </Button>
-              <Button
+                <Button
                 onClick={() => openItemModal()}
                 size="lg"
                 theme="secondary"

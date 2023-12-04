@@ -26,7 +26,8 @@ import { FolderRow } from './documents/folder-row';
 import HeaderPath from './header-path';
 import { ConfirmDeleteModal } from './modals/confirm-delete';
 import { ConfirmTrashModal } from './modals/confirm-trash';
-import {CreateModalAtom, UploadModelAtom} from './modals/create';
+import { CreateModalAtom } from './modals/create';
+import { UploadModelAtom } from './modals/upload'
 import { PropertiesModal } from './modals/properties';
 import { AccessModal } from './modals/update-access';
 import { VersionsModal } from './modals/versions';
@@ -122,6 +123,7 @@ export default memo(
     }, [parentId, refresh, filter]);
 
     const uploadItemModal = useCallback(() => {
+      console.log("here i am")
       if (item?.id) setUploadModalState({ open: true, parent_id: item.id });
     }, [item?.id, setUploadModalState]);
 
