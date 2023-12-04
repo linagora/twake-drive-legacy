@@ -22,7 +22,7 @@
           <tr>
               <td align="center" style="font-size:0px;padding:0 0 16px;word-break:break-word;" >
                   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
-                    <span style="text-transform: capitalize; font-weight: 500">${it.sender.first_name}</span> updated this ${it.notifications[0].item.is_directory ? "folder" : "file" }! ${it.notifications[0].item.is_directory ? "📁" : "📄" }
+                    <span style="text-transform: capitalize; font-weight: 500">${it.sender.first_name}</span> a mis à jour ce ${it.notifications[0].item.is_directory ? "dossier" : "fichier" }! ${it.notifications[0].item.is_directory ? "📁" : "📄" }
                   </div>
                   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
                     <span style="font-weight: 500">
@@ -35,7 +35,7 @@
   </table>
   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;">
     <a class="main-button" href="${it.encodedUrl}">
-    ${it.notifications.length>1 ? `See all ${it.notifications.length} messages` : `See on Twake Drive`}
+    ${it.notifications.length>1 ? `See all ${it.notifications.length} messages` : `Voir sur Twake Drive`}
     </a>
   </div>
   `
