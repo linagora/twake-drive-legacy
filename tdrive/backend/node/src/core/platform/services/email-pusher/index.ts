@@ -49,7 +49,7 @@ export default class EmailPusherClass
         secure: false,
       };
       this.transporter = nodemailer.createTransport(smtpConfig);
-      this.sender = this.configuration.get<string>("smtp_from", "");
+      this.sender = this.configuration.get<string>("sender", "");
     } else {
       this.transporter = null;
       this.apiUrl = this.configuration.get<string>("endpoint", "");
