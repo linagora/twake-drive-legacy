@@ -12,8 +12,6 @@ We are an open-source project and we love to receive contributions from our comm
 - Fork this repository to start working and create a new working branch on top of the develop branch preferably.
 - To propose your changes, open a PR from your fork and target the **develop** branch.
 
-Get more information here about how to start writing code: https://linagora.github.io/Twake/onprem/installation.html
-
 ## Ground Rules
 
 Please adhere to the following responsibilities:
