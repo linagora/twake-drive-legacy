@@ -28,7 +28,7 @@ import assert from "assert";
 import { localEventBus } from "../../../../core/platform/framework/event-bus";
 import { ResourceEventsPayload } from "../../../../utils/types";
 import { isNumber, isString } from "lodash";
-import { RealtimeSaved } from "../../../../core/platform/framework";
+import { Configuration, RealtimeSaved } from "../../../../core/platform/framework";
 import { getPublicUserRoom, getUserRoom } from "../../realtime";
 import NodeCache from "node-cache";
 import gr from "../../../global-resolver";
@@ -42,8 +42,12 @@ export class UserServiceImpl {
   extUserRepository: Repository<ExternalUser>;
   private deviceRepository: Repository<Device>;
   private cache: NodeCache;
+  private driveConfiguration: Configuration;
+  private isSaas: boolean;
 
   async init(): Promise<this> {
+    this.driveConfiguration = new Configuration("drive");
+    this.isSaas = (this.driveConfiguration.get("deploymentType") as string) === "saas";
     this.searchRepository = gr.platformServices.search.getRepository<User>("user", User);
     this.repository = await gr.database.getRepository<User>("user", User);
     this.companyUserRepository = await gr.database.getRepository<CompanyUser>(
@@ -163,6 +167,12 @@ export class UserServiceImpl {
     options?: SearchUserOptions,
     context?: ExecutionContext,
   ): Promise<ListResult<User>> {
+    // if the deployment type is saas, we don't allow partial searching by email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (this.isSaas && !emailRegex.test(options?.search || "")) {
+      return new ListResult<User>("user", [], pagination);
+    }
+
     return await this.searchRepository
       .search(
         {},

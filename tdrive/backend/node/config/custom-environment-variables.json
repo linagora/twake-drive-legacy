@@ -118,6 +118,7 @@
   },
   "drive": {
     "rootAdmins": "DRIVE_ROOT_ADMINS",
-    "defaultLanguage": "DRIVE_DEFAULT_LANGUAGE"
+    "defaultLanguage": "DRIVE_DEFAULT_LANGUAGE",
+    "deploymentType": "DRIVE_DEPLOYMENT_TYPE"
   }
 }
