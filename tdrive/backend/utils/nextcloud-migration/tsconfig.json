@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "outDir": "dist",
+        "strict": true,
+        "esModuleInterop": true,
+        "useUnknownInCatchVariables": false
+    },
+    "include": ["src"]
+}
+  

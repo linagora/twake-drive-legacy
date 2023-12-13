@@ -1,35 +1,36 @@
 ### Drop index
 DELETE https://localhost:9200/tdrive_files_extended
+Authorization: Basic admin admin
 
 ### Delete Index
 DELETE https://localhost:9200/drive_files
+Authorization: Basic admin admin
 
 ### Create index
-PUT https://localhost:9200/tdrive_files_extended
+PUT https://localhost:9200/tdrive_files_extended?pretty
 Authorization: Basic admin admin
 Content-Type: application/json
 
 {
-  "drive_files": {
     "aliases": {},
     "mappings": {
       "_source": {
         "enabled": true
       }
     }
-  }
 }
-
-
 
 ### Check that it is created
 GET https://localhost:9200/_cat/indices
+Authorization: Basic admin admin
 
 ### GET index info
 GET https://localhost:9200/drive_files
+Authorization: Basic admin admin
 
 ### GET data to the index
 GET https://localhost:9200/drive_files/_doc/8c03c5a1-0146-11ee-82d9-f503f8a58e9d
+Authorization: Basic admin admin
 Content-Type: application/json
 
 ### Put data to the index

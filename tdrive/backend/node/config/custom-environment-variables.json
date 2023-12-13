@@ -63,6 +63,13 @@
       "useAuth": "SEARCH_ES_USE_AUTH",
       "username": "SEARCH_ES_USERNAME",
       "password": "SEARCH_ES_PASSWORD"
+    },
+    "opensearch": {
+      "endpoint": "SEARCH_OS_ENDPOINT",
+      "flushInterval": "SEARCH_OS_FLUSHINTERVAL",
+      "useAuth": "SEARCH_OS_USE_AUTH",
+      "username": "SEARCH_OS_USERNAME",
+      "password": "SEARCH_OS_PASSWORD"
     }
   },
   "storage": {

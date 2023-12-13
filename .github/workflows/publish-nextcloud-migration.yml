@@ -1,0 +1,32 @@
+name: publish-nextcloud-migration
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tdrive/backend/utils/nextcloud-migration/**"
+      - "tdrive/docker/tdrive-nextcloud-migration/**"
+
+jobs:
+  publish-node:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set env to production
+        if: endsWith(github.ref, '/main')
+        run: 'echo "DOCKERTAG=latest" >> $GITHUB_ENV'
+      - name: "Push to the registry following labels:"
+        run: |
+          echo "${{ env.DOCKERTAG }},${{ env.DOCKERTAGVERSION }}"
+      - uses: actions/checkout@v2
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@v5
+        with:
+          name: tdrive/tdrive-nextcloud-migration
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          workdir: tdrive
+          registry: docker-registry.linagora.com
+          context: .
+          target: production
+          buildoptions: "-t docker-registry.linagora.com/tdrive/tdrive-nextcloud-migration -f docker/tdrive-nextcloud-migration/Dockerfile"
+          tags: "${{ env.DOCKERTAG }},${{ env.DOCKERTAGVERSION }}"
