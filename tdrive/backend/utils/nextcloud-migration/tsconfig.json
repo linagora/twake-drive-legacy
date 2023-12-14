@@ -6,7 +6,12 @@
         "outDir": "dist",
         "strict": true,
         "esModuleInterop": true,
-        "useUnknownInCatchVariables": false
+        "useUnknownInCatchVariables": false,
+        "typeRoots": [
+            "./typings",
+            "./node_modules/@types/"
+        ],
+        "noImplicitAny": false
     },
     "include": ["src"]
 }

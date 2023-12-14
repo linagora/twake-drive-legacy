@@ -11,6 +11,8 @@ RUN apt update
 
 RUN apt install --assume-yes nextcloud-desktop-cmd
 
+RUN apt install ldap-utils
+
 # Set the working directory inside the container
 WORKDIR /usr/src/app
 

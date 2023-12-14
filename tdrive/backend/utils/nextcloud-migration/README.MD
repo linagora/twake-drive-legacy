@@ -14,10 +14,12 @@ This is a service for migrating date from Nextcloud to Twake Drive
    docker run -p 4001:4001 \
      -e SERVER_PORT=4001 \
      -e LDAP_BASE=dc=example,dc=com \
-     -e LDAP_HOST=ldap.twake.app \
-     -e LDAP_PORT=389 \
+     -e LDAP_URL=ldap://ldap.twake.app:389 \
      -e TMP_DIR=/tmp \
      -e NEXTCLOUD_URL=https://nextcloud.fr \
+     -e TWAKE_DRIVE_URL=https://tdrive.qa.lin-saas.com/ \
+     -e TWAKE_DRIVE_APP_ID=<MY_APPLICATION_ID> \
+     -e TWAKE_DRIVE_SECRET=<MY_SECRET> \
       twakedrive/tdrive-nextcloud-migration
    ```
 

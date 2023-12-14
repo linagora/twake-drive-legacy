@@ -8,21 +8,32 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 const config: NextcloudMigrationConfiguration = {
-  ldapHost: process.env.LDAP_HOST!,
-  ldapPort: process.env.LDAP_PORT!,
-  ldapBase: process.env.LDAP_BASE!,
+  ldap: {
+    baseDn: process.env.LDAP_BASE!,
+    url: process.env.LDAP_URL!,
+  },
   tmpDir: process.env.TMP_DIR || '/tmp',
-  nextcloudUrl: process.env.NEXTCLOUD_URL!
+  nextcloudUrl: process.env.NEXTCLOUD_URL!,
+  drive: {
+    url: process.env.TWAKE_DRIVE_URL!,
+    credentials: {
+      appId: process.env.TWAKE_DRIVE_APP_ID!,
+      secret: process.env.TWAKE_DRIVE_SECRET!,
+    }
+  }
 }
 
-if (!config.ldapBase) {
+if (!config.ldap.baseDn) {
   throw new Error("LDAP base has to be set")
 }
-if (!config.ldapPort) {
-  throw new Error("LDAP port has to be set")
+if (!config.ldap.url) {
+  throw new Error("LDAP url has to be set")
 }
-if (!config.ldapHost) {
-  throw new Error("LDAP host has to be set")
+if (!config.drive.url) {
+  throw new Error("Twake Drive url  host has to be set")
+}
+if (!config.drive.credentials.appId) {
+  throw new Error("Twake Drive application identifier host has to be set")
 }
 if (!config.nextcloudUrl) {
   throw new Error("Nextcloud url has to be set")
