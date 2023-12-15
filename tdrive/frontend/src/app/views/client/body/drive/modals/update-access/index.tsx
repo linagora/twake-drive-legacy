@@ -4,8 +4,11 @@ import { useEffect } from 'react';
 import { atom, useRecoilState } from 'recoil';
 import { InternalAccessManager } from './internal-access';
 import { PublicLinkManager } from './public-link-access';
+import { useCurrentCompany } from '@features/companies/hooks/use-companies';
 import Languages from 'features/global/services/languages-service';
-
+import FeatureTogglesService, {
+  FeatureNames,
+} from '@features/global/services/feature-toggles-service';
 
 export type AccessModalType = {
   open: boolean;
@@ -32,17 +35,22 @@ export const AccessModal = () => {
 
 const AccessModalContent = ({ id }: { id: string }) => {
   const { item, access, refresh } = useDriveItem(id);
-
+  const { company, refresh: refreshCompany } = useCurrentCompany();
   useEffect(() => {
     refresh(id);
+    refreshCompany();
   }, []);
-
-  console.log(item?.access_info?.public?.level, 'item');
-
+  // Check if the COMPANY_SEARCH_USERS feature is disabled
+  const userSearchEnabled = !company.plan?.features?.[FeatureNames.COMPANY_SEARCH_USERS];
+  console.log('user company is: ', company, 'InternalAccess: ', userSearchEnabled);
   return (
-    <ModalContent title={Languages.t('components.item_context_menu.manage_access_to') + " " + item?.name}>
+    <ModalContent
+      title={Languages.t('components.item_context_menu.manage_access_to') + ' ' + item?.name}
+    >
       <PublicLinkManager id={id} disabled={access !== 'manage'} />
-      <InternalAccessManager id={id} disabled={access !== 'manage'} />
+      {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_SEARCH_USERS) && (
+        <InternalAccessManager id={id} disabled={access !== 'manage'} />
+      )}
     </ModalContent>
   );
 };

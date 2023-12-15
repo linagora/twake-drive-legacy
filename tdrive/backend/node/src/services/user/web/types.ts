@@ -83,6 +83,7 @@ export enum CompanyFeaturesEnum {
   CHAT_EDIT_FILES = "chat:edit_files",
   CHAT_UNLIMITED_STORAGE = "chat:unlimited_storage",
   COMPANY_INVITE_MEMBER = "company:invite_member",
+  COMPANY_SEARCH_USERS = "company:search_users",
 }
 
 export type CompanyFeaturesObject = {
@@ -92,6 +93,7 @@ export type CompanyFeaturesObject = {
   [CompanyFeaturesEnum.CHAT_EDIT_FILES]?: boolean;
   [CompanyFeaturesEnum.CHAT_UNLIMITED_STORAGE]?: boolean;
   [CompanyFeaturesEnum.COMPANY_INVITE_MEMBER]?: boolean;
+  [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]?: boolean;
 };
 
 export type CompanyLimitsObject = {

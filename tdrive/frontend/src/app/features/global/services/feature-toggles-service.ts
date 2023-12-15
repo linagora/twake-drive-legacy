@@ -8,6 +8,7 @@ export enum FeatureNames {
   EDIT_FILES = 'chat:edit_files',
   UNLIMITED_STORAGE = 'chat:unlimited_storage', //Currently inactive
   COMPANY_INVITE_MEMBER = 'company:invite_member',
+  COMPANY_SEARCH_USERS = 'company:search_users',
 }
 
 export type FeatureValueType = boolean | number;
@@ -22,6 +23,7 @@ availableFeaturesWithDefaults.set(FeatureNames.MULTIPLE_WORKSPACES, true);
 availableFeaturesWithDefaults.set(FeatureNames.EDIT_FILES, true);
 availableFeaturesWithDefaults.set(FeatureNames.UNLIMITED_STORAGE, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_INVITE_MEMBER, true);
+availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SEARCH_USERS, false);
 
 /**
  * ChannelServiceImpl that allow you to manage feature flipping in Tdrive using react feature toggles

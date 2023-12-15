@@ -53,6 +53,7 @@ export function formatCompany(
       [CompanyFeaturesEnum.CHAT_EDIT_FILES]: true,
       [CompanyFeaturesEnum.CHAT_UNLIMITED_STORAGE]: true,
       [CompanyFeaturesEnum.COMPANY_INVITE_MEMBER]: true,
+      [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]: false,
     },
     {
       ...(res.plan?.features || {}),
@@ -61,6 +62,8 @@ export function formatCompany(
         res.stats.total_members < res.plan?.limits[CompanyLimitsEnum.COMPANY_MEMBERS_LIMIT],
     },
   );
+
+  console.log("🚀🚀 res.plan.features: ", res.plan.features);
 
   return res;
 }
