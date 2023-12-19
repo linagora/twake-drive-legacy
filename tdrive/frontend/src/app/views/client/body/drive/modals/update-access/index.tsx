@@ -40,9 +40,6 @@ const AccessModalContent = ({ id }: { id: string }) => {
     refresh(id);
     refreshCompany();
   }, []);
-  // Check if the COMPANY_SEARCH_USERS feature is disabled
-  const userSearchEnabled = !company.plan?.features?.[FeatureNames.COMPANY_SEARCH_USERS];
-  console.log('user company is: ', company, 'InternalAccess: ', userSearchEnabled);
   return (
     <ModalContent
       title={Languages.t('components.item_context_menu.manage_access_to') + ' ' + item?.name}

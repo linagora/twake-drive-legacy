@@ -23,7 +23,7 @@ availableFeaturesWithDefaults.set(FeatureNames.MULTIPLE_WORKSPACES, true);
 availableFeaturesWithDefaults.set(FeatureNames.EDIT_FILES, true);
 availableFeaturesWithDefaults.set(FeatureNames.UNLIMITED_STORAGE, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_INVITE_MEMBER, true);
-availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SEARCH_USERS, false);
+availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SEARCH_USERS, true);
 
 /**
  * ChannelServiceImpl that allow you to manage feature flipping in Tdrive using react feature toggles
