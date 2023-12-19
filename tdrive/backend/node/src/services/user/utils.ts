@@ -1,4 +1,5 @@
 import Company from "./entities/company";
+import config from "../../core/config";
 import {
   CompanyFeaturesEnum,
   CompanyLimitsEnum,
@@ -53,7 +54,9 @@ export function formatCompany(
       [CompanyFeaturesEnum.CHAT_EDIT_FILES]: true,
       [CompanyFeaturesEnum.CHAT_UNLIMITED_STORAGE]: true,
       [CompanyFeaturesEnum.COMPANY_INVITE_MEMBER]: true,
-      [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]: false,
+      // use the config value for this one
+      [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]:
+        (config.get("company.search_users") as boolean) || true,
     },
     {
       ...(res.plan?.features || {}),
