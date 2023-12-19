@@ -56,7 +56,7 @@ export function formatCompany(
       [CompanyFeaturesEnum.COMPANY_INVITE_MEMBER]: true,
       // use the config value for this one
       [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]:
-        (config.get("company.search_users") as boolean) || true,
+        (config.get("drive.featureSearchUsers") as boolean) || true,
     },
     {
       ...(res.plan?.features || {}),
