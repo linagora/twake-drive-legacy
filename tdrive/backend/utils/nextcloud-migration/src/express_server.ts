@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from "express";
 import { NextcloudMigration, NextcloudMigrationConfiguration } from './nextcloud_migration.js';
+import { logger } from "./logger"
 
 const app: Express = express();
 const port = process.env.SERVER_PORT || 3000;
@@ -47,7 +48,7 @@ const nextcloud = new NextcloudMigration(config);
 
 app.post("/", async (req: Request, res: Response) => {
   const params = req.body;
-  console.log(`Got request for data synchronization with params: ${params}`)
+  logger.info(`Got request for data synchronization with params: ${params}`)
   if (!params || !params["username"] || !params.password) {
     res.status(400).send("Username and password for nextcloud are required");
   }
@@ -62,5 +63,5 @@ app.post("/", async (req: Request, res: Response) => {
 });
 
 app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
+  logger.info(`[server]: Server is running at http://localhost:${port}`);
 });

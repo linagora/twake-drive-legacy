@@ -179,7 +179,7 @@ export const getAccessLevel = async (
   }
 
   if (id.startsWith("user_")) {
-    if (await isCompanyApplication(context)) return "read";
+    if (await isCompanyApplication(context)) return "manage";
   }
 
   if (context?.user?.id) {
@@ -432,7 +432,9 @@ export const getItemScope = async (
       {},
       context,
     );
-    scope = driveItemParent.scope;
+    //when application is creating document, there is not user in the context, so there is not scope as well
+    //TODO [ASH] do not forget tofix it when the context will be emulated during the application rework
+    scope = driveItemParent?.scope || item.scope;
   }
   return scope;
 };

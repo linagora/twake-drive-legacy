@@ -1,4 +1,5 @@
 import ldap, { SearchEntry, SearchOptions } from 'ldapjs';
+import { logger } from "./logger"
 
 export type LdapConfiguration = {
   url: string,
@@ -29,7 +30,7 @@ export class LdapUser {
         if (error) {
           reject(new Error("Authentication error"));
         } else {
-          console.log("Successfully authenticated in LDAP")
+          logger.info("Successfully authenticated in LDAP")
           resolve(this.client);
         }
       });
@@ -44,11 +45,11 @@ export class LdapUser {
           reconnect: true
         });
         this.client.on('connect', (res) => {
-          console.log("Connected to LDAP")
+          logger.info("Connected to LDAP")
           resolve(this.auth("", ""));
         })
         this.client.on('connectionError', (error) => {
-          console.log("Error connecting to LDAP")
+          logger.info("Error connecting to LDAP")
           reject(error);
         });
       }
@@ -59,20 +60,20 @@ export class LdapUser {
     const search = await this.search(username);
     return new Promise<User>((resolve, reject) => {
       search.on('error', (err) => {
-        console.log("ERROR");
-        console.log(err);
+        logger.info("ERROR");
+        logger.info(err);
       });
       search.on('searchRequest', (searchRequest) => {
-        console.log('searchRequest: ', searchRequest.messageId);
+        logger.info('searchRequest: ', searchRequest.messageId);
       });
       search.on('searchEntry', (entry) => {
-        console.log('entry: ' + JSON.stringify(entry));
+        logger.info('entry: ' + JSON.stringify(entry));
       });
       search.on('searchReference', (referral) => {
-        console.log('referral: ' + referral.uris.join());
+        logger.info('referral: ' + referral.uris.join());
       });
       search.on('end', (err) => {
-        console.log("END");
+        logger.info("END");
       });
     });
   }
@@ -84,14 +85,14 @@ export class LdapUser {
         attributes: ['cn', 'sn'],
         scope: 'sub',
       } as SearchOptions;
-      console.log(`Search in ${this.config.baseDn} with options`);
+      logger.info(`Search in ${this.config.baseDn} with options`);
       // Perform search
       this.client?.search(this.config.baseDn, opts, (error, res) => {
         if (error) {
           console.error("Search error", error);
           reject(error)
         } else {
-          console.log("returning search callback");
+          logger.info("returning search callback");
           resolve(res);
         }
       });

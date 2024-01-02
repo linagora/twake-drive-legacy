@@ -21,6 +21,7 @@ import {
   ConfigureRequest,
 } from "../types";
 import { ConsoleHookUser } from "src/services/console/types";
+import User from "src/services/user/entities/user";
 
 export class ApplicationsApiController {
   async token(
@@ -174,9 +175,9 @@ export class ApplicationsApiController {
         last_name: string;
       };
     }>,
-  ): Promise<any> {
+  ): Promise<User> {
     try {
-      await gr.services.console.getClient().updateLocalUserFromConsole({
+      return await gr.services.console.getClient().updateLocalUserFromConsole({
         email: request.body.email.trim().toLocaleLowerCase(),
         name: request.body.first_name,
         surname: request.body.last_name,
@@ -185,7 +186,6 @@ export class ApplicationsApiController {
       logger.error(err);
       throw err;
     }
-    return {};
   }
 }
 

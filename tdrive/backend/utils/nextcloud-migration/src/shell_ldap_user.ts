@@ -1,6 +1,7 @@
 import { LdapConfiguration, User } from './ldap_user';
 import { exec } from 'child_process';
 import ldif from 'ldif';
+import { logger } from "./logger"
 
 export class LdapUser {
 
@@ -13,13 +14,13 @@ export class LdapUser {
   async find(username: string): Promise<User> {
     return new Promise((resolve, reject) => {
       let cmd = `ldapsearch -x -H ${this.config.url} -b '${this.config.baseDn}' '(uid=${username})'`;
-      console.log("Executing command to get data from LDAP for " + username);
+      logger.info("Executing command to get data from LDAP for " + username);
       exec(cmd, (error, stdout, stderr) => {
         if (stderr) {
-          console.log("ERROR: " + stderr);
+          logger.info("ERROR: " + stderr);
         }
         if (error) {
-          console.log(`ERROR running sync for the user: ${error.message}`);
+          logger.info(`ERROR running sync for the user: ${error.message}`);
           reject(new Error(error.message));
         } else {
           if (stdout) {
@@ -28,7 +29,7 @@ export class LdapUser {
                 stdout = stdout.substring(0, stdout.lastIndexOf("# search result"))
               }
               let obj =  ldif.parse(stdout).shift().toObject({});
-              console.log(obj);
+              logger.info(obj);
               resolve({
                 lastName: obj.attributes.sn,
                 firstName: obj.attributes.givenName,
@@ -39,7 +40,7 @@ export class LdapUser {
               resolve({ } as User);
             }
           } else {
-            console.log("No user");
+            logger.info("No user");
             resolve({ } as User);
           }
         }

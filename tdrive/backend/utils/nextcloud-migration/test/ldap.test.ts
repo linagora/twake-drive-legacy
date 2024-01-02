@@ -2,7 +2,7 @@ import {describe, expect, test} from '@jest/globals';
 import { LdapUser } from '../src/shell_ldap_user';
 import { LdapConfiguration } from '../src/ldap_user';
 
-//integration debug test
+//FOR LOCAL DEBUG PURPOSE ONLY, ITS NOT A TEST
 describe.skip('ldap module', () => {
 
   test('ldap returns user info', async () => {
