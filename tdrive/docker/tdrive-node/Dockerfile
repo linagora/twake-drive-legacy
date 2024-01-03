@@ -11,9 +11,7 @@ RUN apt-get update && \
 # RUN apt-get update && apt-get install -y libc6
 # RUN ln -s /lib/libc.musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2
 
-
 ### Install TDrive
-
 WORKDIR /usr/src/app
 COPY backend/node/package*.json ./
 
@@ -30,6 +28,7 @@ COPY backend/node/ .
 #Install dev dependancies for build
 RUN export NODE_ENV=development
 RUN npm install
+
 #Build in production mode
 RUN export NODE_ENV=production
 RUN npm run build

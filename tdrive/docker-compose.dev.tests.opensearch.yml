@@ -42,7 +42,7 @@ services:
     build:
       context: .
       dockerfile: docker/tdrive-node/Dockerfile
-      target: test
+      target: development
     volumes:
       - ./coverage/:/usr/src/app/coverage/
     environment:
@@ -51,9 +51,9 @@ services:
       - DB_DRIVER
       - PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
       - SEARCH_OS_FLUSHINTERVAL=1
-      - SEARCH_OS_ENDPOINT=https://opensearch-node1:9202;
-      - SEARCH_OS_PASSWORD=admin;
-      - SEARCH_OS_USE_AUTH=true;
+      - SEARCH_OS_ENDPOINT=https://opensearch-node1:9202
+      - SEARCH_OS_PASSWORD=admin
+      - SEARCH_OS_USE_AUTH=true
       - SEARCH_OS_USERNAME=admin
     depends_on:
       - mongo
