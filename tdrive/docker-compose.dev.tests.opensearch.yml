@@ -37,24 +37,24 @@ services:
     ports:
       - 27017:27017
 
-  node:
-    image: tdrive/tdrive-node:test
-    container_name: node-test
-    build:
-      context: .
-      dockerfile: docker/tdrive-node/Dockerfile
-      target: test
-    environment:
-      - NODE_ENV=test
-      - DB_DRIVER
-      #- PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
-      - SEARCH_ES_ENDPOINT=http://elasticsearch:9200
-      - SEARCH_ES_FLUSHINTERVAL=1
-    volumes:
-      - ./backend/node:/usr/src/app
-      - ./docker-data/documents/:/storage/
-    depends_on:
-      - mongo
-      - opensearch-node1
-    links:
-      - mongo
+#  node:
+#    image: tdrive/tdrive-node:test
+#    container_name: node-test
+#    build:
+#      context: .
+#      dockerfile: docker/tdrive-node/Dockerfile
+#      target: test
+#    environment:
+#      - NODE_ENV=test
+#      - DB_DRIVER
+#      #- PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
+#      - SEARCH_ES_ENDPOINT=http://elasticsearch:9200
+#      - SEARCH_ES_FLUSHINTERVAL=1
+#    volumes:
+#      - ./backend/node:/usr/src/app
+#      - ./docker-data/documents/:/storage/
+#    depends_on:
+#      - mongo
+#      - opensearch-node1
+#    links:
+#      - mongo

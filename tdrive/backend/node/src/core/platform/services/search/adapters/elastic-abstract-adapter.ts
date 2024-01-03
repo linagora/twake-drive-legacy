@@ -1,22 +1,23 @@
-import { logger } from "../../../../framework";
+import { logger } from "../../../framework";
 import _ from "lodash";
 import {
   ColumnDefinition,
   EntityDefinition,
   EntityTarget,
+  ESSearchConfiguration,
   FindFilter,
   FindOptions,
   IndexedEntity,
   SearchAdapterInterface,
-  SearchConfiguration,
-} from "../../api";
-import { SearchAdapter } from "../abstract";
-import { DatabaseServiceAPI } from "../../../database/api";
-import { getEntityDefinition, unwrapPrimarykey } from "../../api";
-import { ListResult, Paginable, Pagination } from "../../../../framework/api/crud-service";
-import { asciiFold, parsePrimaryKey, stringifyPrimaryKey } from "../utils";
-import { buildSearchQuery } from "../elasticsearch/search";
-import { Client } from "@opensearch-project/opensearch";
+} from "../api";
+import { SearchAdapter } from "./abstract";
+import { DatabaseServiceAPI } from "../../database/api";
+import { getEntityDefinition, unwrapPrimarykey } from "../api";
+import { ListResult, Paginable, Pagination } from "../../../framework/api/crud-service";
+import { asciiFold, parsePrimaryKey, stringifyPrimaryKey } from "./utils";
+import { buildSearchQuery } from "./elasticsearch/search";
+import { Client as OpenClient } from "@opensearch-project/opensearch";
+import { Client as ESClient } from "@elastic/elasticsearch";
 
 type Operation = {
   index?: { _index: string; _id: string };
@@ -24,15 +25,16 @@ type Operation = {
   [key: string]: any;
 };
 
-export default class OpenSearch extends SearchAdapter implements SearchAdapterInterface {
-  private client: Client;
+export default class ESAndOpenSearch extends SearchAdapter implements SearchAdapterInterface {
   private bulkReaders = 0;
   private buffer: Operation[] = [];
-  private name = "OpenSearch";
+  private client: OpenClient | ESClient;
 
   constructor(
     readonly database: DatabaseServiceAPI,
-    readonly configuration: SearchConfiguration["opensearch"],
+    readonly configuration: ESSearchConfiguration,
+    readonly newClient: (arg: any) => OpenClient | ESClient,
+    readonly name,
   ) {
     super();
   }
@@ -54,10 +56,10 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
         };
       }
 
-      this.client = new Client(clientOptions);
+      this.client = this.newClient(clientOptions);
     } catch (e) {
       logger.error(
-        `Unable to connect to ElasticSearch for options: ${JSON.stringify({
+        `Unable to connect to ${this.name} for options: ${JSON.stringify({
           node: this.configuration.endpoint,
           auth: {
             useAuth: this.configuration.useAuth,
@@ -85,6 +87,8 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
     const mapping = entity.options?.search?.esMapping;
 
     try {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       await this.client.indices.get({
         index: name,
       });
@@ -108,7 +112,8 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
           mappings: { ...mapping, _source: { enabled: false } },
         },
       };
-
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       const rep = await this.client.indices.create(indice, { ignore: [400] });
 
       if (rep.statusCode !== 200) {
@@ -164,7 +169,7 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
         ...body,
       };
 
-      logger.info(`Add operation upsert to elasticsearch for doc ${record.id}`);
+      logger.info(`Add operation upsert to ${this.name} for doc ${record.id}`);
 
       this.buffer.push(record);
     }
@@ -191,7 +196,7 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
         },
       };
 
-      logger.info(`Add operation remove from elasticsearch for doc ${record.id}`);
+      logger.info(`Add operation remove from ${this.name} for doc ${record.id}`);
 
       this.buffer.push(record);
     }
@@ -204,7 +209,7 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
       return;
     }
 
-    logger.info("Start new Elasticsearch bulk reader.");
+    logger.info(`Start new ${this.name} bulk reader.`);
     this.bulkReaders += 1;
 
     let buffer;
@@ -223,7 +228,7 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
         onDocument: (doc: Operation) => {
           if (doc.delete) {
             logger.info(
-              `Operation ${"DELETE"} pushed to elasticsearch index ${doc.delete._index} (doc.id: ${
+              `Operation ${"DELETE"} pushed to ${this.name} index ${doc.delete._index} (doc.id: ${
                 doc.delete._id
               })`,
             );
@@ -233,7 +238,7 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
           }
           if (doc.index) {
             logger.info(
-              `Operation ${"INDEX"} pushed to elasticsearch index ${doc.index._index} (doc.id: ${
+              `Operation ${"INDEX"} pushed to ${this.name} index ${doc.index._index} (doc.id: ${
                 doc.index._id
               })`,
             );
@@ -247,11 +252,9 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
         onDrop: res => {
           const doc = res.document;
           logger.error(
-            `Operation ${
-              doc.action
-            } was droped while pushing to elasticsearch index ${JSON.stringify(
-              doc.index,
-            )} (doc.id: ${doc.id})`,
+            `Operation ${doc.action} was droped while pushing to ${
+              this.name
+            } index ${JSON.stringify(doc.index)} (doc.id: ${doc.id})`,
           );
           logger.error(res.error);
         },
@@ -261,7 +264,7 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
       logger.error(err);
     }
 
-    logger.info("Elasticsearch bulk flushed.");
+    logger.info(`${this.name} bulk flushed.`);
     this.bulkReaders += -1;
 
     this.startBulkReader();
@@ -286,6 +289,8 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
     let esResponse: any;
 
     if (options.pagination.page_token) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       esResponse = await this.client.scroll(
         {
           scroll_id: options.pagination.page_token,
@@ -293,6 +298,8 @@ export default class OpenSearch extends SearchAdapter implements SearchAdapterIn
         esOptions,
       );
     } else {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       esResponse = await this.client.search(esParamsWithScroll, esOptions);
     }
 

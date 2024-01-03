@@ -45,7 +45,7 @@ export default class LocalConnectorService implements StorageConnectorAPI {
   async read(path: string): Promise<Readable> {
     const fullPath = this.getFullPath(path);
     if (!fs.existsSync(fullPath)) {
-      throw new Error("File doesn't exists");
+      throw new Error(`File doesn't exists ${fullPath}`);
     }
     return createReadStream(fullPath);
   }

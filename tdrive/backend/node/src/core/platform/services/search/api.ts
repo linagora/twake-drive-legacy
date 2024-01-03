@@ -65,12 +65,15 @@ export interface SearchServiceAPI extends TdriveServiceProvider {
 }
 
 export type SearchConfiguration = {
-  type?: false | "elasticsearch" | "mongodb";
-  elasticsearch?: {
-    useAuth: boolean;
-    username?: string;
-    password?: string;
-    endpoint: string;
-    flushInterval: number; //In milliseconds
-  };
+  type?: false | "elasticsearch" | "mongodb" | "opensearch";
+  elasticsearch?: ESSearchConfiguration;
+  opensearch?: ESSearchConfiguration;
+};
+
+export type ESSearchConfiguration = {
+  useAuth: boolean;
+  username?: string;
+  password?: string;
+  endpoint: string;
+  flushInterval: number; //In milliseconds
 };
