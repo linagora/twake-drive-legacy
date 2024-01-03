@@ -8,7 +8,7 @@ import {
   SearchConfiguration,
   SearchServiceAPI,
 } from "./api";
-import ESAndOpenSearch from "./adapters/elastic-abstract-adapter";
+import ESAndOpenSearch from "./adapters/elasticsearch/elastic-open-search-adapter";
 import MongosearchService from "./adapters/mongosearch";
 import { localEventBus } from "../../framework/event-bus";
 import { DatabaseServiceAPI } from "../database/api";
