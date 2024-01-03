@@ -24,7 +24,7 @@ services:
 #    volumes:
 #      - opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
     ports:
-      - 9200:9202 # REST API
+      - 9202:9200 # REST API
 #      - 9600:9600 # Performance Analyzer
 #   networks:
  #     - opensearch-net # All of the containers will join the same Docker bridge network
