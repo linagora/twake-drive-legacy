@@ -23,19 +23,19 @@ services:
         hard: 65536
 #    volumes:
 #      - opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
-    ports:
-      - 9200:9200 # REST API
-      - 9600:9600 # Performance Analyzer
- #   networks:
- #     - opensearch-net # All of the containers will join the same Docker bridge network
+#    ports:
+#      - 9200:9200 # REST API
+#      - 9600:9600 # Performance Analyzer
+#   networks:
+#     - opensearch-net # All of the containers will join the same Docker bridge network
 
   mongo:
     container_name: mongo
     image: mongo
     volumes:
       - ./docker-data/mongo:/data/db
-    ports:
-      - 27017:27017
+#    ports:
+#      - 27017:27017
 
   node:
     image: tdrive/tdrive-node:test
