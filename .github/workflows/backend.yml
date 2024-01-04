@@ -21,8 +21,12 @@ jobs:
       - uses: actions/checkout@v2
       - name: e2e-mongo-test
         run: cd tdrive && docker-compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb -e PUBSUB_TYPE=local node npm run test:all
+      - name: e2e-mongo-test-clean
+        run: cd tdrive && docker-compose -f docker-compose.tests.yml stop
       - name: e2e-opensearch-test
         run: cd tdrive && docker-compose -f docker-compose.dev.tests.opensearch.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=opensearch -e DB_DRIVER=mongodb -e PUBSUB_TYPE=local node npm run test:all
+      - name: e2e-opensearch-test-clean
+        run: cd tdrive && docker-compose -f docker-compose.dev.tests.opensearch.yml stop
       - name: e2e-cassandra-test
         run: cd tdrive && docker-compose -f docker-compose.tests.yml up -d scylladb elasticsearch rabbitmq && sleep 60 && docker-compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=elasticsearch -e DB_DRIVER=cassandra node npm run test:all
       - name: coverage
