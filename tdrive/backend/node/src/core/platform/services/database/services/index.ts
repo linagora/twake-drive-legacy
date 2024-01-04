@@ -7,6 +7,7 @@ import { CassandraConnectionOptions } from "./orm/connectors/cassandra/cassandra
 import { MongoConnectionOptions } from "./orm/connectors/mongodb/mongodb";
 import { EntityTarget } from "./orm/types";
 import { RepositoryManager } from "./orm/repository/manager";
+import { PostgresConnectionOptions } from "./orm/connectors/postgres/postgres";
 
 export default class DatabaseService implements DatabaseServiceAPI {
   version = "1";
@@ -40,6 +41,9 @@ export default class DatabaseService implements DatabaseServiceAPI {
   }
 }
 
-export declare type ConnectionOptions = MongoConnectionOptions | CassandraConnectionOptions;
+export declare type ConnectionOptions =
+  | MongoConnectionOptions
+  | CassandraConnectionOptions
+  | PostgresConnectionOptions;
 
-export declare type DatabaseType = "mongodb" | "cassandra";
+export declare type DatabaseType = "mongodb" | "cassandra" | "postgres";

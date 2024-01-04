@@ -5,16 +5,12 @@ import { FindOptions } from "../repository/repository";
 import { ColumnDefinition, EntityDefinition } from "../types";
 import { ListResult } from "../../../../../framework/api/crud-service";
 
-export abstract class AbstractConnector<T extends ConnectionOptions, DatabaseClient>
-  implements Connector
-{
+export abstract class AbstractConnector<T extends ConnectionOptions> implements Connector {
   constructor(protected type: DatabaseType, protected options: T, protected secret: string) {}
 
   abstract connect(): Promise<this>;
 
   abstract drop(): Promise<this>;
-
-  abstract getClient(): DatabaseClient;
 
   abstract createTable(
     entity: EntityDefinition,
@@ -37,9 +33,5 @@ export abstract class AbstractConnector<T extends ConnectionOptions, DatabaseCli
 
   getType(): DatabaseType {
     return this.type;
-  }
-
-  getSecret(): string {
-    return this.secret;
   }
 }

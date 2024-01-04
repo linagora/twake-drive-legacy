@@ -1,0 +1,40 @@
+version: "3.4"
+
+# docker-compose -f docker-compose.dev.tests.mongo.yml stop mongo; rm -R docker-data/mongo/; docker-compose -f docker-compose.dev.tests.mongo.yml run -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb node npm run test:e2e
+
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: tdrive
+      POSTGRES_PASSWORD: tdrive_secret
+      POSTGRES_USER: tdrive_user
+    ports:
+      - "5432:5432"
+
+#  node:
+#    image: tdrive/tdrive-node:test
+#    build:
+#      context: .
+#      dockerfile: docker/tdrive-node/Dockerfile
+#      target: development
+#    volumes:
+#      - ./coverage/:/usr/src/app/coverage/
+#    environment:
+#      - LOG_LEVEL=error
+#      - NODE_ENV=test
+#      - DB_DRIVER
+#      - PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
+#      - SEARCH_OS_FLUSHINTERVAL=1
+#      - SEARCH_OS_ENDPOINT=https://opensearch-node1:9200
+#      - SEARCH_OS_PASSWORD=admin
+#      - SEARCH_OS_USE_AUTH=true
+#      - SEARCH_OS_USERNAME=admin
+#    depends_on:
+#      - postgres
+#      - opensearch-node1
+#    links:
+#      - postgres
+#      - opensearch-node1

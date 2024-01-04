@@ -17,7 +17,7 @@ export interface MongoConnectionOptions {
   database: string;
 }
 
-export class MongoConnector extends AbstractConnector<MongoConnectionOptions, mongo.MongoClient> {
+export class MongoConnector extends AbstractConnector<MongoConnectionOptions> {
   private client: mongo.MongoClient;
 
   async init(): Promise<this> {

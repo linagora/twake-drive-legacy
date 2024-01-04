@@ -5,6 +5,7 @@ import { MongoConnectionOptions } from "./mongodb/mongodb";
 import { ColumnDefinition, EntityDefinition } from "../types";
 import { FindOptions } from "../repository/repository";
 import { ListResult } from "../../../../../framework/api/crud-service";
+import { PostgresConnectionOptions } from "./postgres/postgres";
 
 export * from "./mongodb/mongodb";
 export * from "./cassandra/cassandra";
@@ -60,4 +61,7 @@ export interface Connector extends Initializable {
   ): Promise<ListResult<EntityType>>;
 }
 
-export declare type ConnectionOptions = MongoConnectionOptions | CassandraConnectionOptions;
+export declare type ConnectionOptions =
+  | MongoConnectionOptions
+  | CassandraConnectionOptions
+  | PostgresConnectionOptions;

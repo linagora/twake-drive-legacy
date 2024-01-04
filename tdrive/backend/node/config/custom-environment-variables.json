@@ -53,6 +53,16 @@
       "contactPoints": "DB_CASSANDRA_URI",
       "localDataCenter": "DB_CASSANDRA_LOCALDATACENTER",
       "keyspace": "DB_CASSANDRA_KEYSPACE"
+    },
+    "postgres": {
+      "database": "DB_POSTGRES_DBNAME",
+      "user": "DB_POSTGRES_USERNAME",
+      "password": "DB_POSTGRES_PASSWORD",
+      "port": "DB_POSTGRES_PORT",
+      "ssl": "DB_POSTGRES_USE_SSL",
+      "max": "DB_POSTGRES_POOL_MAX_CONNECTIONS",
+      "idleTimeoutMillis": "DB_POSTGRES_CONNECTION_IDLE_TIMEOUT",
+      "connectionTimeoutMillis": "DB_POSTGRES_POOL_CONNECTION_TIMEOUT"
     }
   },
   "search": {
