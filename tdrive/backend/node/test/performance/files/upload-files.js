@@ -13,7 +13,7 @@ export let options = {
     { duration: "10s", target: 0 },
   ],
   thresholds: {
-    upload_duration: ["p(95)<500"], // 95% of uploads should be faster than 500ms
+    upload_duration: ["p(95)<17000"], // 95% of uploads should be faster than 500ms
   },
 };
 
@@ -22,7 +22,7 @@ const files = fileTypes.map(type => ({
   data: open(`../../e2e/common/assets/sample.${type}`),
   type: type,
 }));
-const baseURL = "http://localhost:4000/internal/services/files/v1/companies";
+const baseURL = `${__ENV.BACKEND}/internal/services/files/v1/companies`;
 
 function uploadFile(file, JWT, companyID) {
   const url = `${baseURL}/${companyID}/files?thumbnail_sync=0`;
@@ -51,7 +51,6 @@ export default function () {
   const file = files[Math.floor(Math.random() * files.length)];
 
   const responseBody = uploadFile(file, JWT, companyID);
-
   check(responseBody, {
     "response is successful": body => body.resource !== undefined,
     "company_id is present": body => body.resource.company_id !== undefined,

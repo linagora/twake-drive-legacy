@@ -16,7 +16,7 @@ export let options = {
   },
 };
 
-const baseURL = "http://localhost:4000/internal/services/files/v1/companies";
+const baseURL = `${__ENV.BACKEND}/internal/services/files/v1/companies`;
 
 function createDocument(JWT, companyID, item, version) {
   const url = `${baseURL}/${companyID}/item`;
