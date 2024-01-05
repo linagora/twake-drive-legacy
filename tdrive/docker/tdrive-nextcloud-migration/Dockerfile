@@ -24,8 +24,9 @@ WORKDIR /usr/src/app
 COPY backend/utils/nextcloud-migration/src/** ./src/
 COPY backend/utils/nextcloud-migration/.nvmrc ./
 COPY backend/utils/nextcloud-migration/*.json ./
+COPY backend/utils/nextcloud-migration/rollup.config.js ./
 
-RUN npm i && npm run build
+RUN npm i && npm run build && npm cache clean --force && rm -rf node_modules
 
 # Don't rebuild on start
 RUN perl -i -ne 'print unless/prestart/' package.json
