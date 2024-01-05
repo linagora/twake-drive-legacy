@@ -27,5 +27,8 @@ COPY backend/utils/nextcloud-migration/*.json ./
 
 RUN npm i && npm run build
 
+# Don't rebuild on start
+RUN perl -i -ne 'print unless/prestart/' package.json
+
 # Run the Node.js application
 CMD ["npm", "run", "start"]
