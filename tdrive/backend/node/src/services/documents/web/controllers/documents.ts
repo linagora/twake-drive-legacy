@@ -35,12 +35,6 @@ export class DocumentsController {
     ? config.get("drive.rootAdmins")
     : [];
 
-  private getCompanyUserRole(companyId: string, userId: string, context?: ExecutionContext) {
-    return gr.services.companies
-      .getCompanyUser({ id: companyId }, { id: userId }, context)
-      .then(a => (a ? a.level : null));
-  }
-
   /**
    * Creates a DriveFile item
    *
