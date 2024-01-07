@@ -56,13 +56,11 @@
     },
     "postgres": {
       "database": "DB_POSTGRES_DBNAME",
+      "host": "DB_POSTGRES_HOST",
       "user": "DB_POSTGRES_USERNAME",
       "password": "DB_POSTGRES_PASSWORD",
       "port": "DB_POSTGRES_PORT",
-      "ssl": "DB_POSTGRES_USE_SSL",
-      "max": "DB_POSTGRES_POOL_MAX_CONNECTIONS",
-      "idleTimeoutMillis": "DB_POSTGRES_CONNECTION_IDLE_TIMEOUT",
-      "connectionTimeoutMillis": "DB_POSTGRES_POOL_CONNECTION_TIMEOUT"
+      "ssl": "DB_POSTGRES_USE_SSL"
     }
   },
   "search": {

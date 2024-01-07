@@ -29,9 +29,6 @@ export default class WorkspaceUser {
 
   @Column("last_access", "number")
   lastAccess: number;
-
-  @Column("is_externe", "tdrive_boolean")
-  isExternal: boolean; //Depreciated
 }
 
 export type WorkspaceUserPrimaryKey = Partial<Pick<WorkspaceUser, "workspaceId" | "userId">>;
