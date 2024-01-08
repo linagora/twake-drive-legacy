@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
-import { Connector } from ".";
+import { Connector, UpsertOptions } from ".";
 import { ConnectionOptions, DatabaseType } from "../..";
 import { FindOptions } from "../repository/repository";
 import { ColumnDefinition, EntityDefinition } from "../types";
@@ -17,7 +17,7 @@ export abstract class AbstractConnector<T extends ConnectionOptions> implements 
     columns: { [name: string]: ColumnDefinition },
   ): Promise<boolean>;
 
-  abstract upsert(entities: any[]): Promise<boolean[]>;
+  abstract upsert(entities: any[], _options: UpsertOptions): Promise<boolean[]>;
 
   abstract remove(entities: any[]): Promise<boolean[]>;
 

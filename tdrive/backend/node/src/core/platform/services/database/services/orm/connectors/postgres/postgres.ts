@@ -1,9 +1,13 @@
 import { AbstractConnector } from "../abstract-connector";
-import { ColumnDefinition, EntityDefinition } from "../../types";
-import { ListResult } from "src/core/platform/framework/api/crud-service";
+import { ColumnDefinition, ColumnOptions, ColumnType, EntityDefinition } from "../../types";
+import { ListResult } from "../../../../../../framework/api/crud-service";
 import { FindOptions } from "../../repository/repository";
 import { Client, QueryResult } from "pg";
-import { getLogger } from "../../../../../../framework";
+import { getLogger, logger } from "../../../../../../framework";
+import { getEntityDefinition, unwrapPrimarykey } from "../../../orm/utils";
+import { isBoolean, isInteger, isNull, isUndefined } from "lodash";
+import { decrypt, encrypt } from "../../../../../../../../core/crypto";
+import { UpsertOptions } from "src/core/platform/services/database/services/orm/connectors";
 
 export interface PostgresConnectionOptions {
   database: string;
@@ -164,9 +168,72 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     return Promise.resolve([]);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  upsert(entities: any[]): Promise<boolean[]> {
-    return Promise.resolve([]);
+  async upsert(entities: any[], _options: UpsertOptions): Promise<boolean[]> {
+    if (!_options?.action) {
+      throw new Error("Can't perform unknown operation");
+    }
+    if (entities && entities.length == 1) {
+      // for one row do it without transaction
+      return [await this.upsertOne(entities[0], this.client, _options)];
+    } else {
+      //TODO[ASH] add transaction here
+      const client: Client = new Client(this.options);
+      return await Promise.all(entities.map(entity => this.upsertOne(entity, client, _options)));
+    }
+  }
+
+  private async upsertOne(entity: any, client: Client, _options: UpsertOptions): Promise<boolean> {
+    const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
+    const primaryKey = unwrapPrimarykey(entityDefinition);
+
+    const toValueKeyDBStringPair = (key: string, disableSalts: boolean = null) => {
+      return [
+        `${key}`,
+        `${transformValueToDbString(
+          entity[columnsDefinition[key].nodename],
+          columnsDefinition[key].type,
+          {
+            columns: columnsDefinition[key].options,
+            secret: this.secret,
+            disableSalts: disableSalts,
+            column: { key },
+          },
+        )}`,
+      ];
+    };
+
+    let query: string;
+    if (_options.action == "INSERT") {
+      const fields = Object.keys(columnsDefinition)
+        .filter(key => entity[columnsDefinition[key].nodename] !== undefined)
+        .map(key => toValueKeyDBStringPair(key));
+      query = `INSERT INTO ${entityDefinition.name} (${fields.map(e => e[0]).join(", ")}) 
+                VALUES (${fields.map(e => e[1]).join(", ")})`;
+    } else if (_options.action == "UPDATE") {
+      // Set updated content
+      const set = Object.keys(columnsDefinition)
+        .filter(key => primaryKey.indexOf(key) === -1)
+        .filter(key => entity[columnsDefinition[key].nodename] !== undefined)
+        .map(key => toValueKeyDBStringPair(key));
+      //Set primary key
+      const where = primaryKey.map(key => toValueKeyDBStringPair(key, true));
+      // Insert and update
+      query = `UPDATE ${entityDefinition.name} 
+                SET ${set.map(e => `${e[0]} = ${e[1]}`).join(", ")} 
+                WHERE ${where.map(e => `${e[0]} = ${e[1]}`).join(" AND ")}`;
+    } else {
+      return false;
+    }
+
+    logger.debug(`service.database.orm.upsert - Query: "${query}"`);
+
+    try {
+      await client.query(query);
+      return true;
+    } catch (err) {
+      logger.error({ err }, `services.database.orm.cassandra - Error with CQL query: ${query}`);
+      return false;
+    }
   }
 
   async getTableDefinition(name: string): Promise<string[]> {
@@ -208,4 +275,153 @@ export type TableRowInfo = {
   table_name: string;
   column_name: string;
   data_type: string;
+};
+
+type TransformOptions = {
+  secret?: any;
+  disableSalts?: boolean;
+  columns?: ColumnOptions;
+  column?: any;
+};
+
+export const transformValueToDbString = (
+  v: any,
+  type: ColumnType,
+  options: TransformOptions = {},
+): string => {
+  if (type === "tdrive_datetime") {
+    if (isNaN(v) || isNull(v)) {
+      return "null";
+    }
+    return `${v}`;
+  }
+
+  if (type === "number" || type === "tdrive_int") {
+    if (isNull(v)) {
+      return "null";
+    }
+    if (isNaN(v)) {
+      return "null";
+    }
+    return `${parseInt(v)}`;
+  }
+  if (type === "uuid" || type === "timeuuid") {
+    if (isNull(v)) {
+      return "null";
+    }
+
+    v = (v || "").toString().replace(/[^a-zA-Z0-9-]/g, "");
+    return `${v}`;
+  }
+  if (type === "boolean") {
+    //Security to avoid string with "false" in it
+    if (!isInteger(v) && !isBoolean(v) && !isNull(v) && !isUndefined(v)) {
+      throw new Error(`'${v}' is not a ${type}`);
+    }
+    return `${!!v}`;
+  }
+  if (type === "tdrive_boolean") {
+    if (!isBoolean(v)) {
+      throw new Error(`'${v}' is not a ${type}`);
+    }
+    return v ? "1" : "0";
+  }
+  if (type === "encoded_string" || type === "encoded_json") {
+    if (type === "encoded_json") {
+      try {
+        v = JSON.stringify(v);
+      } catch (err) {
+        v = null;
+      }
+    }
+    const encrypted = encrypt(v, options.secret, { disableSalts: options.disableSalts });
+    return `'${(encrypted.data || "").toString().replace(/'/gm, "''")}'`;
+  }
+  if (type === "blob") {
+    return "''"; //Not implemented yet
+  }
+  if (type === "string" || type === "json") {
+    if (type === "json" && v !== null) {
+      try {
+        v = JSON.stringify(v);
+      } catch (err) {
+        v = null;
+      }
+    }
+    return `'${(v || "").toString().replace(/'/gm, "''")}'`;
+  }
+  if (type === "counter") {
+    if (isNaN(v)) throw new Error("Counter value should be a number");
+    return `${options.column.key} + ${v}`;
+  }
+  return `'${(v || "").toString().replace(/'/gm, "''")}'`;
+};
+
+export const transformValueFromDbString = (
+  v: any,
+  type: string,
+  options: TransformOptions = {},
+): any => {
+  logger.trace(`Transform value %o of type ${type}`, v);
+
+  if (type === "tdrive_datetime") {
+    return new Date(`${v}`).getTime();
+  }
+
+  if (v !== null && (type === "encoded_string" || type === "encoded_json")) {
+    let decryptedValue: any;
+
+    if (typeof v === "string" && v.trim() === "") {
+      return v;
+    }
+
+    try {
+      decryptedValue = decrypt(v, options.secret).data;
+    } catch (err) {
+      logger.debug(`Can not decrypt data (${err.message}) %o of type ${type}`, v);
+
+      decryptedValue = v;
+    }
+
+    if (type === "encoded_json") {
+      try {
+        decryptedValue = JSON.parse(decryptedValue);
+      } catch (err) {
+        logger.debug(
+          { err },
+          `Can not parse JSON from decrypted data %o of type ${type}`,
+          decryptedValue,
+        );
+        decryptedValue = null;
+      }
+    }
+
+    return decryptedValue;
+  }
+
+  if (type === "tdrive_boolean" || type === "boolean") {
+    return Boolean(v).valueOf();
+  }
+
+  if (type === "json") {
+    try {
+      return JSON.parse(v);
+    } catch (err) {
+      return null;
+    }
+  }
+
+  if (type === "uuid" || type === "timeuuid") {
+    return v ? String(v).valueOf() : null;
+  }
+
+  if (type === "number") {
+    return Number(v).valueOf();
+  }
+
+  if (type === "counter") {
+    return Number(v).valueOf();
+  }
+
+  return v;
 };

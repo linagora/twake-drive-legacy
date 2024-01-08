@@ -9,7 +9,8 @@ import { DatabaseEntitiesRemovedEvent, DatabaseEntitiesSavedEvent } from "./type
 import { localEventBus } from "../../../../framework/event-bus";
 
 export default class EntityManager<EntityType extends Record<string, any>> {
-  private toPersist: EntityType[] = [];
+  private toInsert: EntityType[] = [];
+  private toUpdate: EntityType[] = [];
   private toRemove: EntityType[] = [];
 
   constructor(readonly connector: Connector) {}
@@ -24,7 +25,17 @@ export default class EntityManager<EntityType extends Record<string, any>> {
     const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
     const primaryKey: string[] = unwrapPrimarykey(entityDefinition);
 
+    function applyOnUpsert() {
+      for (const column in columnsDefinition) {
+        const definition = columnsDefinition[column];
+        if (definition.options.onUpsert) {
+          entity[definition.nodename] = definition.options.onUpsert(entity[definition.nodename]);
+        }
+      }
+    }
+
     primaryKey.forEach(pk => {
+      applyOnUpsert();
       if (entity[pk] === undefined) {
         const definition = columnsDefinition[pk];
 
@@ -46,19 +57,13 @@ export default class EntityManager<EntityType extends Record<string, any>> {
           default:
             entity[pk] = "";
         }
+        this.toInsert = this.toInsert.filter(e => e !== entity);
+        this.toInsert.push(_.cloneDeep(entity));
+      } else {
+        this.toUpdate = this.toUpdate.filter(e => e !== entity);
+        this.toUpdate.push(_.cloneDeep(entity));
       }
     });
-
-    //Apply the onUpsert
-    for (const column in columnsDefinition) {
-      const definition = columnsDefinition[column];
-      if (definition.options.onUpsert) {
-        entity[definition.nodename] = definition.options.onUpsert(entity[definition.nodename]);
-      }
-    }
-
-    this.toPersist = this.toPersist.filter(e => e !== entity);
-    this.toPersist.push(_.cloneDeep(entity));
 
     return this;
   }
@@ -78,25 +83,32 @@ export default class EntityManager<EntityType extends Record<string, any>> {
   }
 
   public async flush(): Promise<this> {
-    this.toPersist = _.uniqWith(this.toPersist, _.isEqual);
+    this.toInsert = _.uniqWith(this.toInsert, _.isEqual);
+    this.toUpdate = _.uniqWith(this.toUpdate, _.isEqual);
     this.toRemove = _.uniqWith(this.toRemove, _.isEqual);
 
     localEventBus.publish("database:entities:saved", {
-      entities: this.toPersist.map(e => _.cloneDeep(e)),
+      entities: this.toInsert.map(e => _.cloneDeep(e)),
+    } as DatabaseEntitiesSavedEvent);
+
+    localEventBus.publish("database:entities:saved", {
+      entities: this.toUpdate.map(e => _.cloneDeep(e)),
     } as DatabaseEntitiesSavedEvent);
 
     localEventBus.publish("database:entities:saved", {
       entities: this.toRemove.map(e => _.cloneDeep(e)),
     } as DatabaseEntitiesRemovedEvent);
 
-    await this.connector.upsert(this.toPersist);
+    await this.connector.upsert(this.toInsert, { action: "INSERT" });
+    await this.connector.upsert(this.toUpdate, { action: "UPDATE" });
     await this.connector.remove(this.toRemove);
 
     return this;
   }
 
   public reset(): void {
-    this.toPersist = [];
+    this.toInsert = [];
+    this.toUpdate = [];
     this.toRemove = [];
   }
 }
