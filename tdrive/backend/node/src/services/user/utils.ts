@@ -55,8 +55,9 @@ export function formatCompany(
       [CompanyFeaturesEnum.CHAT_UNLIMITED_STORAGE]: true,
       [CompanyFeaturesEnum.COMPANY_INVITE_MEMBER]: true,
       // use the config value for this one
-      [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]:
-        JSON.parse(config.get("drive.featureSearchUsers")) || true,
+      [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]: JSON.parse(
+        config.get("drive.featureSearchUsers") || "true",
+      ),
     },
     {
       ...(res.plan?.features || {}),
