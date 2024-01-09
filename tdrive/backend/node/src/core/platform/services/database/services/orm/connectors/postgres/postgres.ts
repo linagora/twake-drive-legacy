@@ -168,6 +168,8 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     return Promise.resolve([]);
   }
 
+  //TODO[ASH] generate one update or insert query with multiple value sets,
+  //It will be significant optimisation for the batch updates
   async upsert(entities: any[], _options: UpsertOptions): Promise<boolean[]> {
     if (!_options?.action) {
       throw new Error("Can't perform unknown operation");
@@ -177,8 +179,10 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
       return [await this.upsertOne(entities[0], this.client, _options)];
     } else {
       //TODO[ASH] add transaction here
-      const client: Client = new Client(this.options);
-      return await Promise.all(entities.map(entity => this.upsertOne(entity, client, _options)));
+      // const client: Client = new Client(this.options);
+      return await Promise.all(
+        entities.map(entity => this.upsertOne(entity, this.client, _options)),
+      );
     }
   }
 
@@ -186,29 +190,30 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
     const primaryKey = unwrapPrimarykey(entityDefinition);
 
-    const toValueKeyDBStringPair = (key: string, disableSalts: boolean = null) => {
+    const toValueKeyDBStringPair = (key: string) => {
       return [
-        `${key}`,
-        `${transformValueToDbString(
+        key,
+        transformValueToDbString(
           entity[columnsDefinition[key].nodename],
           columnsDefinition[key].type,
           {
             columns: columnsDefinition[key].options,
             secret: this.secret,
-            disableSalts: disableSalts,
             column: { key },
           },
-        )}`,
+        ),
       ];
     };
 
     let query: string;
+    let values = [];
     if (_options.action == "INSERT") {
       const fields = Object.keys(columnsDefinition)
         .filter(key => entity[columnsDefinition[key].nodename] !== undefined)
         .map(key => toValueKeyDBStringPair(key));
       query = `INSERT INTO ${entityDefinition.name} (${fields.map(e => e[0]).join(", ")}) 
-                VALUES (${fields.map(e => e[1]).join(", ")})`;
+                VALUES (${fields.map((e, idx) => `$${idx + 1}`).join(", ")})`;
+      values = fields.map(f => f[1]);
     } else if (_options.action == "UPDATE") {
       // Set updated content
       const set = Object.keys(columnsDefinition)
@@ -216,11 +221,14 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
         .filter(key => entity[columnsDefinition[key].nodename] !== undefined)
         .map(key => toValueKeyDBStringPair(key));
       //Set primary key
-      const where = primaryKey.map(key => toValueKeyDBStringPair(key, true));
-      // Insert and update
+      const where = primaryKey.map(key => toValueKeyDBStringPair(key));
+      //Start index for where clause params
+      const whereIdx = set.length + 1;
       query = `UPDATE ${entityDefinition.name} 
-                SET ${set.map(e => `${e[0]} = ${e[1]}`).join(", ")} 
-                WHERE ${where.map(e => `${e[0]} = ${e[1]}`).join(" AND ")}`;
+                SET ${set.map((e, idx) => `${e[0]} = $${idx + 1}`).join(", ")} 
+                WHERE ${where.map((e, idx) => `${e[0]} = $${whereIdx + idx}`).join(" AND ")}`;
+      values.push(...set.map(f => f[1]));
+      values.push(...where.map(f => f[1]));
     } else {
       return false;
     }
@@ -228,8 +236,8 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     logger.debug(`service.database.orm.upsert - Query: "${query}"`);
 
     try {
-      await client.query(query);
-      return true;
+      const result: QueryResult = await client.query(query, values);
+      return result.rowCount == 1;
     } catch (err) {
       logger.error({ err }, `services.database.orm.cassandra - Error with CQL query: ${query}`);
       return false;
@@ -258,12 +266,11 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
 const typeMappings = {
   encoded_string: "TEXT",
   encoded_json: "TEXT",
+  json: "TEXT",
   string: "TEXT",
   number: "BIGINT",
   timeuuid: "UUID",
   uuid: "UUID",
-  counter: "BIGINT",
-  blob: "BLOB",
   boolean: "BOOLEAN",
 
   // backward compatibility
@@ -288,43 +295,25 @@ export const transformValueToDbString = (
   v: any,
   type: ColumnType,
   options: TransformOptions = {},
-): string => {
-  if (type === "tdrive_datetime") {
-    if (isNaN(v) || isNull(v)) {
+): any => {
+  if (type === "number" || type === "tdrive_int" || type === "tdrive_datetime") {
+    if (isNull(v) || isNaN(v)) {
       return "null";
     }
-    return `${v}`;
-  }
-
-  if (type === "number" || type === "tdrive_int") {
-    if (isNull(v)) {
-      return "null";
-    }
-    if (isNaN(v)) {
-      return "null";
-    }
-    return `${parseInt(v)}`;
+    return parseInt(v);
   }
   if (type === "uuid" || type === "timeuuid") {
     if (isNull(v)) {
-      return "null";
+      return null;
     }
-
-    v = (v || "").toString().replace(/[^a-zA-Z0-9-]/g, "");
-    return `${v}`;
+    return (v || "").toString();
   }
-  if (type === "boolean") {
+  if (type === "boolean" || type === "tdrive_boolean") {
     //Security to avoid string with "false" in it
     if (!isInteger(v) && !isBoolean(v) && !isNull(v) && !isUndefined(v)) {
       throw new Error(`'${v}' is not a ${type}`);
     }
-    return `${!!v}`;
-  }
-  if (type === "tdrive_boolean") {
-    if (!isBoolean(v)) {
-      throw new Error(`'${v}' is not a ${type}`);
-    }
-    return v ? "1" : "0";
+    return !!v;
   }
   if (type === "encoded_string" || type === "encoded_json") {
     if (type === "encoded_json") {
@@ -335,10 +324,7 @@ export const transformValueToDbString = (
       }
     }
     const encrypted = encrypt(v, options.secret, { disableSalts: options.disableSalts });
-    return `'${(encrypted.data || "").toString().replace(/'/gm, "''")}'`;
-  }
-  if (type === "blob") {
-    return "''"; //Not implemented yet
+    return `${(encrypted.data || "").toString().replace(/'/gm, "''")}`;
   }
   if (type === "string" || type === "json") {
     if (type === "json" && v !== null) {
@@ -348,13 +334,13 @@ export const transformValueToDbString = (
         v = null;
       }
     }
-    return `'${(v || "").toString().replace(/'/gm, "''")}'`;
+    return (v || "").toString();
   }
-  if (type === "counter") {
-    if (isNaN(v)) throw new Error("Counter value should be a number");
-    return `${options.column.key} + ${v}`;
+
+  if (type === "blob" || type === "counter") {
+    throw new Error("Not implemented yet");
   }
-  return `'${(v || "").toString().replace(/'/gm, "''")}'`;
+  return (v || "").toString();
 };
 
 export const transformValueFromDbString = (

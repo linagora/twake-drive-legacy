@@ -33,6 +33,7 @@ describe.skip('The Postgres Connector module', () => {
     //when
     await subj.createTable(definition.entityDefinition, definition.columnsDefinition);
 
+    driveFile.id = randomUUID();
     driveFile.name = "My Test File";
     driveFile.company_id = randomUUID();
     driveFile.access_info = {
@@ -47,6 +48,11 @@ describe.skip('The Postgres Connector module', () => {
     driveFile.is_directory = false;
     driveFile.is_in_trash = true;
     driveFile.tags = ["mytag", "ehey"]
+
+    await subj.upsert([driveFile], {action: "INSERT"} )
+    driveFile.tags = null;
+    driveFile.access_info = null;
+    await subj.upsert([driveFile], {action: "UPDATE"} )
 
 
     //then
