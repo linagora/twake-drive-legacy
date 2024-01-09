@@ -16,6 +16,9 @@ export default class EntityManager<EntityType extends Record<string, any>> {
   constructor(readonly connector: Connector) {}
 
   public persist(entity: any): this {
+    logger.trace(
+      `services.database.orm.entity-manager.persist - entity: ${JSON.stringify(entity)}`,
+    );
     if (!entity.constructor.prototype._entity || !entity.constructor.prototype._columns) {
       logger.error("Can not persist this object %o", entity);
       throw Error("Cannot persist this object: it is not an entity.");
@@ -25,45 +28,45 @@ export default class EntityManager<EntityType extends Record<string, any>> {
     const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
     const primaryKey: string[] = unwrapPrimarykey(entityDefinition);
 
-    function applyOnUpsert() {
-      for (const column in columnsDefinition) {
-        const definition = columnsDefinition[column];
-        if (definition.options.onUpsert) {
-          entity[definition.nodename] = definition.options.onUpsert(entity[definition.nodename]);
-        }
+    //apply on upsert(generating created_at, updated_at fields)
+    for (const column in columnsDefinition) {
+      const definition = columnsDefinition[column];
+      if (definition.options.onUpsert) {
+        entity[definition.nodename] = definition.options.onUpsert(entity[definition.nodename]);
       }
     }
 
-    primaryKey.forEach(pk => {
-      applyOnUpsert();
-      if (entity[pk] === undefined) {
-        const definition = columnsDefinition[pk];
+    // generate primary key
+    const emptyPkFields = primaryKey.filter(pk => entity[pk] === undefined);
+    emptyPkFields.forEach(pk => {
+      const definition = columnsDefinition[pk];
 
-        if (!definition) {
-          throw Error(`There is no definition for primary key ${pk}`);
-        }
-
-        //Create default value
-        switch (definition.options.generator || definition.type) {
-          case "uuid":
-            entity[pk] = uuidv4();
-            break;
-          case "timeuuid":
-            entity[pk] = uuidv1();
-            break;
-          case "number":
-            entity[pk] = 0;
-            break;
-          default:
-            entity[pk] = "";
-        }
-        this.toInsert = this.toInsert.filter(e => e !== entity);
-        this.toInsert.push(_.cloneDeep(entity));
-      } else {
-        this.toUpdate = this.toUpdate.filter(e => e !== entity);
-        this.toUpdate.push(_.cloneDeep(entity));
+      if (!definition) {
+        throw Error(`There is no definition for primary key ${pk}`);
+      }
+      //Create default value
+      switch (definition.options.generator || definition.type) {
+        case "uuid":
+          entity[pk] = uuidv4();
+          break;
+        case "timeuuid":
+          entity[pk] = uuidv1();
+          break;
+        case "number":
+          entity[pk] = 0;
+          break;
+        default:
+          entity[pk] = "";
       }
     });
+
+    if (emptyPkFields.length > 0) {
+      this.toInsert = this.toInsert.filter(e => e !== entity);
+      this.toInsert.push(_.cloneDeep(entity));
+    } else {
+      this.toUpdate = this.toUpdate.filter(e => e !== entity);
+      this.toUpdate.push(_.cloneDeep(entity));
+    }
 
     return this;
   }
@@ -99,9 +102,15 @@ export default class EntityManager<EntityType extends Record<string, any>> {
       entities: this.toRemove.map(e => _.cloneDeep(e)),
     } as DatabaseEntitiesRemovedEvent);
 
-    await this.connector.upsert(this.toInsert, { action: "INSERT" });
-    await this.connector.upsert(this.toUpdate, { action: "UPDATE" });
-    await this.connector.remove(this.toRemove);
+    if (this.toInsert.length > 0) {
+      await this.connector.upsert(this.toInsert, { action: "INSERT" });
+    }
+    if (this.toUpdate.length > 0) {
+      await this.connector.upsert(this.toUpdate, { action: "UPDATE" });
+    }
+    if (this.toRemove.length > 0) {
+      await this.connector.remove(this.toRemove);
+    }
 
     return this;
   }
