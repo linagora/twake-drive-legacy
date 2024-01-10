@@ -25,8 +25,6 @@ import {
 } from "../../types";
 import { DriveFileDTO } from "../dto/drive-file-dto";
 import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
-import { ExecutionContext } from "../../../../core/platform/framework/api/crud-service";
-import gr from "../../../global-resolver";
 import config from "config";
 
 export class DocumentsController {

@@ -84,7 +84,11 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions> {
       entities.forEach(entity => {
         const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
         const primaryKey = unwrapPrimarykey(entityDefinition);
-        logger.trace(`services.database.orm.mongodb.upsert[${_options.action}] - Entity{${entityDefinition.name}: ${JSON.stringify(entity)}`);
+        logger.trace(
+          `services.database.orm.mongodb.upsert[${_options.action}] - Entity{${
+            entityDefinition.name
+          }: ${JSON.stringify(entity)}`,
+        );
 
         //Set updated content
         const set: any = {};

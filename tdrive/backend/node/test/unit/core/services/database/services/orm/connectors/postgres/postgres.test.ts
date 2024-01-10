@@ -6,9 +6,8 @@ import {
   PostgresConnector, TableRowInfo
 } from "../../../../../../../../../src/core/platform/services/database/services/orm/connectors/postgres/postgres";
 import { getEntityDefinition } from '../../../../../../../../../src/core/platform/services/database/services/orm/utils';
-import { Column, Entity } from "../../../../../../../../../src/core/platform/services/database/services/orm/decorators";
-import { Type } from "class-transformer";
 import { randomInt, randomUUID } from "crypto";
+import { TestDbEntity, normalizeWhitespace} from "./utils";
 
 describe('The Postgres Connector module', () => {
 
@@ -18,11 +17,11 @@ describe('The Postgres Connector module', () => {
   let dbQuerySpy;
 
   beforeEach(async () => {
-    dbQuerySpy = jest.spyOn(subj.client, 'query');
+    dbQuerySpy = jest.spyOn((subj as any).client, 'query');
     //healthcheck mock
     dbQuerySpy
       .mockReturnValueOnce({rows: [{now: 1}], rowCount: 1});
-    jest.spyOn(subj.client, 'connect').mockImplementation(jest.fn);
+    jest.spyOn((subj as any).client, 'connect').mockImplementation(jest.fn);
     await subj.connect();
   });
 
@@ -99,8 +98,6 @@ describe('The Postgres Connector module', () => {
   });
 });
 
-const normalizeWhitespace = (query: string) => query.replace(/\s+/g, ' ').trim();
-
 const assertInsertQueryParams = (actual: TestDbEntity, expected: string[]) => {
   expect(expected[0]).toBe(actual.company_id);
   expect(expected[1]).toBe(actual.id);
@@ -129,50 +126,4 @@ const newTestDbEntity = () => {
     tags: [randomUUID(), randomUUID()],
     added: randomInt(1, 1000)
   })
-}
-
-@Entity("test_table", {
-  globalIndexes: [
-    ["company_id", "parent_id"],
-    ["company_id", "is_in_trash"],
-  ],
-  primaryKey: [["company_id"], "id"],
-  type: "test_table",
-})
-// @ts-ignore
-export class TestDbEntity {
-
-  @Type(() => String)
-  @Column("company_id", "uuid")
-  // @ts-ignore
-  company_id: string;
-
-  @Type(() => String)
-  @Column("id", "uuid", { generator: "uuid" })
-  // @ts-ignore
-  id: string;
-
-  @Type(() => String)
-  @Column("parent_id", "uuid")
-  // @ts-ignore
-  parent_id: string;
-
-  @Type(() => Boolean)
-  @Column("is_in_trash", "boolean")
-  // @ts-ignore
-  is_in_trash: boolean;
-
-  @Column("tags", "encoded_json")
-  // @ts-ignore
-  tags: string[];
-
-  @Type(() => Number)
-  @Column("added", "number")
-  // @ts-ignore
-  added: number;
-
-  public constructor(init?:Partial<TestDbEntity>) {
-    Object.assign(this, init);
-  }
-
 }

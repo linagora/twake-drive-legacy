@@ -1,13 +1,13 @@
 import { AbstractConnector } from "../abstract-connector";
-import { ColumnDefinition, ColumnOptions, ColumnType, EntityDefinition } from "../../types";
+import { ColumnDefinition, EntityDefinition, ObjectType } from "../../types";
 import { ListResult } from "../../../../../../framework/api/crud-service";
 import { FindOptions } from "../../repository/repository";
 import { Client, QueryResult } from "pg";
 import { getLogger, logger } from "../../../../../../framework";
 import { getEntityDefinition, unwrapPrimarykey } from "../../../orm/utils";
-import { isBoolean, isInteger, isNull, isUndefined } from "lodash";
-import { decrypt, encrypt } from "../../../../../../../../core/crypto";
 import { UpsertOptions } from "src/core/platform/services/database/services/orm/connectors";
+import { PostgresDataTransformer, TypeMappings } from "./postgres-data-transform";
+import { PostgresQueryBuilder } from "./postgres-query-builder";
 
 export interface PostgresConnectionOptions {
   database: string;
@@ -23,9 +23,10 @@ export interface PostgresConnectionOptions {
 }
 
 export class PostgresConnector extends AbstractConnector<PostgresConnectionOptions> {
-  logger = getLogger("PostgresConnector");
-
-  client: Client = new Client(this.options);
+  private logger = getLogger("PostgresConnector");
+  private client: Client = new Client(this.options);
+  private dataTransformer = new PostgresDataTransformer({ secret: this.secret });
+  private queryBuilder = new PostgresQueryBuilder(this.secret);
 
   private async healthcheck(): Promise<void> {
     const result: QueryResult = await this.client.query("SELECT NOW()");
@@ -63,7 +64,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     const columnsString = Object.keys(columns)
       .map(colName => {
         const definition = columns[colName];
-        return `${colName} ${typeMappings[definition.type]}`;
+        return `${colName} ${TypeMappings[definition.type]}`;
       })
       .join(",\n");
 
@@ -139,7 +140,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
       this.logger.debug(`Existing columns for table ${entity.name}, generating altertable queries`);
       const alterQueryColumns = Object.keys(columns)
         .filter(colName => existingColumns.indexOf(colName) < 0)
-        .map(colName => `ADD COLUMN ${colName} ${typeMappings[columns[colName].type]}`)
+        .map(colName => `ADD COLUMN ${colName} ${TypeMappings[columns[colName].type]}`)
         .join(", ");
 
       if (alterQueryColumns.length > 0) {
@@ -154,12 +155,18 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     return Promise.resolve(undefined);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   find<EntityType>(
     entityType: any,
     filters: any,
     options: FindOptions,
   ): Promise<ListResult<EntityType>> {
+    const query = this.queryBuilder.buildSelect(
+      entityType as unknown as ObjectType<EntityType>,
+      filters,
+      options,
+    );
+
+    logger.debug(`services.database.orm.postgres.find - Query: ${query}`);
     return Promise.resolve(undefined);
   }
 
@@ -193,14 +200,9 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     const toValueKeyDBStringPair = (key: string) => {
       return [
         key,
-        transformValueToDbString(
+        this.dataTransformer.toDbString(
           entity[columnsDefinition[key].nodename],
           columnsDefinition[key].type,
-          {
-            columns: columnsDefinition[key].options,
-            secret: this.secret,
-            column: { key },
-          },
         ),
       ];
     };
@@ -263,151 +265,8 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
   }
 }
 
-const typeMappings = {
-  encoded_string: "TEXT",
-  encoded_json: "TEXT",
-  json: "TEXT",
-  string: "TEXT",
-  number: "BIGINT",
-  timeuuid: "UUID",
-  uuid: "UUID",
-  boolean: "BOOLEAN",
-
-  // backward compatibility
-  tdrive_boolean: "BOOLEAN",
-  tdrive_datetime: "BIGINT", //Deprecated
-};
-
 export type TableRowInfo = {
   table_name: string;
   column_name: string;
   data_type: string;
-};
-
-type TransformOptions = {
-  secret?: any;
-  disableSalts?: boolean;
-  columns?: ColumnOptions;
-  column?: any;
-};
-
-export const transformValueToDbString = (
-  v: any,
-  type: ColumnType,
-  options: TransformOptions = {},
-): any => {
-  if (type === "number" || type === "tdrive_int" || type === "tdrive_datetime") {
-    if (isNull(v) || isNaN(v)) {
-      return "null";
-    }
-    return parseInt(v);
-  }
-  if (type === "uuid" || type === "timeuuid") {
-    if (isNull(v)) {
-      return null;
-    }
-    return (v || "").toString();
-  }
-  if (type === "boolean" || type === "tdrive_boolean") {
-    //Security to avoid string with "false" in it
-    if (!isInteger(v) && !isBoolean(v) && !isNull(v) && !isUndefined(v)) {
-      throw new Error(`'${v}' is not a ${type}`);
-    }
-    return !!v;
-  }
-  if (type === "encoded_string" || type === "encoded_json") {
-    if (type === "encoded_json") {
-      try {
-        v = JSON.stringify(v);
-      } catch (err) {
-        v = null;
-      }
-    }
-    const encrypted = encrypt(v, options.secret, { disableSalts: options.disableSalts });
-    return `${(encrypted.data || "").toString().replace(/'/gm, "''")}`;
-  }
-  if (type === "string" || type === "json") {
-    if (type === "json" && v !== null) {
-      try {
-        v = JSON.stringify(v);
-      } catch (err) {
-        v = null;
-      }
-    }
-    return (v || "").toString();
-  }
-
-  if (type === "blob" || type === "counter") {
-    throw new Error("Not implemented yet");
-  }
-  return (v || "").toString();
-};
-
-export const transformValueFromDbString = (
-  v: any,
-  type: string,
-  options: TransformOptions = {},
-): any => {
-  logger.trace(`Transform value %o of type ${type}`, v);
-
-  if (type === "tdrive_datetime") {
-    return new Date(`${v}`).getTime();
-  }
-
-  if (v !== null && (type === "encoded_string" || type === "encoded_json")) {
-    let decryptedValue: any;
-
-    if (typeof v === "string" && v.trim() === "") {
-      return v;
-    }
-
-    try {
-      decryptedValue = decrypt(v, options.secret).data;
-    } catch (err) {
-      logger.debug(`Can not decrypt data (${err.message}) %o of type ${type}`, v);
-
-      decryptedValue = v;
-    }
-
-    if (type === "encoded_json") {
-      try {
-        decryptedValue = JSON.parse(decryptedValue);
-      } catch (err) {
-        logger.debug(
-          { err },
-          `Can not parse JSON from decrypted data %o of type ${type}`,
-          decryptedValue,
-        );
-        decryptedValue = null;
-      }
-    }
-
-    return decryptedValue;
-  }
-
-  if (type === "tdrive_boolean" || type === "boolean") {
-    return Boolean(v).valueOf();
-  }
-
-  if (type === "json") {
-    try {
-      return JSON.parse(v);
-    } catch (err) {
-      return null;
-    }
-  }
-
-  if (type === "uuid" || type === "timeuuid") {
-    return v ? String(v).valueOf() : null;
-  }
-
-  if (type === "number") {
-    return Number(v).valueOf();
-  }
-
-  if (type === "counter") {
-    return Number(v).valueOf();
-  }
-
-  return v;
 };
