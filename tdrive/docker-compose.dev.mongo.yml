@@ -28,6 +28,7 @@ services:
       - PUBSUB_TYPE=local
       - ./docker-data/documents/:/storage/
     volumes:
+      - ./backend/node/profiles:/usr/src/app/profiles
       - ./backend/node/src:/usr/src/app/src
       - ./docker-data/documents/:/storage/
     depends_on:

@@ -28,13 +28,16 @@ import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
 import { ExecutionContext } from "../../../../core/platform/framework/api/crud-service";
 import gr from "../../../global-resolver";
 import config from "config";
+import Profiler from "../../../../utils/profiler";
 
 export class DocumentsController {
   private driveFileDTOBuilder = new DriveFileDTOBuilder();
   private rootAdmins: string[] = config.has("drive.rootAdmins")
     ? config.get("drive.rootAdmins")
     : [];
-
+  private profilingEnabled: boolean = config.has("drive.profilingEnabled")
+    ? config.get("drive.profilingEnabled")
+    : false;
   private getCompanyUserRole(companyId: string, userId: string, context?: ExecutionContext) {
     return gr.services.companies
       .getCompanyUser({ id: companyId }, { id: userId }, context)
@@ -196,6 +199,13 @@ export class DocumentsController {
   ): Promise<DriveItemDetails & { websockets: ResourceWebsocket[] }> => {
     const context = getDriveExecutionContext(request);
     const { id } = request.params;
+    // Begin profiling
+    const profiler = new Profiler({
+      title: "documents-browse",
+      active: this.profilingEnabled,
+      outputDir: "profiles",
+    });
+    profiler.start();
 
     const options: SearchDocumentsOptions = {
       ...request.body,
@@ -214,6 +224,9 @@ export class DocumentsController {
           )
         : [],
     };
+
+    // End profiling
+    profiler.finish();
 
     return data;
   };

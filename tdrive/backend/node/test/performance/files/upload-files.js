@@ -17,19 +17,19 @@ export let options = {
   },
 };
 
-const fileTypes = ["doc", "gif", "mp4", "pdf", "png", "zip"];
-const files = fileTypes.map(type => ({
-  data: open(`../../e2e/common/assets/sample.${type}`),
-  type: type,
-}));
+const files = [
+  { path: "../assets/sample.pdf", type: "application/pdf" },
+  { path: "../assets/sample.png", type: "image/png" },
+];
+
 const baseURL = `${__ENV.BACKEND}/internal/services/files/v1/companies`;
 
-function uploadFile(file, JWT, companyID) {
+function uploadFile(filePath, fileType, JWT, companyID) {
   const url = `${baseURL}/${companyID}/files?thumbnail_sync=0`;
   const formData = new FormData();
   const randomInt = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
-  const fileName = `${randomInt.toString(36)}.${file.type}`;
-  formData.append("file", http.file(file.data, fileName));
+  const fileName = `${randomInt.toString(36)}.${fileType.split("/")[1]}`; // Extract extension from MIME type
+  formData.append("file", http.file(open(filePath), fileName, fileType));
 
   const headers = {
     Authorization: `Bearer ${JWT}`,
@@ -50,7 +50,7 @@ export default function () {
   const companyID = __ENV.COMPANY_ID; // Set Company ID as an environment variable
   const file = files[Math.floor(Math.random() * files.length)];
 
-  const responseBody = uploadFile(file, JWT, companyID);
+  const responseBody = uploadFile(file.path, file.type, JWT, companyID);
   check(responseBody, {
     "response is successful": body => body.resource !== undefined,
     "company_id is present": body => body.resource.company_id !== undefined,
