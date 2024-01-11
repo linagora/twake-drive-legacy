@@ -9,8 +9,6 @@ import { buildSelectQuery } from "./query-builder";
 import { transformValueFromDbString, transformValueToDbString } from "./typeTransforms";
 import { logger } from "../../../../../../framework";
 
-export { MongoPagination } from "./pagination";
-
 export interface MongoConnectionOptions {
   // TODO: More options
   uri: string;

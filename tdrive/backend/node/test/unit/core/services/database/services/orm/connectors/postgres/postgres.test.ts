@@ -6,8 +6,7 @@ import {
   PostgresConnector, TableRowInfo
 } from "../../../../../../../../../src/core/platform/services/database/services/orm/connectors/postgres/postgres";
 import { getEntityDefinition } from '../../../../../../../../../src/core/platform/services/database/services/orm/utils';
-import { randomInt, randomUUID } from "crypto";
-import { TestDbEntity, normalizeWhitespace} from "./utils";
+import { TestDbEntity, normalizeWhitespace, newTestDbEntity } from "./utils";
 
 describe('The Postgres Connector module', () => {
 
@@ -114,16 +113,4 @@ const assertUpdateQueryParams = (actual: TestDbEntity, expected: string[]) => {
   expect(expected[3]).toBe(actual.added);
   expect(expected[4]).toBe(actual.company_id);
   expect(expected[5]).toBe(actual.id);
-}
-
-
-const newTestDbEntity = () => {
-  return new TestDbEntity({
-    company_id: randomUUID(),
-    id: randomUUID(),
-    parent_id: randomUUID(),
-    is_in_trash: true,
-    tags: [randomUUID(), randomUUID()],
-    added: randomInt(1, 1000)
-  })
 }

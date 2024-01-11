@@ -1,6 +1,6 @@
 import { comparisonType, FindOptions } from "../../repository/repository";
 import { ObjectType } from "../../types";
-import { getEntityDefinition } from "../../utils";
+import { getEntityDefinition, unwrapPrimarykey } from "../../utils";
 import { PostgresDataTransformer } from "./postgres-data-transform";
 import _ from "lodash";
 
@@ -10,6 +10,7 @@ export class PostgresQueryBuilder {
   constructor(private secret: string) {
     this.dataTransformer = new PostgresDataTransformer({ secret: this.secret });
   }
+
   buildSelect<Entity>(
     entityType: ObjectType<Entity>,
     filters: Record<string, unknown>,
@@ -103,55 +104,27 @@ export class PostgresQueryBuilder {
         offset = (Number.parseInt(options.pagination.page_token) - 1) * limit;
       }
     }
-
     return [query(whereClause, orderByClause, limit, offset), values];
   }
-}
 
-export function buildComparison(options: FindOptions = {}): string[] {
-  let lessClause;
-  let lessEqualClause;
-  let greaterClause;
-  let greaterEqualClause;
+  buildDelete<Entity>(entity: Entity) {
+    const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
+    const primaryKey = unwrapPrimarykey(entityDefinition);
 
-  if (options.$lt) {
-    lessClause = options.$lt.map(element => `${element[0]} < ${element[1]}`);
+    const toValueKeyDBStringPair = (key: string) => {
+      return [
+        key,
+        this.dataTransformer.toDbString(
+          entity[columnsDefinition[key].nodename],
+          columnsDefinition[key].type,
+        ),
+      ];
+    };
+
+    const where = primaryKey.map(key => toValueKeyDBStringPair(key));
+    const query = `DELETE FROM ${entityDefinition.name} 
+                WHERE ${where.map((e, idx) => `${e[0]} = $${idx + 1}`).join(" AND ")}`;
+
+    return [query, where.map(f => f[1])];
   }
-
-  if (options.$lte) {
-    lessEqualClause = options.$lte.map(element => `${element[0]} <= ${element[1]}`);
-  }
-
-  if (options.$gt) {
-    greaterClause = options.$gt.map(element => `${element[0]} > ${element[1]}`);
-  }
-
-  if (options.$gte) {
-    greaterEqualClause = options.$gte.map(element => `${element[0]} >= ${element[1]}`);
-  }
-
-  return [
-    ...(lessClause || []),
-    ...(lessEqualClause || []),
-    ...(greaterClause || []),
-    ...(greaterEqualClause || []),
-  ];
-}
-
-export function buildIn(options: FindOptions = {}): string[] {
-  let inClauses: string[];
-  if (options.$in) {
-    inClauses = options.$in.map(element => `${element[0]} IN (${element[1].join(",")})`);
-  }
-
-  return inClauses || [];
-}
-
-export function buildLike(options: FindOptions = {}): string[] {
-  let likeClauses: string[];
-  if (options.$like) {
-    likeClauses = options.$like.map(element => `${element[0]} LIKE '%${element[1]}%`);
-  }
-
-  return likeClauses || [];
 }

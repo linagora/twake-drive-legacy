@@ -1,5 +1,6 @@
 import { Column, Entity } from "../../../../../../../../../src/core/platform/services/database/services/orm/decorators";
 import { Type } from "class-transformer";
+import { randomInt, randomUUID } from "crypto";
 
 export const normalizeWhitespace = (query: string) => query.replace(/\s+/g, ' ').trim();
 
@@ -46,5 +47,15 @@ export class TestDbEntity {
   public constructor(init?:Partial<TestDbEntity>) {
     Object.assign(this, init);
   }
+}
 
+export const newTestDbEntity = () => {
+  return new TestDbEntity({
+    company_id: randomUUID(),
+    id: randomUUID(),
+    parent_id: randomUUID(),
+    is_in_trash: true,
+    tags: [randomUUID(), randomUUID()],
+    added: randomInt(1, 1000)
+  })
 }

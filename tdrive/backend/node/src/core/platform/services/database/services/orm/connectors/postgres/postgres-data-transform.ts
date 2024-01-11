@@ -1,10 +1,10 @@
 import { ColumnType } from "../../../orm/types";
-import { isBoolean, isInteger, isNull, isUndefined } from "lodash";
+import { isBoolean, isInteger, isNull, isString, isUndefined } from "lodash";
 import { decrypt, encrypt } from "../../../../../../../crypto";
 import { logger } from "../../../../../../framework";
 
 export type TransformOptions = {
-  secret?: any;
+  secret?: string;
 };
 
 export const TypeMappings = {
@@ -22,18 +22,35 @@ export const TypeMappings = {
   tdrive_datetime: "BIGINT", //Deprecated
 };
 
+/**
+ * Possible data transformations:
+ *   string --> everything
+ *   encoded_string --> everything
+ *   json --> everything
+ *   encoded_json --> everything
+ *
+ *   number --> number, string
+ *   tdrive_int --> number, string
+ *   tdrive_datetime --> number. string
+ *
+ *   timeuuid --> string
+ *   uuid --> string
+ *
+ *   boolean --> boolean, number
+ *   tdrive_boolean --> boolean, number
+ *
+ *   tdrive_datetime --> number
+ *
+ *   null and undefined --> null
+ */
 export class PostgresDataTransformer {
   constructor(readonly options: TransformOptions) {}
 
-  fromDbString(v: any, type: string): any {
-    logger.trace(`Transform value %o of type ${type}`, v);
-
-    if (type === "tdrive_datetime") {
-      return new Date(`${v}`).getTime();
-    }
+  fromDbString(v: any, type: ColumnType): any {
+    this.checkType(type);
 
     if (v !== null && (type === "encoded_string" || type === "encoded_json")) {
-      let decryptedValue: any;
+      let decryptedValue: string;
 
       if (typeof v === "string" && v.trim() === "") {
         return v;
@@ -63,78 +80,66 @@ export class PostgresDataTransformer {
       return decryptedValue;
     }
 
-    if (type === "tdrive_boolean" || type === "boolean") {
-      return Boolean(v).valueOf();
-    }
-
     if (type === "json") {
-      try {
-        return JSON.parse(v);
-      } catch (err) {
-        return null;
-      }
-    }
-
-    if (type === "uuid" || type === "timeuuid") {
-      return v ? String(v).valueOf() : null;
-    }
-
-    if (type === "number") {
-      return Number(v).valueOf();
-    }
-
-    if (type === "counter") {
-      return Number(v).valueOf();
+      return JSON.parse(v);
     }
 
     return v;
   }
 
   toDbString(v: any, type: ColumnType): any {
-    if (type === "number" || type === "tdrive_int" || type === "tdrive_datetime") {
-      if (isNull(v) || isNaN(v)) {
-        return "null";
-      }
-      return parseInt(v);
+    this.checkType(type);
+
+    if (isNull(v) || isUndefined(v)) {
+      return null;
     }
+
+    if (type === "number" || type === "tdrive_datetime") {
+      const number = parseInt(v, 10);
+      if (isNaN(number)) throw new Error(`Can't parse ${v} to int`);
+      return number;
+    }
+
     if (type === "uuid" || type === "timeuuid") {
-      if (isNull(v)) {
-        return null;
-      }
-      return (v || "").toString();
+      if (!isString(v))
+        throw new Error(`uuid or timeuuid could be only strings, and ${v} is not string`);
+      return v;
     }
+
     if (type === "boolean" || type === "tdrive_boolean") {
       //Security to avoid string with "false" in it
-      if (!isInteger(v) && !isBoolean(v) && !isNull(v) && !isUndefined(v)) {
+      if (!isInteger(v) && !isBoolean(v)) {
         throw new Error(`'${v}' is not a ${type}`);
       }
       return !!v;
     }
+
+    if (type === "string") {
+      if (isString(v)) return v;
+      else throw "We can't store in string fields only strings";
+    }
+
+    if (type === "json") {
+      return JSON.stringify(v);
+    }
+
     if (type === "encoded_string" || type === "encoded_json") {
+      if (type === "encoded_string" && !isString(v))
+        throw "We can't store in string fields only strings";
+
       if (type === "encoded_json") {
-        try {
-          v = JSON.stringify(v);
-        } catch (err) {
-          v = null;
-        }
+        v = JSON.stringify(v);
       }
       const encrypted = encrypt(v, this.options.secret);
       return `${(encrypted.data || "").toString().replace(/'/gm, "''")}`;
     }
-    if (type === "string" || type === "json") {
-      if (type === "json" && v !== null) {
-        try {
-          v = JSON.stringify(v);
-        } catch (err) {
-          v = null;
-        }
-      }
-      return (v || "").toString();
-    }
 
-    if (type === "blob" || type === "counter") {
-      throw new Error("Not implemented yet");
+    return v.toString();
+  }
+
+  private checkType(type: ColumnType) {
+    if (!Object.keys(TypeMappings).includes(type)) {
+      throw new Error(`Support of ${type} not implemented yet for PostgreSQL`);
     }
-    return (v || "").toString();
   }
 }

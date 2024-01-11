@@ -47,14 +47,23 @@ describe.skip('The Postgres Connector module', () => {
     }
     driveFile.is_directory = false;
     driveFile.is_in_trash = true;
+    driveFile.last_modified = now();
     driveFile.tags = ["mytag", "ehey"]
 
     await subj.upsert([driveFile], {action: "INSERT"} )
-    driveFile.tags = null;
-    driveFile.access_info = null;
-    await subj.upsert([driveFile], {action: "UPDATE"} )
+    // driveFile.tags = null;
+    // driveFile.access_info = null;
+    // await subj.upsert([driveFile], {action: "UPDATE"} )
 
+    let files = await subj.find(DriveFile, null, null);
+    expect(files.getEntities().length).toBeGreaterThan(0);
 
+    await subj.remove(files.getEntities());
+
+    files = await subj.find(DriveFile, null, null);
+    expect(files.getEntities().length).toEqual(0);
+
+    await subj.drop();
     //then
   }, 3000000);
 

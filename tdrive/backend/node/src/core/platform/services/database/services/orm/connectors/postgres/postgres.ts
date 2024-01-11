@@ -1,6 +1,6 @@
 import { AbstractConnector } from "../abstract-connector";
 import { ColumnDefinition, EntityDefinition, ObjectType } from "../../types";
-import { ListResult } from "../../../../../../framework/api/crud-service";
+import { ListResult, Paginable, Pagination } from "../../../../../../framework/api/crud-service";
 import { FindOptions } from "../../repository/repository";
 import { Client, QueryResult } from "pg";
 import { getLogger, logger } from "../../../../../../framework";
@@ -151,11 +151,23 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     }
   }
 
-  drop(): Promise<this> {
-    return Promise.resolve(undefined);
+  async drop(): Promise<this> {
+    const query = `
+        DO $$ 
+        DECLARE 
+          tablename text;
+        BEGIN 
+          FOR tablename IN (SELECT table_name FROM information_schema.tables WHERE table_schema = 'public') 
+          LOOP 
+            EXECUTE 'DROP TABLE IF EXISTS "' || tablename || '" CASCADE'; 
+          END LOOP; 
+        END $$;`;
+    logger.debug(`service.database.orm.postgres.dropTables - Query: "${query}"`);
+    await this.client.query(query);
+    return this;
   }
 
-  find<EntityType>(
+  async find<EntityType>(
     entityType: any,
     filters: any,
     options: FindOptions,
@@ -167,12 +179,47 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     );
 
     logger.debug(`services.database.orm.postgres.find - Query: ${query}`);
-    return Promise.resolve(undefined);
+
+    const results = await this.client.query(query[0] as string, query[1] as never[]);
+
+    const { columnsDefinition, entityDefinition } = getEntityDefinition(
+      new (entityType as ObjectType<EntityType>)(),
+    );
+    const entities: EntityType[] = [];
+    results.rows.forEach(row => {
+      const entity = new (entityType as ObjectType<EntityType>)();
+      Object.keys(row).forEach(key => {
+        if (columnsDefinition[key]) {
+          entity[columnsDefinition[key].nodename] = this.dataTransformer.fromDbString(
+            row[key],
+            columnsDefinition[key].type,
+          );
+        }
+      });
+      entities.push(entity);
+    });
+
+    const nextPageToken = options?.pagination?.page_token || "0";
+    const limit = parseInt(options?.pagination?.limitStr);
+    const nextToken = entities.length === limit && (parseInt(nextPageToken) + limit).toString(10);
+    const nextPage: Paginable = new Pagination(nextToken, options?.pagination?.limitStr || "100");
+    logger.debug(
+      `services.database.orm.postgres.find - Query Result (items=${entities.length}): ${query}`,
+    );
+
+    return new ListResult<EntityType>(entityDefinition.type, entities, nextPage);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   remove(entities: any[]): Promise<boolean[]> {
-    return Promise.resolve([]);
+    return Promise.all(entities.map(entity => this.removeOne(entity)));
+  }
+
+  async removeOne(entity: any): Promise<boolean> {
+    const query = this.queryBuilder.buildDelete(entity);
+    logger.debug(`service.database.orm.postgres.remove - Query: "${query}"`);
+    const result = await this.client.query(query[0] as string, query[1] as never[]);
+    return result.rowCount > 0;
   }
 
   //TODO[ASH] generate one update or insert query with multiple value sets,
@@ -241,7 +288,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
       const result: QueryResult = await client.query(query, values);
       return result.rowCount == 1;
     } catch (err) {
-      logger.error({ err }, `services.database.orm.cassandra - Error with CQL query: ${query}`);
+      logger.error({ err }, `services.database.orm.postgres - Error with CQL query: ${query}`);
       return false;
     }
   }
