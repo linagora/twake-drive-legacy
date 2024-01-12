@@ -52,7 +52,7 @@ services:
       - NODE_ENV=test
       - DB_DRIVER=postgres
       - DB_POSTGRES_DBNAME=tdrive
-      - DB_POSTGRES_HOST=localhost
+      - DB_POSTGRES_HOST=postgres
       - DB_POSTGRES_PASSWORD=tdrive_secret
       - DB_POSTGRES_PORT=5432
       - DB_POSTGRES_USERNAME=tdrive_user
