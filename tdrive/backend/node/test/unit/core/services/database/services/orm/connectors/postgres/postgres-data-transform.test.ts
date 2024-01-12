@@ -14,9 +14,7 @@ describe('The PostgresDataTransformer', () => {
     const subj: PostgresDataTransformer = new PostgresDataTransformer({ secret: "" });
 
     //then
-    expect(() => subj.toDbString(randomInt(1000), "counter")).toThrow(Error);
     expect(() => subj.toDbString(randomInt(1000), "blob")).toThrow(Error);
-    expect(() => subj.toDbString(null, "counter")).toThrow(Error);
     expect(() => subj.toDbString(null, "blob")).toThrow(Error);
   });
 
@@ -36,6 +34,7 @@ describe('The PostgresDataTransformer', () => {
 
     //then
     expect(subj.toDbString(number, "number")).toBe(number);
+    expect(subj.toDbString(number, "counter")).toBe(number);
     expect(subj.toDbString(number, "tdrive_datetime")).toBe(number);
     expect(subj.toDbString(String(number), "tdrive_datetime")).toBe(number);
   });

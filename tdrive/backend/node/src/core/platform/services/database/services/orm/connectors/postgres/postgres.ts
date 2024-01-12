@@ -4,10 +4,10 @@ import { ListResult, Paginable, Pagination } from "../../../../../../framework/a
 import { FindOptions } from "../../repository/repository";
 import { Client, QueryResult } from "pg";
 import { getLogger, logger } from "../../../../../../framework";
-import { getEntityDefinition, unwrapPrimarykey } from "../../../orm/utils";
+import { getEntityDefinition } from "../../../orm/utils";
 import { UpsertOptions } from "src/core/platform/services/database/services/orm/connectors";
 import { PostgresDataTransformer, TypeMappings } from "./postgres-data-transform";
-import { PostgresQueryBuilder } from "./postgres-query-builder";
+import { PostgresQueryBuilder, Query } from "./postgres-query-builder";
 
 export interface PostgresConnectionOptions {
   database: string;
@@ -19,7 +19,7 @@ export interface PostgresConnectionOptions {
   idleTimeoutMillis: 1000; // close idle clients after 1 second
   connectionTimeoutMillis: 1000; // return an error after 1 second if connection could not be established
   statement_timeout: number; // number of milliseconds before a statement in query will time out, default is no timeout
-  query_timeout: number; // number of milliseconds before a query call will timeout, default is no timeout
+  query_timeout: number; // number of milliseconds before a query call will time out, default is no timeout
 }
 
 export class PostgresConnector extends AbstractConnector<PostgresConnectionOptions> {
@@ -70,7 +70,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
 
     // --- Generate final create table query --- //
     const query = `
-        CREATE TABLE IF NOT EXISTS ${entity.name}
+        CREATE TABLE IF NOT EXISTS "${entity.name}"
           (
             ${columnsString}
           );`;
@@ -80,7 +80,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
         `service.database.orm.createTable - Creating table ${entity.name} : ${query}`,
       );
       const result: QueryResult = await this.client.query(query);
-      this.logger.info(`Table is created with the result ${result}`);
+      this.logger.info(`Table is created with the result ${JSON.stringify(result)}`);
     } catch (err) {
       this.logger.warn(
         { err },
@@ -105,7 +105,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
         const indexName = globalIndex.join("_");
         const indexDbName = `index_${entity.name}_${indexName}`;
 
-        const query = `CREATE INDEX IF NOT EXISTS ${indexDbName} ON ${entity.name} 
+        const query = `CREATE INDEX IF NOT EXISTS ${indexDbName} ON "${entity.name}" 
         (${globalIndex.length === 1 ? globalIndex[0] : `(${globalIndex[0]}), ${globalIndex[1]}`})`;
 
         try {
@@ -124,12 +124,12 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
 
   private async alterTablePrimaryKey(entity: EntityDefinition) {
     if (entity.options.primaryKey) {
-      const query = `ALTER TABLE ${entity.name} ADD PRIMARY KEY (
+      const query = `ALTER TABLE "${entity.name}" ADD PRIMARY KEY (
         ${entity.options.primaryKey.join(", ")});`;
       try {
         await this.client.query(query);
       } catch (err) {
-        this.logger.warn(err, `Error creating primary key for ${entity.name}`);
+        this.logger.warn(err, `Error creating primary key for "${entity.name}"`);
       }
     }
   }
@@ -137,14 +137,16 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
   private async alterTable(entity: EntityDefinition, columns: { [p: string]: ColumnDefinition }) {
     const existingColumns = await this.getTableDefinition(entity.name);
     if (existingColumns.length > 0) {
-      this.logger.debug(`Existing columns for table ${entity.name}, generating altertable queries`);
+      this.logger.debug(
+        `Existing columns for table "${entity.name}", generating alter table queries ...`,
+      );
       const alterQueryColumns = Object.keys(columns)
         .filter(colName => existingColumns.indexOf(colName) < 0)
         .map(colName => `ADD COLUMN ${colName} ${TypeMappings[columns[colName].type]}`)
         .join(", ");
 
       if (alterQueryColumns.length > 0) {
-        const alterQuery = `ALTER TABLE ${entity.name} ${alterQueryColumns}`;
+        const alterQuery = `ALTER TABLE "${entity.name}" ${alterQueryColumns}`;
         const queryResult: QueryResult = await this.client.query(alterQuery);
         this.logger.info(`Table is altered with the result ${queryResult}`);
       }
@@ -152,6 +154,11 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
   }
 
   async drop(): Promise<this> {
+    logger.info("Drop database is not implemented for security reasons.");
+    return this;
+  }
+
+  async dropTables(): Promise<this> {
     const query = `
         DO $$ 
         DECLARE 
@@ -168,15 +175,11 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
   }
 
   async find<EntityType>(
-    entityType: any,
-    filters: any,
+    entityType: ObjectType<EntityType>,
+    filters: Record<string, unknown>,
     options: FindOptions,
   ): Promise<ListResult<EntityType>> {
-    const query = this.queryBuilder.buildSelect(
-      entityType as unknown as ObjectType<EntityType>,
-      filters,
-      options,
-    );
+    const query = this.queryBuilder.buildSelect(entityType, filters, options);
 
     logger.debug(`services.database.orm.postgres.find - Query: ${query}`);
 
@@ -211,84 +214,45 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  remove(entities: any[]): Promise<boolean[]> {
+  remove<Entity>(entities: Entity[]): Promise<boolean[]> {
     return Promise.all(entities.map(entity => this.removeOne(entity)));
   }
 
-  async removeOne(entity: any): Promise<boolean> {
+  async removeOne<Entity>(entity: Entity): Promise<boolean> {
     const query = this.queryBuilder.buildDelete(entity);
     logger.debug(`service.database.orm.postgres.remove - Query: "${query}"`);
     const result = await this.client.query(query[0] as string, query[1] as never[]);
     return result.rowCount > 0;
   }
 
-  //TODO[ASH] generate one update or insert query with multiple value sets,
-  //It will be significant optimisation for the batch updates
-  async upsert(entities: any[], _options: UpsertOptions): Promise<boolean[]> {
+  async upsert<Entity>(entities: Entity[], _options: UpsertOptions): Promise<boolean[]> {
     if (!_options?.action) {
       throw new Error("Can't perform unknown operation");
-    }
-    if (entities && entities.length == 1) {
-      // for one row do it without transaction
-      return [await this.upsertOne(entities[0], this.client, _options)];
     } else {
-      //TODO[ASH] add transaction here
-      // const client: Client = new Client(this.options);
-      return await Promise.all(
-        entities.map(entity => this.upsertOne(entity, this.client, _options)),
-      );
+      return Promise.all(entities.map(entity => this.upsertOne(entity, _options)));
     }
   }
 
-  private async upsertOne(entity: any, client: Client, _options: UpsertOptions): Promise<boolean> {
-    const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
-    const primaryKey = unwrapPrimarykey(entityDefinition);
-
-    const toValueKeyDBStringPair = (key: string) => {
-      return [
-        key,
-        this.dataTransformer.toDbString(
-          entity[columnsDefinition[key].nodename],
-          columnsDefinition[key].type,
-        ),
-      ];
-    };
-
-    let query: string;
-    let values = [];
+  private async upsertOne<Entity>(entity: Entity, _options: UpsertOptions): Promise<boolean> {
     if (_options.action == "INSERT") {
-      const fields = Object.keys(columnsDefinition)
-        .filter(key => entity[columnsDefinition[key].nodename] !== undefined)
-        .map(key => toValueKeyDBStringPair(key));
-      query = `INSERT INTO ${entityDefinition.name} (${fields.map(e => e[0]).join(", ")}) 
-                VALUES (${fields.map((e, idx) => `$${idx + 1}`).join(", ")})`;
-      values = fields.map(f => f[1]);
+      const query = this.queryBuilder.buildInsert(entity);
+      return this.execute(query);
     } else if (_options.action == "UPDATE") {
-      // Set updated content
-      const set = Object.keys(columnsDefinition)
-        .filter(key => primaryKey.indexOf(key) === -1)
-        .filter(key => entity[columnsDefinition[key].nodename] !== undefined)
-        .map(key => toValueKeyDBStringPair(key));
-      //Set primary key
-      const where = primaryKey.map(key => toValueKeyDBStringPair(key));
-      //Start index for where clause params
-      const whereIdx = set.length + 1;
-      query = `UPDATE ${entityDefinition.name} 
-                SET ${set.map((e, idx) => `${e[0]} = $${idx + 1}`).join(", ")} 
-                WHERE ${where.map((e, idx) => `${e[0]} = $${whereIdx + idx}`).join(" AND ")}`;
-      values.push(...set.map(f => f[1]));
-      values.push(...where.map(f => f[1]));
+      if (!(await this.execute(this.queryBuilder.buildUpdate(entity)))) {
+        return this.execute(this.queryBuilder.buildInsert(entity));
+      }
     } else {
       return false;
     }
+  }
 
-    logger.debug(`service.database.orm.upsert - Query: "${query}"`);
-
+  private async execute(query: Query) {
+    logger.debug(`service.database.orm.postgres - Query: "${query[0]}"`);
     try {
-      const result: QueryResult = await client.query(query, values);
-      return result.rowCount == 1;
+      const result: QueryResult = await this.client.query(query[0] as string, query[1] as never[]);
+      return result.rowCount > 0;
     } catch (err) {
-      logger.error({ err }, `services.database.orm.postgres - Error with CQL query: ${query}`);
+      logger.error({ err }, `services.database.orm.postgres - Error with SQL query: ${query[0]}`);
       return false;
     }
   }

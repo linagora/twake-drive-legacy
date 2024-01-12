@@ -29,13 +29,15 @@ services:
 #   networks:
  #     - opensearch-net # All of the containers will join the same Docker bridge network
 
-  mongo:
-    container_name: mongo
-    image: mongo
-    volumes:
-      - ./docker-data/mongo:/data/db
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: tdrive
+      POSTGRES_PASSWORD: tdrive_secret
+      POSTGRES_USER: tdrive_user
     ports:
-      - 27017:27017
+      - "5432:5432"
 
   node:
     image: tdrive/tdrive-node:test
@@ -48,7 +50,12 @@ services:
     environment:
       - LOG_LEVEL=error
       - NODE_ENV=test
-      - DB_DRIVER
+      - DB_DRIVER=postgres
+      - DB_POSTGRES_DBNAME=tdrive
+      - DB_POSTGRES_HOST=localhost
+      - DB_POSTGRES_PASSWORD=tdrive_secret
+      - DB_POSTGRES_PORT=5432
+      - DB_POSTGRES_USERNAME=tdrive_user
       - PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
       - SEARCH_OS_FLUSHINTERVAL=1
       - SEARCH_OS_ENDPOINT=https://opensearch-node1:9200
@@ -56,8 +63,8 @@ services:
       - SEARCH_OS_USE_AUTH=true
       - SEARCH_OS_USERNAME=admin
     depends_on:
-      - mongo
+      - postgres
       - opensearch-node1
     links:
-      - mongo
+      - postgres
       - opensearch-node1

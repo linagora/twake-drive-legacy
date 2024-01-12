@@ -51,9 +51,6 @@ describe.skip('The Postgres Connector module', () => {
     driveFile.tags = ["mytag", "ehey"]
 
     await subj.upsert([driveFile], {action: "INSERT"} )
-    // driveFile.tags = null;
-    // driveFile.access_info = null;
-    // await subj.upsert([driveFile], {action: "UPDATE"} )
 
     let files = await subj.find(DriveFile, null, null);
     expect(files.getEntities().length).toBeGreaterThan(0);

@@ -4,6 +4,8 @@ import { getEntityDefinition, unwrapPrimarykey } from "../../utils";
 import { PostgresDataTransformer } from "./postgres-data-transform";
 import _ from "lodash";
 
+export type Query = [string, any[]];
+
 export class PostgresQueryBuilder {
   private dataTransformer: PostgresDataTransformer;
 
@@ -15,12 +17,12 @@ export class PostgresQueryBuilder {
     entityType: ObjectType<Entity>,
     filters: Record<string, unknown>,
     options: FindOptions,
-  ) {
+  ): Query {
     const instance = new (entityType as any)();
     const { columnsDefinition, entityDefinition } = getEntityDefinition(instance);
 
     const query = (whereClause: string, orderByClause: string, limit: number, offset: number) => {
-      return `SELECT * FROM ${entityDefinition.name} 
+      return `SELECT * FROM "${entityDefinition.name}" 
             ${whereClause?.length ? "WHERE " + whereClause : ""} 
             ${orderByClause?.length ? "ORDER BY " + orderByClause : ""}
             LIMIT ${limit} OFFSET ${offset}`;
@@ -107,7 +109,7 @@ export class PostgresQueryBuilder {
     return [query(whereClause, orderByClause, limit, offset), values];
   }
 
-  buildDelete<Entity>(entity: Entity) {
+  buildDelete<Entity>(entity: Entity): Query {
     const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
     const primaryKey = unwrapPrimarykey(entityDefinition);
 
@@ -122,9 +124,62 @@ export class PostgresQueryBuilder {
     };
 
     const where = primaryKey.map(key => toValueKeyDBStringPair(key));
-    const query = `DELETE FROM ${entityDefinition.name} 
+    const query = `DELETE FROM "${entityDefinition.name}" 
                 WHERE ${where.map((e, idx) => `${e[0]} = $${idx + 1}`).join(" AND ")}`;
 
     return [query, where.map(f => f[1])];
+  }
+
+  buildInsert<Entity>(entity: Entity): Query {
+    const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
+    const toValueKeyDBStringPair = (key: string) => {
+      return [
+        key,
+        this.dataTransformer.toDbString(
+          entity[columnsDefinition[key].nodename],
+          columnsDefinition[key].type,
+        ),
+      ];
+    };
+
+    const fields = Object.keys(columnsDefinition)
+      .filter(key => entity[columnsDefinition[key].nodename] !== undefined)
+      .map(key => toValueKeyDBStringPair(key));
+    const query = `INSERT INTO "${entityDefinition.name}" (${fields.map(e => e[0]).join(", ")}) 
+              VALUES (${fields.map((e, idx) => `$${idx + 1}`).join(", ")})`;
+    return [query, fields.map(f => f[1])];
+  }
+
+  buildUpdate<Entity>(entity: Entity): Query {
+    const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
+    const primaryKey = unwrapPrimarykey(entityDefinition);
+
+    const toValueKeyDBStringPair = (key: string) => {
+      return [
+        key,
+        this.dataTransformer.toDbString(
+          entity[columnsDefinition[key].nodename],
+          columnsDefinition[key].type,
+        ),
+      ];
+    };
+
+    // Set updated content
+    const set = Object.keys(columnsDefinition)
+      .filter(key => primaryKey.indexOf(key) === -1)
+      .filter(key => entity[columnsDefinition[key].nodename] !== undefined)
+      .map(key => toValueKeyDBStringPair(key));
+    //Set primary key
+    const where = primaryKey.map(key => toValueKeyDBStringPair(key));
+    //Start index for where clause params
+    const whereIdx = set.length + 1;
+    const query = `UPDATE "${entityDefinition.name}" 
+              SET ${set.map((e, idx) => `${e[0]} = $${idx + 1}`).join(", ")} 
+              WHERE ${where.map((e, idx) => `${e[0]} = $${whereIdx + idx}`).join(" AND ")}`;
+    const values = [];
+    values.push(...set.map(f => f[1]));
+    values.push(...where.map(f => f[1]));
+
+    return [query, values];
   }
 }

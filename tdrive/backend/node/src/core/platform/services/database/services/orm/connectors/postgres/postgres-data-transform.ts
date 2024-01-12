@@ -16,6 +16,7 @@ export const TypeMappings = {
   timeuuid: "UUID",
   uuid: "UUID",
   boolean: "BOOLEAN",
+  counter: "BIGINT",
 
   // backward compatibility
   tdrive_boolean: "BOOLEAN",
@@ -94,7 +95,7 @@ export class PostgresDataTransformer {
       return null;
     }
 
-    if (type === "number" || type === "tdrive_datetime") {
+    if (type === "number" || type === "tdrive_datetime" || type === "counter") {
       const number = parseInt(v, 10);
       if (isNaN(number)) throw new Error(`Can't parse ${v} to int`);
       return number;

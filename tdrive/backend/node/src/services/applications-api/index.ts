@@ -5,6 +5,7 @@ import { Prefix, TdriveService } from "../../core/platform/framework";
 import WebServerAPI from "../../core/platform/services/webserver/provider";
 import Application from "../applications/entities/application";
 import web from "./web/index";
+import { logger } from "../../core/platform/framework/logger";
 
 @Prefix("/api")
 export default class ApplicationsApiService extends TdriveService<undefined> {
@@ -26,7 +27,7 @@ export default class ApplicationsApiService extends TdriveService<undefined> {
       if (domain && prefix) {
         try {
           fastify.all("/" + prefix + "/*", async (req, rep) => {
-            console.log("Proxying", req.method, req.url, "to", domain);
+            logger.info("Proxying", req.method, req.url, "to", domain);
             try {
               const response = await axios.request({
                 url: domain + req.url,
@@ -54,15 +55,15 @@ export default class ApplicationsApiService extends TdriveService<undefined> {
 
               rep.send(response.data);
             } catch (err) {
-              console.error(`${err}`);
+              logger.error(`${err}`);
               rep.raw.statusCode = 500;
               rep.raw.end(JSON.stringify({ error: err.message }));
             }
           });
-          console.log("Listening at ", "/" + prefix + "/*");
+          logger.info("Listening at ", "/" + prefix + "/*");
         } catch (e) {
-          console.log(e);
-          console.log("Can't listen to ", "/" + prefix + "/*");
+          logger.error(e);
+          logger.info("Can't listen to ", "/" + prefix + "/*");
         }
       }
     }

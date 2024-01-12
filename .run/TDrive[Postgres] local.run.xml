@@ -12,7 +12,7 @@
       <env name="DB_POSTGRES_PASSWORD" value="tdrive_secret" />
       <env name="DB_POSTGRES_PORT" value="5432" />
       <env name="DB_POSTGRES_URI" value="postgres://localhost:27017" />
-      <env name="DB_POSTGRES_USERNAME" value="tdrive_username" />
+      <env name="DB_POSTGRES_USERNAME" value="tdrive_user" />
       <env name="DRIVE_ROOT_ADMINS" value="ashepilov@gmail.com" />
       <env name="PUBSUB_TYPE" value="local" />
       <env name="SEARCH_DRIVER" value="opensearch" />
