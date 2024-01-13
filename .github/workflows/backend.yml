@@ -24,7 +24,7 @@ jobs:
       - name: e2e-mongo-test-clean
         run: cd tdrive && docker-compose -f docker-compose.tests.yml stop
       - name: e2e-opensearch-test
-        run: cd tdrive && docker-compose -f docker-compose.dev.tests.opensearch.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=opensearch -e DB_DRIVER=mongodb -e PUBSUB_TYPE=local node npm run test:all
+        run: cd tdrive && docker-compose -f docker-compose.dev.tests.opensearch.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=opensearch -e DB_DRIVER=postgres -e PUBSUB_TYPE=local node npm run test:all
       - name: e2e-opensearch-test-clean
         run: cd tdrive && docker-compose -f docker-compose.dev.tests.opensearch.yml stop
       - name: e2e-cassandra-test
