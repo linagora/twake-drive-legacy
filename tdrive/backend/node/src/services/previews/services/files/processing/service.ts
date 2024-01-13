@@ -9,7 +9,11 @@ import {
 } from "../../../../../utils/mime";
 import { PreviewMessageQueueRequest, ThumbnailResult } from "../../../types";
 import { generateVideoPreview } from "./video";
-import { Initializable, logger, TdriveServiceProvider } from "../../../../../core/platform/framework";
+import {
+  Initializable,
+  logger,
+  TdriveServiceProvider,
+} from "../../../../../core/platform/framework";
 import { cleanFiles } from "../../../../../utils/files";
 
 export class PreviewProcessService implements TdriveServiceProvider, Initializable {
