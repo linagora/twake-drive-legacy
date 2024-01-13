@@ -3,7 +3,7 @@ import { Stream, Readable } from "stream";
 import Multistream from "multistream";
 import { Consumes, logger, TdriveService } from "../../framework";
 import LocalConnectorService, { LocalConfiguration } from "./connectors/local/service";
-import S3ConnectorService from "./connectors/S3/service";
+import S3ConnectorService from "./connectors/S3/s3-service";
 import StorageAPI, {
   DeleteOptions,
   ReadOptions,
@@ -47,6 +47,7 @@ export default class StorageService extends TdriveService<StorageAPI> implements
         useSSL: Boolean(this.configuration.get<boolean>("S3.useSSL")),
         accessKey: this.configuration.get<string>("S3.accessKey"),
         secretKey: this.configuration.get<string>("S3.secretKey"),
+        disableRemove: this.configuration.get<boolean>("S3.disableRemove"),
       });
     } else {
       logger.info("Using 'local' connector for storage.");
