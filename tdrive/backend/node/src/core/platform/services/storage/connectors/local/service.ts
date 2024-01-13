@@ -4,6 +4,7 @@ import p from "path";
 import { rm } from "fs/promises"; // Do not change the import, this is not the same function import { rm } from "fs"
 import { StorageConnectorAPI, WriteMetadata } from "../../provider";
 import fs from "fs";
+import { logger } from "../../../../framework/logger";
 
 export type LocalConfiguration = {
   path: string;
@@ -18,6 +19,7 @@ export default class LocalConnectorService implements StorageConnectorAPI {
 
   write(relativePath: string, stream: Readable): Promise<WriteMetadata> {
     const path = this.getFullPath(relativePath);
+    logger.trace(`Writing file ${path}`);
 
     const directory = p.dirname(path);
     if (!existsSync(directory)) {
@@ -30,10 +32,12 @@ export default class LocalConnectorService implements StorageConnectorAPI {
       const file = createWriteStream(path);
       file
         .on("error", function (err) {
+          logger.error(`Error ${err.message} during writing file ${path}`);
           reject(err);
         })
         .on("finish", () => {
           const stats = statSync(path);
+          logger.trace(`File ${path} have been written`);
           resolve({
             size: stats.size,
           });
@@ -43,6 +47,7 @@ export default class LocalConnectorService implements StorageConnectorAPI {
   }
 
   async read(path: string): Promise<Readable> {
+    logger.trace(`Reading file ... ${path}`);
     const fullPath = this.getFullPath(path);
     if (!fs.existsSync(fullPath)) {
       throw new Error(`File doesn't exists ${fullPath}`);

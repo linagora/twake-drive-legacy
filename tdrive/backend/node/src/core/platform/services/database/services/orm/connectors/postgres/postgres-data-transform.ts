@@ -48,6 +48,10 @@ export class PostgresDataTransformer {
   constructor(readonly options: TransformOptions) {}
 
   fromDbString(v: any, type: ColumnType): any {
+    if (isNull(v) || isUndefined(v)) {
+      return null;
+    }
+
     this.checkType(type);
 
     if (v !== null && (type === "encoded_string" || type === "encoded_json")) {
@@ -79,6 +83,12 @@ export class PostgresDataTransformer {
       }
 
       return decryptedValue;
+    }
+
+    if (type === "number" || type === "tdrive_datetime" || type === "counter") {
+      const number = parseInt(v, 10);
+      if (isNaN(number)) throw new Error(`Can't parse ${v} to int`);
+      return number;
     }
 
     if (type === "json") {

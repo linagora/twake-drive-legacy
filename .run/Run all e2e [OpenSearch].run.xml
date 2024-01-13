@@ -18,7 +18,7 @@
       <env name="SEARCH_OS_PASSWORD" value="admin" />
       <env name="SEARCH_OS_USE_AUTH" value="true" />
       <env name="SEARCH_OS_USERNAME" value="admin" />
-      <env name="STORAGE_LOCAL_PATH" value="$USER_HOME$/dev/linagora/TDrive/tdrive/docker-data" />
+      <env name="STORAGE_LOCAL_PATH" value="/tmp" />
     </envs>
     <scope-kind value="DIRECTORY" />
     <test-directory value="$PROJECT_DIR$/tdrive/backend/node/test/e2e" />

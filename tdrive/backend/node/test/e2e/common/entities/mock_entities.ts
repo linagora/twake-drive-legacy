@@ -25,7 +25,7 @@ export class DriveFileMockClass {
     extension: string;
     description: string;
     tags: string[];
-    last_modified: string;
+    last_modified: number;
     access_info: MockAccessInformation;
     creator: string;
     is_directory: boolean;

@@ -37,7 +37,9 @@ export default class EntityManager<EntityType extends Record<string, any>> {
     }
 
     // generate primary key
-    const emptyPkFields = primaryKey.filter(pk => entity[pk] === undefined);
+    const emptyPkFields = primaryKey.filter(
+      pk => entity[columnsDefinition[pk].nodename] === undefined,
+    );
     emptyPkFields.forEach(pk => {
       const definition = columnsDefinition[pk];
 
@@ -47,16 +49,16 @@ export default class EntityManager<EntityType extends Record<string, any>> {
       //Create default value
       switch (definition.options.generator || definition.type) {
         case "uuid":
-          entity[pk] = uuidv4();
+          entity[columnsDefinition[pk].nodename] = uuidv4();
           break;
         case "timeuuid":
-          entity[pk] = uuidv1();
+          entity[columnsDefinition[pk].nodename] = uuidv1();
           break;
         case "number":
-          entity[pk] = 0;
+          entity[columnsDefinition[pk].nodename] = 0;
           break;
         default:
-          entity[pk] = "";
+          entity[columnsDefinition[pk].nodename] = "";
       }
     });
 
