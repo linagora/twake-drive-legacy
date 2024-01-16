@@ -36,4 +36,21 @@ export class Profiler {
   }
 }
 
-export default Profiler;
+function withProfiler(fn: (context: any, ...args: any[]) => Promise<any>, title: string) {
+  return async function (this: any, ...args: any[]) {
+    const profiler = new Profiler({
+      title: title,
+      active: this.profilingEnabled,
+      outputDir: "profiles",
+    });
+    profiler.start();
+
+    try {
+      return await fn(this, ...args);
+    } finally {
+      profiler.finish();
+    }
+  };
+}
+
+export default withProfiler;

@@ -28,7 +28,7 @@ import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
 import { ExecutionContext } from "../../../../core/platform/framework/api/crud-service";
 import gr from "../../../global-resolver";
 import config from "config";
-import Profiler from "../../../../utils/profiler";
+import withProfiler from "../../../../utils/profiler";
 
 export class DocumentsController {
   private driveFileDTOBuilder = new DriveFileDTOBuilder();
@@ -190,46 +190,39 @@ export class DocumentsController {
    * @param {FastifyRequest} request
    * @returns {Promise<DriveItemDetails>}
    */
-  browse = async (
-    request: FastifyRequest<{
-      Params: ItemRequestParams;
-      Body: SearchDocumentsBody;
-      Querystring: PaginationQueryParameters & { public_token?: string };
-    }>,
-  ): Promise<DriveItemDetails & { websockets: ResourceWebsocket[] }> => {
-    const context = getDriveExecutionContext(request);
-    const { id } = request.params;
-    // Begin profiling
-    const profiler = new Profiler({
-      title: "documents-browse",
-      active: this.profilingEnabled,
-      outputDir: "profiles",
-    });
-    profiler.start();
+  browse = withProfiler(
+    async (
+      request: FastifyRequest<{
+        Params: ItemRequestParams;
+        Body: SearchDocumentsBody;
+        Querystring: PaginationQueryParameters & { public_token?: string };
+      }>,
+    ): Promise<DriveItemDetails & { websockets: ResourceWebsocket[] }> => {
+      const context = getDriveExecutionContext(request);
+      const { id } = request.params;
 
-    const options: SearchDocumentsOptions = {
-      ...request.body,
-      company_id: request.body.company_id || context.company.id,
-      view: DriveFileDTOBuilder.VIEW_SHARED_WITH_ME,
-      onlyDirectlyShared: true,
-      onlyUploadedNotByMe: true,
-    };
+      const options: SearchDocumentsOptions = {
+        ...request.body,
+        company_id: request.body.company_id || context.company.id,
+        view: DriveFileDTOBuilder.VIEW_SHARED_WITH_ME,
+        onlyDirectlyShared: true,
+        onlyUploadedNotByMe: true,
+      };
 
-    const data = {
-      ...(await globalResolver.services.documents.documents.browse(id, options, context)),
-      websockets: request.currentUser?.id
-        ? globalResolver.platformServices.realtime.sign(
-            [{ room: `/companies/${context.company.id}/documents/item/${id}` }],
-            request.currentUser?.id,
-          )
-        : [],
-    };
+      const data = {
+        ...(await globalResolver.services.documents.documents.browse(id, options, context)),
+        websockets: request.currentUser?.id
+          ? globalResolver.platformServices.realtime.sign(
+              [{ room: `/companies/${context.company.id}/documents/item/${id}` }],
+              request.currentUser?.id,
+            )
+          : [],
+      };
 
-    // End profiling
-    profiler.finish();
-
-    return data;
-  };
+      return data;
+    },
+    "browse",
+  );
 
   sharedWithMe = async (
     request: FastifyRequest<{
