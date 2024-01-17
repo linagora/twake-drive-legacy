@@ -52,43 +52,27 @@ const useRealtimeRoom = <T>(
   useEffect(() => {
     if (room !== roomConf) {
       setRoom({ ...roomConf });
-      if (room && subscribed.current && websocket) {
-        websocket.leave(room.room, tag);
+      if (room && subscribed.current) {
+        // websocket.leave(room.room, tag);
         subscribed.current = false;
       }
     }
   }, [roomConf?.room, roomConf?.token, tagName]);
 
   useEffect(() => {
-    if (room && room.room && websocket && !subscribed.current) {
-      websocket.join(room.room, room.token, tag, (type: string, event: RealtimeBaseEvent) => {
-        logger.debug('Received WebSocket event', type, event);
-        if (type === 'realtime:resource') {
-          newEvent({
-            action: (event as RealtimeResourceEvent<T>).action,
-            payload: {
-              ...(event as RealtimeResourceEvent<T>).resource,
-              _type: (event as RealtimeResourceEvent<T>).type,
-            },
-          });
-        } else if (type === 'realtime:event') {
-          newEvent({ action: 'event', payload: event.data });
-        } else if (type === 'realtime:join:success') {
-          logger.debug(`Room ${room} has been joined`);
-        } else {
-          logger.debug('Event type is not supported', type);
-        }
-      });
+    if (room && room.room && !subscribed.current) {
       subscribed.current = true;
     }
-  }, [websocket, tag, room, onEvent]);
+  }, [tag, room, onEvent]);
 
   return {
     lastEvent,
-    send: (data: any) => websocket?.send(room.room, room.token, data),
+    send: (data: any) => {
+      return data;
+    },
     unsubscribe: () => {
       subscribed.current = false;
-      websocket?.leave(room.room, tagName);
+      // websocket?.leave(room.room, tagName);
     },
   };
 };

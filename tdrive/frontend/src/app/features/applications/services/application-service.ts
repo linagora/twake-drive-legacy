@@ -25,8 +25,8 @@ class Application {
     this.started = true;
     this.logger.info('Starting application for user', user);
 
-    const ws = WebSocket.get();
-    ws.connect();
+    /*const ws = WebSocket.get();
+    ws.connect();*/
 
     AccessRightsService.resetLevels();
     CurrentUser.start();

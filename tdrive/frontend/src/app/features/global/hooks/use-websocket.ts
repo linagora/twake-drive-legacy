@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import WebSocketFactory, { WebsocketEvents } from '@features/global/types/websocket-types';
+// import WebSocketFactory, { WebsocketEvents } from '@features/global/types/websocket-types';
 import WebSocketService from '@features/global/services/websocket-service';
 
 const useWebSocket = () => {
@@ -8,7 +8,7 @@ const useWebSocket = () => {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    wsRef.current = WebSocketFactory.get();
+    /*wsRef.current = WebSocketFactory.get();
 
     if (wsRef.current.isConnected()) {
       setConnected(() => true);
@@ -20,13 +20,12 @@ const useWebSocket = () => {
 
     wsRef.current.on(WebsocketEvents.Disconnected, () => {
       setConnected(() => false);
-    });
-
+    });*/
     return () => undefined;
   }, []);
 
   return {
-    websocket: wsRef.current,
+    websocket: null,
     connected,
   };
 };
