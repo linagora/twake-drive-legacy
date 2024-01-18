@@ -267,6 +267,7 @@
     "components.side_menu.buttons.empty_trash": "Empty trash",
     "components.header_path.shared_trash": "Shared Trash",
     "components.header_path.my_trash": "My Trash",
+    "components.header_path.shared_with_me": "Shared with me",
     "scenes.app.drive.nothing": "Nothing here.",
     "scenes.app.drive.drag_and_drop": "Drag and drop files to upload them or click on the 'Add document' button.",
     "scenes.app.drive.add_doc": "Add document or folder",

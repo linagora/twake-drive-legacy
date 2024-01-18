@@ -128,12 +128,14 @@ const PathItem = ({
   const { user } = useCurrentUser();
   const { viewId } = RouterServices.getStateFromRoute();
   const { access: trashAccess } = useDriveItem('trash');
+  const isInSharedWithMe = viewId === "shared_with_me";
   return (
     <div className="flex items-center">
       <a
         href="#"
         className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
         onClick={evt => {
+          evt.preventDefault();
           const driveMenuItems = [
             {
               type: 'menu',
@@ -160,6 +162,10 @@ const PathItem = ({
               hide: trashAccess === 'read',
             },
           ];
+          if (first && isInSharedWithMe) {
+            onClick(viewId || '', '');
+            return;
+          }
 
           if (first && user?.id) {
             if (viewId?.includes('trash')) {
@@ -173,18 +179,30 @@ const PathItem = ({
         }}
       >
         <Title>
-          {viewId?.includes('trash_') && first && Languages.t('components.header_path.my_trash')}
-          {viewId === 'trash' && first && Languages.t('components.header_path.shared_trash')}
-          {(viewId === 'trash' || viewId?.includes('trash_')) &&
-            !first &&
-            (cutFileName(item?.name) || '')}
-          {!viewId?.includes('trash') && (cutFileName(item?.name) || '')}
+          {(() => {
+            const isTrash = viewId?.includes('trash_') || viewId === 'trash';
+            const fileName = cutFileName(item?.name) || '';
+
+            if (first) {
+              if (isTrash) {
+                return viewId?.includes('trash_') 
+                  ? Languages.t('components.header_path.my_trash') 
+                  : Languages.t('components.header_path.shared_trash');
+              } else {
+                return isInSharedWithMe 
+                  ? Languages.t('components.header_path.shared_with_me') 
+                  : fileName;
+              }
+            } else {
+              return isTrash ? fileName : fileName;
+            }
+          })()}
         </Title>
       </a>
       {item?.access_info?.public?.level && item?.access_info?.public?.level !== 'none' && (
         <PublicIcon className="h-5 w-5 ml-2" />
       )}
-      {first && !!user?.id && (
+      {first && !!user?.id && viewId != "shared_with_me" && (
         <span className="ml-2 -mr-1 text-gray-700">
           <ChevronDownIcon className="w-4 h-4" />
         </span>

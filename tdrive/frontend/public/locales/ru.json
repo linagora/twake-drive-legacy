@@ -267,6 +267,7 @@
     "components.side_menu.buttons.empty_trash": "Очистить козину",
     "components.header_path.shared_trash": "Корзина \"Общего диска\"",
     "components.header_path.my_trash": "Корзина \"Моего диска\"",
+    "components.header_path.shared_with_me": "Поделено со мной",
     "scenes.app.drive.nothing": "Здесь ничего нет.",
     "scenes.app.drive.drag_and_drop": "Перенесите сюда файлы чтобы загрузить их или нажмите кнопку \"Добавить файл\"",
     "scenes.app.drive.add_doc": "Добавить файл или папку",
