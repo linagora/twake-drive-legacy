@@ -89,26 +89,29 @@ export default () => {
         >
           <UserIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.my_drive')}
         </Button>
-        <Button
-          onClick={() => {
-            history.push(
-              RouterServices.generateRouteFromState({
-                companyId: company,
-                viewId: 'root',
-                itemId: '',
-                dirId: '',
-              }),
-            );
-            setParentId('root');
-          }}
-          size="lg"
-          theme="white"
-          className={
-            'w-full mb-1 ' + (folderType === 'home' && viewId == 'root' ? activeClass : '')
-          }
-        >
-          <CloudIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.home')}
-        </Button>
+        {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_SHARED_DRIVE) && (
+          <Button
+            onClick={() => {
+              history.push(
+                RouterServices.generateRouteFromState({
+                  companyId: company,
+                  viewId: 'root',
+                  itemId: '',
+                  dirId: '',
+                }),
+              );
+              setParentId('root');
+            }}
+            size="lg"
+            theme="white"
+            className={
+              'w-full mb-1 ' + (folderType === 'home' && viewId == 'root' ? activeClass : '')
+            }
+          >
+
+            <CloudIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.home')}
+          </Button>
+        )}
         {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_SEARCH_USERS) && (
           <Button
             onClick={() => {

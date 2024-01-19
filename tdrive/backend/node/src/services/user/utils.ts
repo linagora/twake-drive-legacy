@@ -58,6 +58,9 @@ export function formatCompany(
       [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]: JSON.parse(
         config.get("drive.featureSearchUsers") || "true",
       ),
+      [CompanyFeaturesEnum.COMPANY_SHARED_DRIVE]: JSON.parse(
+        config.get("drive.featureSharedDrive") || "true",
+      ),
     },
     {
       ...(res.plan?.features || {}),
