@@ -1,7 +1,6 @@
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { useGlobalEffect } from '@features/global/hooks/use-global-effect';
-import { useRealtimeRoom } from '@features/global/hooks/use-realtime';
 import { LoadingState } from '@features/global/state/atoms/Loading';
 import { UserType } from '@features/users/types/user';
 import UserAPIClient from '../api/user-api-client';
@@ -33,11 +32,6 @@ export const useUser = (userId: string): UserType | undefined => {
     },
     [],
   );
-
-  const room = UserAPIClient.websocket(userId);
-  useRealtimeRoom<UserType>(room, 'useUser', () => {
-    refresh();
-  });
 
   return user;
 };

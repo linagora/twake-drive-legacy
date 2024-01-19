@@ -3,7 +3,6 @@ import { CompanyType } from '@features/companies/types/company';
 import { UserPreferencesType, UserType } from '@features/users/types/user';
 import Api from '../../global/framework/api-service';
 import { TdriveService } from '../../global/framework/registry-decorator-service';
-import { WebsocketRoom } from '../../global/types/websocket-types';
 import WorkspaceAPIClient from '../../workspaces/api/workspace-api-client';
 import CurrentUser from '../../../deprecated/user/CurrentUser';
 import { setUserList } from '../hooks/use-user-list';
@@ -23,12 +22,7 @@ type SearchUserApiResponse<T> = {
 @TdriveService('UserAPIClientService')
 class UserAPIClientService {
   private readonly prefixUrl: string = '/internal/services/users/v1';
-  private realtime: Map<string, WebsocketRoom> = new Map();
   private logger = Logger.getLogger('UserAPIClientService');
-
-  websocket(userId: string): WebsocketRoom {
-    return this.realtime.get(userId) || { room: '', token: '' };
-  }
 
   /**
    * Get users from their ID
@@ -101,7 +95,6 @@ class UserAPIClientService {
     companyId: string,
     options?: { bufferize?: boolean; callback?: (res: UserType[]) => void },
   ): Promise<UserType[]> {
-
     const res = await new Promise<UserType[]>(resolve =>
       Api.post(
         `/internal/services/users/v1/users/${companyId}/all`,
@@ -135,7 +128,7 @@ class UserAPIClientService {
   }
 
   async getCurrent(disableJWTAuthentication = false): Promise<UserType> {
-    return Api.get<{ resource: UserType; websocket: WebsocketRoom }>(
+    return Api.get<{ resource: UserType }>(
       '/internal/services/users/v1/users/me',
       undefined,
       false,
@@ -144,7 +137,6 @@ class UserAPIClientService {
       if (!result?.resource?.id) {
         throw new Error('User not found');
       }
-      result.resource.id && this.realtime.set(result.resource.id, result.websocket);
       return result.resource;
     });
   }

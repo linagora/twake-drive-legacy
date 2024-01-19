@@ -1,29 +1,20 @@
 import Api from '../../global/framework/api-service';
 import { NotificationType } from '@features/users/types/notification-types';
 import { TdriveService } from '../../global/framework/registry-decorator-service';
-import { WebsocketRoom } from '@features/global/types/websocket-types';
 
 @TdriveService('UserNotificationAPIClientService')
 class UserNotificationAPIClient {
-  private realtime: WebsocketRoom = { room: '', token: '' };
-
-  websocket(): WebsocketRoom {
-    return this.realtime;
-  }
-
   async getAllCompaniesBadges(): Promise<NotificationType[]> {
-    const response = await Api.get<{ resources: NotificationType[]; websockets: WebsocketRoom[] }>(
+    const response = await Api.get<{ resources: NotificationType[] }>(
       '/internal/services/notifications/v1/badges?limit=1000&websockets=1&all_companies=true',
     );
-    if (response.websockets) this.realtime = response.websockets[0];
     return response.resources ? response.resources : [];
   }
 
   async getCompanyBadges(companyId: string): Promise<NotificationType[]> {
-    const response = await Api.get<{ resources: NotificationType[]; websockets: WebsocketRoom[] }>(
+    const response = await Api.get<{ resources: NotificationType[] }>(
       '/internal/services/notifications/v1/badges?limit=1000&websockets=1&company_id=' + companyId,
     );
-    if (response.websockets) this.realtime = response.websockets[0];
     return response.resources ? response.resources : [];
   }
 

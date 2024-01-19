@@ -9,7 +9,7 @@ import ModalComponent from '@components/modal/modal-component';
 import PopupService from '@deprecated/popupManager/popupManager.js';
 import useUsetiful from '@features/global/hooks/use-usetiful';
 import Languages from '@features/global/services/languages-service';
-import { useCurrentUser, useCurrentUserRealtime } from '@features/users/hooks/use-current-user';
+import { useCurrentUser } from '@features/users/hooks/use-current-user';
 import UserContext from '@features/users/state/integration/user-context';
 import Viewer from '@views/client/viewer/viewer';
 import ConnectionIndicator from 'components/connection-indicator/connection-indicator';
@@ -26,7 +26,6 @@ import SideBar from './side-bar';
 export default React.memo((): JSX.Element => {
   const [menuIsOpen, setMenuIsOpen] = useState(false);
   const { user } = useCurrentUser();
-  useCurrentUserRealtime();
   const { FeatureToggles, activeFeatureNames } = useFeatureToggles();
 
   useUsetiful();

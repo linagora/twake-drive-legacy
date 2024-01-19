@@ -4,7 +4,6 @@ import AccessRightsService from 'app/features/workspace-members/services/workspa
 import CurrentUser from 'app/deprecated/user/CurrentUser';
 import JWT from 'app/features/auth/jwt-storage-service';
 import LocalStorage from '../../global/framework/local-storage-service';
-import WebSocket from '../../global/types/websocket-types';
 
 class Application {
   private logger: Logger.Logger;
@@ -24,9 +23,6 @@ class Application {
     }
     this.started = true;
     this.logger.info('Starting application for user', user);
-
-    /*const ws = WebSocket.get();
-    ws.connect();*/
 
     AccessRightsService.resetLevels();
     CurrentUser.start();

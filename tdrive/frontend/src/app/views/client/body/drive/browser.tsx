@@ -6,7 +6,6 @@ import { getFilesTree } from '@components/uploads/file-tree-utils';
 import UploadZone from '@components/uploads/upload-zone';
 import { setTdriveTabToken } from '@features/drive/api-client/api-client';
 import { useDriveItem } from '@features/drive/hooks/use-drive-item';
-import { DriveRealtimeObject } from '@features/drive/hooks/use-drive-realtime';
 import { useDriveUpload } from '@features/drive/hooks/use-drive-upload';
 import { DriveItemSelectedList } from '@features/drive/state/store';
 import { formatBytes } from '@features/drive/utils';
@@ -257,7 +256,6 @@ export default memo(
             onDrop={handleDrop}
 
           >
-            <DriveRealtimeObject id={parentId} key={parentId} />
             {role == "admin" && <UsersModal />}
             <VersionsModal />
             <AccessModal />

@@ -2,15 +2,10 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { WorkspaceType } from '@features/workspaces/types/workspace';
 import { WorkspaceListStateFamily } from '../state/workspace-list';
-import Collections from '@deprecated/CollectionsV1/Collections/Collections';
-import { useRealtimeRoom } from '@features/global/hooks/use-realtime';
 import useRouterWorkspace from '@features/router/hooks/use-router-workspace';
 import RouterService from '@features/router/services/router-service';
 import _ from 'lodash';
 import WorkspacesService from '@deprecated/workspaces/workspaces.jsx';
-import AccessRightsService, {
-  RightsOrNone,
-} from '@features/workspace-members/services/workspace-members-access-rights-service';
 import LocalStorage from '@features/global/framework/local-storage-service';
 import useRouterCompany from '@features/router/hooks/use-router-company';
 import WorkspaceAPIClient from '@features/workspaces/api/workspace-api-client';
@@ -46,22 +41,6 @@ export const useWorkspacesCommons = (companyId = '') => {
 
   return { workspaces, loading, refresh };
 };
-
-export function useWorkspaces(companyId = '') {
-  const { workspaces, loading, refresh } = useWorkspacesCommons(companyId);
-
-  useRealtimeRoom<WorkspaceType>(
-    WorkspaceAPIClient.websockets(companyId)[0],
-    'useWorkspaces',
-    action => {
-      if (action === 'saved') {
-        refresh();
-      }
-    },
-  );
-
-  return { workspaces, loading, refresh };
-}
 
 export function useWorkspaceLoader(companyId: string) {
   const loading = useRecoilValue(LoadingState(`workspaces-${companyId}`));

@@ -12,7 +12,6 @@ import WorkspacesService from '@deprecated/workspaces/workspaces.jsx';
 import AccessRightsService from '@features/workspace-members/services/workspace-members-access-rights-service';
 import LoginService from '@features/auth/login-service';
 import UserAPIClient from '@features/users/api/user-api-client';
-import { useRealtimeRoom } from '@features/global/hooks/use-realtime';
 import CompanyAPIClient from '@features/companies/api/company-api-client';
 
 /**
@@ -86,16 +85,6 @@ export const useCurrentCompany = () => {
 
   return { company: company as CompanyType, refresh };
 };
-
-export const useCurrentCompanyRealtime = () => {
-  const { company, refresh } = useCurrentCompany();
-
-  const room = CompanyAPIClient.websocket(company?.id || '');
-  useRealtimeRoom<CompanyType>(room, 'useCurrentCompany', () => {
-    refresh();
-  });
-};
-
 /**
  * Company priority:
  * 1. Router company id

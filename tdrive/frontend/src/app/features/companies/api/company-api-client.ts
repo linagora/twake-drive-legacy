@@ -2,7 +2,6 @@ import { CompanyType } from '@features/companies/types/company';
 import { WorkspaceType } from '@features/workspaces/types/workspace';
 import Api from '../../global/framework/api-service';
 import { TdriveService } from '../../global/framework/registry-decorator-service';
-import { WebsocketRoom } from '../../global/types/websocket-types';
 
 const PREFIX = '/internal/services/users/v1';
 
@@ -14,12 +13,6 @@ export type UpdateWorkspaceBody = {
 
 @TdriveService('CompanyAPIClientService')
 class CompanyAPIClient {
-  private realtime: Map<string, WebsocketRoom> = new Map();
-
-  websocket(companyId: string): WebsocketRoom {
-    return this.realtime.get(companyId) || { room: '', token: '' };
-  }
-
   /**
    * Get a list of companies for a user, only common companies with current user are returned.
    
@@ -37,13 +30,12 @@ class CompanyAPIClient {
    * @param companyId
    */
   async get(companyId: string, disableJWTAuthentication = false): Promise<CompanyType> {
-    return Api.get<{ resource: CompanyType; websocket: WebsocketRoom }>(
+    return Api.get<{ resource: CompanyType; }>(
       `${PREFIX}/companies/${companyId}`,
       undefined,
       false,
       { disableJWTAuthentication },
     ).then(result => {
-      result.resource?.id && this.realtime.set(result.resource.id, result.websocket);
       return result.resource;
     });
   }
