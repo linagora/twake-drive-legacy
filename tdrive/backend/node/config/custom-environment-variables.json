@@ -53,6 +53,14 @@
       "contactPoints": "DB_CASSANDRA_URI",
       "localDataCenter": "DB_CASSANDRA_LOCALDATACENTER",
       "keyspace": "DB_CASSANDRA_KEYSPACE"
+    },
+    "postgres": {
+      "database": "DB_POSTGRES_DBNAME",
+      "host": "DB_POSTGRES_HOST",
+      "user": "DB_POSTGRES_USERNAME",
+      "password": "DB_POSTGRES_PASSWORD",
+      "port": "DB_POSTGRES_PORT",
+      "ssl": "DB_POSTGRES_USE_SSL"
     }
   },
   "search": {
@@ -86,7 +94,8 @@
       "port": "STORAGE_S3_PORT",
       "useSSL": "STORAGE_S3_USE_SSL",
       "accessKey": "STORAGE_S3_ACCESS_KEY",
-      "secretKey": "STORAGE_S3_SECRET_KEY"
+      "secretKey": "STORAGE_S3_SECRET_KEY",
+      "disableRemove": "STORAGE_S3_DISABLE_REMOVE"
     }
   },
   "email-pusher": {

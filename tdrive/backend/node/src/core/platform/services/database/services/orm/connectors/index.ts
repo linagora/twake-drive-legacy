@@ -5,11 +5,14 @@ import { MongoConnectionOptions } from "./mongodb/mongodb";
 import { ColumnDefinition, EntityDefinition } from "../types";
 import { FindOptions } from "../repository/repository";
 import { ListResult } from "../../../../../framework/api/crud-service";
+import { PostgresConnectionOptions } from "./postgres/postgres";
 
 export * from "./mongodb/mongodb";
 export * from "./cassandra/cassandra";
 
-export type UpsertOptions = any;
+export type UpsertOptions = {
+  action?: "INSERT" | "UPDATE";
+};
 
 export type RemoveOptions = any;
 
@@ -41,7 +44,7 @@ export interface Connector extends Initializable {
    * Upsert
    * returns true if the object was created/updated, false otherwise
    */
-  upsert(entities: any[]): Promise<boolean[]>;
+  upsert(entities: any[], _options: UpsertOptions): Promise<boolean[]>;
 
   /**
    * Remove
@@ -60,4 +63,7 @@ export interface Connector extends Initializable {
   ): Promise<ListResult<EntityType>>;
 }
 
-export declare type ConnectionOptions = MongoConnectionOptions | CassandraConnectionOptions;
+export declare type ConnectionOptions =
+  | MongoConnectionOptions
+  | CassandraConnectionOptions
+  | PostgresConnectionOptions;

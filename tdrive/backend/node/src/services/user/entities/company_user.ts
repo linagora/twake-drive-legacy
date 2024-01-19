@@ -35,22 +35,6 @@ export default class CompanyUser {
 
   @Column("last_update_day", "number")
   lastUpdateDay: number;
-
-  /**
-   * 0: member,
-   * 1, 2, 3: admin,
-   */
-  @Column("level", "number")
-  level: number; //Depreciated
-
-  @Column("is_externe", "tdrive_boolean")
-  isExterne: boolean; //Depreciated
-
-  @Column("did_connect_today", "tdrive_boolean")
-  didConnectToday: boolean; //Depreciated
-
-  @Column("app_used_today", "json")
-  appUsedToday: Array<string>; //Depreciated
 }
 
 export type CompanyUserPrimaryKey = Partial<Pick<CompanyUser, "group_id" | "user_id">>;

@@ -121,7 +121,8 @@
       "port": 9000,
       "useSSL": false,
       "accessKey": "ABCD",
-      "secretKey": "x1yz"
+      "secretKey": "x1yz",
+      "disableRemove": false
     },
     "local": {
       "path": "/tdrive"

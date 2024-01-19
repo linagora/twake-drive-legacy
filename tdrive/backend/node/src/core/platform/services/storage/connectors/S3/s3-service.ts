@@ -11,6 +11,7 @@ export type S3Configuration = {
   useSSL: boolean;
   accessKey: string;
   secretKey: string;
+  disableRemove: boolean;
 };
 
 export default class S3ConnectorService implements StorageConnectorAPI {
@@ -66,8 +67,13 @@ export default class S3ConnectorService implements StorageConnectorAPI {
 
   async remove(path: string): Promise<boolean> {
     try {
-      await this.client.removeObject(this.minioConfiguration.bucket, path);
-      return true;
+      if (this.minioConfiguration.disableRemove) {
+        logger.info(`File ${path} wasn't removed, file removal is disabled in configuration`);
+        return true;
+      } else {
+        await this.client.removeObject(this.minioConfiguration.bucket, path);
+        return true;
+      }
     } catch (err) {}
     return false;
   }

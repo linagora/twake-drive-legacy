@@ -25,8 +25,6 @@ import {
 } from "../../types";
 import { DriveFileDTO } from "../dto/drive-file-dto";
 import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
-import { ExecutionContext } from "../../../../core/platform/framework/api/crud-service";
-import gr from "../../../global-resolver";
 import config from "config";
 import withProfiler from "../../../../utils/profiler";
 
@@ -38,12 +36,6 @@ export class DocumentsController {
   private profilingEnabled: boolean = config.has("drive.profilingEnabled")
     ? config.get("drive.profilingEnabled")
     : false;
-  private getCompanyUserRole(companyId: string, userId: string, context?: ExecutionContext) {
-    return gr.services.companies
-      .getCompanyUser({ id: companyId }, { id: userId }, context)
-      .then(a => (a ? a.level : null));
-  }
-
   /**
    * Creates a DriveFile item
    *

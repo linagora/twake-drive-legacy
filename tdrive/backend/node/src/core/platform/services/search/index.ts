@@ -3,15 +3,18 @@ import {
   DatabaseEntitiesRemovedEvent,
   DatabaseEntitiesSavedEvent,
   EntityTarget,
+  ESSearchConfiguration,
   SearchAdapterInterface,
   SearchConfiguration,
   SearchServiceAPI,
 } from "./api";
-import ElasticsearchService from "./adapters/elasticsearch";
+import ESAndOpenSearch from "./adapters/elasticsearch/elastic-open-search-adapter";
 import MongosearchService from "./adapters/mongosearch";
 import { localEventBus } from "../../framework/event-bus";
 import { DatabaseServiceAPI } from "../database/api";
 import SearchRepository from "./repository";
+import { Client as OpenClient } from "@opensearch-project/opensearch";
+import { Client as ESClient } from "@elastic/elasticsearch";
 
 @ServiceName("search")
 @Consumes(["database"])
@@ -29,9 +32,19 @@ export default class Search extends TdriveService<SearchServiceAPI> {
 
     if (type === "elasticsearch") {
       logger.info("Loaded Elasticsearch adapter for search.");
-      this.service = new ElasticsearchService(
+      this.service = new ESAndOpenSearch(
         this.database,
-        this.configuration.get("elasticsearch") as SearchConfiguration["elasticsearch"],
+        this.configuration.get("elasticsearch") as ESSearchConfiguration,
+        config => new ESClient(config),
+        "ElasticSearch",
+      );
+    } else if (type === "opensearch") {
+      logger.info("Loaded OpenSearch adapter for search.");
+      this.service = new ESAndOpenSearch(
+        this.database,
+        this.configuration.get("opensearch") as ESSearchConfiguration,
+        config => new OpenClient(config),
+        "OpenSearch",
       );
     } else if (type === "mongodb") {
       logger.info("Loaded Mongo adapter for search.");
@@ -41,7 +54,7 @@ export default class Search extends TdriveService<SearchServiceAPI> {
       this.service = null;
     }
 
-    if (this.service) this.service.connect();
+    if (this.service) await this.service.connect();
     return this;
   }
 
@@ -60,11 +73,11 @@ export default class Search extends TdriveService<SearchServiceAPI> {
     return this;
   }
 
-  public async upsert(entities: any[]) {
+  public async upsert(entities: never[]) {
     return this.service.upsert(entities);
   }
 
-  public async remove(entities: any[]) {
+  public async remove(entities: never[]) {
     return this.service.remove(entities);
   }
 

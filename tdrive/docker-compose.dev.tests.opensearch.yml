@@ -25,36 +25,46 @@ services:
 #      - opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
     ports:
       - 9200:9200 # REST API
-      - 9600:9600 # Performance Analyzer
- #   networks:
+#      - 9600:9600 # Performance Analyzer
+#   networks:
  #     - opensearch-net # All of the containers will join the same Docker bridge network
 
-  mongo:
-    container_name: mongo
-    image: mongo
-    volumes:
-      - ./docker-data/mongo:/data/db
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: tdrive
+      POSTGRES_PASSWORD: tdrive_secret
+      POSTGRES_USER: tdrive_user
     ports:
-      - 27017:27017
+      - "5432:5432"
 
   node:
     image: tdrive/tdrive-node:test
-    container_name: node-test
     build:
       context: .
       dockerfile: docker/tdrive-node/Dockerfile
-      target: test
-    environment:
-      - NODE_ENV=test
-      - DB_DRIVER
-      #- PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
-      - SEARCH_ES_ENDPOINT=http://elasticsearch:9200
-      - SEARCH_ES_FLUSHINTERVAL=1
+      target: development
     volumes:
-      - ./backend/node:/usr/src/app
-      - ./docker-data/documents/:/storage/
+      - ./coverage/:/usr/src/app/coverage/
+    environment:
+      - LOG_LEVEL=error
+      - NODE_ENV=test
+      - DB_DRIVER=postgres
+      - DB_POSTGRES_DBNAME=tdrive
+      - DB_POSTGRES_HOST=postgres
+      - DB_POSTGRES_PASSWORD=tdrive_secret
+      - DB_POSTGRES_PORT=5432
+      - DB_POSTGRES_USERNAME=tdrive_user
+      - PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
+      - SEARCH_OS_FLUSHINTERVAL=1
+      - SEARCH_OS_ENDPOINT=https://opensearch-node1:9200
+      - SEARCH_OS_PASSWORD=admin
+      - SEARCH_OS_USE_AUTH=true
+      - SEARCH_OS_USERNAME=admin
     depends_on:
-      - mongo
+      - postgres
       - opensearch-node1
     links:
-      - mongo
+      - postgres
+      - opensearch-node1

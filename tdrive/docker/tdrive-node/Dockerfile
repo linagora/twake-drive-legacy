@@ -3,17 +3,12 @@ FROM node:lts as node-base
 
 ### Install dependancies
 RUN apt-get update && \
-    apt-get install -y ghostscript graphicsmagick wget unoconv libxml2-dev ffmpeg python-is-python3 && \
-    # upgrade unoconv
-    wget -N https://raw.githubusercontent.com/dagwieers/unoconv/master/unoconv -O /usr/bin/unoconv && \
-    chmod +x /usr/bin/unoconv
+    apt-get install -y ghostscript graphicsmagick
 #Docker mac issue
 # RUN apt-get update && apt-get install -y libc6
 # RUN ln -s /lib/libc.musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2
 
-
 ### Install TDrive
-
 WORKDIR /usr/src/app
 COPY backend/node/package*.json ./
 
@@ -30,6 +25,7 @@ COPY backend/node/ .
 #Install dev dependancies for build
 RUN export NODE_ENV=development
 RUN npm install
+
 #Build in production mode
 RUN export NODE_ENV=production
 RUN npm run build
