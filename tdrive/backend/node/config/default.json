@@ -135,6 +135,7 @@
     "debug": true
   },
   "drive": {
+    "featureSharedDrive": true,
     "featureSearchUsers": true
   },
   "applications": {
