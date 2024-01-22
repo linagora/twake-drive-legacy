@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from "express";
-import { NextcloudMigration, NextcloudMigrationConfiguration } from './nextcloud_migration.js';
-import { logger } from "./logger.js"
-import { UserProviderType } from "./user/user_privider.js";
+import { NextcloudMigration, NextcloudMigrationConfiguration } from './nextcloud_migration';
+import { logger } from "./logger"
+import { UserProviderType } from "./user/user_privider";
 
 const app: Express = express();
 const port = process.env.SERVER_PORT || 3000;
