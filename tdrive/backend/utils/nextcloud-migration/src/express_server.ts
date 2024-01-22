@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import { NextcloudMigration, NextcloudMigrationConfiguration } from './nextcloud_migration.js';
-import { logger } from "./logger"
-import { UserProviderType } from "./user/user_privider";
+import { logger } from "./logger.js"
+import { UserProviderType } from "./user/user_privider.js";
 
 const app: Express = express();
 const port = process.env.SERVER_PORT || 3000;
@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 const config: NextcloudMigrationConfiguration = {
-  ldap: {
+  shell: {
     baseDn: process.env.LDAP_BASE!,
     url: process.env.LDAP_URL!,
   },
@@ -30,12 +30,13 @@ const config: NextcloudMigrationConfiguration = {
   userProvider: process.env.USER_PROVIDER! as UserProviderType
 }
 
-if (!config.ldap.baseDn) {
-  throw new Error("LDAP base has to be set")
-}
-if (!config.ldap.url) {
-  throw new Error("LDAP url has to be set")
-}
+// if (!config.shell.baseDn) {
+//   throw new Error("LDAP base has to be set")
+// }
+// if (!config.shell.url) {
+//   throw new Error("LDAP url has to be set")
+// }
+
 if (!config.drive.url) {
   throw new Error("Twake Drive url  host has to be set")
 }
