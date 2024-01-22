@@ -136,6 +136,7 @@
     "featureSharedDrive": "ENABLE_FEATURE_SHARED_DRIVE",
     "rootAdmins": "DRIVE_ROOT_ADMINS",
     "defaultLanguage": "DRIVE_DEFAULT_LANGUAGE",
-    "featureSearchUsers": "ENABLE_FEATURE_SEARCH_USERS"
+    "featureSearchUsers": "ENABLE_FEATURE_SEARCH_USERS",
+    "featureDisplayEmail": "ENABLE_FEATURE_DISPLAY_EMAIL"
   }
 }

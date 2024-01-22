@@ -136,7 +136,8 @@
   },
   "drive": {
     "featureSharedDrive": true,
-    "featureSearchUsers": true
+    "featureSearchUsers": true,
+    "featureDisplayEmail": true
   },
   "applications": {
     "grid": [

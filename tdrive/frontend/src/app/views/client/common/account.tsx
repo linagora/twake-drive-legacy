@@ -7,7 +7,9 @@ import currentUserService from '@features/users/services/current-user-service';
 import AccountParameter from '@views/client/popup/UserParameter/UserParameter';
 import Languages from '../../../features/global/services/languages-service';
 import ModalManagerDepreciated from '@deprecated/popupManager/popupManager';
-import InitService from '@features/global/services/init-service';
+import FeatureTogglesService, {
+  FeatureNames,
+} from '@features/global/services/feature-toggles-service';
 
 export default ({ sidebar }: { sidebar?: boolean }): JSX.Element => {
   const { user } = useCurrentUser();
@@ -51,9 +53,12 @@ export default ({ sidebar }: { sidebar?: boolean }): JSX.Element => {
         <Base className="font-bold overflow-hidden text-ellipsis whitespace-nowrap w-full block -mb-1">
           {currentUserService.getFullName(user)}
         </Base>
-        <Info className="font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full">
-          {user.email}
-        </Info>
+
+        { !FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_DISPLAY_EMAIL) && (
+          <Info className="font-semibold overflow-hidden text-ellipsis whitespace-nowrap w-full">
+            {user.email}
+          </Info>
+        )}
       </div>
     </Menu>
   );
