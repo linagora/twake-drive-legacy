@@ -1,11 +1,11 @@
 import { exec } from 'child_process';
 // @ts-ignore
 import fs from 'fs';
-import { ShellLdapUserProvider } from './user/shell_ldap_user';
+import { ShellLdapUserProvider } from './shell_ldap_user';
 import { TwakeDriveClient, TwakeDriveUser } from './twake_client';
 import path from 'path';
 import { logger } from "./logger"
-import { User, UserProvider, UserProviderFactory, UserProviderType } from "./user/user_privider";
+import { User, UserProvider, UserProviderFactory, UserProviderType } from "./user_privider";
 
 export interface NextcloudMigrationConfiguration {
   shell: {

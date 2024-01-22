@@ -1,6 +1,6 @@
 import {describe, expect, test} from '@jest/globals';
-import { ShellLdapUserProvider } from '../src/user/shell_ldap_user';
-import { LdapConfiguration } from '../src/user/ldap_user';
+import { ShellLdapUserProvider } from '../src/shell_ldap_user';
+import { LdapConfiguration } from '../src/ldap_user';
 
 //FOR LOCAL DEBUG PURPOSE ONLY, ITS NOT A TEST
 describe.skip('Shell LDAP User Provider', () => {

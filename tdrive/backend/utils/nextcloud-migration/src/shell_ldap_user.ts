@@ -1,7 +1,7 @@
 import { LdapConfiguration } from './ldap_user';
 import { exec } from 'child_process';
 import ldif from 'ldif';
-import { logger } from "../logger"
+import { logger } from "./logger"
 import { User, UserProvider } from "./user_privider";
 
 export class ShellLdapUserProvider implements UserProvider {

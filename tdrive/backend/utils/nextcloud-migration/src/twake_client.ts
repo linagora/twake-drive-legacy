@@ -3,7 +3,7 @@ import FormData from 'form-data';
 // @ts-ignore
 import fs from 'fs';
 import { logger } from './logger';
-import { User } from "./user/user_privider";
+import { User } from "./user_privider";
 
 type TwakeClientConfiguration = {
   url: string,

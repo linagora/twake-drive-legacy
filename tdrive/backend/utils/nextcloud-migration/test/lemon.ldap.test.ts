@@ -1,5 +1,5 @@
 import {describe, expect, test} from '@jest/globals';
-import { LemonLdapUserProvider, LemonLdapUserProviderConfig } from "../src/user/lemon_ldap_user_provider";
+import { LemonLdapUserProvider, LemonLdapUserProviderConfig } from "../src/lemon_ldap_user_provider";
 
 //FOR LOCAL DEBUG PURPOSE ONLY, ITS NOT A TEST
 describe.skip('Lemon LDAP User Provider', () => {

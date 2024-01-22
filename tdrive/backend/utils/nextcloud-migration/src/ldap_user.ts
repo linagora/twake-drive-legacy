@@ -1,5 +1,5 @@
 import ldap, { SearchOptions } from "ldapjs";
-import { logger } from "../logger";
+import { logger } from "./logger";
 import { User, UserProvider } from "./user_privider";
 
 export type LdapConfiguration = {
