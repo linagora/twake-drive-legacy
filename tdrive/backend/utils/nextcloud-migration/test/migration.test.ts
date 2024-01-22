@@ -14,7 +14,12 @@ describe.skip('nextcloud migration module', () => {
           appId: "tdrive_onlyoffice",
           secret: "c1cc66db78e1d3bb4713c55d5ab2"
         }
-      }
+      },
+      userProvider: "lemon",
+      lemon: {
+        url: "url",
+        auth: "key"
+      },
     } as NextcloudMigrationConfiguration);
 
     let user = await subj.driveClient.createUser({firstName: "DWHO", lastName: "DWHO", email: "dwho@example.com", uid: "test"});

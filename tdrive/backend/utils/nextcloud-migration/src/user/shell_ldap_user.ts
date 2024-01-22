@@ -1,9 +1,10 @@
-import { LdapConfiguration, User } from './ldap_user';
+import { LdapConfiguration } from './ldap_user';
 import { exec } from 'child_process';
 import ldif from 'ldif';
-import { logger } from "./logger"
+import { logger } from "../logger"
+import { User, UserProvider } from "./user_privider";
 
-export class LdapUser {
+export class ShellLdapUserProvider implements UserProvider {
 
   private config: LdapConfiguration;
 
@@ -12,7 +13,7 @@ export class LdapUser {
   }
 
   async find(username: string): Promise<User> {
-    return new Promise((resolve, reject) => {
+    return new Promise<User>((resolve, reject) => {
       let cmd = `ldapsearch -x -H ${this.config.url} -b '${this.config.baseDn}' '(uid=${username})'`;
       logger.info("Executing command to get data from LDAP for " + username);
       exec(cmd, (error, stdout, stderr) => {

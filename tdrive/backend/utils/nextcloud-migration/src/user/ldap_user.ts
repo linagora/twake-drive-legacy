@@ -1,20 +1,14 @@
-import ldap, { SearchEntry, SearchOptions } from 'ldapjs';
-import { logger } from "./logger"
+import ldap, { SearchOptions } from "ldapjs";
+import { logger } from "../logger";
+import { User, UserProvider } from "./user_privider";
 
 export type LdapConfiguration = {
   url: string,
   baseDn: string,
 }
 
-export type User = {
-  firstName: string,
-  lastName: string,
-  email: string,
-  uid: string
-}
-
 // Doesn't work, fix it later, somehow none of the events is called for the search request
-export class LdapUser {
+export class LdapUserProvider implements UserProvider {
 
   private config: LdapConfiguration;
 
@@ -22,38 +16,6 @@ export class LdapUser {
 
   constructor(config: LdapConfiguration) {
     this.config = config;
-  }
-
-  async auth(username: string, password: string) {
-    return new Promise((resolve, reject) => {
-      this.client?.bind(username, password, (error) => {
-        if (error) {
-          reject(new Error("Authentication error"));
-        } else {
-          logger.info("Successfully authenticated in LDAP")
-          resolve(this.client);
-        }
-      });
-    });
-  }
-
-  async connect() {
-    return new Promise((resolve, reject) => {
-      if (!this.client) {
-        this.client = ldap.createClient({
-          url: this.config.url,
-          reconnect: true
-        });
-        this.client.on('connect', (res) => {
-          logger.info("Connected to LDAP")
-          resolve(this.auth("", ""));
-        })
-        this.client.on('connectionError', (error) => {
-          logger.info("Error connecting to LDAP")
-          reject(error);
-        });
-      }
-    });
   }
 
   async find(username: string): Promise<User> {

@@ -1,17 +1,21 @@
 import { exec } from 'child_process';
 // @ts-ignore
 import fs from 'fs';
-import { LdapUser } from './shell_ldap_user';
-import { User } from './ldap_user.js';
+import { ShellLdapUserProvider } from './user/shell_ldap_user';
 import { TwakeDriveClient, TwakeDriveUser } from './twake_client';
 import path from 'path';
 import { logger } from "./logger"
+import { User, UserProvider, UserProviderFactory, UserProviderType } from "./user/user_privider";
 
-export type NextcloudMigrationConfiguration = {
-  ldap: {
+export interface NextcloudMigrationConfiguration {
+  shell: {
     baseDn: string,
     url: string,
   },
+  lemon: {
+    url: string,
+    auth: string,
+  }
   drive: {
     url: string,
     credentials: {
@@ -21,19 +25,20 @@ export type NextcloudMigrationConfiguration = {
   },
   tmpDir: string,
   nextcloudUrl: string
+  userProvider: UserProviderType
 }
 
 export class NextcloudMigration {
 
   private config: NextcloudMigrationConfiguration;
 
-  private ldap: LdapUser;
+  private userProvider: UserProvider;
 
   driveClient: TwakeDriveClient;
 
   constructor(config: NextcloudMigrationConfiguration) {
     this.config = config;
-    this.ldap = new LdapUser(config.ldap);
+    this.userProvider = (new UserProviderFactory()).get(config.userProvider, config[config.userProvider]);
     this.driveClient = new TwakeDriveClient(this.config.drive);
   }
 
@@ -79,7 +84,7 @@ export class NextcloudMigration {
   }
 
   async getLDAPUser(username: string): Promise<User> {
-    const user = await this.ldap.find(username);
+    const user = await this.userProvider.find(username);
     if (!user.email) {
       throw new Error(`User ${username} not found`);
     }

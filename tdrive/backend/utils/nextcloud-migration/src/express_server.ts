@@ -1,6 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import { NextcloudMigration, NextcloudMigrationConfiguration } from './nextcloud_migration.js';
 import { logger } from "./logger"
+import { UserProviderType } from "./user/user_privider";
 
 const app: Express = express();
 const port = process.env.SERVER_PORT || 3000;
@@ -13,6 +14,10 @@ const config: NextcloudMigrationConfiguration = {
     baseDn: process.env.LDAP_BASE!,
     url: process.env.LDAP_URL!,
   },
+  lemon: {
+    url: process.env.LEMON_USERS_URL!,
+    auth: process.env.LEMON_USERS_AUTH!,
+  },
   tmpDir: process.env.TMP_DIR || '/tmp',
   nextcloudUrl: process.env.NEXTCLOUD_URL!,
   drive: {
@@ -21,7 +26,8 @@ const config: NextcloudMigrationConfiguration = {
       appId: process.env.TWAKE_DRIVE_APP_ID!,
       secret: process.env.TWAKE_DRIVE_SECRET!,
     }
-  }
+  },
+  userProvider: process.env.USER_PROVIDER! as UserProviderType
 }
 
 if (!config.ldap.baseDn) {
