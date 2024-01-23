@@ -30,7 +30,6 @@ export class ShellLdapUserProvider implements UserProvider {
                 stdout = stdout.substring(0, stdout.lastIndexOf("# search result"))
               }
               let obj =  ldif.parse(stdout).shift().toObject({});
-              logger.info(obj);
               resolve({
                 lastName: obj.attributes.sn,
                 firstName: obj.attributes.givenName,

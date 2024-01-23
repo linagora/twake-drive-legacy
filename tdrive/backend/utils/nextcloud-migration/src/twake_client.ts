@@ -78,7 +78,7 @@ export class TwakeDriveClient {
       item,
       version,
     });
-    logger.info(response);
+    logger.info(response.data);
     return response.data;
   };
 
@@ -87,7 +87,7 @@ export class TwakeDriveClient {
     const response
       = await (await this.client()).get(`${this.config.url}/internal/services/documents/v1/companies/00000000-0000-4000-0000-000000000000/item/${id}`, {
     });
-    logger.info(response);
+    logger.info(response.data);
     return response.data;
   }
 
