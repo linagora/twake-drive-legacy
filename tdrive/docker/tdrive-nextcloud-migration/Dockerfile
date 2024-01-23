@@ -38,6 +38,18 @@ RUN perl -i -ne 'print unless/prestart/' package.json
 
 FROM updated
 
+ENV SERVER_PORT=3000 \
+    LDAP_BASE= \
+    LDAP_URL= \
+    LEMON_USERS_URL= \
+    LEMON_USERS_AUTH= \
+    TMP_DIR=/tmp \
+    NEXTCLOUD_URL= \
+    TWAKE_DRIVE_URL= \
+    TWAKE_DRIVE_APP_ID= \
+    TWAKE_DRIVE_SECRET= \
+    USER_PROVIDER=
+
 COPY --from=1 /usr/src/app/dist/* /
 RUN mv express_server.js express_server.mjs
 
