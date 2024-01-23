@@ -1,4 +1,5 @@
 import fs from "fs";
+import fp from "fastify-plugin";
 import v8profiler from "v8-profiler-next";
 
 export class Profiler {
@@ -36,21 +37,25 @@ export class Profiler {
   }
 }
 
-function withProfiler(fn: (context: any, ...args: any[]) => Promise<any>, title: string) {
-  return async function (this: any, ...args: any[]) {
+async function profilerPlugin(fastify, options) {
+  fastify.addHook("onRequest", async request => {
     const profiler = new Profiler({
-      title: title,
-      active: this.profilingEnabled,
-      outputDir: "profiles",
+      title: `${request.method}-${request.url}`,
+      active: options.active,
+      outputDir: options.outputDir || "profiles",
     });
+
     profiler.start();
 
-    try {
-      return await fn(this, ...args);
-    } finally {
-      profiler.finish();
+    // Attach profiler to request for access in routes or other hooks
+    request.profiler = profiler;
+  });
+
+  fastify.addHook("onResponse", async request => {
+    if (request.profiler) {
+      request.profiler.finish();
     }
-  };
+  });
 }
 
-export default withProfiler;
+export default fp(profilerPlugin);

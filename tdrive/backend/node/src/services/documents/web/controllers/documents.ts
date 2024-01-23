@@ -26,14 +26,13 @@ import {
 import { DriveFileDTO } from "../dto/drive-file-dto";
 import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
 import config from "config";
-// import withProfiler from "../../../../utils/profiler";
 
 export class DocumentsController {
   private driveFileDTOBuilder = new DriveFileDTOBuilder();
   private rootAdmins: string[] = config.has("drive.rootAdmins")
     ? config.get("drive.rootAdmins")
     : [];
-  private profilingEnabled: boolean = config.has("drive.profilingEnabled")
+  public profilingEnabled: boolean = config.has("drive.profilingEnabled")
     ? config.get("drive.profilingEnabled")
     : false;
   /**
