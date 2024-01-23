@@ -26,7 +26,7 @@ import {
 import { DriveFileDTO } from "../dto/drive-file-dto";
 import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
 import config from "config";
-import withProfiler from "../../../../utils/profiler";
+// import withProfiler from "../../../../utils/profiler";
 
 export class DocumentsController {
   private driveFileDTOBuilder = new DriveFileDTOBuilder();
@@ -182,39 +182,36 @@ export class DocumentsController {
    * @param {FastifyRequest} request
    * @returns {Promise<DriveItemDetails>}
    */
-  browse = withProfiler(
-    async (
-      request: FastifyRequest<{
-        Params: ItemRequestParams;
-        Body: SearchDocumentsBody;
-        Querystring: PaginationQueryParameters & { public_token?: string };
-      }>,
-    ): Promise<DriveItemDetails & { websockets: ResourceWebsocket[] }> => {
-      const context = getDriveExecutionContext(request);
-      const { id } = request.params;
+  browse = async (
+    request: FastifyRequest<{
+      Params: ItemRequestParams;
+      Body: SearchDocumentsBody;
+      Querystring: PaginationQueryParameters & { public_token?: string };
+    }>,
+  ): Promise<DriveItemDetails & { websockets: ResourceWebsocket[] }> => {
+    const context = getDriveExecutionContext(request);
+    const { id } = request.params;
 
-      const options: SearchDocumentsOptions = {
-        ...request.body,
-        company_id: request.body.company_id || context.company.id,
-        view: DriveFileDTOBuilder.VIEW_SHARED_WITH_ME,
-        onlyDirectlyShared: true,
-        onlyUploadedNotByMe: true,
-      };
+    const options: SearchDocumentsOptions = {
+      ...request.body,
+      company_id: request.body.company_id || context.company.id,
+      view: DriveFileDTOBuilder.VIEW_SHARED_WITH_ME,
+      onlyDirectlyShared: true,
+      onlyUploadedNotByMe: true,
+    };
 
-      const data = {
-        ...(await globalResolver.services.documents.documents.browse(id, options, context)),
-        websockets: request.currentUser?.id
-          ? globalResolver.platformServices.realtime.sign(
-              [{ room: `/companies/${context.company.id}/documents/item/${id}` }],
-              request.currentUser?.id,
-            )
-          : [],
-      };
+    const data = {
+      ...(await globalResolver.services.documents.documents.browse(id, options, context)),
+      websockets: request.currentUser?.id
+        ? globalResolver.platformServices.realtime.sign(
+            [{ room: `/companies/${context.company.id}/documents/item/${id}` }],
+            request.currentUser?.id,
+          )
+        : [],
+    };
 
-      return data;
-    },
-    "browse",
-  );
+    return data;
+  };
 
   sharedWithMe = async (
     request: FastifyRequest<{
