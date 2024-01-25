@@ -327,6 +327,36 @@ export class DocumentsService {
         this.repository,
         context,
       );
+      // TODO: notify the user a document has been added to the directory shared with them
+      const parentItem = await this.repository.findOne(
+        {
+          id: driveItem.parent_id,
+          company_id: context.company.id,
+        },
+        {},
+        context,
+      );
+
+      const sharedWith = driveItem.access_info.entities.filter(
+        info =>
+          !parentItem.access_info.entities.find(entity => entity.id === info.id) &&
+          info.type === "user",
+      );
+
+      if (sharedWith.length > 0) {
+        // Notify the user that the document has been shared with them
+        this.logger.info("Notifying users that the document has been shared with them: ", {
+          sharedWith,
+        });
+        for (const info of sharedWith) {
+          gr.services.documents.engine.notifyDocumentShared({
+            context,
+            item: driveItem,
+            notificationEmitter: context.user.id,
+            notificationReceiver: info.id,
+          });
+        }
+      }
 
       await this.repository.save(driveItem);
       driveItemVersion.drive_item_id = driveItem.id;
