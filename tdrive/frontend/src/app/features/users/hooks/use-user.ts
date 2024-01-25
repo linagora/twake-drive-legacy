@@ -18,7 +18,7 @@ export const useUser = (userId: string): UserType | undefined => {
   const refresh = async () => {
     setLoading(true);
     UserAPIClient.list([userId], undefined, {
-      bufferize: true,
+      bufferize: false,
       callback: () => {
         setLoading(false);
       },
