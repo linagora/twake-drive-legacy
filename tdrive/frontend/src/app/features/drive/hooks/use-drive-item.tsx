@@ -19,7 +19,14 @@ export const useDriveItem = (id: string) => {
   const item = useRecoilValue(DriveItemAtom(id));
   const children = useRecoilValue(DriveItemChildrenAtom(id));
   const [loading, setLoading] = useRecoilState(LoadingStateInitTrue('useDriveItem-' + id));
-  const { refresh: refreshItem, create, update: _update, updateLevel: _updateLevel, remove: _remove, restore: _restore } = useDriveActions();
+  const {
+    refresh: refreshItem,
+    create,
+    update: _update,
+    updateLevel: _updateLevel,
+    remove: _remove,
+    restore: _restore,
+  } = useDriveActions();
   const { uploadVersion: _uploadVersion } = useDriveUpload();
 
   const refresh = useCallback(
@@ -55,8 +62,8 @@ export const useDriveItem = (id: string) => {
   }, [id, setLoading, refresh, item?.item?.parent_id]);
 
   const update = useCallback(
-    async (update: Partial<DriveItem>) => {
-      setLoading(true);
+    async (update: Partial<DriveItem>, skipLoading = false) => {
+      if (!skipLoading) setLoading(true);
       try {
         await _update(update, id, item?.item?.parent_id || '');
       } catch (e) {
@@ -93,8 +100,11 @@ export const useDriveItem = (id: string) => {
     [companyId, id, setLoading, refresh, item?.item?.parent_id],
   );
 
-  const inTrash = id.includes('trash') || item?.path?.some(i => i?.parent_id?.includes('trash')) || item?.item?.is_in_trash;
-  const sharedWithMe = id =="shared_with_me";
+  const inTrash =
+    id.includes('trash') ||
+    item?.path?.some(i => i?.parent_id?.includes('trash')) ||
+    item?.item?.is_in_trash;
+  const sharedWithMe = id == 'shared_with_me';
 
   return {
     sharedWithMe,
