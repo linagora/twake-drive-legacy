@@ -336,12 +336,11 @@ export class DocumentsService {
         {},
         context,
       );
-
-      const sharedWith = driveItem.access_info.entities.filter(
-        info =>
-          !parentItem.access_info.entities.find(entity => entity.id === info.id) &&
-          info.type === "user",
-      );
+      const sharedWith = parentItem?.access_info
+        ? parentItem.access_info.entities.filter(
+            info => info.type === "user" && info.id !== context.user.id,
+          )
+        : [];
 
       if (sharedWith.length > 0) {
         // Notify the user that the document has been shared with them
