@@ -13,6 +13,8 @@ import path from "path";
 import swaggerPlugin from "fastify-swagger";
 import { SkipCLI } from "../../framework/decorators/skip";
 import fs from "fs";
+import { ExecutionContext, executionStorage } from "../../framework/execution-storage";
+
 // import { throws } from "assert";
 export default class WebServerService extends TdriveService<WebServerAPI> implements WebServerAPI {
   name = "webserver";
@@ -39,6 +41,11 @@ export default class WebServerService extends TdriveService<WebServerAPI> implem
     this.server = fastify({
       maxParamLength: 300, //We have big urls with uuids and devices tokens
       logger: false,
+    });
+
+    this.server.addHook("onRequest", (req, res, done) => {
+      const defaultStoreValues = { request_id: req.id } as ExecutionContext;
+      executionStorage.run(defaultStoreValues, done);
     });
 
     this.server.addHook("onResponse", (req, reply, done) => {
