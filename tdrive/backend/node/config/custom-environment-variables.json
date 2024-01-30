@@ -17,6 +17,7 @@
     "level": "LOG_LEVEL"
   },
   "webserver": {
+    "host": "TWAKE_DRIVE_HOST",
     "logger": {
       "level": "LOG_LEVEL"
     },

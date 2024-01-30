@@ -130,6 +130,17 @@ export const getUserSchema = {
       required: ["resource"],
     },
   },
+  tags: ["User"],
+  params: {
+    type: "object",
+    description: "Users",
+    properties: {
+      id: {
+        description: "User ID",
+        type: "string",
+      },
+    },
+  },
 };
 
 export const setUserPreferencesSchema = {
@@ -146,6 +157,7 @@ export const setUserPreferencesSchema = {
     },
     required: [] as any[],
   },
+  tags: ["User"],
   response: {
     "2xx": userObjectSchema.properties.preferences,
   },

@@ -43,6 +43,7 @@
     }
   },
   "webserver": {
+    "host": "localhost",
     "port": 4000,
     "logger": {
       "level": "info"
