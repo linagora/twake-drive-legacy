@@ -53,7 +53,7 @@ export default class OIDCAuthProviderService
         redirect_uri: getAsFrontUrl(OIDC_CALLBACK_URL),
         response_type: 'code',
         response_mode: 'query',
-        scope: 'openid profile email address phone offline_access',
+        scope: 'openid profile email address phone offline_access applications',
         post_logout_redirect_uri: getAsFrontUrl(OIDC_SIGNOUT_URL),
         silent_redirect_uri: getAsFrontUrl(OIDC_SILENT_URL),
         automaticSilentRenew: false,

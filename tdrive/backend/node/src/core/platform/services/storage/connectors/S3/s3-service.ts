@@ -25,7 +25,7 @@ export default class S3ConnectorService implements StorageConnectorAPI {
 
   write(path: string, stream: Readable): Promise<WriteMetadata> {
     let totalSize = 0;
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       stream
         .on("data", function (chunk) {
           totalSize += chunk.length;
@@ -36,7 +36,7 @@ export default class S3ConnectorService implements StorageConnectorAPI {
           });
         });
 
-      this.client.putObject(this.minioConfiguration.bucket, path, stream);
+      this.client.putObject(this.minioConfiguration.bucket, path, stream).catch(e => reject(e));
     });
   }
 
