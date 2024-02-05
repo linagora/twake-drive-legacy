@@ -75,7 +75,8 @@ const PropertiesModalContent = ({ id, onClose }: { id: string; onClose: () => vo
             if (!item?.is_directory) {
               const lastDotIndex = finalName.lastIndexOf('.');
               if (lastDotIndex !== -1) {
-                finalName = finalName.slice(0, lastDotIndex);
+                const fileExtension = name.slice(lastDotIndex);
+                finalName = finalName.slice(0, lastDotIndex) + fileExtension;
               }
             }
             await update({ name: finalName }, id, item.parent_id);
