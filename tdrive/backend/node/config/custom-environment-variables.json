@@ -89,6 +89,7 @@
       "path": "STORAGE_LOCAL_PATH"
     },
     "S3": {
+      "homeDirectory": "STORAGE_S3_HOME_DIRECTORY",
       "bucket": "STORAGE_S3_BUCKET",
       "region": "STORAGE_S3_REGION",
       "endPoint": "STORAGE_S3_ENDPOINT",

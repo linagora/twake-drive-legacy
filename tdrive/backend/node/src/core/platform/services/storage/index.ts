@@ -38,7 +38,14 @@ export default class StorageService extends TdriveService<StorageAPI> implements
     const type = this.getConnectorType();
     if (type === "S3") {
       logger.info("Using 'S3' connector for storage.");
-      this.homeDir = this.configuration.get<string>("S3.bucket");
+      try {
+        this.homeDir = this.configuration.get<string>("S3.homeDirectory");
+      } catch (e) {
+        this.logger.warn("Home directory is not set, using S3.bucket instead");
+      }
+      if (!this.homeDir) {
+        this.homeDir = this.configuration.get<string>("S3.bucket");
+      }
       return new S3ConnectorService({
         bucket: this.configuration.get<string>("S3.bucket"),
         region: this.configuration.get<string>("S3.region"),
