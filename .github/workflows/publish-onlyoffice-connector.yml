@@ -1,0 +1,54 @@
+name: publish-onlyoffice-connector
+
+# Deploy onlyoffice-connector only if push on "main"
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tdrive/docker/**"
+      - "tdrive/onlyoffice-connector/**"
+      - ".github/workflows/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies and build
+        run: |
+          npm ci
+          npm run build --if-present
+          npm run lint
+        working-directory: ./server
+        env:
+          CI: true
+
+  publish:
+    runs-on: ubuntu-20.04
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@v5
+        with:
+          name: tdrive/onlyoffice-connector
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          workdir: .
+          registry: docker-registry.linagora.com
+          context: .
+          target: production
+          buildoptions: "-t docker-registry.linagora.com/tdrive/onlyoffice-connector"
+          tags: "latest"
