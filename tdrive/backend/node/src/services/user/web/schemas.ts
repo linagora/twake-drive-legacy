@@ -143,6 +143,30 @@ export const getUserSchema = {
   },
 };
 
+export const getQuotaSchema = {
+  response: {
+    "2xx": {
+      type: "object",
+      properties: {
+        used: { type: "number" },
+        remaining: { type: "number" },
+        total: { type: "number" },
+      },
+    },
+  },
+  tags: ["User"],
+  params: {
+    type: "object",
+    description: "Users",
+    properties: {
+      id: {
+        description: "User ID",
+        type: "string",
+      },
+    },
+  },
+};
+
 export const setUserPreferencesSchema = {
   request: {
     properties: {

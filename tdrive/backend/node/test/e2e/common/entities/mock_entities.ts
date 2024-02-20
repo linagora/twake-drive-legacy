@@ -1,4 +1,5 @@
 import {DriveFileAccessLevel, publicAccessLevel} from "../../../../src/services/documents/types";
+import { UserQuota } from "../../../../src/services/user/web/types";
 
 export type MockAccessInformation = {
     public?: {
@@ -43,6 +44,12 @@ export class DriveItemDetailsMockClass {
 
 export class SearchResultMockClass {
     entities: DriveFileMockClass[];
+}
+
+export class UserQuotaMockClass implements UserQuota{
+    remaining: number;
+    total: number;
+    used: number;
 }
 
 export class AccessTokenMockClass {

@@ -124,8 +124,19 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
 
   private async alterTablePrimaryKey(entity: EntityDefinition) {
     if (entity.options.primaryKey) {
-      const query = `ALTER TABLE "${entity.name}" ADD PRIMARY KEY (
-        ${entity.options.primaryKey.join(", ")});`;
+      const query = `
+        do $$
+        begin
+        IF NOT EXISTS 
+          (SELECT constraint_name 
+          FROM information_schema.table_constraints 
+          WHERE table_name = '${entity.name}' 
+          and constraint_type = 'PRIMARY KEY') 
+        THEN
+          ALTER TABLE "${entity.name}" ADD PRIMARY KEY (
+          ${entity.options.primaryKey.join(", ")});
+        END IF;
+        end $$;`;
       try {
         await this.client.query(query);
       } catch (err) {

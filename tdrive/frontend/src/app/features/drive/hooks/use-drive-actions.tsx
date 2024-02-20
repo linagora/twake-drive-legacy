@@ -7,6 +7,7 @@ import { DriveItemAtom, DriveItemChildrenAtom } from '../state/store';
 import { BrowseFilter, DriveItem, DriveItemVersion } from '../types';
 import { SharedWithMeFilterState } from '../state/shared-with-me-filter';
 import Languages from 'features/global/services/languages-service';
+import { useUserQuota } from "features/users/hooks/use-user-quota";
 
 /**
  * Returns the children of a drive item
@@ -15,6 +16,7 @@ import Languages from 'features/global/services/languages-service';
 export const useDriveActions = () => {
   const companyId = useRouterCompany();
   const sharedFilter = useRecoilValue(SharedWithMeFilterState);
+  const { getQuota } = useUserQuota();
 
   const refresh = useRecoilCallback(
     ({ set, snapshot }) =>
@@ -52,6 +54,7 @@ export const useDriveActions = () => {
       try {
         driveFile = await DriveApiClient.create(companyId, { item, version });
         await refresh(driveFile.parent_id!);
+        await getQuota();
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_create_file'));
       }
@@ -89,6 +92,7 @@ export const useDriveActions = () => {
       try {
         await DriveApiClient.remove(companyId, id);
         await refresh(parentId || '');
+        await getQuota();
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_remove_file'));
       }

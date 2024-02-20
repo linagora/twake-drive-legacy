@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginCallback } from "fastify";
 import { DocumentsController } from "./controllers";
 import { createDocumentSchema, createVersionSchema } from "./schemas";
-import profilerPlugin from "../../../utils/profiler";
+// import profilerPlugin from "../../../utils/profiler";
 
 const baseUrl = "/companies/:company_id";
 const serviceUrl = `${baseUrl}/item`;
@@ -9,10 +9,10 @@ const serviceUrl = `${baseUrl}/item`;
 const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next) => {
   const documentsController = new DocumentsController();
 
-  fastify.register(profilerPlugin, {
-    active: documentsController.profilingEnabled,
-    outputDir: "profiles",
-  });
+  // fastify.register(profilerPlugin, {
+  //   active: documentsController.profilingEnabled,
+  //   outputDir: "profiles",
+  // });
 
   fastify.route({
     method: "GET",

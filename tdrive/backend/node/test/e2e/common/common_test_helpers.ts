@@ -9,10 +9,16 @@ import { v1 as uuidv1 } from "uuid";
 import { TestDbService } from "../utils.prepare.db";
 import { DriveFile } from "../../../src/services/documents/entities/drive-file";
 import { FileVersion } from "../../../src/services/documents/entities/file-version";
-import { AccessTokenMockClass, DriveItemDetailsMockClass, SearchResultMockClass } from "./entities/mock_entities";
+import {
+    AccessTokenMockClass,
+    DriveItemDetailsMockClass,
+    SearchResultMockClass,
+    UserQuotaMockClass
+} from "./entities/mock_entities";
 import { logger } from "../../../src/core/platform/framework";
 import { expect } from "@jest/globals";
 import { publicAccessLevel } from "../../../src/services/documents/types";
+import { UserQuota } from "../../../src/services/user/web/types";
 
 export default class TestHelpers {
 
@@ -191,22 +197,23 @@ export default class TestHelpers {
       parent_id = "root",
     ) {
         const file = await this.uploadRandomFile();
-        const item = {
-            name: file.metadata.name,
-            parent_id: parent_id,
-            company_id: file.company_id,
-        };
 
-        const version = {
-            file_metadata: {
-                name: file.metadata.name,
-                size: file.upload_data?.size,
-                thumbnails: [],
-                external_id: file.id
-            }
-        }
+        const doc = await this.createDocumentFromFile(file, parent_id);
 
-        const doc = await this.createDocument(item, version);
+        expect(doc).toBeDefined();
+        expect(doc).not.toBeNull();
+        expect(doc.parent_id).toEqual(parent_id)
+
+        return doc;
+    };
+
+    async createDocumentFromFilename(
+      file_name: "sample.png",
+      parent_id = "root",
+    ) {
+        const file = await this.uploadFile(file_name);
+
+        const doc = await this.createDocumentFromFile(file, parent_id);
 
         expect(doc).toBeDefined();
         expect(doc).not.toBeNull();
@@ -338,5 +345,16 @@ export default class TestHelpers {
           response.body)
     };
 
+    async quota() {
+        const url = "/internal/services/users/v1/users";
+
+        const response =  await this.platform.app.inject({
+            method: "GET",
+            headers: { "authorization": `Bearer ${this.jwt}` },
+            url: `${url}/${this.user.id}/quota`,
+        })
+
+        return deserialize<UserQuota>(UserQuotaMockClass, response.body)
+    }
 }
 

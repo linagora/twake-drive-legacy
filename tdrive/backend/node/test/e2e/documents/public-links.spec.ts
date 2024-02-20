@@ -4,7 +4,6 @@ import { AccessInformation, DriveFile } from "../../../src/services/documents/en
 import { FileVersion } from "../../../src/services/documents/entities/file-version";
 import { DriveFileAccessLevel, DriveItemDetails } from "../../../src/services/documents/types";
 import { init, TestPlatform } from "../setup";
-import { TestDbService } from "../utils.prepare.db";
 import { e2e_createDocument, e2e_updateDocument } from "./utils";
 import TestHelpers from "../common/common_test_helpers";
 import { AccessTokenMockClass } from "../common/entities/mock_entities";

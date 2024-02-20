@@ -70,7 +70,6 @@ class FeatureTogglesService {
   }
 
   public isActiveFeatureName(featureName: FeatureNames) {
-    console.debug(this.activeFeatureNames)
     const b = this.activeFeatureNames.includes(featureName);
     console.debug(`Feature ${featureName} is ${b}`);
     return b;

@@ -14,7 +14,7 @@ export interface UserParameters {
 }
 
 export interface CompanyUsersParameters {
-  /* user id */
+  /* company id */
   companyId: string;
 }
 
@@ -143,4 +143,10 @@ export interface RegisterDeviceParams {
 
 export interface DeregisterDeviceParams {
   value: "string";
+}
+
+export interface UserQuota {
+  used: number;
+  remaining: number;
+  total: number;
 }

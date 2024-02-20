@@ -4,6 +4,7 @@ import {
   deleteDeviceSchema,
   getCompanySchema,
   getDevicesSchema,
+  getQuotaSchema,
   getUserCompaniesSchema,
   getUserSchema,
   getUsersSchema,
@@ -31,6 +32,15 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     preValidation: [fastify.authenticate],
     schema: getUserSchema,
     handler: usersController.get.bind(usersController),
+  });
+
+  fastify.route({
+    method: "GET",
+    url: `${usersUrl}/:id/quota`,
+    preHandler: accessControl,
+    preValidation: fastify.authenticate,
+    schema: getQuotaSchema,
+    handler: usersController.qouta.bind(usersController),
   });
 
   fastify.route({
