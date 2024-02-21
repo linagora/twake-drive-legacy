@@ -11,6 +11,7 @@ export const useUserQuota = () => {
   }
   const {user } = useCurrentUser();
   const [quota, setQuota] = useState<UserQuota>(nullQuota);
+  const [used, setUsed] = useState<number>(0);
 
   const getQuota = useCallback(async () => {
     let data: UserQuota = nullQuota;
@@ -20,6 +21,7 @@ export const useUserQuota = () => {
       data = nullQuota;
     }
     setQuota(data)
+    setUsed(Math.random());
   },  []);
 
   useEffect(() => {
@@ -27,5 +29,5 @@ export const useUserQuota = () => {
   }, []);
 
 
-  return { quota, getQuota };
+  return { quota, used, getQuota };
 };

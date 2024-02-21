@@ -64,6 +64,9 @@ export function formatCompany(
       [CompanyFeaturesEnum.COMPANY_DISPLAY_EMAIL]: JSON.parse(
         config.get("drive.featureDisplayEmail") || "true",
       ),
+      [CompanyFeaturesEnum.COMPANY_USER_QUOTA]: JSON.parse(
+        config.get("drive.featureUserQuota") || "false",
+      ),
     },
     {
       ...(res.plan?.features || {}),

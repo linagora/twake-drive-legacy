@@ -115,9 +115,10 @@ export class DocumentsService {
     }
   };
 
-  userQuota = async (context: ExecutionContext): Promise<number> => {
+  userQuota = async (context: CompanyExecutionContext): Promise<number> => {
     const children = await this.repository.find({
       parent_id: "user_" + context.user.id,
+      company_id: context.company.id,
     });
     return children.getEntities().reduce((sum, child) => sum + child.size, 0);
   };

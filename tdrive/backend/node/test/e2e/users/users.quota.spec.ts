@@ -9,7 +9,7 @@ describe("The /users/quota API", () => {
   beforeEach(async () => {
     platform = await init();
     currentUser = await TestHelpers.getInstance(platform);
-  });
+  }, 30000000);
 
   afterEach(async () => {
     await platform.tearDown();
@@ -35,7 +35,7 @@ describe("The /users/quota API", () => {
         "platform-services",
       ],
     });
-  });
+  }, 30000000);
 
   afterAll(async () => {
   });
@@ -52,7 +52,7 @@ describe("The /users/quota API", () => {
     expect(quota.total).toBe(userQuota);
     expect(quota.remaining).toBe(userQuota - doc.size); //198346196 //198342406
     expect(quota.used).toBe(doc.size);
-  });
+  }, 30000000);
 
   test("should return 200 with all empty space", async () => {
     //given

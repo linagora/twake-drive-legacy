@@ -95,6 +95,7 @@ export const companyObjectSchema = {
             [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]: { type: "boolean" },
             [CompanyFeaturesEnum.COMPANY_SHARED_DRIVE]: { type: "boolean" },
             [CompanyFeaturesEnum.COMPANY_DISPLAY_EMAIL]: { type: "boolean" },
+            [CompanyFeaturesEnum.COMPANY_USER_QUOTA]: { type: "boolean" },
             guests: { type: "number" }, // to rename or delete
             members: { type: "number" }, //  to rename or delete
             storage: { type: "number" }, //  to rename or delete
@@ -144,6 +145,10 @@ export const getUserSchema = {
 };
 
 export const getQuotaSchema = {
+  type: "object",
+  properties: {
+    companyId: { type: "string" },
+  },
   response: {
     "2xx": {
       type: "object",

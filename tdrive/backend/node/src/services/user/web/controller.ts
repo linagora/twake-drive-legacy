@@ -322,7 +322,10 @@ export class UsersCrudController
   }
 
   async qouta(
-    request: FastifyRequest<{ Params: UserParameters }>,
+    request: FastifyRequest<{
+      Params: UserParameters;
+      Querystring: CompanyUsersParameters;
+    }>,
     _reply: FastifyReply,
   ): Promise<UserQuota> {
     const context = getExecutionContext(request);
@@ -337,7 +340,10 @@ export class UsersCrudController
       throw new Error("Not implemented yes");
     }
 
-    const quota = await gr.services.documents.documents.userQuota(context);
+    const quota = await gr.services.documents.documents.userQuota({
+      ...context,
+      company: { id: request.query.companyId || config.get("drive.defaultCompany") },
+    });
 
     const total: number = config.has("drive.defaultUserQuota")
       ? config.get("drive.defaultUserQuota")

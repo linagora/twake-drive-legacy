@@ -20,7 +20,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
       { id: request.currentUser.id },
     );
 
-    const authorization = user.role === "owner" || user.role === "admin" ? true : false;
+    const authorization = user.role === "owner" || user.role === "admin";
 
     if (!authorization) {
       throw fastify.httpErrors.unauthorized("Only owner and Company Administrator have permission");

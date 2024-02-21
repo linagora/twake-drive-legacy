@@ -351,7 +351,7 @@ export default class TestHelpers {
         const response =  await this.platform.app.inject({
             method: "GET",
             headers: { "authorization": `Bearer ${this.jwt}` },
-            url: `${url}/${this.user.id}/quota`,
+            url: `${url}/${this.user.id}/quota?companyId=${this.platform.workspace.company_id}`,
         })
 
         return deserialize<UserQuota>(UserQuotaMockClass, response.body)
