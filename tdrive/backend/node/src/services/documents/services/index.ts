@@ -344,19 +344,17 @@ export class DocumentsService {
               )
             : [];
 
-          if (sharedWith.length > 0) {
-            // Notify the user that the document has been shared with them
-            this.logger.info("Notifying users that the document has been shared with them: ", {
+          if (context.user.id !== parentItem?.creator && sharedWith.length > 0) {
+            // Notify the owner that the document has been shared with them
+            this.logger.info("Notifying the onwer that the document has been shared with them: ", {
               sharedWith,
             });
-            for (const info of sharedWith) {
-              gr.services.documents.engine.notifyDocumentShared({
-                context,
-                item: driveItem,
-                notificationEmitter: context.user.id,
-                notificationReceiver: info.id,
-              });
-            }
+            gr.services.documents.engine.notifyDocumentShared({
+              context,
+              item: driveItem,
+              notificationEmitter: context.user.id,
+              notificationReceiver: parentItem.creator,
+            });
           }
         }
       } catch (error) {
