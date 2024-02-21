@@ -1,7 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { UserQuota } from '@features/users/types/user-quota';
 import UserAPIClient from '@features/users/api/user-api-client';
 import { useCurrentUser } from "features/users/hooks/use-current-user";
+import { atom, useRecoilState } from "recoil";
+
+export const QuotaState = atom<UserQuota>({
+  key: 'QuotaState',
+  default: {
+    used: 0,
+    remaining: 1,
+    total: 1
+  },
+});
 
 export const useUserQuota = () => {
   const nullQuota = {
@@ -10,8 +20,7 @@ export const useUserQuota = () => {
     total: 1
   }
   const {user } = useCurrentUser();
-  const [quota, setQuota] = useState<UserQuota>(nullQuota);
-  const [used, setUsed] = useState<number>(0);
+  const [quota, setQuota] = useRecoilState(QuotaState);
 
   const getQuota = useCallback(async () => {
     let data: UserQuota = nullQuota;
@@ -21,7 +30,6 @@ export const useUserQuota = () => {
       data = nullQuota;
     }
     setQuota(data)
-    setUsed(Math.random());
   },  []);
 
   useEffect(() => {
@@ -29,5 +37,5 @@ export const useUserQuota = () => {
   }, []);
 
 
-  return { quota, used, getQuota };
+  return { quota, getQuota };
 };
