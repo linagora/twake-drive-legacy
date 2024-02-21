@@ -28,6 +28,7 @@ jobs:
         run: | 
           cd tdrive
           docker-compose -f docker-compose.dev.tests.opensearch.yml up -d --force-recreate opensearch-node1 postgres node
+          sleep 60
           docker-compose -f docker-compose.dev.tests.opensearch.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=opensearch -e DB_DRIVER=postgres -e PUBSUB_TYPE=local node npm run test:all
           docker-compose -f docker-compose.dev.tests.opensearch.yml down
       - name: e2e-cassandra-test
