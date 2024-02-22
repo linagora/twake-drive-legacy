@@ -101,4 +101,24 @@ describe("the Drive feature", () => {
 
     expect(notifyDocumentVersionUpdated).toHaveBeenCalled();
   });
+
+  it("Did notify the owner after a user uploaded a file.", async () => {
+    const oneUser = await TestHelpers.getInstance(platform, true, { companyRole: "admin" });
+    const anotherUser = await TestHelpers.getInstance(platform, true, { companyRole: "admin" });
+
+    const directory = await oneUser.uploadRandomFileAndCreateDocument();
+    await new Promise(r => setTimeout(r, 3000));
+    directory.access_info.entities.push({
+      type: "user",
+      id: anotherUser.user.id,
+      level: "write",
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      grantor: null,
+    });
+
+    await anotherUser.uploadRandomFileAndCreateDocument(directory.id);
+    // expect the owner to be notified
+    expect(notifyDocumentShared).toHaveBeenCalled();
+  });
 });
