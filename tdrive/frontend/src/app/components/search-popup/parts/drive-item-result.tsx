@@ -14,12 +14,10 @@ import {
   FileTypeUnknownIcon,
 } from '@atoms/icons-colored';
 import * as Text from '@atoms/text';
-import { useCompanyApplications } from '@features/applications/hooks/use-company-applications';
 import { DriveItem } from '@features/drive/types';
 import FileUploadAPIClient from '@features/files/api/file-upload-api-client';
 import { formatDate } from '@features/global/utils/format-date';
 import { formatSize } from '@features/global/utils/format-file-size';
-import useRouterWorkspace from '@features/router/hooks/use-router-workspace';
 import { useSearchModal } from '@features/search/hooks/use-search';
 import { SearchInputState } from '@features/search/state/search-input';
 import { UserType } from '@features/users/types/user';
@@ -34,14 +32,8 @@ import useRouterCompany from 'app/features/router/hooks/use-router-company';
 export default (props: { driveItem: DriveItem & { user?: UserType }}) => {
   const history = useHistory();
   const input = useRecoilValue(SearchInputState);
-  const currentWorkspaceId = useRouterWorkspace();
-  const companyApplications = useCompanyApplications();
   const { user } = useCurrentUser();
   const [_, setParentId] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id }));
-  const tdriveDriveApplicationId =
-    companyApplications.applications.find(application => {
-      return application.identity.code === 'tdrive_drive';
-    })?.id || '';
   const file = props.driveItem;
   const name = file?.name;
   const extension = name?.split('.').pop();
