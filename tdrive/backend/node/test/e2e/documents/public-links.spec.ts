@@ -4,14 +4,15 @@ import { AccessInformation, DriveFile } from "../../../src/services/documents/en
 import { FileVersion } from "../../../src/services/documents/entities/file-version";
 import { DriveFileAccessLevel, DriveItemDetails } from "../../../src/services/documents/types";
 import { init, TestPlatform } from "../setup";
-import { e2e_createDocument, e2e_updateDocument } from "./utils";
-import TestHelpers from "../common/common_test_helpers";
+import { e2e_updateDocument } from "./utils";
+import UserApi from "../common/user-api";
 import { AccessTokenMockClass } from "../common/entities/mock_entities";
 
 const url = "/internal/services/documents/v1";
 
 describe("the public links feature", () => {
   let platform: TestPlatform;
+  let currentUser: UserApi;
 
   class DriveFileMockClass {
     id: string;
@@ -54,6 +55,7 @@ describe("the public links feature", () => {
         "documents",
       ],
     });
+    currentUser = await UserApi.getInstance(platform);
   });
 
   afterAll(async () => {
@@ -62,29 +64,14 @@ describe("the public links feature", () => {
   });
 
   describe("Basic Flow", () => {
-    const createItem = async (): Promise<DriveFileMockClass> => {
-      await TestHelpers.getInstance(platform, true, { companyRole: "admin" });
-
-      const item = {
-        name: "public file",
-        parent_id: "root",
-        company_id: platform.workspace.company_id,
-      };
-
-      const version = {};
-
-      const response = await e2e_createDocument(platform, item, version);
-      return deserialize<DriveFileMockClass>(DriveFileMockClass, response.body);
-    };
-
     let publicFile: DriveFileMockClass;
 
     it("did create the drive item", async () => {
-      const result = await createItem();
+      const result = await currentUser.createDefaultDocument();
       publicFile = result;
 
       expect(result).toBeDefined();
-      expect(result.name).toEqual("public file");
+      expect(result.name).toEqual("new test file");
       expect(result.added).toBeDefined();
       expect(result.access_info).toBeDefined();
     });
@@ -283,8 +270,8 @@ describe("the public links feature", () => {
 
   describe("Download Folder from shared link", () => {
     it("Share folder", async () => {
-      const user = await TestHelpers.getInstance(platform, true);
-      const anotherUser = await TestHelpers.getInstance(platform, true);
+      const user = await UserApi.getInstance(platform, true);
+      const anotherUser = await UserApi.getInstance(platform, true);
 
       //create directory in "My Drive" and upload a file
       const directory = await user.createDirectory("user_" + user.user.id);

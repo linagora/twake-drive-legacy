@@ -1,11 +1,11 @@
 import { describe, beforeEach, afterEach, it, expect, afterAll } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
-import TestHelpers from "../common/common_test_helpers";
+import UserApi from "../common/user-api";
 
 describe("The Documents Browser Window and API", () => {
   let platform: TestPlatform;
-  let currentUser: TestHelpers;
+  let currentUser: UserApi;
   let dbService: TestDbService;
 
   beforeEach(async () => {
@@ -26,7 +26,7 @@ describe("The Documents Browser Window and API", () => {
         "documents",
       ],
     });
-    currentUser = await TestHelpers.getInstance(platform);
+    currentUser = await UserApi.getInstance(platform);
     dbService = await TestDbService.getInstance(platform, true);
   });
 
@@ -43,25 +43,25 @@ describe("The Documents Browser Window and API", () => {
 
       expect(result).toBeDefined();
       expect(result.entries()).toBeDefined();
-      expect(Array.from(result.entries())).toHaveLength(TestHelpers.ALL_FILES.length);
+      expect(Array.from(result.entries())).toHaveLength(UserApi.ALL_FILES.length);
 
 
       const docs = await currentUser.browseDocuments(myDriveId, {});
       expect(docs).toBeDefined();
       expect(docs.children).toBeDefined();
-      expect(docs.children.length).toEqual(TestHelpers.ALL_FILES.length)
+      expect(docs.children.length).toEqual(UserApi.ALL_FILES.length)
     });
 
     it("Should not be visible for other users", async () => {
       const myDriveId = "user_" + currentUser.user.id;
-      const anotherUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
+      const anotherUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
       await currentUser.uploadAllFilesOneByOne(myDriveId);
       await new Promise(r => setTimeout(r, 5000));
 
       const docs = await currentUser.browseDocuments(myDriveId, {});
       expect(docs).toBeDefined();
       expect(docs.children).toBeDefined();
-      expect(docs.children.length).toEqual(TestHelpers.ALL_FILES.length)
+      expect(docs.children.length).toEqual(UserApi.ALL_FILES.length)
 
       const anotherUserDocs = await anotherUser.searchDocument({});
       expect(anotherUserDocs).toBeDefined();
@@ -77,13 +77,13 @@ describe("The Documents Browser Window and API", () => {
       const result = await currentUser.uploadAllFilesOneByOne("root");
       expect(result).toBeDefined();
       expect(result.entries()).toBeDefined();
-      expect(Array.from(result.entries())).toHaveLength(TestHelpers.ALL_FILES.length);
+      expect(Array.from(result.entries())).toHaveLength(UserApi.ALL_FILES.length);
 
 
       const docs = await currentUser.browseDocuments("root", {});
       expect(docs).toBeDefined();
       expect(docs.children).toBeDefined();
-      expect(docs.children.length).toEqual(TestHelpers.ALL_FILES.length);
+      expect(docs.children.length).toEqual(UserApi.ALL_FILES.length);
     });
 
   });
@@ -107,8 +107,8 @@ describe("The Documents Browser Window and API", () => {
 
     it("Should contain files that were shared with the user", async () => {
       const sharedWIthMeFolder = "shared_with_me";
-      const oneUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
-      const anotherUser = await TestHelpers.getInstance(platform, true, {companyRole: "admin"});
+      const oneUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
+      const anotherUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
       let files = await oneUser.uploadAllFilesOneByOne();
       await new Promise(r => setTimeout(r, 5000));
 

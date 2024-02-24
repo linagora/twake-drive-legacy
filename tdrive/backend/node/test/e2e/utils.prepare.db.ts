@@ -36,7 +36,6 @@ export class TestDbService {
   public company: Company;
   public users: User[];
   private workspacesMap: Map<string, { workspace: Workspace; users: User[] }>;
-  private userService;
 
   rand = () => Math.floor(Math.random() * 100000);
   private database: DatabaseServiceAPI;
@@ -254,6 +253,10 @@ export class TestDbService {
       platform.currentUser.id,
     );
     return this;
+  }
+
+  async cleanUp() {
+    await this.database.getConnector().drop()
   }
 
   getRepository = (type, entity) => {
