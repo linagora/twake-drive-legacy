@@ -55,15 +55,15 @@ describe("the Drive Search feature", () => {
     userTwo = await UserApi.getInstance(platform, true, {companyRole: "admin"});
 
     //user one upload 6 file to the personal folder
-    uploadedByUserOne.push(...(await userOne.uploadAllFilesAndCreateDocuments("user_" + userOne.user.id)));
+    uploadedByUserOne.push(...(await userOne.uploadAllFilesOneByOne("user_" + userOne.user.id)));
     start = new Date().getTime();
     //user on uploaded 6 files to the root folder
-    uploadedByUserOne.push(...(await userOne.uploadAllFilesAndCreateDocuments("root")));
+    uploadedByUserOne.push(...(await userOne.uploadAllFilesOneByOne("root")));
     end = new Date().getTime();
     //another user uploaded 6 files to the personal folder
-    uploadedByUserTwo.push(...(await userTwo.uploadAllFilesAndCreateDocuments("user_" + userTwo.user.id)));
+    uploadedByUserTwo.push(...(await userTwo.uploadAllFilesOneByOne("user_" + userTwo.user.id)));
     //another user uploaded 6 files to the root folder
-    uploadedByUserTwo.push(...(await userTwo.uploadAllFilesAndCreateDocuments("root")));
+    uploadedByUserTwo.push(...(await userTwo.uploadAllFilesOneByOne("root")));
     await new Promise(resolve => setTimeout(resolve, 3000));
 
     //user one give permissions to user two to one of the documents from personal folder
@@ -110,8 +110,6 @@ describe("the Drive Search feature", () => {
   })
 
   it("did search for an item that doesn't exist", async () => {
-    await userOne.createDefaultDocument();
-
     const unexistingSeachPayload = {
       search: "somethingthatdoesn'tandshouldn'texist",
     };
