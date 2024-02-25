@@ -21,7 +21,7 @@ export class DriveFileMockClass {
     id: string;
     name: string;
     size: number;
-    added: string;
+    added: number;
     parent_id: string;
     extension: string;
     description: string;

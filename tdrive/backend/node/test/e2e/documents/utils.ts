@@ -6,7 +6,6 @@ import * as fs from "fs";
 
 const url = "/internal/services/documents/v1";
 
-
 export const e2e_deleteDocument = async (platform: TestPlatform, id: string | "root" | "trash") => {
   const token = await platform.auth.getJWTToken();
 
@@ -36,21 +35,6 @@ export const e2e_updateDocument = async (
   });
 };
 
-export const e2e_searchDocument = async (
-  platform: TestPlatform,
-  payload: Record<string, string>,
-) => {
-  const token = await platform.auth.getJWTToken();
-
-  return await platform.app.inject({
-    method: "POST",
-    url: `${url}/companies/${platform.workspace.company_id}/search`,
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-    payload,
-  });
-};
 
 export const e2e_createVersion = async (
   platform: TestPlatform,
