@@ -129,8 +129,9 @@ describe("the Drive Search feature", () => {
 
     //then
     expect(documents.entities).toHaveLength(3);
-    const actualFile = documents.entities[0];
-    expect(actualFile.name).toEqual("sample.pdf");
+    expect(documents.entities[0].name.includes("pdf")).toBeTruthy();
+    expect(documents.entities[1].name.includes("pdf")).toBeTruthy();
+    expect(documents.entities[2].name.includes("pdf")).toBeTruthy();
   });
 
   it("did search by last modified", async () => {
