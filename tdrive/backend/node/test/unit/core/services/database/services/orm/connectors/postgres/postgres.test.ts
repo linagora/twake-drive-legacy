@@ -54,7 +54,7 @@ describe('The Postgres Connector module', () => {
     expect(normalizeWhitespace(dbQuerySpy.mock.calls[2][0])).toBe(normalizeWhitespace("SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_name = $1"));
     expect(dbQuerySpy.mock.calls[2][1]).toStrictEqual(["test_table"])
     expect(normalizeWhitespace(dbQuerySpy.mock.calls[3][0])).toBe(`ALTER TABLE "test_table" ADD COLUMN id UUID, ADD COLUMN is_in_trash BOOLEAN, ADD COLUMN tags TEXT, ADD COLUMN added BIGINT`)
-    expect(normalizeWhitespace(dbQuerySpy.mock.calls[4][0])).toBe(`ALTER TABLE "test_table" ADD PRIMARY KEY ( company_id, id);`)
+    expect(normalizeWhitespace(dbQuerySpy.mock.calls[4][0])).toBe(`do $$ begin IF NOT EXISTS (SELECT constraint_name FROM information_schema.table_constraints WHERE table_name = 'test_table' and constraint_type = 'PRIMARY KEY') THEN ALTER TABLE "test_table" ADD PRIMARY KEY ( company_id, id); END IF; end $$;`)
     expect(normalizeWhitespace(dbQuerySpy.mock.calls[5][0])).toBe(`CREATE INDEX IF NOT EXISTS index_test_table_company_id_parent_id ON "test_table" ((company_id), parent_id)`)
     expect(normalizeWhitespace(dbQuerySpy.mock.calls[6][0])).toBe(`CREATE INDEX IF NOT EXISTS index_test_table_company_id_is_in_trash ON "test_table" ((company_id), is_in_trash)`)
   });

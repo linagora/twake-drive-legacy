@@ -20,13 +20,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: e2e-mongo-test
-        run: cd tdrive && docker-compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb -e PUBSUB_TYPE=local node npm run test:all
-      - name: e2e-mongo-test-clean
-        run: cd tdrive && docker-compose -f docker-compose.tests.yml stop
+        run: | 
+          cd tdrive 
+          docker-compose -f docker-compose.tests.yml run --rm -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb -e PUBSUB_TYPE=local node npm run test:all
+          docker-compose -f docker-compose.tests.yml down
       - name: e2e-opensearch-test
-        run: cd tdrive && docker-compose -f docker-compose.dev.tests.opensearch.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=opensearch -e DB_DRIVER=postgres -e PUBSUB_TYPE=local node npm run test:all
-      - name: e2e-opensearch-test-clean
-        run: cd tdrive && docker-compose -f docker-compose.dev.tests.opensearch.yml stop
+        run: | 
+          cd tdrive
+          docker-compose -f docker-compose.dev.tests.opensearch.yml up -d --force-recreate opensearch-node1 postgres node
+          sleep 60
+          docker-compose -f docker-compose.dev.tests.opensearch.yml logs
+          docker-compose -f docker-compose.dev.tests.opensearch.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=opensearch -e DB_DRIVER=postgres -e PUBSUB_TYPE=local node npm run test:all
+          docker-compose -f docker-compose.dev.tests.opensearch.yml down
       - name: e2e-cassandra-test
         run: cd tdrive && docker-compose -f docker-compose.tests.yml up -d scylladb elasticsearch rabbitmq && sleep 60 && docker-compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=elasticsearch -e DB_DRIVER=cassandra node npm run test:all
       - name: coverage

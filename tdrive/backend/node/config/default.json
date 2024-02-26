@@ -138,7 +138,10 @@
   "drive": {
     "featureSharedDrive": true,
     "featureSearchUsers": true,
-    "featureDisplayEmail": true
+    "featureDisplayEmail": true,
+    "featureUserQuota": false,
+    "defaultCompany": "00000000-0000-4000-0000-000000000000",
+    "defaultUserQuota": 200000000
   },
   "applications": {
     "grid": [

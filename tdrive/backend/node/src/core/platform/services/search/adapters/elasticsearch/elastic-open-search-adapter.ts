@@ -283,11 +283,12 @@ export default class ESAndOpenSearch extends SearchAdapter implements SearchAdap
     const esParamsWithScroll = {
       ...esParams,
       size: parseInt(options.pagination.limitStr || "100"),
-      scroll: "1m",
+      scroll: "10m",
     };
 
     let esResponse: any;
 
+    let nextToken;
     if (options.pagination.page_token) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -297,18 +298,23 @@ export default class ESAndOpenSearch extends SearchAdapter implements SearchAdap
         },
         esOptions,
       );
+      //the scroll token is also the same, and we do not get it from response
+      nextToken = options.pagination.page_token;
     } else {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       esResponse = await this.client.search(esParamsWithScroll, esOptions);
+      nextToken = esResponse.body?._scroll_id || "";
     }
 
     if (esResponse.statusCode !== 200) {
       logger.error(`${this.name} -  ${JSON.stringify(esResponse.body)}`);
     }
 
-    const nextToken = esResponse.body?._scroll_id || "";
     const hits = esResponse.body?.hits?.hits || [];
+    if (hits.length == 0) {
+      nextToken = false;
+    }
 
     logger.debug(`${this.name} got response: ${JSON.stringify(esResponse)}`);
 

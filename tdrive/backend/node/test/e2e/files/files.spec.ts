@@ -5,20 +5,20 @@ import { init, TestPlatform } from "../setup";
 // @ts-ignore
 import fs from "fs";
 import LocalConnectorService from "../../../src/core/platform/services/storage/connectors/local/service";
-import TestHelpers from "../common/common_test_helpers";
+import UserApi from "../common/user-api";
 
 
 describe("The Files feature", () => {
   const url = "/internal/services/files/v1";
   let platform: TestPlatform;
-  let helpers: TestHelpers;
+  let helpers: UserApi;
 
   beforeAll(async () => {
     platform = await init({
       services: ["webserver", "database", "storage", "files", "previews"],
     });
     await platform.database.getConnector().init();
-    helpers = await TestHelpers.getInstance(platform)
+    helpers = await UserApi.getInstance(platform)
   });
 
   afterAll(async () => {
@@ -68,8 +68,8 @@ describe("The Files feature", () => {
     }, 120000);
 
     it.skip("should save file and generate previews", async () => {
-      for (const i in TestHelpers.ALL_FILES) {
-        const file = TestHelpers.ALL_FILES[i];
+      for (const i in UserApi.ALL_FILES) {
+        const file = UserApi.ALL_FILES[i];
 
         const filesUpload = await helpers.uploadFile(file);
 

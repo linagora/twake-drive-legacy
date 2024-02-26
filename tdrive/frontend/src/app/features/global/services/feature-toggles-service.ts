@@ -11,6 +11,7 @@ export enum FeatureNames {
   COMPANY_SEARCH_USERS = 'company:search_users',
   COMPANY_SHARED_DRIVE = 'company:shared_drive',
   COMPANY_DISPLAY_EMAIL = 'company:display_email',
+  COMPANY_USER_QUOTA = 'company:user_quota',
 }
 
 export type FeatureValueType = boolean | number;
@@ -29,6 +30,7 @@ availableFeaturesWithDefaults.set(FeatureNames.COMPANY_INVITE_MEMBER, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SEARCH_USERS, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SHARED_DRIVE, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_DISPLAY_EMAIL, true);
+availableFeaturesWithDefaults.set(FeatureNames.COMPANY_USER_QUOTA, false);
 
 /**
  * ChannelServiceImpl that allow you to manage feature flipping in Tdrive using react feature toggles
@@ -70,7 +72,6 @@ class FeatureTogglesService {
   }
 
   public isActiveFeatureName(featureName: FeatureNames) {
-    console.debug(this.activeFeatureNames)
     const b = this.activeFeatureNames.includes(featureName);
     console.debug(`Feature ${featureName} is ${b}`);
     return b;

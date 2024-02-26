@@ -1,6 +1,10 @@
 import SearchRepository from "../../../core/platform/services/search/repository";
 import { getLogger, logger, TdriveLogger } from "../../../core/platform/framework";
-import { CrudException, ListResult } from "../../../core/platform/framework/api/crud-service";
+import {
+  CrudException,
+  ListResult,
+  Pagination,
+} from "../../../core/platform/framework/api/crud-service";
 import Repository, {
   comparisonType,
   inType,
@@ -96,19 +100,40 @@ export class DocumentsService {
     context: DriveExecutionContext & { public_token?: string },
   ): Promise<BrowseDetails> => {
     if (isSharedWithMeFolder(id)) {
-      const children = await this.search(options, context);
-      return {
-        access: "read",
-        children: children.getEntities(),
-        nextPage: children.nextPage,
-        path: [] as Array<DriveFile>,
-      };
+      return this.sharedWithMe(options, context);
     } else {
       return {
         nextPage: null,
         ...(await this.get(id, context)),
       };
     }
+  };
+
+  sharedWithMe = async (
+    options: SearchDocumentsOptions,
+    context: DriveExecutionContext & { public_token?: string },
+  ): Promise<BrowseDetails> => {
+    const result = [];
+    let fileList: ListResult<DriveFile>;
+    do {
+      fileList = await this.search(options, context);
+      result.push(...fileList.getEntities());
+      options.pagination = fileList.nextPage;
+    } while (fileList.nextPage?.page_token);
+    return {
+      access: "read",
+      children: result,
+      nextPage: null,
+      path: [] as Array<DriveFile>,
+    };
+  };
+
+  userQuota = async (context: CompanyExecutionContext): Promise<number> => {
+    const children = await this.repository.find({
+      parent_id: "user_" + context.user.id,
+      company_id: context.company.id,
+    });
+    return children.getEntities().reduce((sum, child) => sum + child.size, 0);
   };
 
   /**
@@ -945,9 +970,9 @@ export class DocumentsService {
     const result = await this.searchRepository.search(
       {},
       {
-        pagination: {
-          limitStr: "100",
-        },
+        pagination: options.pagination
+          ? Pagination.fromPaginable(options.pagination)
+          : new Pagination(),
         $in: [
           ...(options.onlyDirectlyShared ? [["access_entities", [context.user.id]] as inType] : []),
           ...(options.company_id ? [["company_id", [options.company_id]] as inType] : []),
@@ -989,7 +1014,7 @@ export class DocumentsService {
     if (!options.onlyDirectlyShared) {
       const filteredResult = await this.filter(result.getEntities(), async item => {
         try {
-          // Check access for each item
+          //skip all the fiels
           return await checkAccess(item.id, null, "read", this.repository, context);
         } catch (error) {
           this.logger.warn("failed to check item access", error);
@@ -1007,7 +1032,6 @@ export class DocumentsService {
 
       return new ListResult(result.type, filteredResult, result.nextPage);
     }
-
     return result;
   };
 
@@ -1019,12 +1043,11 @@ export class DocumentsService {
   }
 
   getTab = async (tabId: string, context: CompanyExecutionContext): Promise<DriveTdriveTab> => {
-    const tab = await this.driveTdriveTabRepository.findOne(
+    return await this.driveTdriveTabRepository.findOne(
       { company_id: context.company.id, tab_id: tabId },
       {},
       context,
     );
-    return tab;
   };
 
   setTab = async (

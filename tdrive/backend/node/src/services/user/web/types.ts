@@ -14,7 +14,7 @@ export interface UserParameters {
 }
 
 export interface CompanyUsersParameters {
-  /* user id */
+  /* company id */
   companyId: string;
 }
 
@@ -86,6 +86,7 @@ export enum CompanyFeaturesEnum {
   COMPANY_SEARCH_USERS = "company:search_users",
   COMPANY_SHARED_DRIVE = "company:shared_drive",
   COMPANY_DISPLAY_EMAIL = "company:display_email",
+  COMPANY_USER_QUOTA = "company:user_quota",
 }
 
 export type CompanyFeaturesObject = {
@@ -98,6 +99,7 @@ export type CompanyFeaturesObject = {
   [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]?: boolean;
   [CompanyFeaturesEnum.COMPANY_SHARED_DRIVE]?: boolean;
   [CompanyFeaturesEnum.COMPANY_DISPLAY_EMAIL]?: boolean;
+  [CompanyFeaturesEnum.COMPANY_USER_QUOTA]?: boolean;
 };
 
 export type CompanyLimitsObject = {
@@ -143,4 +145,10 @@ export interface RegisterDeviceParams {
 
 export interface DeregisterDeviceParams {
   value: "string";
+}
+
+export interface UserQuota {
+  used: number;
+  remaining: number;
+  total: number;
 }

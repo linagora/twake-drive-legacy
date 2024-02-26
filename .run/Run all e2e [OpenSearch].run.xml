@@ -1,9 +1,10 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run all e2e [OpenSearch]" type="JavaScriptTestRunnerJest">
-    <node-interpreter value="project" />
+    <node-interpreter value="node" />
+    <node-options value="--experimental-specifier-resolution=node --experimental-vm-modules" />
     <jest-package value="$PROJECT_DIR$/tdrive/backend/node/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$/tdrive/backend/node" />
-    <jest-options value="--forceExit --coverage --maxWorkers=1 --testTimeout=30000" />
+    <jest-options value="--forceExit --coverage --maxWorkers=1" />
     <envs>
       <env name="DB_DRIVER" value="postgres" />
       <env name="DB_MONGO_URI" value="mongodb://localhost:27017" />

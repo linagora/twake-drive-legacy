@@ -5,7 +5,7 @@ version: "3.4"
 services:
 
   opensearch-node1:
-    image: opensearchproject/opensearch:latest # Specifying the latest available image - modify if you want a specific version
+    image: opensearchproject/opensearch:2.11.0 # Specifying the latest available image - modify if you want a specific version
     container_name: opensearch-node1
     environment:
       - cluster.name=opensearch-cluster # Name the cluster
@@ -13,6 +13,7 @@ services:
       - discovery.seed_hosts=opensearch-node1 # Nodes to look for when discovering the cluster
       - cluster.initial_cluster_manager_nodes=opensearch-node1 # Nodes eligible to serve as cluster manager
       - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+#      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=admin
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
     ulimits:
       memlock:

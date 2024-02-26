@@ -27,6 +27,7 @@ import {
   UserObject,
   UserParameters,
   CompanyUsersParameters,
+  UserQuota,
 } from "./types";
 import Company from "../entities/company";
 import CompanyUser from "../entities/company_user";
@@ -35,6 +36,7 @@ import { getCompanyRooms, getUserRooms } from "../realtime";
 import { formatCompany, getCompanyStats } from "../utils";
 import { formatUser } from "../../../utils/users";
 import gr from "../../global-resolver";
+import config from "config";
 
 export class UsersCrudController
   implements
@@ -317,6 +319,40 @@ export class UsersCrudController
     return {
       resources: [],
     };
+  }
+
+  async qouta(
+    request: FastifyRequest<{
+      Params: UserParameters;
+      Querystring: CompanyUsersParameters;
+    }>,
+    _reply: FastifyReply,
+  ): Promise<UserQuota> {
+    const context = getExecutionContext(request);
+
+    let id = request.params.id;
+    if (request.params.id === "me") {
+      id = context.user.id;
+    }
+
+    if (id != context.user.id) {
+      //if admin or application wants to know user quota, it's not implemented yet
+      throw new Error("Not implemented yes");
+    }
+
+    const quota = await gr.services.documents.documents.userQuota({
+      ...context,
+      company: { id: request.query.companyId || config.get("drive.defaultCompany") },
+    });
+
+    const total: number = config.has("drive.defaultUserQuota")
+      ? config.get("drive.defaultUserQuota")
+      : NaN;
+    return {
+      total: total,
+      remaining: isNaN(total) ? NaN : total - quota,
+      used: quota,
+    } as UserQuota;
   }
 }
 
