@@ -102,12 +102,11 @@ describe("the Drive feature", () => {
     expect(notifyDocumentVersionUpdated).toHaveBeenCalled();
   });
 
-  it("Did notify the owner after a user uploaded a file.", async () => {
+  it("Did notify the owner after a user uploaded a file to a shared directory.", async () => {
     const oneUser = await TestHelpers.getInstance(platform, true, { companyRole: "admin" });
     const anotherUser = await TestHelpers.getInstance(platform, true, { companyRole: "admin" });
 
-    const directory = await oneUser.uploadRandomFileAndCreateDocument();
-    await new Promise(r => setTimeout(r, 3000));
+    const directory = await oneUser.createDirectory();
     directory.access_info.entities.push({
       type: "user",
       id: anotherUser.user.id,
@@ -119,6 +118,11 @@ describe("the Drive feature", () => {
 
     await anotherUser.uploadRandomFileAndCreateDocument(directory.id);
     // expect the owner to be notified
-    expect(notifyDocumentShared).toHaveBeenCalled();
+    expect(notifyDocumentShared).toHaveBeenCalledWith(
+      expect.objectContaining({
+        notificationEmitter: anotherUser.user.id,
+        notificationReceiver: oneUser.user.id,
+      }),
+    );
   });
 });
