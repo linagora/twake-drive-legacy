@@ -5,11 +5,7 @@ import { CrudException, ListResult } from "../../../../core/platform/framework/a
 import { File } from "../../../../services/files/entities/file";
 import { UploadOptions } from "../../../../services/files/types";
 import globalResolver from "../../../../services/global-resolver";
-import {
-  PaginationQueryParameters,
-  ResourceWebsocket,
-  CompanyUserRole,
-} from "../../../../utils/types";
+import { CompanyUserRole, PaginationQueryParameters, ResourceWebsocket } from "../../../../utils/types";
 import { DriveFile } from "../../entities/drive-file";
 import { FileVersion } from "../../entities/file-version";
 import {
@@ -199,48 +195,10 @@ export class DocumentsController {
       onlyUploadedNotByMe: true,
     };
 
-    const data = {
+    return {
       ...(await globalResolver.services.documents.documents.browse(id, options, context)),
-      websockets: request.currentUser?.id
-        ? globalResolver.platformServices.realtime.sign(
-            [{ room: `/companies/${context.company.id}/documents/item/${id}` }],
-            request.currentUser?.id,
-          )
-        : [],
+      websockets: [],
     };
-
-    return data;
-  };
-
-  sharedWithMe = async (
-    request: FastifyRequest<{
-      Params: RequestParams;
-      Body: SearchDocumentsBody;
-      Querystring: { public_token?: string };
-    }>,
-  ): Promise<ListResult<DriveFileDTO>> => {
-    try {
-      const context = getDriveExecutionContext(request);
-
-      const options: SearchDocumentsOptions = {
-        ...request.body,
-        company_id: request.body.company_id || context.company.id,
-        view: DriveFileDTOBuilder.VIEW_SHARED_WITH_ME,
-        onlyDirectlyShared: true,
-        onlyUploadedNotByMe: true,
-      };
-
-      if (!Object.keys(options).length) {
-        this.throw500Search();
-      }
-
-      const fileList = await globalResolver.services.documents.documents.search(options, context);
-
-      return this.driveFileDTOBuilder.build(fileList, context, options.fields, options.view);
-    } catch (error) {
-      logger.error({ error: `${error}` }, "error while searching for document");
-      this.throw500Search();
-    }
   };
 
   /**

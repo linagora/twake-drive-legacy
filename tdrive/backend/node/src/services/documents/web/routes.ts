@@ -109,13 +109,6 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
 
   fastify.route({
     method: "POST",
-    url: `${baseUrl}/shared-with-me`,
-    preValidation: [fastify.authenticate],
-    handler: documentsController.sharedWithMe.bind(documentsController),
-  });
-
-  fastify.route({
-    method: "POST",
     url: `${baseUrl}/browse/:id`,
     preValidation: [fastify.authenticate],
     handler: documentsController.browse.bind(documentsController),

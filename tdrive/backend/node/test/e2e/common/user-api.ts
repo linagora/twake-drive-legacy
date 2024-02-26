@@ -343,15 +343,15 @@ export default class UserApi {
   ) {
     const response = await this.platform.app.inject({
       method: "POST",
-      url: `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/shared-with-me`,
+      url: `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/browse/shared_with_me`,
       headers: {
         authorization: `Bearer ${this.jwt}`
       },
       payload
     });
 
-    return deserialize<SearchResultMockClass>(
-      SearchResultMockClass,
+    return deserialize<DriveItemDetailsMockClass>(
+      DriveItemDetailsMockClass,
       response.body);
   };
 

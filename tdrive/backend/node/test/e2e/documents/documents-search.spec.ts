@@ -106,7 +106,7 @@ describe("the Drive Search feature", () => {
     const searchResponse = await userTwo.sharedWithMeDocuments({});
 
     //then::
-    expect(searchResponse.entities?.length).toEqual(1);
+    expect(searchResponse.children?.length).toEqual(1);
   })
 
   it("did search for an item that doesn't exist", async () => {
@@ -146,7 +146,7 @@ describe("the Drive Search feature", () => {
 
   it("did search a file shared by another user", async () => {
     //then file become searchable
-    expect((await userTwo.sharedWithMeDocuments({})).entities).toHaveLength(1);
+    expect((await userTwo.sharedWithMeDocuments({})).children).toHaveLength(1);
   });
 
   it("did search a file by file owner", async () => {
