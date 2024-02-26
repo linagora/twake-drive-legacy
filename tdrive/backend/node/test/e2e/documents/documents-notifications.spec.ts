@@ -49,7 +49,6 @@ describe("the Drive feature", () => {
     platform = null;
   });
 
-
   it("Did notify the user after sharing a file.", async () => {
     // jest.setTimeout(20000);
     //given:: user uploaded one doc and give permission to another user
@@ -88,8 +87,8 @@ describe("the Drive feature", () => {
   });
 
   it("Did notify the owner after a user uploaded a file to a shared directory.", async () => {
-    const oneUser = await TestHelpers.getInstance(platform, true, { companyRole: "admin" });
-    const anotherUser = await TestHelpers.getInstance(platform, true, { companyRole: "admin" });
+    const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+    const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
 
     const directory = await oneUser.createDirectory();
     directory.access_info.entities.push({
