@@ -39,7 +39,6 @@ export default class SearchRepository<EntityType> {
         filters,
         options,
       );
-      console.log("NEXT_PAGE::" + JSON.stringify(searchResults.nextPage));
 
       //2. Get database original objects from these primary keys
       for (const searchEntity of searchResults.getEntities().sort((a, b) => b.score - a.score)) {

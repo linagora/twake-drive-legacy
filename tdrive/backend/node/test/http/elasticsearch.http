@@ -20,13 +20,61 @@ Content-Type: application/json
   }
 }
 
+### Query data
+GET https://localhost:9200/drive_files/_search
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "boost": 1,
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "access_entities": {
+                    "query": "7f2e4e80-d4be-11ee-8a11-0544b51cf428",
+                    "operator": "AND"
+                  }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "company_id": {
+                    "query": "7efb7eb1-d4be-11ee-8a11-0544b51cf428",
+                    "operator": "AND"
+                  }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        }
+      ]
+    }
+  }
+}
 
 
 ### Check that it is created
 GET https://localhost:9200/_cat/indices
+Authorization: Basic admin admin
+Content-Type: application/json
 
 ### GET index info
-GET https://localhost:9200/drive_files
+GET https://localhost:9200/user
+Authorization: Basic admin admin
+Content-Type: application/json
 
 ### GET data to the index
 GET https://localhost:9200/drive_files/_doc/8c03c5a1-0146-11ee-82d9-f503f8a58e9d

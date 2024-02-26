@@ -5,7 +5,11 @@ import { CrudException, ListResult } from "../../../../core/platform/framework/a
 import { File } from "../../../../services/files/entities/file";
 import { UploadOptions } from "../../../../services/files/types";
 import globalResolver from "../../../../services/global-resolver";
-import { CompanyUserRole, PaginationQueryParameters, ResourceWebsocket } from "../../../../utils/types";
+import {
+  CompanyUserRole,
+  PaginationQueryParameters,
+  ResourceWebsocket,
+} from "../../../../utils/types";
 import { DriveFile } from "../../entities/drive-file";
 import { FileVersion } from "../../entities/file-version";
 import {

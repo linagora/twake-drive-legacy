@@ -120,7 +120,6 @@ export class DocumentsService {
       result.push(...fileList.getEntities());
       options.pagination = fileList.nextPage;
     } while (fileList.nextPage?.page_token);
-
     return {
       access: "read",
       children: result,

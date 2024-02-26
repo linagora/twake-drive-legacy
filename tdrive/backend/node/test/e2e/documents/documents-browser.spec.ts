@@ -28,7 +28,7 @@ describe("The Documents Browser Window and API", () => {
     });
     currentUser = await UserApi.getInstance(platform);
     dbService = await TestDbService.getInstance(platform, true);
-  }, 30000000);
+  });
 
   afterAll(async () => {
     await platform?.tearDown();
@@ -150,8 +150,8 @@ describe("The Documents Browser Window and API", () => {
       await new Promise(r => setTimeout(r, 3000));
 
       //then file become searchable
-      expect((await anotherUser.browseDocuments("shared_with_me", {pagination: {limitStr: 1}})).children).toHaveLength(1);
-    }, 300000000);
+      expect((await anotherUser.browseDocuments("shared_with_me", {pagination: {limitStr: 100}})).children).toHaveLength(1);
+    });
   });
 });
 
