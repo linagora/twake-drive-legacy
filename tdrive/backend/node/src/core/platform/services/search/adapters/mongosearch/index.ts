@@ -229,9 +229,10 @@ export default class MongoSearch extends SearchAdapter implements SearchAdapterI
       }
     }
 
+    const limit = parseInt(options.pagination.limitStr);
     const nextToken =
-      entities.length === parseInt(options.pagination.limitStr) &&
-      (parseInt(options.pagination.page_token || "0") + 1).toString(10);
+      entities.length === limit &&
+      (parseInt(options.pagination.page_token || "0") + limit).toString(10);
     const nextPage: Paginable = new Pagination(nextToken, options.pagination.limitStr || "100");
 
     logger.info(`Found ${entities.length} results on entity ${searchPrefix}${index}`);
