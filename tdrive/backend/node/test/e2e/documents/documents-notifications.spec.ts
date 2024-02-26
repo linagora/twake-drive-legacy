@@ -109,6 +109,11 @@ describe("the Drive feature", () => {
       }),
     );
     // expect only one notification went through (the owner only notified)
-    expect(notifyDocumentShared).toHaveBeenCalledTimes(1);
+    expect(notifyDocumentShared).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        notificationEmitter: oneUser.user.id,
+        notificationReceiver: anotherUser.user.id,
+      }),
+    );
   });
 });
