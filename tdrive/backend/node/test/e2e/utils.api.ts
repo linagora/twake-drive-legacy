@@ -1,4 +1,4 @@
-import { TestPlatform } from "./setup";
+import { TestPlatform, User } from "./setup";
 import { InjectPayload, Response } from "light-my-request";
 import { logger as log } from "../../src/core/platform/framework";
 
@@ -10,39 +10,33 @@ declare global {
 }
 
 export class Api {
-  constructor(protected platform: TestPlatform) {}
 
-  private async convertResponse(response: Promise<Response>): Promise<ApiResponse> {
-    const apiResponse = (await response) as ApiResponse;
-    if (apiResponse.statusCode !== 204) {
-      const json = apiResponse.json();
-      apiResponse.resources = json.resources;
-      apiResponse.resource = json.resource;
-    }
-    return apiResponse;
+  private jwt: string;
+
+  constructor(protected platform: TestPlatform, protected user: User) {
   }
 
-  private getJwtToken(userId: string) {
-    return this.platform.auth.getJWTToken({ sub: userId });
+  private async getJwtToken() {
+    if (!this.jwt) {
+      this.jwt = await this.platform.auth.getJWTToken({ sub: this.user.id });
+    }
+    return this.jwt;
   }
 
   async request(
     method: "GET" | "POST",
     url: string,
     payload: InjectPayload,
-    userId: string,
     headers: any,
-  ): Promise<ApiResponse> {
-    if (!userId) userId = this.platform.currentUser.id;
+  ): Promise<Response> {
 
-    let totalHeaders = { authorization: `Bearer ${await this.getJwtToken(userId)}` };
+    let totalHeaders = { authorization: `Bearer ${await this.getJwtToken()}` };
 
     if (headers) {
       totalHeaders = { ...totalHeaders, ...headers };
     }
 
-    return this.convertResponse(
-      this.platform.app
+    return this.platform.app
         .inject({
           method,
           url,
@@ -54,20 +48,18 @@ export class Api {
             log.debug(a.json(), `${method} ${url}`);
           }
           return a;
-        }),
-    );
+        });
   }
 
-  public async get(url: string, userId?: string, headers?: any): Promise<ApiResponse> {
-    return this.request("GET", url, undefined, userId, headers);
+  public async get(url: string, headers?: any): Promise<Response> {
+    return this.request("GET", url, undefined, headers);
   }
 
   public async post(
     url: string,
     payload: InjectPayload,
-    userId?: string,
     headers?: any,
-  ): Promise<ApiResponse> {
-    return this.request("POST", url, payload, userId, headers);
+  ): Promise<Response> {
+    return this.request("POST", url, payload, headers);
   }
 }

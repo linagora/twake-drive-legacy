@@ -33,10 +33,7 @@ import { getPublicUserRoom, getUserRoom } from "../../realtime";
 import NodeCache from "node-cache";
 import gr from "../../../global-resolver";
 import { formatUser } from "../../../../utils/users";
-import { getDefaultDriveItem } from "../../../documents/utils";
-import { CompanyExecutionContext } from "../../../documents/types";
 import { TYPE as DriveFileType, DriveFile } from "../../../documents/entities/drive-file";
-import config from "config";
 
 export class UserServiceImpl {
   version: "1";

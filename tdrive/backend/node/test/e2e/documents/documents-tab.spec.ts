@@ -1,14 +1,15 @@
-import { afterAll, afterEach, beforeEach, describe, expect, it } from "@jest/globals";
+import { afterAll, beforeEach, describe, expect, it } from "@jest/globals";
 import { deserialize } from "class-transformer";
 import { AccessInformation } from "../../../src/services/documents/entities/drive-file";
 import { init, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
-import { e2e_createDocument, e2e_getDocument } from "./utils";
+import UserApi from "../common/user-api";
 
 const url = "/internal/services/documents/v1";
 
 describe("the Drive Tdrive tabs feature", () => {
   let platform: TestPlatform;
+  let currentUser: UserApi;
 
   class DriveFileMockClass {
     id: string;
@@ -49,6 +50,7 @@ describe("the Drive Tdrive tabs feature", () => {
         "documents",
       ],
     });
+    currentUser = await UserApi.getInstance(platform);
   });
 
   afterAll(async () => {
@@ -59,16 +61,7 @@ describe("the Drive Tdrive tabs feature", () => {
   it("did create a tab configuration on Drive side", async () => {
     await TestDbService.getInstance(platform, true);
 
-    const item = {
-      name: "new tab test file",
-      parent_id: "root",
-      company_id: platform.workspace.company_id,
-    };
-
-    const version = {};
-
-    const response = await e2e_createDocument(platform, item, version);
-    const doc = deserialize<DriveFileMockClass>(DriveFileMockClass, response.body);
+    const doc = await currentUser.createDefaultDocument();
 
     const tab = {
       company_id: platform.workspace.company_id,
@@ -109,7 +102,7 @@ describe("the Drive Tdrive tabs feature", () => {
     expect(getTabResponse.json().tab_id).toBe(tab.tab_id);
     expect(getTabResponse.json().item_id).toBe(tab.item_id);
 
-    const documentResponse = await e2e_getDocument(platform, doc.id);
+    const documentResponse = await currentUser.getDocument(doc.id);
     const documentResult = deserialize<DriveItemDetailsMockClass>(
       DriveItemDetailsMockClass,
       documentResponse.body,
@@ -132,25 +125,7 @@ describe("the Drive Tdrive tabs feature", () => {
     };
     const otherUser = await dbService.createUser([ws0pk]);
 
-    const item = {
-      name: "new tab test file",
-      parent_id: "root",
-      company_id: platform.workspace.company_id,
-      access_info: {
-        entities: [
-          {
-            type: "folder",
-            id: "parent",
-            level: "none",
-          } as any,
-        ],
-      },
-    };
-
-    const version = {};
-
-    const response = await e2e_createDocument(platform, item, version);
-    const doc = deserialize<DriveFileMockClass>(DriveFileMockClass, response.body);
+    const doc = await currentUser.createDefaultDocument();
 
     const tab = {
       company_id: platform.workspace.company_id,

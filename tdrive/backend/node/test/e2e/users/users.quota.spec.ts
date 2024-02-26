@@ -1,14 +1,14 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect} from "@jest/globals";
 import { init, TestPlatform } from "../setup";
-import TestHelpers from "../common/common_test_helpers";
+import UserApi from "../common/user-api";
 
 describe("The /users/quota API", () => {
   let platform: TestPlatform;
-  let currentUser: TestHelpers;
+  let currentUser: UserApi;
 
   beforeEach(async () => {
     platform = await init();
-    currentUser = await TestHelpers.getInstance(platform);
+    currentUser = await UserApi.getInstance(platform);
   });
 
   afterEach(async () => {

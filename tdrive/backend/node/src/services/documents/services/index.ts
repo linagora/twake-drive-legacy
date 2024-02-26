@@ -1,10 +1,6 @@
 import SearchRepository from "../../../core/platform/services/search/repository";
 import { getLogger, logger, TdriveLogger } from "../../../core/platform/framework";
-import {
-  CrudException,
-  ExecutionContext,
-  ListResult,
-} from "../../../core/platform/framework/api/crud-service";
+import { CrudException, ListResult } from "../../../core/platform/framework/api/crud-service";
 import Repository, {
   comparisonType,
   inType,

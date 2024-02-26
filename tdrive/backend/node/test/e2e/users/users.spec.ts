@@ -3,7 +3,7 @@ import { init, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import { v1 as uuidv1 } from "uuid";
 import { CompanyLimitsEnum } from "../../../src/services/user/web/types";
-import TestHelpers from "../common/common_test_helpers";
+import UserApi from "../common/user-api";
 
 describe("The /users API", () => {
   const url = "/internal/services/users/v1";
@@ -213,7 +213,7 @@ describe("The /users API", () => {
     });
 
     it("shouldn't return anonymous accounts ", async () => {
-      const oneUser = await TestHelpers.getInstance(platform, true);
+      const oneUser = await UserApi.getInstance(platform, true);
 
       const response = await platform.app.inject({
         method: "GET",

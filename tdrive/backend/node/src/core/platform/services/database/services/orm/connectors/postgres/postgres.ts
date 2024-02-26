@@ -165,7 +165,18 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
   }
 
   async drop(): Promise<this> {
-    logger.info("Drop database is not implemented for security reasons.");
+    const query = `
+        DO $$ 
+        DECLARE 
+          tablename text;
+        BEGIN 
+          FOR tablename IN (SELECT table_name FROM information_schema.tables WHERE table_schema = 'public') 
+          LOOP 
+            EXECUTE 'DELETE FROM  "' || tablename || '" CASCADE'; 
+          END LOOP; 
+        END $$;`;
+    logger.debug(`service.database.orm.postgres.drop - Query: "${query}"`);
+    await this.client.query(query);
     return this;
   }
 

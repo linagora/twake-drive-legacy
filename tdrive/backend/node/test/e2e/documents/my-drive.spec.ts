@@ -1,21 +1,16 @@
 import { describe, beforeEach, afterEach, it, expect, afterAll } from "@jest/globals";
 import { deserialize } from "class-transformer";
-import { File } from "../../../src/services/files/entities/file";
-import { ResourceUpdateResponse } from "../../../src/utils/types";
 import { init, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import {
-  e2e_createDocument,
-  e2e_createDocumentFile,
-  e2e_createVersion,
-  e2e_deleteDocument,
-  e2e_getDocument,
-  e2e_searchDocument,
   e2e_updateDocument,
 } from "./utils";
+import UserApi from "../common/user-api";
+import { DriveFile } from "../../../src/services/documents/entities/drive-file";
 
 describe("the My Drive feature", () => {
   let platform: TestPlatform;
+  let currentUser: UserApi;
 
   class DriveFileMockClass {
     id: string;
@@ -60,6 +55,7 @@ describe("the My Drive feature", () => {
         "documents",
       ],
     });
+    currentUser = await UserApi.getInstance(platform);
   });
 
   afterAll(async () => {
@@ -67,7 +63,7 @@ describe("the My Drive feature", () => {
     platform = null;
   });
 
-  const createItem = async (): Promise<DriveFileMockClass> => {
+  const createItem = async (): Promise<DriveFile> => {
     await TestDbService.getInstance(platform, true);
 
     const item = {
@@ -76,10 +72,7 @@ describe("the My Drive feature", () => {
       company_id: platform.workspace.company_id,
     };
 
-    const version = {};
-
-    const response = await e2e_createDocument(platform, item, version);
-    return deserialize<DriveFileMockClass>(DriveFileMockClass, response.body);
+    return await currentUser.createDocument(item, {});
   };
 
   it("did create the drive item in my user folder", async () => {
