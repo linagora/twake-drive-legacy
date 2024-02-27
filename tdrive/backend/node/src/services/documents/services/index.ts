@@ -986,6 +986,7 @@ export class DocumentsService {
               ]
             : []),
         ],
+        $nin: [...(options.onlyDirectlyShared ? [["creator", [context.user.id]] as inType] : [])],
         $lte: [
           ...(options.last_modified_lt
             ? [["last_modified", options.last_modified_lt] as comparisonType]

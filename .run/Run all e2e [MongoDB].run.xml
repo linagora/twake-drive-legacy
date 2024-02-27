@@ -9,7 +9,7 @@
       <env name="DB_MONGO_URI" value="mongodb://localhost:27017" />
       <env name="PUBSUB_TYPE" value="local" />
       <env name="SEARCH_DRIVER" value="mongodb" />
-      <env name="STORAGE_LOCAL_PATH" value="$USER_HOME$/dev/linagora/TDrive/tdrive/docker-data" />
+      <env name="STORAGE_LOCAL_PATH" value="/tmp" />
     </envs>
     <scope-kind value="DIRECTORY" />
     <test-directory value="$PROJECT_DIR$/tdrive/backend/node/test/e2e" />

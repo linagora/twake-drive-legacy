@@ -32,6 +32,7 @@ export type FindOptions = {
    * The $in operator selects the documents where the value of a field equals any value in the specified array
    */
   $in?: inType[];
+  $nin?: inType[];
   $like?: likeType[];
 };
 

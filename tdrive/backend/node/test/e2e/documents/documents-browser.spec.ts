@@ -89,7 +89,7 @@ describe("The Documents Browser Window and API", () => {
   });
 
   describe("Shared With Me", () => {
-    it("Shouldn't contain files uploaded to the user folder", async () => {
+    it("Shouldn't contain user personal files", async () => {
       const sharedWIthMeFolder = "shared_with_me";
       await currentUser.uploadAllFilesOneByOne("user_" + currentUser.user.id);
       await new Promise(r => setTimeout(r, 5000));
@@ -129,7 +129,7 @@ describe("The Documents Browser Window and API", () => {
       expect((await anotherUser.browseDocuments("shared_with_me", {pageSize: 1})).children).toHaveLength(1);
     });
 
-    it("Share With Me should return all the files that was share by user at one", async () => {
+    it("Should return ALL the files that was share by user at one", async () => {
       const sharedWIthMeFolder = "shared_with_me";
       const oneUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
       const anotherUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
