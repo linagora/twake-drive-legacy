@@ -23,8 +23,6 @@ export class CompanyApplicationServiceImpl implements TdriveServiceProvider, Ini
         pk.application_id,
         context,
       );
-      //do not expose application secret
-      application.api = null;
 
       if (!application?.id) {
         return null;
@@ -64,8 +62,6 @@ export class CompanyApplicationServiceImpl implements TdriveServiceProvider, Ini
         companyApplication.application_id,
         context,
       );
-      //do not expose application secret
-      application.api = null;
       if (application)
         applications.push({
           ...companyApplication,

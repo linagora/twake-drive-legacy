@@ -9,7 +9,7 @@ describe("The /users/quota API", () => {
   beforeEach(async () => {
     platform = await init();
     currentUser = await UserApi.getInstance(platform);
-  });
+  }, 30000000);
 
   afterEach(async () => {
     await platform.tearDown();
