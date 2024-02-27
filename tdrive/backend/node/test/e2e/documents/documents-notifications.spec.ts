@@ -89,11 +89,21 @@ describe("the Drive feature", () => {
   it("Did notify the owner after a user uploaded a file to a shared directory.", async () => {
     const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
     const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+    const thridUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
 
     const directory = await oneUser.createDirectory();
     directory.access_info.entities.push({
       type: "user",
       id: anotherUser.user.id,
+      level: "write",
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      grantor: null,
+    });
+
+    directory.access_info.entities.push({
+      type: "user",
+      id: thridUser.user.id,
       level: "write",
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -112,7 +122,7 @@ describe("the Drive feature", () => {
     expect(notifyDocumentShared).not.toHaveBeenCalledWith(
       expect.objectContaining({
         notificationEmitter: oneUser.user.id,
-        notificationReceiver: anotherUser.user.id,
+        notificationReceiver: thridUser.user.id,
       }),
     );
   });
