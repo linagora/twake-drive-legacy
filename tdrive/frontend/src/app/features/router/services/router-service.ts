@@ -34,6 +34,7 @@ export type ClientStateType = {
   threadId?: string;
   tabId?: string;
   directoryId?: string;
+  appName?: string;
 };
 
 export type Pathnames = {
