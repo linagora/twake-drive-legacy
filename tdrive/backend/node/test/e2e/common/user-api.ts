@@ -366,5 +366,13 @@ export default class UserApi {
 
     return deserialize<UserQuota>(UserQuotaMockClass, response.body);
   }
+
+  async delete(id: string) {
+    return await this.platform.app.inject({
+      method: "DELETE",
+      url: `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/item/${id}`,
+      headers: { "authorization": `Bearer ${this.jwt}` },
+    });
+  }
 }
 

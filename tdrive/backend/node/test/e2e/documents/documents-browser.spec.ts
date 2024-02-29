@@ -6,7 +6,6 @@ import UserApi from "../common/user-api";
 describe("The Documents Browser Window and API", () => {
   let platform: TestPlatform;
   let currentUser: UserApi;
-  let dbService: TestDbService;
 
   beforeEach(async () => {
     platform = await init({
@@ -27,7 +26,6 @@ describe("The Documents Browser Window and API", () => {
       ],
     });
     currentUser = await UserApi.getInstance(platform);
-    dbService = await TestDbService.getInstance(platform, true);
   });
 
   afterAll(async () => {
@@ -130,7 +128,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should return ALL the files that was share by user at one", async () => {
-      const sharedWIthMeFolder = "shared_with_me";
       const oneUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
       const anotherUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
 
@@ -152,6 +149,27 @@ describe("The Documents Browser Window and API", () => {
       //then file become searchable
       expect((await anotherUser.browseDocuments("shared_with_me", {pagination: {limitStr: 100}})).children).toHaveLength(1);
     });
+
+    it("User should be able to delete file that was shared with him with right permissions", async () => {
+      const oneUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
+      const anotherUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
+
+      let files = await oneUser.uploadAllFilesOneByOne("user_" + oneUser.user.id);
+      await new Promise(r => setTimeout(r, 5000));
+
+      let toDeleteDoc = files[2];
+      toDeleteDoc.access_info.entities.push({
+        type: "user",
+        id: anotherUser.user.id,
+        level: "manage",
+        grantor: null,
+      });
+      await oneUser.updateDocument(toDeleteDoc.id, toDeleteDoc);
+
+      const response = await anotherUser.delete(toDeleteDoc.id);
+      expect(response.statusCode).toBe(200);
+    });
+
   });
 });
 

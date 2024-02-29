@@ -467,6 +467,7 @@ export class DocumentsService {
         if ((content as any)[key]) {
           if (
             key === "parent_id" &&
+            oldParent !== item.parent_id &&
             !(await canMoveItem(item.id, content.parent_id, this.repository, context))
           ) {
             throw Error("Move operation not permitted");
@@ -495,7 +496,7 @@ export class DocumentsService {
               });
             }
 
-            item.access_info.entities.forEach(async info => {
+            item.access_info.entities.forEach(info => {
               if (!info.grantor) {
                 info.grantor = context.user.id;
               }
@@ -528,13 +529,10 @@ export class DocumentsService {
 
       if (oldParent) {
         item.scope = await getItemScope(item, this.repository, context);
-        this.repository.save(item);
+        await this.repository.save(item);
 
         await updateItemSize(oldParent, this.repository, context);
-        this.notifyWebsocket(oldParent, context);
       }
-
-      this.notifyWebsocket(item.parent_id, context);
 
       if (item.parent_id === this.TRASH) {
         //When moving to trash we recompute the access level to make them flat
@@ -715,7 +713,7 @@ export class DocumentsService {
       throw new CrudException("User does not have access to this item or its children", 401);
     }
 
-    if (isInTrash(item, this.repository, context)) {
+    if (await isInTrash(item, this.repository, context)) {
       if (item.is_in_trash != true) {
         if (item.scope === "personal") {
           item.parent_id = "user_" + context.user.id;
@@ -726,9 +724,7 @@ export class DocumentsService {
         item.is_in_trash = false;
       }
     }
-    this.repository.save(item);
-
-    this.notifyWebsocket("trash", context);
+    await this.repository.save(item);
   };
 
   /**
@@ -805,10 +801,9 @@ export class DocumentsService {
         notificationReceiver: item.creator,
       });
 
-      this.notifyWebsocket(item.parent_id, context);
       await updateItemSize(item.parent_id, this.repository, context);
 
-      globalResolver.platformServices.messageQueue.publish<DocumentsMessageQueueRequest>(
+      await globalResolver.platformServices.messageQueue.publish<DocumentsMessageQueueRequest>(
         "services:documents:process",
         {
           data: {
@@ -938,7 +933,7 @@ export class DocumentsService {
       }
     }
 
-    archive.finalize();
+    await archive.finalize();
 
     return archive;
   };

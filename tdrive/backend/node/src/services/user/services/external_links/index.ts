@@ -42,25 +42,4 @@ export class UserExternalLinksServiceImpl {
 
     return user;
   }
-
-  async createExternalGroup(
-    group: ExternalGroup,
-    context?: ExecutionContext,
-  ): Promise<ExternalGroup> {
-    await this.externalGroupRepository.save(group, context);
-
-    //Save company provider and provider id here
-    const internalCompany = await this.companyRepository.findOne(
-      { id: group.company_id },
-      {},
-      context,
-    );
-    if (internalCompany) {
-      internalCompany.identity_provider = group.service_id;
-      internalCompany.identity_provider_id = group.external_id;
-      this.companyRepository.save(internalCompany, context);
-    }
-
-    return group;
-  }
 }

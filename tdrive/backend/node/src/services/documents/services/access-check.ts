@@ -419,7 +419,7 @@ export const getItemScope = async (
   context: CompanyExecutionContext,
 ): Promise<"personal" | "shared"> => {
   let scope: "personal" | "shared";
-  if (item.parent_id === "user_" + context.user?.id) {
+  if (item.parent_id.startsWith("user_")) {
     scope = "personal";
   } else if (item.parent_id === "root") {
     scope = "shared";

@@ -4,7 +4,7 @@
     <node-options value="--experimental-specifier-resolution=node --experimental-vm-modules" />
     <jest-package value="$PROJECT_DIR$/tdrive/backend/node/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$/tdrive/backend/node" />
-    <jest-options value="--forceExit --coverage --maxWorkers=1" />
+    <jest-options value="--forceExit --coverage --maxWorkers=1 --testTimeout=30000" />
     <envs>
       <env name="DB_DRIVER" value="postgres" />
       <env name="DB_MONGO_URI" value="mongodb://localhost:27017" />
