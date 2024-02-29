@@ -150,7 +150,7 @@ describe("The Documents Browser Window and API", () => {
       expect((await anotherUser.browseDocuments("shared_with_me", {pagination: {limitStr: 100}})).children).toHaveLength(1);
     });
 
-    it("User should be able to delete file that was shared with him with right permissions", async () => {
+    it("User should be able to delete file that was shared with him with 'manage' permissions", async () => {
       const oneUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
       const anotherUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
 
@@ -168,6 +168,58 @@ describe("The Documents Browser Window and API", () => {
 
       const response = await anotherUser.delete(toDeleteDoc.id);
       expect(response.statusCode).toBe(200);
+    });
+
+    it("User should be able to delete folder with the files that was shared with him with 'manage' permissions", async () => {
+      const oneUser = await UserApi.getInstance(platform, true);
+      const anotherUser = await UserApi.getInstance(platform, true);
+      
+      const dir = await oneUser.createDirectory("user_" + oneUser.user.id);
+      const level2Dir = await oneUser.createDirectory(dir.id);
+      const level2Dir2 = await oneUser.createDirectory(dir.id);
+      await oneUser.uploadAllFilesOneByOne(level2Dir.id);
+      await oneUser.uploadAllFilesOneByOne(level2Dir2.id);
+      await oneUser.uploadAllFilesOneByOne(dir.id);
+      await new Promise(r => setTimeout(r, 5000));
+
+      dir.access_info.entities.push({
+        type: "user",
+        id: anotherUser.user.id,
+        level: "manage",
+        grantor: null,
+      });
+      await oneUser.updateDocument(dir.id, dir);
+
+      const response = await anotherUser.delete(dir.id);
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("Shouldn't return files that are in trash", async () => {
+      const oneUser = await UserApi.getInstance(platform, true);
+      const anotherUser = await UserApi.getInstance(platform, true);
+
+      const dir = await oneUser.createDirectory("user_" + oneUser.user.id);
+
+      dir.access_info.entities.push({
+        type: "user",
+        id: anotherUser.user.id,
+        level: "manage",
+        grantor: null,
+      });
+      await oneUser.updateDocument(dir.id, dir);
+      await new Promise(r => setTimeout(r, 3000));
+
+      //can brows files
+      let sharedDocs = await anotherUser.browseDocuments("shared_with_me");
+      expect(sharedDocs.children.length).toBe(1);
+
+      //when
+      const response = await anotherUser.delete(dir.id);
+      expect(response.statusCode).toBe(200);
+      await new Promise(r => setTimeout(r, 3000));
+
+      sharedDocs = await anotherUser.browseDocuments("shared_with_me");
+      expect(sharedDocs.children.length).toBe(0);
     });
 
   });

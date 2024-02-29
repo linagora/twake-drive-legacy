@@ -8,6 +8,7 @@ import { DriveItem } from '@features/drive/types';
 import { useEffect, useState } from 'react';
 import { atom, useRecoilState } from 'recoil';
 import Languages from '@features/global/services/languages-service';
+import RouterServices from "features/router/services/router-service";
 
 
 export type ConfirmTrashModalType = {
@@ -39,6 +40,7 @@ const ConfirmTrashModalContent = ({ items }: { items: DriveItem[] }) => {
   const [loading, setLoading] = useState(false);
   const [state, setState] = useRecoilState(ConfirmTrashModalAtom);
   const [, setSelected] = useRecoilState(DriveItemSelectedList);
+  const { viewId } = RouterServices.getStateFromRoute();
 
   useEffect(() => {
     refresh(items[0].id);
@@ -59,10 +61,17 @@ const ConfirmTrashModalContent = ({ items }: { items: DriveItem[] }) => {
         loading={loading}
         onClick={async () => {
           setLoading(true);
-          await Promise.all((items || []).map(async item => await remove(item.id, item.parent_id)));
+          await Promise.all((items || []).map(async item => {
+            let parent = item.parent_id;
+            if (viewId === "shared_with_me" && parent && parent.startsWith("user_")) {
+              console.log("Refresh shared_with_me");
+              parent = "shared_with_me";
+            }
+            await remove(item.id, parent)
+          }));
           setSelected({});
           setLoading(false);
-          refresh('trash');
+          await refresh("trash");
           setState({ ...state, open: false });
         }}
       >

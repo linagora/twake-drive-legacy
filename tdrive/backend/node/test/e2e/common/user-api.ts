@@ -287,7 +287,7 @@ export default class UserApi {
 
   async browseDocuments(
     id: string,
-    payload: Record<string, any>
+    payload: Record<string, any> = {}
   ) {
     const response = await this.platform.app.inject({
       method: "POST",

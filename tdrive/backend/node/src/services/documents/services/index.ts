@@ -678,6 +678,7 @@ export class DocumentsService {
    * restore a Drive Document and its children
    *
    * @param {string} id - the item id
+   * @param item item to restore
    * @param {DriveExecutionContext} context - the execution context
    * @returns {Promise<void>}
    */
@@ -981,7 +982,7 @@ export class DocumentsService {
               ]
             : []),
         ],
-        $nin: [...(options.onlyDirectlyShared ? [["creator", [context.user.id]] as inType] : [])],
+        $nin: [...(options.onlyUploadedNotByMe ? [["creator", [context.user.id]] as inType] : [])],
         $lte: [
           ...(options.last_modified_lt
             ? [["last_modified", options.last_modified_lt] as comparisonType]
@@ -1011,7 +1012,10 @@ export class DocumentsService {
       const filteredResult = await this.filter(result.getEntities(), async item => {
         try {
           //skip all the fiels
-          return await checkAccess(item.id, null, "read", this.repository, context);
+          return (
+            !item.is_in_trash &&
+            (await checkAccess(item.id, null, "read", this.repository, context))
+          );
         } catch (error) {
           this.logger.warn("failed to check item access", error);
           return false;
@@ -1023,7 +1027,7 @@ export class DocumentsService {
 
     if (options.onlyUploadedNotByMe) {
       const filteredResult = await this.filter(result.getEntities(), async item => {
-        return item.creator != context.user.id;
+        return item.creator != context.user.id && !item.is_in_trash;
       });
 
       return new ListResult(result.type, filteredResult, result.nextPage);
