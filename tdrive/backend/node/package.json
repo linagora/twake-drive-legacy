@@ -73,6 +73,7 @@
     "@types/node-cron": "^3.0.0",
     "@types/node-fetch": "^2.5.12",
     "@types/node-uuid": "^0.0.28",
+    "@types/nodemailer": "^6.4.14",
     "@types/pdf-image": "^2.0.1",
     "@types/pg-pool": "^2.0.6",
     "@types/pump": "^1.1.1",
