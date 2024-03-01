@@ -58,7 +58,7 @@ export const DocumentRow = ({
     console.log("DEVICE:: " + device);
     if (device != "ios" && device != "android") {
       history.push(RouterServices.generateRouteFromState({companyId: company, itemId: item.id, dirId: ''}));
-      open(item);
+      //open(item);
     }
   };
 

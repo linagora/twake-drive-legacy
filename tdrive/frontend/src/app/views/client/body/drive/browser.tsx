@@ -383,8 +383,8 @@ export default memo(
                             }
                             item={child}
                             onClick={() => {
-                              const route = RouterServices.generateRouteFromState({dirId: child.id});
-                              history.push(route);
+                              // const route = RouterServices.generateRouteFromState({dirId: child.id});
+                              // history.push(route);
                               return setParentId(child.id);
                             }}
                             checked={checked[child.id] || false}

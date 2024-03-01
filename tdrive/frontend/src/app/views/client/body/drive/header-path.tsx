@@ -33,13 +33,13 @@ export default ({
       inTrash={inTrash || false}
       path={path}
       onClick={(viewId, dirId) => {
-        history.push(
+        /*history.push(
           RouterServices.generateRouteFromState({
             companyId: company,
             viewId,
             dirId,
           }),
-        );
+        );*/
         setParentId(dirId ? dirId : viewId);
       }}
     />
@@ -128,7 +128,7 @@ const PathItem = ({
   const { user } = useCurrentUser();
   const { viewId } = RouterServices.getStateFromRoute();
   const { access: trashAccess } = useDriveItem('trash');
-  const isInSharedWithMe = viewId === "shared_with_me";
+  const isInSharedWithMe = viewId === 'shared_with_me';
   return (
     <div className="flex items-center">
       <a
@@ -185,12 +185,12 @@ const PathItem = ({
 
             if (first) {
               if (isTrash) {
-                return viewId?.includes('trash_') 
-                  ? Languages.t('components.header_path.my_trash') 
+                return viewId?.includes('trash_')
+                  ? Languages.t('components.header_path.my_trash')
                   : Languages.t('components.header_path.shared_trash');
               } else {
-                return isInSharedWithMe 
-                  ? Languages.t('components.header_path.shared_with_me') 
+                return isInSharedWithMe
+                  ? Languages.t('components.header_path.shared_with_me')
                   : fileName;
               }
             } else {
@@ -202,7 +202,7 @@ const PathItem = ({
       {item?.access_info?.public?.level && item?.access_info?.public?.level !== 'none' && (
         <PublicIcon className="h-5 w-5 ml-2" />
       )}
-      {first && !!user?.id && viewId != "shared_with_me" && (
+      {first && !!user?.id && viewId != 'shared_with_me' && (
         <span className="ml-2 -mr-1 text-gray-700">
           <ChevronDownIcon className="w-4 h-4" />
         </span>

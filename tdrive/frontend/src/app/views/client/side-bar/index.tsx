@@ -44,6 +44,7 @@ export default () => {
   if (sharedWithMe) folderType = 'shared';
 
   useEffect(() => {
+    console.log('PARENT ID CHANGED: ', parentId);
     !itemId && !dirId && viewId && setParentId(viewId);
     dirId && viewId && setParentId(dirId);
   }, [viewId, itemId, dirId]);
@@ -76,7 +77,7 @@ export default () => {
                 dirId: '',
               }),
             );
-            setParentId('user_' + user?.id);
+            // setParentId('user_' + user?.id);
           }}
           size="lg"
           theme="white"
@@ -92,6 +93,7 @@ export default () => {
         {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_SHARED_DRIVE) && (
           <Button
             onClick={() => {
+              // setParentId('root')
               history.push(
                 RouterServices.generateRouteFromState({
                   companyId: company,
@@ -100,7 +102,6 @@ export default () => {
                   dirId: '',
                 }),
               );
-              setParentId('root');
             }}
             size="lg"
             theme="white"
@@ -108,7 +109,6 @@ export default () => {
               'w-full mb-1 ' + (folderType === 'home' && viewId == 'root' ? activeClass : '')
             }
           >
-
             <CloudIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.home')}
           </Button>
         )}
@@ -123,7 +123,7 @@ export default () => {
                   dirId: '',
                 }),
               );
-              setParentId('shared_with_me');
+              // setParentId('shared_with_me');
             }}
             size="lg"
             theme="white"
@@ -164,7 +164,7 @@ export default () => {
                 dirId: '',
               }),
             );
-            setParentId('trash_' + user?.id);
+            // setParentId('trash_' + user?.id);
           }}
           size="lg"
           theme="white"
