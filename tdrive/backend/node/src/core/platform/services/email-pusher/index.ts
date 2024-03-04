@@ -43,12 +43,13 @@ export default class EmailPusherClass
     this.interface = this.configuration.get<string>("email_interface", "");
     this.platformUrl = this.configuration.get<string>("platform_url", "");
     if (this.interface === "smtp") {
+      const useTLS = this.configuration.get<string>("smtp_tls", "false") == "true";
       const smtpConfig: SMTPClientConfigType = {
         host: this.configuration.get<string>("smtp_host", ""),
         port: this.configuration.get<number>("smtp_port", 25),
         secure: false,
-        ignoreTLS: !this.configuration.get<boolean>("smtp_tls", false),
-        requireTLS: this.configuration.get<boolean>("smtp_tls", true),
+        ignoreTLS: !useTLS,
+        requireTLS: useTLS,
       };
       this.logger.info(`Start SMTP client with configuration: ${JSON.stringify(smtpConfig)}`);
       this.transporter = nodemailer.createTransport(smtpConfig);
