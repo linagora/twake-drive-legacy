@@ -84,8 +84,9 @@ export default class EmailPusherClass
       const templatePath = path.join(__dirname, "templates", language, `${template}.eta`);
       const subjectPath = path.join(__dirname, "templates", language, `${template}.subject.eta`);
       const encodedCompanyId = translator.fromUUID(data.notifications[0].item.company_id);
-      const encodedFileId = translator.fromUUID(data.notifications[0].item.id);
-      const encodedUrl = `${this.platformUrl}/client/${encodedCompanyId}/v/shared_with_me/preview/${encodedFileId}`;
+      const encodedItemId = translator.fromUUID(data.notifications[0].item.id);
+      const previewType = data.notifications[0].item.is_directory ? "d" : "preview";
+      const encodedUrl = `${this.platformUrl}/client/${encodedCompanyId}/v/shared_with_me/${previewType}/${encodedItemId}`;
 
       if (!existsSync(templatePath)) {
         throw Error(`template not found: ${templatePath}`);
