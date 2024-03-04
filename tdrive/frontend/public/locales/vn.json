@@ -275,7 +275,7 @@
     "scenes.app.drive.used": "được sử dụng trong thư mục này",
     "scenes.app.drive.context_menu": "Thêm",
     "scenes.app.drive.documents": "Tài liệu",
-    "components.disk_usage.used": "đã sử dụng,",
+    "components.disk_usage.used": "đã sử dụng",
     "components.disk_usage.in_trash": "trong thùng rác",
     "components.create_modal.create_folder_or_doc": "Tạo tài liệu hoặc thư mục",
     "components.create_modal.create_folder": "Tạo thư mục",
