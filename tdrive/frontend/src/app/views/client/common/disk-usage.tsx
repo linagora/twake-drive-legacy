@@ -18,14 +18,18 @@ const DiskUsage = () => {
 
   const { quota } = useUserQuota()
   useEffect(() => {
-    setUsed(Math.round(quota.used / quota.total * 100))
-    setUsedBytes(quota.used);
-    setTotalBytes(quota.total);
+    if (FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_USER_QUOTA)) {
+      setUsed(Math.round(quota.used / quota.total * 100))
+      setUsedBytes(quota.used);
+      setTotalBytes(quota.total);
+    }
   }, [quota]);
 
   const { item } = useDriveItem(viewId || "root");
   useEffect(() => {
-    setUsedBytes(item?.size || 0);
+    if (!FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_USER_QUOTA)) {
+      setUsedBytes(item?.size || 0);
+    }
   }, [viewId, item])
 
   return (
