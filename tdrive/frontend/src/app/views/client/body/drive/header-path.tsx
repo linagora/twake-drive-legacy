@@ -33,14 +33,15 @@ export default ({
       inTrash={inTrash || false}
       path={path}
       onClick={(viewId, dirId) => {
-        /*history.push(
+        history.push(
           RouterServices.generateRouteFromState({
             companyId: company,
             viewId,
             dirId,
           }),
-        );*/
-        setParentId(dirId ? dirId : viewId);
+        );
+        console.log("viewId changed now setting the parentId")
+        // setParentId(dirId ? dirId : viewId);
       }}
     />
   );
