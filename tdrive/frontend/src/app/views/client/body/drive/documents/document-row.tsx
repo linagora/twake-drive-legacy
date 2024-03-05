@@ -20,7 +20,6 @@ import { useEffect, useState } from 'react';
 import Avatar from '../../../../../atoms/avatar';
 import { PublicIcon } from '../components/public-icon';
 import {CheckableIcon, DriveItemOverlayProps, DriveItemProps} from './common';
-import { getDevice } from '../../../../../features/global/utils/device';
 import './style.scss';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
@@ -59,11 +58,7 @@ export const DocumentRow = ({
   }, [itemId]);
 
   const preview = () => {
-    const device = getDevice();
-    console.log("DEVICE:: " + device);
-    if (device != "ios" && device != "android") {
-      history.push(RouterServices.generateRouteFromState({companyId: company, itemId: item.id, dirId: ''}));
-    }
+    history.push(RouterServices.generateRouteFromState({companyId: company, itemId: item.id, dirId: ''}));
   };
 
   return (
