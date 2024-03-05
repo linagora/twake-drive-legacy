@@ -5,7 +5,7 @@ services:
     container_name: mongo
     image: mongo
     volumes:
-      - ./docker-data/mongo:/data/db
+      - mongo-data:/data/db
     networks:
       - tdrive_network
 
@@ -49,3 +49,5 @@ networks:
   tdrive_network:
     driver: bridge
 
+volumes:
+  mongo-data:
