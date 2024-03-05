@@ -17,6 +17,7 @@ services:
       - SEARCH_DRIVER=mongodb
       - DB_DRIVER=mongodb
       - PUBSUB_TYPE=local
+    volumes:
       - ./docker-data/documents/:/storage/
     depends_on:
       - mongo
