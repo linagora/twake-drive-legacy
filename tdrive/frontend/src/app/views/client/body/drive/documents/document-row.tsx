@@ -36,7 +36,7 @@ export const DocumentRow = ({
 }: DriveItemProps) => {
   const history = useHistory();
   const [hover, setHover] = useState(false);
-  const { open } = useDrivePreview();
+  const { open,close } = useDrivePreview();
   const company = useRouterCompany();
   const { itemId } = useRouteState();
 
@@ -48,6 +48,11 @@ export const DocumentRow = ({
   const hasThumbnails = !!metadata.thumbnails?.length || false;
 
   useEffect(() => {
+    // close the preview if the item is not set or the user navigated away
+    if(!itemId) {
+      close();
+    }
+    // open the preview if the item is set
     if(itemId == item.id) {
       open(item);
     }
@@ -58,7 +63,6 @@ export const DocumentRow = ({
     console.log("DEVICE:: " + device);
     if (device != "ios" && device != "android") {
       history.push(RouterServices.generateRouteFromState({companyId: company, itemId: item.id, dirId: ''}));
-      //open(item);
     }
   };
 
