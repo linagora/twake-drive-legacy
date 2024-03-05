@@ -24,14 +24,14 @@ FROM node-base as installed-libs
 COPY backend/node/ .
 #Install dev dependancies for build
 RUN export NODE_ENV=development
-RUN npm install
+RUN npm ci
 
 #Build in production mode
 RUN export NODE_ENV=production
 RUN npm run build
 RUN rm -rf node_modules
 #Install prod dependancies after build
-RUN npm install --legacy-peer-deps
+RUN npm ci --legacy-peer-deps
 
 # Development Stage
 FROM installed-libs as development
@@ -39,7 +39,7 @@ FROM installed-libs as development
 ENV NODE_ENV=development
 RUN npm install -g pino-pretty && \
     npm install -g tsc-watch && \
-    yarn install
+    npm ci
 CMD ["npm", "run", "dev:debug"]
 
 # Production Stage
