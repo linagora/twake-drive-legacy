@@ -1,12 +1,12 @@
 # Common node machine
-FROM node:lts as node-base
+FROM node:lts-alpine as node-base
 
-### Install dependancies
-RUN apt-get update && \
-    apt-get install -y ghostscript graphicsmagick
-#Docker mac issue
-# RUN apt-get update && apt-get install -y libc6
-# RUN ln -s /lib/libc.musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2
+### Install dependencies
+RUN apk add --update-cache \
+      ghostscript \
+      graphicsmagick \
+    && rm -rf /var/cache/apk/*
+
 
 ### Install TDrive
 WORKDIR /usr/src/app
