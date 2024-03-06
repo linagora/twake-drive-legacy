@@ -338,44 +338,49 @@ export class FileServiceImpl {
     if (!this.checkConsistencyInProgress) {
       this.checkConsistencyInProgress = true;
       let result: ListResult<FileVersion>;
-      let page: Pagination = null;
+      let page: Pagination = { limitStr: "20" };
       try {
         do {
           result = await this.versionRepository.find({}, { pagination: page });
           //check that the file exists
+          const jobs: Promise<void>[] = [];
           for (const version of result.getEntities()) {
             if (version.file_metadata.external_id) {
-              try {
-                const file = await this.getFile({
-                  id: version.file_metadata.external_id,
-                  company_id: "00000000-0000-4000-0000-000000000000",
-                });
-                const exist = await gr.platformServices.storage.exists(getFilePath(file));
-                if (exist) {
-                  logger.info(`File ${version.file_metadata.external_id} exists in S3`);
-                } else {
-                  logger.info(`File ${version.file_metadata.external_id} DOES NOT exists in S3`);
-                  const doc = await this.documentRepository.findOne({
-                    id: version.drive_item_id,
+              const checkFile = async () => {
+                try {
+                  const file = await this.getFile({
+                    id: version.file_metadata.external_id,
                     company_id: "00000000-0000-4000-0000-000000000000",
                   });
-                  const user = await this.userRepository.findOne({ id: doc.creator });
-                  data.push({
-                    file_id: version.file_metadata.external_id,
-                    user: user?.email_canonical,
-                    doc: {
+                  const exist = await gr.platformServices.storage.exists(getFilePath(file));
+                  if (exist) {
+                    logger.info(`File ${version.file_metadata.external_id} exists in S3`);
+                  } else {
+                    logger.info(`File ${version.file_metadata.external_id} DOES NOT exists in S3`);
+                    const doc = await this.documentRepository.findOne({
                       id: version.drive_item_id,
-                      name: doc.name,
-                    },
-                  });
-                  console.log(`Missing files:: ${JSON.stringify(data)}`);
+                      company_id: "00000000-0000-4000-0000-000000000000",
+                    });
+                    const user = await this.userRepository.findOne({ id: doc.creator });
+                    data.push({
+                      file_id: version.file_metadata.external_id,
+                      user: user?.email_canonical,
+                      doc: {
+                        id: version.drive_item_id,
+                        name: doc.name,
+                      },
+                    });
+                    console.log(`Missing files:: ${JSON.stringify(data)}`);
+                  }
+                } catch (e) {
+                  logger.warn(`Can't find ${version.file_metadata.external_id} in DB`);
                 }
-              } catch (e) {
-                logger.warn(`Can't find ${version.file_metadata.external_id} in DB`);
-              }
+              };
+              jobs.push(checkFile.bind(this)());
             }
           }
-
+          await Promise.all(jobs);
+          console.log(`Missing files:: ${JSON.stringify(data)}`);
           //go to next page
           page = Pagination.fromPaginable(result.nextPage);
         } while (page.page_token);
