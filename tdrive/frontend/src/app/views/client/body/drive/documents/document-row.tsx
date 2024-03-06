@@ -58,7 +58,7 @@ export const DocumentRow = ({
   }, [itemId]);
 
   const preview = () => {
-    history.push(RouterServices.generateRouteFromState({companyId: company, itemId: item.id, dirId: ''}));
+    history.push(RouterServices.generateRouteFromState({companyId: company, itemId: item.id}));
   };
 
   return (
