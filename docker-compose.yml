@@ -9,8 +9,8 @@ services:
     networks:
       - tdrive_network
 
-    image: twakedrive/tdrive-node
   tdrive_node:
+    image: twakedrive/tdrive-node
     hostname: tdrive_node
     environment:
       - DEV=production
