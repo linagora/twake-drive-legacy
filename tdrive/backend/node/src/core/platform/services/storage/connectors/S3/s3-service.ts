@@ -2,7 +2,6 @@ import * as Minio from "minio";
 import { logger } from "../../../../../../core/platform/framework";
 import { Readable } from "stream";
 import { StorageConnectorAPI, WriteMetadata } from "../../provider";
-import fs from "fs";
 
 export type S3Configuration = {
   bucket: string;
@@ -89,7 +88,7 @@ export default class S3ConnectorService implements StorageConnectorAPI {
           break;
         }
       } catch (e) {
-        logger.error(`Error getting information from S3`, e);
+        logger.error("Error getting information from S3", e);
       }
 
       if (i === tries) {

@@ -47,5 +47,4 @@ export class MissedDriveFile {
   @Type(() => String)
   @Column("creator", "uuid")
   creator: string;
-
 }
