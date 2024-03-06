@@ -76,6 +76,11 @@ export default memo(
       DriveCurrentFolderAtom({ context: context, initialFolderId: dirId || viewId || initialParentId || 'user_'+user?.id }),
     );
 
+    // set the initial view to the user's home directory
+    useEffect(() => {
+      !dirId && !viewId && history.push(RouterServices.generateRouteFromState({viewId: parentId}));
+    }, [viewId, dirId]);
+
     const [loadingParentChange, setLoadingParentChange] = useState(false);
     const {
       sharedWithMe,

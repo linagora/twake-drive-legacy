@@ -137,18 +137,6 @@ const PathItem = ({
         className="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white"
         onClick={evt => {
           evt.preventDefault();
-          const driveMenuItems = [
-            {
-              type: 'menu',
-              text: Languages.t('components.side_menu.home'),
-              onClick: () => onClick('root', ''),
-            },
-            {
-              type: 'menu',
-              text: Languages.t('components.side_menu.my_drive'),
-              onClick: () => onClick('user_' + user?.id, ''),
-            },
-          ];
 
           const trashMenuItems = [
             {
@@ -172,7 +160,11 @@ const PathItem = ({
             if (viewId?.includes('trash')) {
               MenusManager.openMenu(trashMenuItems, { x: evt.clientX, y: evt.clientY }, 'center');
             } else {
-              MenusManager.openMenu(driveMenuItems, { x: evt.clientX, y: evt.clientY }, 'center');
+              if (viewId === 'root') {
+                onClick('root', '')
+              } else if (viewId === 'user_' + user?.id) {
+                onClick('user_' + user?.id, '')
+              }
             }
           } else {
             onClick(viewId || '', item?.id || '');
@@ -203,7 +195,7 @@ const PathItem = ({
       {item?.access_info?.public?.level && item?.access_info?.public?.level !== 'none' && (
         <PublicIcon className="h-5 w-5 ml-2" />
       )}
-      {first && !!user?.id && viewId != 'shared_with_me' && (
+      {first && !!user?.id && viewId?.includes('trash') && (
         <span className="ml-2 -mr-1 text-gray-700">
           <ChevronDownIcon className="w-4 h-4" />
         </span>

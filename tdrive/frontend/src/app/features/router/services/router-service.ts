@@ -52,9 +52,9 @@ class RouterServices extends Observable {
   clientSubPathnames: Readonly<string[]> = [
     '/client/:companyId',
     '/client/:companyId/v/:viewId',
-    '/client/:companyId/preview/:itemId',
-    '/client/:companyId/v/:viewId/preview/:itemId',
     '/client/:companyId/v/:viewId/d/:dirId',
+    '/client/:companyId/v/:viewId/preview/:itemId',
+    '/client/:companyId/v/:viewId/d/:dirId/preview/:itemId',
     '/client/:companyId/w/:workspaceId',
     '/client/:companyId/w/:workspaceId/c/:channelId',
     '/client/:companyId/w/:workspaceId/c/:channelId/t/:threadId',
@@ -294,8 +294,8 @@ class RouterServices extends Observable {
       `${this.pathnames.CLIENT}` +
       (state.companyId ? `/${state.companyId}` : '') +
       (state.viewId ? `/v/${state.viewId}` : '') +
-      (state.itemId ? `/preview/${state.itemId}` : '') +
       (state.dirId ? `/d/${state.dirId}` : '') +
+      (state.itemId ? `/preview/${state.itemId}` : '') +
       (state.sharedWithMe ? `/shared-with-me` : '') +
       (state.workspaceId ? `/w/${state.workspaceId}` : '') +
       (state.channelId ? `/c/${state.channelId}` : '') +

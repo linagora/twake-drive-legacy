@@ -32,7 +32,6 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
   const { status, isOpen, open, close, loading } = useDrivePreview();
   const [modalLoading, setModalLoading] = useState(true);
   const { loading: loadingData } = useDrivePreviewLoading();
-  const { type = '' } = useDrivePreviewDisplayData();
   let animationTimeout: number = setTimeout(() => undefined);
   const handleSwitchRight = () => {
     const currentItem = status.item;
@@ -83,12 +82,11 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
     if (device != 'ios' && device != 'android') {
       close();
       history.push(
-        RouterServices.generateRouteFromState({ companyId: company, viewId: '', itemId: item.id, dirId: '' }),
+        RouterServices.generateRouteFromState({ companyId: company, itemId: item.id, }),
       );
       open(item);
     }
   };
-
   return (
     <Modal
       open={isOpen}
@@ -99,7 +97,10 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
     >
       <XIcon
         className="z-10 cursor-pointer absolute right-5 top-5 w-20 h-20 text-white hover:text-black rounded-full p-1 bg-gray-500 hover:bg-white bg-opacity-25"
-        onClick={() => close()}
+        onClick={() => {
+          close();
+          history.push(RouterServices.generateRouteFromState({ companyId: company,  itemId: '' }));
+        }}
       />
 
       <Transition
