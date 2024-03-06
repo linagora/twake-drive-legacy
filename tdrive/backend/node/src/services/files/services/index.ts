@@ -23,6 +23,7 @@ import { PreviewFinishedProcessor } from "./preview";
 import _ from "lodash";
 import User from "../../user/entities/user";
 import { DriveFile } from "../../documents/entities/drive-file";
+import { MissedDriveFile } from "../../documents/entities/missed-drive-file";
 import { FileVersion } from "../../documents/entities/file-version";
 
 export class FileServiceImpl {
@@ -30,6 +31,7 @@ export class FileServiceImpl {
   repository: Repository<File>;
   userRepository: Repository<User>;
   documentRepository: Repository<DriveFile>;
+  missedFileRepository: Repository<MissedDriveFile>;
   versionRepository: Repository<FileVersion>;
   private algorithm = "aes-256-cbc";
   private max_preview_file_size = 50000000;
@@ -45,6 +47,12 @@ export class FileServiceImpl {
         (this.documentRepository = await gr.database.getRepository<DriveFile>(
           "drive_files",
           DriveFile,
+        )),
+      ]);
+      await Promise.all([
+        (this.missedFileRepository = await gr.database.getRepository<MissedDriveFile>(
+          "missed_drive_files",
+          MissedDriveFile,
         )),
       ]);
       await Promise.all([
@@ -362,15 +370,19 @@ export class FileServiceImpl {
                       company_id: "00000000-0000-4000-0000-000000000000",
                     });
                     const user = await this.userRepository.findOne({ id: doc.creator });
-                    data.push({
+                    const missedFile = new MissedDriveFile();
+                    Object.assign(missedFile, {
+                      id: version.file_metadata.external_id,
+                      added: doc.added,
+                      doc_id: doc.id,
                       file_id: version.file_metadata.external_id,
-                      user: user?.email_canonical,
-                      doc: {
-                        id: version.drive_item_id,
-                        name: doc.name,
-                      },
+                      creator: user?.id,
+                      name: doc.name,
+                      is_in_trash: doc.is_in_trash,
+                      user_email: user?.email_canonical,
                     });
-                    console.log(`Missing files:: ${JSON.stringify(data)}`);
+                    await this.missedFileRepository.save(missedFile);
+                    logger.info(`Missing file:: ${JSON.stringify(missedFile)}`);
                   }
                 } catch (e) {
                   logger.warn(`Can't find ${version.file_metadata.external_id} in DB`);
@@ -380,12 +392,12 @@ export class FileServiceImpl {
             }
           }
           await Promise.all(jobs);
-          console.log(`Missing files:: ${JSON.stringify(data)}`);
           //go to next page
           page = Pagination.fromPaginable(result.nextPage);
         } while (page.page_token);
       } finally {
         this.checkConsistencyInProgress = false;
+        logger.info("Scanning for missing file finished.");
       }
     }
     return data;
