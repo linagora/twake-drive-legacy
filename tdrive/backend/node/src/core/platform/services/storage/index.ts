@@ -75,6 +75,10 @@ export default class StorageService extends TdriveService<StorageAPI> implements
     return this.homeDir;
   }
 
+  exists(path: string, options?: ReadOptions): Promise<boolean> {
+    return this.getConnector().exists(path, options);
+  }
+
   async write(path: string, stream: Stream, options?: WriteOptions): Promise<WriteMetadata> {
     try {
       if (options?.encryptionKey) {

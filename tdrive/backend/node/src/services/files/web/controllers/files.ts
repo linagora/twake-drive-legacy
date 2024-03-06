@@ -59,6 +59,11 @@ export class FileController {
     }
   }
 
+  async checkConsistency(request: FastifyRequest, response: FastifyReply): Promise<void> {
+    const data = await gr.services.files.checkConsistency();
+    response.send(data);
+  }
+
   async thumbnail(
     request: FastifyRequest<{ Params: { company_id: string; id: string; index: string } }>,
     response: FastifyReply,

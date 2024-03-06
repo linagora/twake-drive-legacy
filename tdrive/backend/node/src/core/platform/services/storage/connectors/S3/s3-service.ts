@@ -2,6 +2,7 @@ import * as Minio from "minio";
 import { logger } from "../../../../../../core/platform/framework";
 import { Readable } from "stream";
 import { StorageConnectorAPI, WriteMetadata } from "../../provider";
+import fs from "fs";
 
 export type S3Configuration = {
   bucket: string;
@@ -76,5 +77,28 @@ export default class S3ConnectorService implements StorageConnectorAPI {
       }
     } catch (err) {}
     return false;
+  }
+
+  async exists(path: string): Promise<boolean> {
+    logger.trace(`Reading file ... ${path}`);
+    const tries = 2;
+    for (let i = 0; i <= tries; i++) {
+      try {
+        const stat = await this.client.statObject(this.minioConfiguration.bucket, path);
+        if (stat?.size > 0) {
+          break;
+        }
+      } catch (e) {
+        logger.error(`Error getting information from S3`, e);
+      }
+
+      if (i === tries) {
+        logger.info(`Unable to get file after ${tries} tries:`);
+        return false;
+      }
+      await new Promise(r => setTimeout(r, 500));
+      logger.info(`File ${path} not found in S3 bucket, retrying...`);
+    }
+    return true;
   }
 }

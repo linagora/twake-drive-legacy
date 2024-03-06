@@ -72,4 +72,10 @@ export default class LocalConnectorService implements StorageConnectorAPI {
   delete(path: string): Promise<void> {
     return rm(this.getFullPath(path), { recursive: false, force: true });
   }
+
+  async exists(path: string): Promise<boolean> {
+    logger.trace(`Reading file ... ${path}`);
+    const fullPath = this.getFullPath(path);
+    return fs.existsSync(fullPath);
+  }
 }

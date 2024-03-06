@@ -11,6 +11,8 @@ import {
   CrudException,
   DeleteResult,
   ExecutionContext,
+  ListResult,
+  Pagination,
 } from "../../../core/platform/framework/api/crud-service";
 import gr from "../../global-resolver";
 import {
@@ -19,16 +21,38 @@ import {
 } from "../../../services/previews/types";
 import { PreviewFinishedProcessor } from "./preview";
 import _ from "lodash";
+import User from "../../user/entities/user";
+import { DriveFile } from "../../documents/entities/drive-file";
+import { FileVersion } from "../../documents/entities/file-version";
 
 export class FileServiceImpl {
   version: "1";
   repository: Repository<File>;
+  userRepository: Repository<User>;
+  documentRepository: Repository<DriveFile>;
+  versionRepository: Repository<FileVersion>;
   private algorithm = "aes-256-cbc";
   private max_preview_file_size = 50000000;
+  private checkConsistencyInProgress = false;
 
   async init(): Promise<this> {
     try {
       await Promise.all([(this.repository = await gr.database.getRepository<File>("files", File))]);
+      await Promise.all([
+        (this.userRepository = await gr.database.getRepository<User>("user", User)),
+      ]);
+      await Promise.all([
+        (this.documentRepository = await gr.database.getRepository<DriveFile>(
+          "drive_files",
+          DriveFile,
+        )),
+      ]);
+      await Promise.all([
+        (this.versionRepository = await gr.database.getRepository<FileVersion>(
+          "drive_file_versions",
+          FileVersion,
+        )),
+      ]);
       gr.platformServices.messageQueue.processor.addHandler(
         new PreviewFinishedProcessor(this, this.repository),
       );
@@ -307,6 +331,59 @@ export class FileServiceImpl {
     }
 
     return new DeleteResult("files", fileToDelete, true);
+  }
+
+  async checkConsistency(): Promise<any> {
+    const data = [];
+    if (!this.checkConsistencyInProgress) {
+      this.checkConsistencyInProgress = true;
+      let result: ListResult<FileVersion>;
+      let page: Pagination = null;
+      try {
+        do {
+          result = await this.versionRepository.find({}, { pagination: page });
+          //check that the file exists
+          for (const version of result.getEntities()) {
+            if (version.file_metadata.external_id) {
+              try {
+                const file = await this.getFile({
+                  id: version.file_metadata.external_id,
+                  company_id: "00000000-0000-4000-0000-000000000000",
+                });
+                const exist = await gr.platformServices.storage.exists(getFilePath(file));
+                if (exist) {
+                  logger.info(`File ${version.file_metadata.external_id} exists in S3`);
+                } else {
+                  logger.info(`File ${version.file_metadata.external_id} DOES NOT exists in S3`);
+                  const doc = await this.documentRepository.findOne({
+                    id: version.drive_item_id,
+                    company_id: "00000000-0000-4000-0000-000000000000",
+                  });
+                  const user = await this.userRepository.findOne({ id: doc.creator });
+                  data.push({
+                    file_id: version.file_metadata.external_id,
+                    user: user?.email_canonical,
+                    doc: {
+                      id: version.drive_item_id,
+                      name: doc.name,
+                    },
+                  });
+                  console.log(`Missing files:: ${JSON.stringify(data)}`);
+                }
+              } catch (e) {
+                logger.warn(`Can't find ${version.file_metadata.external_id} in DB`);
+              }
+            }
+          }
+
+          //go to next page
+          page = Pagination.fromPaginable(result.nextPage);
+        } while (page.page_token);
+      } finally {
+        this.checkConsistencyInProgress = false;
+      }
+    }
+    return data;
   }
 }
 

@@ -44,6 +44,13 @@ export interface StorageConnectorAPI {
   read(path: string, options?: ReadOptions, context?: ExecutionContext): Promise<Readable>;
 
   /**
+   * Check that the file is exists
+   *
+   * @param path
+   */
+  exists(path: string, options?: ReadOptions, context?: ExecutionContext): Promise<boolean>;
+
+  /**
    * Remove a path
    *
    * @param path

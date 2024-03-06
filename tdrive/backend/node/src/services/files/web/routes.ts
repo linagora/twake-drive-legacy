@@ -46,6 +46,12 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     preValidation: [fastify.authenticate],
     handler: fileController.delete.bind(fileController),
   });
+  fastify.route({
+    method: "GET",
+    url: "/check-files",
+    preValidation: [fastify.authenticate],
+    handler: fileController.checkConsistency.bind(fileController),
+  });
 
   next();
 };
