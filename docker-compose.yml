@@ -30,8 +30,26 @@ services:
     image: twakedrive/tdrive-frontend
     environment:
       - DEV=production
-      - SSL_CERTS=selfsigned
       - NODE_HOST=http://tdrive_node:4000
+      # Do not use SSL. Just connect to port 80:
+      # - SSL_CERTS=off
+      #
+      # Or generate a self signed certificate, for host `$SSL_SUBJ_CN` (default: `localhost`)
+      # unless one exists in `/etc/nginx/ssl/selfsigned.crt`
+      - SSL_CERTS=selfsigned
+      #
+      #   Tip: To accept invalid certificate on localhost:
+      #        - Chrome: enable chrome://flags/#allow-insecure-localhost
+      #        - Firefox: about:config > security.enterprise_roots.enabled=true + security.certerrors.mitm.priming.enabled=false
+      #
+      # If using docker in a virtual or remote machine, create a new hostname in your /etc/hosts pointing to that IP
+      # and set `SSL_SUBJ_CN` to that hostname. (Chrome will not accept a self signed certificate for other than localhost.)
+      # For ex. with `docker-machine`, get ip with `docker-machine ip <machinename>`,
+      # add hosts file entry for docker-machine-default, then browse https://docker-machine-default
+      # - SSL_SUBJ_CN=docker-machine-default
+      #
+      # Debug certificate generation script:
+      # - DEBUG=yes
     ports:
       - 80:80
       - 443:443
@@ -42,7 +60,10 @@ services:
       - ./docker-data/letsencrypt/:/etc/letsencrypt/
       - ./docker-data/drive-preview/:/tdrive-core/web/medias/
       - ./docker-data/uploads/:/tdrive-core/web/upload/
-      - ./docker-data/ssl:/etc/nginx/ssl
+      # If `$SSL_CERTS != off`, mounting certificates here will prevent auto-generating them.
+      # This allows you to keep previously generated (or other certificates), but changes to
+      # SSL_SUBJ_CN will be ignored then.
+      # - ./docker-data/ssl:/etc/nginx/ssl
     networks:
       - tdrive_network
 
