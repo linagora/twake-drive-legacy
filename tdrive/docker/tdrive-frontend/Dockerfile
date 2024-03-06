@@ -1,5 +1,5 @@
 # First stage: building frontend
-FROM node:lts AS build
+FROM node:lts-alpine AS build
 
 RUN yarn global add webpack webpack-cli
 COPY frontend /tdrive-react/
