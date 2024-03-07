@@ -18,7 +18,7 @@ export default class Signin extends Component {
       username: '',
       email: LoginService.emailInit,
       password: '',
-      name: '',
+      lastName: '',
       firstName: '',
       phone: '',
       code: '',
@@ -105,8 +105,8 @@ export default class Signin extends Component {
               [],
               'Last name',
             )}
-            value={this.state.name}
-            onChange={evt => this.setState({ name: evt.target.value })}
+            value={this.state.lastName}
+            onChange={evt => this.setState({ lastName: evt.target.value })}
           />
 
           <br />
