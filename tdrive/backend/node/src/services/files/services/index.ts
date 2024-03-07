@@ -20,11 +20,12 @@ import {
   PreviewMessageQueueRequest,
 } from "../../../services/previews/types";
 import { PreviewFinishedProcessor } from "./preview";
-import _ from "lodash";
+import _, { isNull, isUndefined } from "lodash";
 import User from "../../user/entities/user";
 import { DriveFile } from "../../documents/entities/drive-file";
 import { MissedDriveFile } from "../../documents/entities/missed-drive-file";
 import { FileVersion } from "../../documents/entities/file-version";
+import { getPath } from "../../documents/utils";
 
 export class FileServiceImpl {
   version: "1";
@@ -342,6 +343,7 @@ export class FileServiceImpl {
   }
 
   async checkConsistency(): Promise<any> {
+    const ver = new Date().getTime();
     const data = [];
     if (!this.checkConsistencyInProgress) {
       this.checkConsistencyInProgress = true;
@@ -369,7 +371,16 @@ export class FileServiceImpl {
                       id: version.drive_item_id,
                       company_id: "00000000-0000-4000-0000-000000000000",
                     });
-                    const user = await this.userRepository.findOne({ id: doc.creator });
+                    let user = await this.userRepository.findOne({ id: doc.creator });
+                    const isFromNextcloud = isUndefined(user) || isNull(user);
+                    const path = await getPath(doc.id, this.documentRepository, true, {
+                      company: { id: "00000000-0000-4000-0000-000000000000" },
+                    } as CompanyExecutionContext);
+                    if (isFromNextcloud) {
+                      if (path[0].id.startsWith("user_")) {
+                        user = await this.userRepository.findOne({ id: path[0].id.substring(5) });
+                      }
+                    }
                     const missedFile = new MissedDriveFile();
                     Object.assign(missedFile, {
                       id: version.file_metadata.external_id,
@@ -380,6 +391,10 @@ export class FileServiceImpl {
                       name: doc.name,
                       is_in_trash: doc.is_in_trash,
                       user_email: user?.email_canonical,
+                      is_from_nextcloud: isFromNextcloud,
+                      path: path.map(e => e?.name).join("/"),
+                      size: doc.size,
+                      version: ver,
                     });
                     await this.missedFileRepository.save(missedFile);
                     logger.info(`Missing file:: ${JSON.stringify(missedFile)}`);

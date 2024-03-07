@@ -24,6 +24,10 @@ export class MissedDriveFile {
   @Column("is_in_trash", "boolean")
   is_in_trash: boolean;
 
+  @Type(() => Boolean)
+  @Column("is_from_nextcloud", "boolean")
+  is_from_nextcloud: boolean;
+
   @Type(() => String)
   @Column("name", "string")
   name: string;
@@ -37,6 +41,14 @@ export class MissedDriveFile {
   added: number;
 
   @Type(() => Number)
+  @Column("version", "number")
+  version: number;
+
+  @Type(() => Number)
+  @Column("size", "number")
+  size: number;
+
+  @Type(() => Number)
   @Column("last_modified", "number")
   last_modified: number;
 
@@ -47,4 +59,11 @@ export class MissedDriveFile {
   @Type(() => String)
   @Column("creator", "uuid")
   creator: string;
+
+  @Type(() => String)
+  @Column("path", "string")
+  path: string;
+
+
+
 }
