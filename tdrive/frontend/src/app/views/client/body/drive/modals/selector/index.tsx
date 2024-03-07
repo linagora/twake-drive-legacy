@@ -85,7 +85,7 @@ const SelectorModalContent = (key:any,showfiles:boolean) => {
               setParentId(folder.id);
             }}
           >
-            <div className="grow flex flex-row items-center">
+            <div className="grow flex flex-row items-center dark:text-white">
               <FolderIcon className="h-5 w-5 shrink-0 text-blue-500 mr-2" />
               {folder.name}
             </div>
@@ -113,7 +113,7 @@ const SelectorModalContent = (key:any,showfiles:boolean) => {
             }
           }}
           >
-          <div className="grow flex flex-row items-center">
+          <div className="grow flex flex-row items-center dark:text-white">
             <DocumentIcon className="h-5 w-5 shrink-0 text-gray-400 mr-2" />
             {file.name}
           </div>
