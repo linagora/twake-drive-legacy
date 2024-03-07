@@ -17,6 +17,11 @@ export class TwakeDriveClient {
 
   private readonly config: TwakeClientConfiguration;
 
+  private clientInstance;
+
+  //00000000-0000-4000-0000-000000000000
+  private company = "00000000-0000-4000-0000-000000000000";
+
   constructor(config: TwakeClientConfiguration) {
     this.config = config;
     //remove the trailing '/'
@@ -33,7 +38,7 @@ export class TwakeDriveClient {
     form.append('file', fs.createReadStream(path));
 
     const response
-      = await client.post(`${this.config.url}/internal/services/files/v1/companies/00000000-0000-4000-0000-000000000000/files`, form);
+      = await client.post(`${this.config.url}/internal/services/files/v1/companies/${this.company}/files`, form);
 
     logger.info(response.data);
 
@@ -47,7 +52,7 @@ export class TwakeDriveClient {
 
   async createDirectory(name: string, parent: string) {
     return this.createDocument({
-      company_id: '00000000-0000-4000-0000-000000000000',
+      company_id: this.company,
       name: name,
       parent_id: parent,
       is_directory: true,
@@ -74,7 +79,7 @@ export class TwakeDriveClient {
 
   private async createDocument(item: any, version: any) {
     const response
-      = await (await this.client()).post(`${this.config.url}/internal/services/documents/v1/companies/00000000-0000-4000-0000-000000000000/item`, {
+      = await (await this.client()).post(`${this.config.url}/internal/services/documents/v1/companies/${this.company}/item`, {
       item,
       version,
     });
@@ -85,7 +90,7 @@ export class TwakeDriveClient {
   async getDocument(id: string) {
     logger.info(`Get information for the doc ${id}`);
     const response
-      = await (await this.client()).get(`${this.config.url}/internal/services/documents/v1/companies/00000000-0000-4000-0000-000000000000/item/${id}`, {
+      = await (await this.client()).get(`${this.config.url}/internal/services/documents/v1/companies/${this.company}/item/${id}`, {
     });
     logger.info(response.data);
     return response.data;
@@ -122,12 +127,15 @@ export class TwakeDriveClient {
   }
 
   private async client() {
-    return axios.create({
-      baseURL: this.config.url,
-      headers: {
-        Authorization: `Bearer ${await (this.accessToken())}`,
-      },
-    });
+    if (!this.clientInstance) {
+      this.clientInstance = axios.create({
+        baseURL: this.config.url,
+        headers: {
+          Authorization: `Bearer ${await (this.accessToken())}`,
+        },
+      });
+    }
+    return this.clientInstance;
   }
 
   private async accessToken(): Promise<string> {
@@ -169,23 +177,24 @@ export class TwakeDriveClient {
     form.append('file', fs.createReadStream(fPath));
 
     const response
-      = await client.post(`${this.config.url}/internal/services/files/S3/upload`, form);
+      = await client.post(`${this.config.url}/internal/services/files/v1/S3/restore/${id}`, form);
 
     logger.info(response.data);
 
-    return response.data?.resource;
+    return response.data;
   }
 
   async existsInS3(id: string): Promise<boolean> {
     const client = await this.client();
     const response
-      = await client.get(`${this.config.url}/internal/services/files/S3/exists`);
+      = await client.get(`${this.config.url}/internal/services/files/v1/S3/exist/${id}`);
     if (response.status != 200) {
       logger.warn(`Error receiving S3 status for ${id}`);
       logger.warn(response.data)
       return true;
     } else {
-      return response.data.isInS3;
+      logger.info(`Exists ${JSON.stringify(response.data)}`)
+      return response.data?.exist;
     }
   }
 }

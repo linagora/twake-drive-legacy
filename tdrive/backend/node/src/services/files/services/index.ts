@@ -432,7 +432,6 @@ export class FileServiceImpl {
       if (result.exist) {
         return { success: true };
       }
-      const file = result.file;
       await gr.platformServices.storage.write(getFilePath(result.file), file.file, {
         chunkNumber: options.chunkNumber,
         encryptionAlgo: this.algorithm,

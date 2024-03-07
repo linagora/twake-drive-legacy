@@ -108,12 +108,9 @@ export class FileController {
 
   async checkFileS3Exists(
     request: FastifyRequest<{ Params: { company_id: string; id: string } }>,
-  ): Promise<{ exists: boolean }> {
+  ): Promise<{ isInS3: boolean }> {
     const params = request.params;
-
-    const result = await gr.services.files.checkFileExistsS3(params.id);
-
-    return result;
+    return await gr.services.files.checkFileExistsS3(params.id);
   }
 
   async restoreFileS3(

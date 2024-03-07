@@ -55,14 +55,14 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
 
   fastify.route({
     method: "GET",
-    url: `${filesUrl}/check/:id`,
+    url: "/S3/exist/:id",
     preValidation: [fastify.authenticate],
     handler: fileController.checkFileS3Exists.bind(fileController),
   });
 
   fastify.route({
     method: "POST",
-    url: `${filesUrl}/restore/:id`,
+    url: "/S3/restore/:id",
     preValidation: [fastify.authenticate],
     handler: fileController.restoreFileS3.bind(fileController),
   });
