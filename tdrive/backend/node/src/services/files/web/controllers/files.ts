@@ -105,6 +105,40 @@ export class FileController {
 
     return { status: deleteResult.deleted ? "success" : "error" };
   }
+
+  async checkFileS3Exists(
+    request: FastifyRequest<{ Params: { company_id: string; id: string } }>,
+  ): Promise<{ exists: boolean }> {
+    const params = request.params;
+
+    const result = await gr.services.files.checkFileExistsS3(params.id);
+
+    return result;
+  }
+
+  async restoreFileS3(
+    request: FastifyRequest<{
+      Params: { company_id: string; id: string };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Querystring: any;
+    }>,
+  ): Promise<{ resource: PublicFile }> {
+    const params = request.params;
+    let file: null | Multipart = null;
+    if (request.isMultipart()) {
+      file = await request.file();
+    }
+
+    const q = request.query;
+    const options: any = {
+      totalChunks: parseInt(q.resumableTotalChunks || q.total_chunks) || 1,
+      chunkNumber: parseInt(q.resumableChunkNumber || q.chunk_number) || 1,
+    };
+
+    const result = await gr.services.files.restoreFileS3(params.id, file, options);
+
+    return result;
+  }
 }
 
 function getCompanyExecutionContext(
