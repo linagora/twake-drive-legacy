@@ -161,6 +161,33 @@ export class TwakeDriveClient {
     }
   };
 
+  async uploadToS3(fPath: string, id: string) {
+    logger.info(`Upload to S3 ${fPath}`);
+    const client = await this.client();
+
+    const form = new FormData();
+    form.append('file', fs.createReadStream(fPath));
+
+    const response
+      = await client.post(`${this.config.url}/internal/services/files/S3/upload`, form);
+
+    logger.info(response.data);
+
+    return response.data?.resource;
+  }
+
+  async existsInS3(id: string): Promise<boolean> {
+    const client = await this.client();
+    const response
+      = await client.get(`${this.config.url}/internal/services/files/S3/exists`);
+    if (response.status != 200) {
+      logger.warn(`Error receiving S3 status for ${id}`);
+      logger.warn(response.data)
+      return true;
+    } else {
+      return response.data.isInS3;
+    }
+  }
 }
 
 export type TwakeDriveUser = {

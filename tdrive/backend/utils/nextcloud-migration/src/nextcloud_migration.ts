@@ -113,6 +113,7 @@ export class NextcloudMigration {
   async upload(user: TwakeDriveUser, sourceDirPath: string, parentDirId = "user_" + user.id) {
     const dirsToUpload: Map<string, string> = new Map<string, string>();
     const filesToUpload: string[] = [];
+    const existingFiles: string[] = [];
 
     const parent = await this.driveClient.getDocument(parentDirId);
 
@@ -126,6 +127,9 @@ export class NextcloudMigration {
       const stat = fs.statSync(filePath);
       if (exists(name)) {
         logger.info(`File ${name} already exists`);
+        //find document that we need to replace
+        existingFiles.push(filePath);
+        //skip
       } else {
         if (stat.isFile()) {
           logger.info(`Add file for future upload ${filePath}`);
@@ -136,6 +140,26 @@ export class NextcloudMigration {
         }
       }
     });
+    //check existing files
+    for (const fPath of existingFiles) {
+      logger.debug(`Check existing file ${fPath}`)
+      let name = path.parse(fPath).name;
+      let candidatesWithTheSameName = parent.children.filter(i => i.name.startsWith(name));
+      if (candidatesWithTheSameName.length > 1) {
+        logger.warn("WE HAVE MORE MORE THAN ONE FILE WITH NAME: " + name);
+      } else {
+        const doc = candidatesWithTheSameName[0];
+        //check that it exists in S3
+        if (await this.driveClient.existsInS3(doc.id)) {
+          logger.info(`File ${name}, docId = ${doc.id} exists in S3`);
+        } else {
+          //if it doesn't exists upload just one file
+          logger.info(`File ${name}, is missing, uploading files`);
+          await this.driveClient.uploadToS3(fPath, doc.id);
+        }
+      }
+    }
+
 
     //upload all files
     logger.debug(`UPLOAD FILES FOR  ${sourceDirPath}`)
