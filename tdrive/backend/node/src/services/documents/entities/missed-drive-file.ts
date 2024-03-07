@@ -63,7 +63,4 @@ export class MissedDriveFile {
   @Type(() => String)
   @Column("path", "string")
   path: string;
-
-
-
 }
