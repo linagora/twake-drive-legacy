@@ -402,8 +402,49 @@ export class FileServiceImpl {
     }
     return data;
   }
-}
 
+  async checkFileExistsS3(id: string): Promise<any> {
+    try {
+      const doc = await this.documentRepository.findOne({
+        id,
+        company_id: "00000000-0000-4000-0000-000000000000",
+      });
+      const externalId = doc.last_version_cache.file_metadata.external_id;
+      const file = await this.getFile({
+        id: externalId,
+        company_id: "00000000-0000-4000-0000-000000000000",
+      });
+      const exist = await gr.platformServices.storage.exists(getFilePath(file));
+      if (exist) {
+        return { exist: true, file };
+      } else {
+        return { exist: false, file };
+      }
+    } catch (error) {
+      logger.error(`Error while checking file ${id} in S3`, error);
+      return { exist: false, file: null };
+    }
+  }
+
+  async restoreFileS3(id: string, file: Multipart, options: UploadOptions): Promise<any> {
+    try {
+      const result = await this.checkFileExistsS3(id);
+      if (result.exist) {
+        return { success: true };
+      }
+      const file = result.file;
+      await gr.platformServices.storage.write(getFilePath(result.file), file.file, {
+        chunkNumber: options.chunkNumber,
+        encryptionAlgo: this.algorithm,
+        encryptionKey: result.file.encryption_key,
+      });
+      return { success: true };
+    } catch (error) {
+      logger.error(`Error while uploading missing file ${id} to S3`, error);
+      return { success: false };
+    }
+  }
+}
 function getFilePath(entity: File): string {
   return `${gr.platformServices.storage.getHomeDir()}/files/${entity.company_id}/${
     entity.user_id || "anonymous"

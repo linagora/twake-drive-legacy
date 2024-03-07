@@ -53,6 +53,20 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     handler: fileController.checkConsistency.bind(fileController),
   });
 
+  fastify.route({
+    method: "GET",
+    url: `${filesUrl}/check/:id`,
+    preValidation: [fastify.authenticate],
+    handler: fileController.checkFileS3Exists.bind(fileController),
+  });
+
+  fastify.route({
+    method: "POST",
+    url: `${filesUrl}/restore/:id`,
+    preValidation: [fastify.authenticate],
+    handler: fileController.restoreFileS3.bind(fileController),
+  });
+
   next();
 };
 
