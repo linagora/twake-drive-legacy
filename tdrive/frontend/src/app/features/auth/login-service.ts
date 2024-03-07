@@ -194,7 +194,9 @@ class Login extends Observable {
         }
         await this.updateUser();
       } catch (err) {
-        throw Error('Can not login');
+        this.login_loading = false;
+        this.login_error = true;
+        this.notify();
       } finally {
         this.logger.debug('Login process finished');
         Login.logInOngoing = false;
