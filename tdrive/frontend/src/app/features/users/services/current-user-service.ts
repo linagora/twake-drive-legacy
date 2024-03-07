@@ -46,15 +46,17 @@ class User {
     if (!name) {
       return 'Anonymous';
     }
+    // @author https://stackoverflow.com/a/17200679
+    const toNameCase = (str?: string) => (str || '').toLowerCase().replace(/(?<!\p{L})\p{L}(?=\p{L}{2})/gu, (m: string) => m.toUpperCase());
 
     if (user.deleted) {
       name = Languages.t('general.user.deleted');
     } else {
-      name = [user.first_name, user.last_name].filter(a => a).join(' ');
+      name = [user.first_name, user.last_name].filter(a => a).map(toNameCase).join(' ');
       name = name || user.username;
     }
 
-    return name.charAt(0).toUpperCase() + name.slice(1);
+    return name;
   }
 
   getThumbnail(user: UserType) {
