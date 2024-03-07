@@ -24,6 +24,12 @@
         background: #FFFFFF;
       }
 
+      @media (prefers-color-scheme: dark) {
+        body, #root {
+          background: #2e3440; /* From tdrive/frontend/public/index.html - var(--nord0); */
+        }
+      }
+
       #root {
         z-index: 0;
       }
