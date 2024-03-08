@@ -429,7 +429,7 @@ export class FileServiceImpl {
         id: externalId,
         company_id: "00000000-0000-4000-0000-000000000000",
       });
-      const exist = await gr.platformServices.storage.exists(getFilePath(file));
+      const exist = await gr.platformServices.storage.exists(getFilePath(file) + "/chunk/1");
       if (exist) {
         return { exist: true, file };
       } else {
