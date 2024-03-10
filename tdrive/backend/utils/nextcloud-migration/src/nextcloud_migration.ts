@@ -42,8 +42,9 @@ export class NextcloudMigration {
     this.driveClient = new TwakeDriveClient(this.config.drive);
   }
 
-  async migrate(username: string, password: string) {
-    const dir = this.createTmpDir(username);
+  async migrate(username: string, password: string, dir?: string) {
+    const dirTmp = dir ? dir : this.createTmpDir(username);
+    if (dir) console.log(`Using dir: ${dir}`);
     // const dir = "/tmp/to_upload"
     try {
       const user = await this.getLDAPUser(username);
@@ -51,14 +52,14 @@ export class NextcloudMigration {
       const driveUser = await this.driveClient.createUser(user);
       console.log(`Drive user ${driveUser.id} created`);
       //download all files from nextcloud to tmp dir
-      await this.download(username, password, dir);
+      if(!dir) await this.download(username, password, dirTmp);
       //upload files to the Twake Drive
-      await this.upload(driveUser, dir);
+      await this.upload(driveUser, dirTmp);
     } catch (e) {
       console.error('Error downloading files from next cloud', e);
       throw e;
     } finally {
-      this.deleteDir(dir);
+      if(!dir) this.deleteDir(dirTmp);
     }
   }
 

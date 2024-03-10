@@ -60,7 +60,7 @@ app.post("/", async (req: Request, res: Response) => {
     res.status(400).send("Username and password for nextcloud are required");
   }
   try {
-    await nextcloud.migrate(params.username, params.password);
+    await nextcloud.migrate(params.username, params.password, params.dir);
     res.status(200).send("Sync DONE ✅");
   } catch (e) {
     console.error(e)
