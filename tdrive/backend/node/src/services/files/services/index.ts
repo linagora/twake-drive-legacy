@@ -362,7 +362,9 @@ export class FileServiceImpl {
                     id: version.file_metadata.external_id,
                     company_id: "00000000-0000-4000-0000-000000000000",
                   });
-                  const exist = await gr.platformServices.storage.exists(getFilePath(file));
+                  const exist = await gr.platformServices.storage.exists(
+                    getFilePath(file) + "/chunk1",
+                  );
                   if (exist) {
                     logger.info(`File ${version.file_metadata.external_id} exists in S3`);
                   } else {
