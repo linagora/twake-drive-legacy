@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { spawnSync } from 'child_process';
 // @ts-ignore
 import fs from 'fs';
 import { ShellLdapUserProvider } from './shell_ldap_user';
@@ -64,23 +64,22 @@ export class NextcloudMigration {
 
   async download(username: string, password: string, dir: string) {
     return new Promise((resolve, reject) => {
-      let cmd = `nextcloudcmd -s --non-interactive -u '${username}' -p '${password}' ${dir} ${this.config.nextcloudUrl}`;
+      let args = [ '-s', '--non-interactive', '-u', username, '-p', password, dir, this.config.nextcloudUrl];
       console.log('Start downloading data from Nextcloud');
-      exec(cmd, (error, stdout, stderr) => {
-        if (stderr) {
-          console.log('ERROR: ' + stderr);
-        }
-        if (stdout) {
-          console.log('OUT: ' + stdout);
-        }
-        if (error) {
-          console.log(`ERROR running sync for the user: ${error.message}`);
-          reject(error.message);
-        } else {
-          console.log('Download finished');
-          resolve('');
-        }
-      });
+      const ret = spawnSync('nextcloudcmd', args);
+      if (ret.stderr) {
+        console.log('ERROR:', ret.stderr.toString());
+      }
+      if (ret.stdout) {
+        console.log('OUT: ', ret.stdout.toString());
+      }
+      if (ret.error) {
+        console.log(`ERROR running sync for the user: ${ret.error.message}`);
+        reject(ret.error.message);
+      } else {
+        console.log('Download finished');
+        resolve('');
+      }
     });
   }
 
