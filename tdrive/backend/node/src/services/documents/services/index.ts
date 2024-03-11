@@ -920,6 +920,10 @@ export class DocumentsService {
       zlib: { level: 9 },
     });
 
+    archive.on('error', error => {
+      this.logger.error("error while creating ZIP file: ", error);
+    });
+
     for (const id of ids) {
       if (!(await checkAccess(id, null, "read", this.repository, context))) {
         this.logger.warn(`not enough permissions to download ${id}, skipping`);
