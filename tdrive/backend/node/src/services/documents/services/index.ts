@@ -938,7 +938,8 @@ export class DocumentsService {
       }
     }
 
-    await archive.finalize();
+    //TODO[ASH] why do we need this call??
+    archive.finalize();
 
     return archive;
   };
