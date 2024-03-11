@@ -920,7 +920,7 @@ export class DocumentsService {
       zlib: { level: 9 },
     });
 
-    archive.on('error', error => {
+    archive.on("error", error => {
       this.logger.error("error while creating ZIP file: ", error);
     });
 
