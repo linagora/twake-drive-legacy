@@ -48,17 +48,24 @@ export const useDriveActions = () => {
 
   const create = useCallback(
     async (item: Partial<DriveItem>, version: Partial<DriveItemVersion>) => {
-      if (!item || !version) throw new Error("All ");
-      let driveFile = null;
+      if (!item || !version) throw new Error('All ');
       if (!item.company_id) item.company_id = companyId;
+
       try {
-        driveFile = await DriveApiClient.create(companyId, { item, version });
-        await refresh(driveFile.parent_id!);
+        const driveFile = await DriveApiClient.create(companyId, { item, version });
+
+        await refresh(driveFile.parent_id);
         await getQuota();
-      } catch (e) {
-        ToasterService.error(Languages.t('hooks.use-drive-actions.unable_create_file'));
+
+        return driveFile;
+      } catch (e: any) {
+        if (e.statusCode === 403) {
+          ToasterService.error(Languages.t('hooks.use-drive-actions.quota_limit_exceeded'));
+        } else {
+          ToasterService.error(Languages.t('hooks.use-drive-actions.unable_create_file'));
+        }
+        return null;
       }
-      return driveFile;
     },
     [refresh],
   );

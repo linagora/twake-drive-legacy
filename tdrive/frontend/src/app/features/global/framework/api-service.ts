@@ -151,7 +151,7 @@ export default class Api {
       requestType?: 'post' | 'get' | 'put' | 'delete';
     } = {},
   ): Promise<Response> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       Requests.request(
         options.requestType ? options.requestType : 'post',
         new URL(route, Globals.api_root_url).toString(),

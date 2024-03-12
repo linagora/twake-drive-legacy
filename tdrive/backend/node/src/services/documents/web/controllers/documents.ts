@@ -50,7 +50,7 @@ export class DocumentsController {
         version: Partial<FileVersion>;
       };
     }>,
-  ): Promise<DriveFile> => {
+  ): Promise<DriveFile | any> => {
     try {
       const context = getDriveExecutionContext(request);
 
@@ -80,7 +80,12 @@ export class DocumentsController {
         context,
       );
     } catch (error) {
+      console.log("🚀 ", JSON.stringify(error));
       logger.error({ error: `${error}` }, "Failed to create Drive item");
+      // if error code is 403, it means the user exceeded the quota limit
+      if (error.code === 403) {
+        throw new CrudException("Quota limit exceeded", 403);
+      }
       CrudException.throwMe(error, new CrudException("Failed to create Drive item", 500));
     }
   };

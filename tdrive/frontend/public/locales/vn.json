@@ -234,6 +234,7 @@
     "compenents.VersionModalContent_donwload": "Tải xuống",
     "hooks.use-drive-actions.unable_load_file": "Không thể tải tệp của bạn.",
     "hooks.use-drive-actions.unable_create_file": "Không thể tạo tệp mới.",
+    "hooks.use-drive-actions.quota_limit_exceeded":"Quota đã vượt quá.",
     "hooks.use-drive-actions.unable_download_file": "Không thể tải xuống các tệp này.",
     "hooks.use-drive-actions.unable_remove_file": "Không thể xóa tệp này.",
     "hooks.use-drive-actions.unable_restore_file": "Không thể khôi phục mục này.",

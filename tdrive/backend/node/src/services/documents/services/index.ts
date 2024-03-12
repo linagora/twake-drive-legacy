@@ -295,6 +295,7 @@ export class DocumentsService {
     context: DriveExecutionContext,
   ): Promise<DriveFile> => {
     try {
+      const leftQuota = await this.userQuota(context);
       const driveItem = getDefaultDriveItem(content, context);
       const driveItemVersion = getDefaultDriveItemVersion(version, context);
       driveItem.scope = await getItemScope(driveItem, this.repository, context);
@@ -328,6 +329,11 @@ export class DocumentsService {
         }
 
         if (fileToProcess) {
+          if (fileToProcess.upload_data.size < leftQuota) {
+            // clean up everything
+            await globalResolver.services.files.delete(fileToProcess.id, context);
+            throw new CrudException("Not enough space", 403);
+          }
           driveItem.size = fileToProcess.upload_data.size;
           driveItem.is_directory = false;
           driveItem.extension = fileToProcess.metadata.name.split(".").pop();
@@ -413,6 +419,7 @@ export class DocumentsService {
 
       return driveItem;
     } catch (error) {
+      console.log("🚀🚀 error:", error);
       this.logger.error({ error: `${error}` }, "Failed to create drive item");
       CrudException.throwMe(error, new CrudException("Failed to create item", 500));
     }

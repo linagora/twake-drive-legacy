@@ -218,6 +218,7 @@
     "compenents.VersionModalContent_donwload": "Télécharger",
     "hooks.use-drive-actions.unable_load_file": "Impossible de charger cet élément",
     "hooks.use-drive-actions.unable_create_file": "Impossible de créer ce fichier",
+    "hooks.use-drive-actions.quota_limit_exceeded":"Limite de quota dépassée.",
     "hooks.use-drive-actions.unable_download_file": "Impossible de télécharger ce fichier",
     "hooks.use-drive-actions.unable_remove_file": "Impossible de supprimer ce fichier",
     "hooks.use-drive-actions.unable_restore_file": "Impossible de restaurer cet élément.",

@@ -218,6 +218,7 @@
     "compenents.VersionModalContent_donwload":"Download",
     "hooks.use-drive-actions.unable_load_file":"Unable to load your files.",
     "hooks.use-drive-actions.unable_create_file":"Unable to create a new file.",
+    "hooks.use-drive-actions.quota_limit_exceeded":"Квота исчерпана.",
     "hooks.use-drive-actions.unable_download_file":"Unable to download this files.",
     "hooks.use-drive-actions.unable_remove_file":"Unable to remove this file.",
     "hooks.use-drive-actions.unable_restore_file":"Unable to restore this item.",
