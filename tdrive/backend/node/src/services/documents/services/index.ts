@@ -329,7 +329,7 @@ export class DocumentsService {
         }
 
         if (fileToProcess) {
-          if (fileToProcess.upload_data.size < leftQuota) {
+          if (fileToProcess.upload_data.size > leftQuota) {
             // clean up everything
             await globalResolver.services.files.delete(fileToProcess.id, context);
             throw new CrudException("Not enough space", 403);
