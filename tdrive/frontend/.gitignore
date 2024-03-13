@@ -7,6 +7,7 @@
 # testing
 /coverage
 /src/app/environment/environment.ts
+/src/app/environment/version.ts
 /src/app/environment/*-e
 
 # misc

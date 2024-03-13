@@ -1,5 +1,8 @@
 {
   "general": {
+    "version": {
+      "current": "TWAKE_DRIVE_VERSION"
+    },
     "accounts": {
       "type": "ACCOUNTS_TYPE",
       "remote": {

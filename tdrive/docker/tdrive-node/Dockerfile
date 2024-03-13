@@ -21,6 +21,10 @@ COPY backend/node/ .
 # Add frontend Stage
 FROM node-base as installed-libs
 
+ARG VERSION
+ENV TWAKE_DRIVE_VERSION=$VERSION
+RUN echo "Set application version to $TWAKE_DRIVE_VERSION"
+
 COPY backend/node/ .
 #Install dev dependancies for build
 RUN export NODE_ENV=development

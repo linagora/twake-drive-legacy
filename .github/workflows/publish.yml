@@ -80,7 +80,7 @@ jobs:
         uses: docker/bake-action@v4
         with:
           files: |
-            ./docker-bake.hcl
+            ./tdrive/docker/docker-bake.hcl
             ${{ steps.meta.outputs.bake-file-annotations }}
             ${{ steps.meta.outputs.bake-file }}
           push: true

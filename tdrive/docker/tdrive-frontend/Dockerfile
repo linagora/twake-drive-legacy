@@ -1,6 +1,10 @@
 # First stage: building frontend
 FROM node:lts AS build
 
+ARG VERSION
+ENV TWAKE_DRIVE_VERSION=$VERSION
+RUN echo "Set application version to $TWAKE_DRIVE_VERSION"
+
 RUN yarn global add webpack webpack-cli
 COPY frontend /tdrive-react/
 

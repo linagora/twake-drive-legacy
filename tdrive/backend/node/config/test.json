@@ -1,4 +1,7 @@
 {
+  "version": {
+    "current": "1.0.1"
+  },
   "database": {
     "secret": "",
     "mongodb": {

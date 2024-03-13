@@ -3,12 +3,19 @@ function "generate_tags" {
   result = formatlist("%s:%s", image, tags)
 }
 
-target "docker-metadata-action" {}
+variable "GITHUB_REF_NAME" {
+  default = "$GITHUB_REF_NAME"
+}
+
+target "docker-metadata-action" { tags = ["latest"] }
 
 target "_common" {
   platforms = ["linux/amd64", "linux/arm64"]
   context = "tdrive"
   inherits = ["docker-metadata-action"]
+  args = {
+    VERSION = "$GITHUB_REF_NAME"
+  }
 }
 
 target "backend" {

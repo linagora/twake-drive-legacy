@@ -1,5 +1,8 @@
 {
   "general": {
+    "version": {
+      "current": "1.0.1"
+    },
     "help_url": false,
     "pricing_plan_url": "",
     "app_download_url": "https://twake.app/download",
