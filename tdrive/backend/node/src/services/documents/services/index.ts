@@ -60,7 +60,7 @@ import {
   RealtimeEntityActionType,
   ResourcePath,
 } from "../../../core/platform/services/realtime/types";
-
+import { Configuration } from "../../../core/platform/framework";
 export class DocumentsService {
   version: "1";
   repository: Repository<DriveFile>;
@@ -69,6 +69,9 @@ export class DocumentsService {
   driveTdriveTabRepository: Repository<DriveTdriveTabEntity>;
   ROOT: RootType = "root";
   TRASH: TrashType = "trash";
+  CONFIG = new Configuration("drive");
+  QUOTA_ENABLED: boolean = this.CONFIG.get<boolean>("featureUserQuota") || false;
+  QUOTA: number = this.CONFIG.get<number>("defaultUserQuota") || 0;
   logger: TdriveLogger = getLogger("Documents Service");
 
   async init(): Promise<this> {
@@ -295,7 +298,8 @@ export class DocumentsService {
     context: DriveExecutionContext,
   ): Promise<DriveFile> => {
     try {
-      const leftQuota = await this.userQuota(context);
+      const userQuota = await this.userQuota(context);
+      const leftQuota = this.QUOTA_ENABLED ? this.QUOTA - userQuota : 0;
       const driveItem = getDefaultDriveItem(content, context);
       const driveItemVersion = getDefaultDriveItemVersion(version, context);
       driveItem.scope = await getItemScope(driveItem, this.repository, context);
@@ -329,10 +333,13 @@ export class DocumentsService {
         }
 
         if (fileToProcess) {
-          if (fileToProcess.upload_data.size > leftQuota) {
+          if (this.QUOTA_ENABLED && fileToProcess.upload_data.size > leftQuota) {
             // clean up everything
             await globalResolver.services.files.delete(fileToProcess.id, context);
-            throw new CrudException("Not enough space", 403);
+            throw new CrudException(
+              `Not enough space: ${fileToProcess.upload_data.size}, ${leftQuota}.`,
+              403,
+            );
           }
           driveItem.size = fileToProcess.upload_data.size;
           driveItem.is_directory = false;
