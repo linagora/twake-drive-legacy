@@ -14,6 +14,7 @@ export default ({ className }: { className?: string }): JSX.Element => {
   return (
     <Menu
       position="bottom"
+      toggle="true"
       menu={[
         {
           type: 'react-element',
