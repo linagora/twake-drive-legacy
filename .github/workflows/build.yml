@@ -60,6 +60,11 @@ jobs:
           cd tdrive
           docker-compose -f docker-compose.tests.yml run --rm -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb -e PUBSUB_TYPE=local node npm run test:all
           docker-compose -f docker-compose.tests.yml down
+      - name: e2e-mongo-minio-test
+        run: |
+          cd tdrive
+          docker-compose -f docker-compose.tests.minio.yml run --rm -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb -e PUBSUB_TYPE=local node npm run test:all
+          docker-compose -f docker-compose.tests.minio.yml down
       - name: e2e-opensearch-test
         run: |
           cd tdrive
