@@ -1,12 +1,36 @@
 import { describe, beforeEach, it, expect, afterAll } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
+import config from "config";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+jest.mock("config");
 
 describe("the Drive feature", () => {
   let platform: TestPlatform;
   let currentUser: UserApi;
+  let configHasSpy: jest.SpyInstance;
+  let configGetSpy: jest.SpyInstance;
 
   beforeEach(async () => {
+    configHasSpy = jest.spyOn(config, "has");
+    configGetSpy = jest.spyOn(config, "get");
+
+    configHasSpy.mockImplementation((setting: string) => {
+      const value = jest.requireActual("config").has(setting);
+      return value;
+    });
+    configGetSpy.mockImplementation((setting: string) => {
+      if (setting === "drive.featureUserQuota") {
+        return true;
+      }
+      if (setting === "drive.defaultUserQuota") {
+        return 2000000;
+      }
+      const value = jest.requireActual("config").get(setting);
+      return value;
+    });
     platform = await init({
       services: [
         "webserver",
@@ -35,6 +59,7 @@ describe("the Drive feature", () => {
   afterAll(async () => {
     await platform?.tearDown();
     platform = null;
+    configGetSpy.mockRestore();
   });
 
   it("did create the drive item with size under quota", async () => {

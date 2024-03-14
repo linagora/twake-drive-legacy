@@ -24,7 +24,6 @@
     "test:local": "jest --forceExit --detectOpenHandles --runInBand mock.spec.ts",
     "test:watch": "npm run test -- --watchAll --verbose false | pino-pretty",
     "test:e2e": "node ./test/e2e/run-all.js",
-    "test:e2e:quota" : "jest --forceExit --detectOpenHandles --maxWorkers=1 --testTimeout=30000000 --colors --verbose --runTestsByPath ./test/e2e/documents/documents-quota.spec.ts",
     "test:unit": "jest test/unit --forceExit --coverage --detectOpenHandles --maxWorkers=1 --testTimeout=30000 --verbose false > coverage/coverage-report.txt",
     "test:unit:watch": "npm run test:unit -- --watchAll --verbose false | pino-pretty",
     "test:merge:json": "npx istanbul report --dir coverage/merged --include 'coverage/**/coverage-final.json' json-summary",
