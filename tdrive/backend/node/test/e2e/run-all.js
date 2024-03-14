@@ -72,6 +72,11 @@ srcFiles = srcFiles.filter(p => p.indexOf(".spec.ts") >= 0 || p.indexOf(".test.t
 
   for (const path of localDevTests || srcFiles) {
     const test = path.split("test/e2e/")[1];
+    // skip the test if it's quota a quota test, it will be run separately
+    if (test.includes("quota")) {
+      console.log(`Skipping ${test}`);
+      continue;
+    }
     const testName = `test/e2e/${test}`;
     const args = `${testName} --forceExit --detectOpenHandles --coverage --coverageDirectory=coverage/e2e/${test} --runInBand --testTimeout=60000 --verbose=true`;
 
