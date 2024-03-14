@@ -3,16 +3,20 @@
 ## Features
 
 - New Version Semantics
-- Usage quota settings
-- PostgreSQL support as a metadata database
+- Usage quota settings 
+- PostgreSQL support as a metadata database 
 - OpenSearch support as a search database
 - New API to check file storage consistency
 - UX improvements
-    - Remove the switcher from breadcrumbs
+  - Remove the switcher from breadcrumbs
+  - Improved translations
+- Be able to use SMTP transport without TLS
+- Do not display deleted items in the shared with me section
 
 ## BugFixes
 - Fix preview of the files on mobile and web
--  Malformed URL when you share a file
+- Malformed URL when you share a file
+- ...
 
 # Twake Drive v2023.Q3.012
 
