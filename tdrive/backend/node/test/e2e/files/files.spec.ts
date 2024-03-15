@@ -3,10 +3,8 @@ import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import fs from "fs";
-import LocalConnectorService from "../../../src/core/platform/services/storage/connectors/local/service";
+import S3ConnectorService from "../../../src/core/platform/services/storage/connectors/S3/s3-service";
 import UserApi from "../common/user-api";
-
 
 describe("The Files feature", () => {
   const url = "/internal/services/files/v1";
@@ -17,14 +15,17 @@ describe("The Files feature", () => {
     platform = await init({
       services: ["webserver", "database", "storage", "files", "previews"],
     });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     await platform.database.getConnector().init();
-    helpers = await UserApi.getInstance(platform)
+    helpers = await UserApi.getInstance(platform);
   });
 
   afterAll(async () => {
     await platform?.tearDown();
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     platform = null;
-    
   });
 
   describe("On user send files", () => {
@@ -35,9 +36,7 @@ describe("The Files feature", () => {
       const filesUpload = await helpers.uploadRandomFile();
       expect(filesUpload.id).toBeTruthy();
       //clean files directory
-      expect(platform.storage.getConnector()).toBeInstanceOf(LocalConnectorService)
-      const path = (<LocalConnectorService>platform.storage.getConnector()).configuration.path;
-      fs.readdirSync(path).forEach(f => fs.rmSync(`${path}/${f}`, {recursive: true, force: true}));
+      expect(platform.storage.getConnector()).toBeInstanceOf(S3ConnectorService);
       //when try to download the file
       const fileDownloadResponse = await platform.app.inject({
         method: "GET",
@@ -46,15 +45,14 @@ describe("The Files feature", () => {
       //then file should be not found with 404 error and "File not found message"
       expect(fileDownloadResponse).toBeTruthy();
       expect(fileDownloadResponse.statusCode).toBe(500);
-
     }, 120000);
 
     it("Download file should return 200 if file exists", async () => {
       //given file
-      const filesUpload = await helpers.uploadRandomFile()
+      const filesUpload = await helpers.uploadRandomFile();
       expect(filesUpload.id).toBeTruthy();
       //clean files directory
-      expect(platform.storage.getConnector()).toBeInstanceOf(LocalConnectorService)
+      expect(platform.storage.getConnector()).toBeInstanceOf(S3ConnectorService);
 
       //when try to download the file
       const fileDownloadResponse = await platform.app.inject({
@@ -64,7 +62,6 @@ describe("The Files feature", () => {
       //then file should be not found with 404 error and "File not found message"
       expect(fileDownloadResponse).toBeTruthy();
       expect(fileDownloadResponse.statusCode).toBe(200);
-
     }, 120000);
 
     it.skip("should save file and generate previews", async () => {
@@ -79,16 +76,13 @@ describe("The Files feature", () => {
 
         for (const thumb of filesUpload.thumbnails) {
           const thumbnails = await platform.app.inject({
-            headers: {"authorization": `Bearer ${await platform.auth.getJWTToken()}`},
+            headers: { authorization: `Bearer ${await platform.auth.getJWTToken()}` },
             method: "GET",
             url: `${url}/companies/${platform.workspace.company_id}/files/${filesUpload.id}/thumbnails/${thumb.index}`,
           });
           expect(thumbnails.statusCode).toBe(200);
         }
       }
-
-      
     }, 1200000);
   });
 });
-
