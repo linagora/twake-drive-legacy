@@ -35,8 +35,9 @@ describe("The Files feature", () => {
       //given file
       const filesUpload = await helpers.uploadRandomFile();
       expect(filesUpload.id).toBeTruthy();
-      //clean files directory
       expect(platform.storage.getConnector()).toBeInstanceOf(S3ConnectorService);
+      const path = `tdrive/files/${platform.workspace.company_id}/${platform.currentUser.id}/${filesUpload.id}`;
+      await platform.storage.getConnector().remove(path);
       //when try to download the file
       const fileDownloadResponse = await platform.app.inject({
         method: "GET",
