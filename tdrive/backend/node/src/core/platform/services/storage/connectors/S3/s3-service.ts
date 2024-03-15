@@ -46,6 +46,7 @@ export default class S3ConnectorService implements StorageConnectorAPI {
     let err = null;
     for (let i = 0; i <= tries; i++) {
       try {
+        console.log("🚀🚀 reading s3 object: ", path);
         const stat = await this.client.statObject(this.minioConfiguration.bucket, path);
         if (stat?.size > 0) {
           break;
