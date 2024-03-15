@@ -1,9 +1,7 @@
 import "reflect-metadata";
 import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import S3ConnectorService from "../../../src/core/platform/services/storage/connectors/S3/s3-service";
+import { getFilePath } from "../../../src/services/files/services";
 import UserApi from "../common/user-api";
 
 describe("The Files feature", () => {
@@ -33,15 +31,15 @@ describe("The Files feature", () => {
 
     it("Download file should return 500 if file doesn't exists", async () => {
       //given file
-      const filesUpload = await helpers.uploadRandomFile();
-      expect(filesUpload.id).toBeTruthy();
+      const fileUpload = await helpers.uploadRandomFile();
+      expect(fileUpload.id).toBeTruthy();
       // expect(platform.storage.getConnector()).toBeInstanceOf(S3ConnectorService);
-      const path = `tdrive/files/${platform.workspace.company_id}/${platform.currentUser.id}/${filesUpload.id}/chunk1`;
+      const path = `${getFilePath(fileUpload)}/chunk1`;
       await platform.storage.getConnector().remove(path);
       //when try to download the file
       const fileDownloadResponse = await platform.app.inject({
         method: "GET",
-        url: `${url}/companies/${platform.workspace.company_id}/files/${filesUpload.id}/download`,
+        url: `${url}/companies/${platform.workspace.company_id}/files/${fileUpload.id}/download`,
       });
       //then file should be not found with 404 error and "File not found message"
       expect(fileDownloadResponse).toBeTruthy();
