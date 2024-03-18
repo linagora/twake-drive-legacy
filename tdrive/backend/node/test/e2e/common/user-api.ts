@@ -233,8 +233,14 @@ export default class UserApi {
   };
 
   async createDocumentFromFilename(
-    file_name: "sample.png",
-    parent_id = "root"
+    file_name:
+      | "sample.png"
+      | "sample.doc"
+      | "sample.pdf"
+      | "sample.zip"
+      | "sample.mp4"
+      | "sample.gif",
+    parent_id = "root",
   ) {
     const file = await this.uploadFile(file_name);
 

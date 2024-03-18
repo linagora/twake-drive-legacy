@@ -301,8 +301,6 @@ export class DocumentsService {
     context: DriveExecutionContext,
   ): Promise<DriveFile> => {
     try {
-      const userQuota = await this.userQuota(context);
-      const leftQuota = this.quotaEnabled ? this.defaultQuota - userQuota : 0;
       const driveItem = getDefaultDriveItem(content, context);
       const driveItemVersion = getDefaultDriveItemVersion(version, context);
       driveItem.scope = await getItemScope(driveItem, this.repository, context);
@@ -336,13 +334,18 @@ export class DocumentsService {
         }
 
         if (fileToProcess) {
-          if (this.quotaEnabled && fileToProcess.upload_data.size > leftQuota) {
-            // clean up everything
-            await globalResolver.services.files.delete(fileToProcess.id, context);
-            throw new CrudException(
-              `Not enough space: ${fileToProcess.upload_data.size}, ${leftQuota}.`,
-              403,
-            );
+          if (this.quotaEnabled) {
+            const userQuota = await this.userQuota(context);
+            const leftQuota = this.defaultQuota - userQuota;
+
+            if (fileToProcess.upload_data.size > leftQuota) {
+              // clean up everything
+              await globalResolver.services.files.delete(fileToProcess.id, context);
+              throw new CrudException(
+                `Not enough space: ${fileToProcess.upload_data.size}, ${leftQuota}.`,
+                403,
+              );
+            }
           }
           driveItem.size = fileToProcess.upload_data.size;
           driveItem.is_directory = false;

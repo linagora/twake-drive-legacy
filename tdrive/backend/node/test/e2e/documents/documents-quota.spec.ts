@@ -1,7 +1,11 @@
-import { afterAll, beforeEach, describe, expect, it } from "@jest/globals";
+import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 import config from "config";
+import { e2e_createDocumentFile, e2e_createVersion } from "./utils";
+import { deserialize } from "class-transformer";
+import { ResourceUpdateResponse } from "../../../src/utils/types";
+import { DriveItemDetailsMockClass } from "../common/entities/mock_entities";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -77,6 +81,23 @@ describe("the Drive feature", () => {
     //TODO[ASH] check that the file was deleted
   });
 
-  //TODO[ASH] test with creation of a new files version
+  it("did create a version for a drive item", async () => {
+    const item = await currentUser.createDefaultDocument();
+    const fileUploadResponse = await e2e_createDocumentFile(platform);
+    const fileUploadResult = deserialize<ResourceUpdateResponse<File>>(
+      ResourceUpdateResponse,
+      fileUploadResponse.body,
+    );
 
+    const file_metadata = { external_id: fileUploadResult.resource.id };
+
+    const result: any = await e2e_createVersion(platform, item.id, {
+      filename: "file2",
+      file_metadata,
+    });
+    expect(result).toBeDefined();
+    expect(result.statusCode).toBe(403);
+    expect(result.error).toBe("Forbidden");
+    expect(result.message).toContain("Not enough space");
+  });
 });
