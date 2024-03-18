@@ -15,10 +15,12 @@ export default ({
   path: livePath,
   inTrash,
   setParentId,
+  inPublicSharing,
 }: {
   path: DriveItem[];
   inTrash?: boolean;
   setParentId: (id: string) => void;
+  inPublicSharing?: boolean;
 }) => {
   const [savedPath, setSavedPath] = useState<DriveItem[]>([]);
   const history = useHistory();
@@ -40,8 +42,7 @@ export default ({
             dirId,
           }),
         );
-        console.log("viewId changed now setting the parentId")
-        // setParentId(dirId ? dirId : viewId);
+        if (inPublicSharing) return setParentId(dirId ? dirId : viewId);
       }}
     />
   );

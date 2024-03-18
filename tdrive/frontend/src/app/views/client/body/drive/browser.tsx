@@ -346,7 +346,7 @@ export default memo(
                     </div>
                   </div>
                 ) : (
-                  <HeaderPath path={path || []} inTrash={inTrash} setParentId={setParentId} />
+                  <HeaderPath path={path || []} inTrash={inTrash} setParentId={setParentId} inPublicSharing={inPublicSharing} />
                 )}
                 <div className="grow" />
 
@@ -391,7 +391,7 @@ export default memo(
                             onClick={() => {
                               const route = RouterServices.generateRouteFromState({dirId: child.id});
                               history.push(route);
-                              //return setParentId(child.id);
+                              if (inPublicSharing) return setParentId(child.id);
                             }}
                             checked={checked[child.id] || false}
                             onCheck={v =>
