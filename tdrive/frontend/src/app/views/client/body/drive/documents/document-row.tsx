@@ -32,6 +32,7 @@ export const DocumentRow = ({
   checked,
   onClick,
   onBuildContextMenu,
+  inPublicSharing,
 }: DriveItemProps) => {
   const history = useHistory();
   const [hover, setHover] = useState(false);
@@ -59,6 +60,7 @@ export const DocumentRow = ({
 
   const preview = () => {
     history.push(RouterServices.generateRouteFromState({companyId: company, itemId: item.id}));
+    if (inPublicSharing) open(item);
   };
 
   return (

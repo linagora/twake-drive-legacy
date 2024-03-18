@@ -217,6 +217,7 @@ export default memo(
         onCheck: (v: boolean) =>
             setChecked(_.pickBy({ ...checked, [child.id]: v }, _.identity)),
         onBuildContextMenu: () => onBuildContextMenu(details, child),
+        inPublicSharing,
       };
       return (
           isMobile ? (
