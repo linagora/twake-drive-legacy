@@ -390,7 +390,6 @@ export default memo(
                             item={child}
                             onClick={() => {
                               const route = RouterServices.generateRouteFromState({dirId: child.id});
-                              console.log('click folder row: ', route);
                               history.push(route);
                               if (inPublicSharing) return setParentId(child.id);
                             }}
