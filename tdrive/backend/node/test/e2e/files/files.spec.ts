@@ -1,8 +1,10 @@
 import "reflect-metadata";
-import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
+import { afterAll, beforeAll, afterEach, describe, expect, it } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import { getFilePath } from "../../../src/services/files/services";
 import UserApi from "../common/user-api";
+import LocalConnectorService from "../../../src/core/platform/services/storage/connectors/local/service"
+import { Client as MinioClient } from "minio"
 
 describe("The Files feature", () => {
   const url = "/internal/services/files/v1";
@@ -17,6 +19,10 @@ describe("The Files feature", () => {
     // @ts-ignore
     await platform.database.getConnector().init();
     helpers = await UserApi.getInstance(platform);
+  });
+
+  afterEach(async () => {
+    jest.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -44,6 +50,19 @@ describe("The Files feature", () => {
       //then file should be not found with 404 error and "File not found message"
       expect(fileDownloadResponse).toBeTruthy();
       expect(fileDownloadResponse.statusCode).toBe(500);
+    }, 120000);
+
+    it("should fail an upload POST when the backend storage fails", async () => {
+      const thrower = () => {
+        throw new Error("<Mock error done on purpose on upload to storage (for the E2E test)>");
+      };
+      const writeS3Mock = jest.spyOn(MinioClient.prototype, "putObject").mockImplementation(thrower);
+      const writeLocalMock = jest.spyOn(LocalConnectorService.prototype, "write").mockImplementation(thrower);
+      // const writeMock = jest.spyOn(platform.storage, "write").mockImplementation(thrower)
+      const response = await helpers.injectUploadRequest("dummy");
+      expect(response).toBeTruthy();
+      expect(response.statusCode).toBe(500);
+      expect(writeS3Mock.mock.calls.length + writeLocalMock.mock.calls.length).toEqual(1);
     }, 120000);
 
     it("Download file should return 200 if file exists", async () => {
