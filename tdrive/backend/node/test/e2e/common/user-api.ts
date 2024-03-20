@@ -1,5 +1,6 @@
 // @ts-ignore
 import fs from "fs";
+import { Readable } from 'stream';
 import { ResourceUpdateResponse, Workspace } from "../../../src/utils/types";
 import { File } from "../../../src/services/files/entities/file";
 import { deserialize } from "class-transformer";
@@ -79,18 +80,31 @@ export default class UserApi {
     return await this.uploadFile(UserApi.ALL_FILES[Math.floor((Math.random() * UserApi.ALL_FILES.length))]);
   }
 
-  async uploadFile(filename: string) {
-    logger.info(`Upload ${filename} for the user: ${this.user.id}`);
-    const fullPath = `${__dirname}/assets/${filename}`;
+  async injectUploadRequest(readable: Readable | string) {
+    function makeReadableFromString(str: string): Readable {
+      const result = new Readable();
+      result._read = () => {};
+      result.push(str);
+      result.push(null);
+      return result;
+    }
+    if (typeof readable === "string")
+      readable = makeReadableFromString(readable);
     const url = "/internal/services/files/v1";
-    const form = formAutoContent({ file: fs.createReadStream(fullPath) });
+    const form = formAutoContent({ file: readable });
     form.headers["authorization"] = `Bearer ${this.jwt}`;
 
-    const filesUploadRaw = await this.platform.app.inject({
+    return await this.platform.app.inject({
       method: "POST",
       url: `${url}/companies/${this.platform.workspace.company_id}/files?thumbnail_sync=0`,
       ...form
     });
+  }
+
+  async uploadFile(filename: string) {
+    logger.info(`Upload ${filename} for the user: ${this.user.id}`);
+    const fullPath = `${__dirname}/assets/${filename}`;
+    const filesUploadRaw = await this.injectUploadRequest(fs.createReadStream(fullPath));
 
     const filesUpload: ResourceUpdateResponse<File> = deserialize<ResourceUpdateResponse<File>>(
       ResourceUpdateResponse,
