@@ -38,14 +38,18 @@ export default class S3ConnectorService implements StorageConnectorAPI {
         .on("data", function (chunk) {
           totalSize += chunk.length;
         })
-        .on('end', () => { // TODO: this could be bad practice as it puts the stream in flow mode before putObject gets to it
+        .on("end", () => {
+          // TODO: this could be bad practice as it puts the stream in flow mode before putObject gets to it
           didCompleteCalculateSize = true;
           doResolve();
         });
-      this.client.putObject(this.minioConfiguration.bucket, path, stream).then(_x => {
-        didCompletePutObject = true;
-        doResolve();
-      }).catch(reject);
+      this.client
+        .putObject(this.minioConfiguration.bucket, path, stream)
+        .then(_x => {
+          didCompletePutObject = true;
+          doResolve();
+        })
+        .catch(reject);
     });
   }
 
