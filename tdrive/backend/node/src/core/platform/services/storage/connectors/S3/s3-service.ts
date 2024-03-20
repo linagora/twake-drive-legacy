@@ -24,19 +24,28 @@ export default class S3ConnectorService implements StorageConnectorAPI {
   }
 
   write(path: string, stream: Readable): Promise<WriteMetadata> {
-    let totalSize = 0;
     return new Promise((resolve, reject) => {
+      let totalSize = 0;
+      let didCompletePutObject = false;
+      let didCompleteCalculateSize = false;
+      const doResolve = () =>
+        didCompletePutObject &&
+        didCompleteCalculateSize &&
+        resolve({
+          size: totalSize,
+        });
       stream
         .on("data", function (chunk) {
           totalSize += chunk.length;
         })
-        .on("end", () => {
-          resolve({
-            size: totalSize,
-          });
+        .on('end', () => { // TODO: this could be bad practice as it puts the stream in flow mode before putObject gets to it
+          didCompleteCalculateSize = true;
+          doResolve();
         });
-
-      this.client.putObject(this.minioConfiguration.bucket, path, stream).catch(e => reject(e));
+      this.client.putObject(this.minioConfiguration.bucket, path, stream).then(_x => {
+        didCompletePutObject = true;
+        doResolve();
+      }).catch(reject);
     });
   }
 
