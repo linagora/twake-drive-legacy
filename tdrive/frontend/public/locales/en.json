@@ -166,6 +166,7 @@
     "components.newversion.new_version_component.link": "Click here to reload",
     "components.newversion.new_version_modal.title": "New update available !",
     "components.add_mails_workspace.text_area_placeholder": "Enter emails of your users*",
+    "services.file_upload_service.toaster.upload_file_error": "Error uploading file: {{$1}}",
     "services.console_services.toaster.add_emails_error": "Error while adding email(s)",
     "services.console_services.toaster.add_email_error_message": "Error while adding {{$1}}",
     "services.console_services.toaster.success_verify_email": "A verification link has been sent to your email account",
