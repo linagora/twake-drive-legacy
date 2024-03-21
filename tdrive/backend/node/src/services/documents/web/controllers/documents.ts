@@ -310,14 +310,23 @@ export class DocumentsController {
       Body: Partial<FileVersion>;
       Querystring: { public_token?: string };
     }>,
-  ): Promise<FileVersion> => {
-    const context = getDriveExecutionContext(request);
-    const { id } = request.params;
-    const version = request.body;
+  ): Promise<FileVersion | any> => {
+    try {
+      const context = getDriveExecutionContext(request);
+      const { id } = request.params;
+      const version = request.body;
 
-    if (!id) throw new CrudException("Missing id", 400);
+      if (!id) throw new CrudException("Missing id", 400);
 
-    return await globalResolver.services.documents.documents.createVersion(id, version, context);
+      return await globalResolver.services.documents.documents.createVersion(id, version, context);
+    } catch (error) {
+      logger.error({ error: `${error}` }, "Failed to create Drive item version");
+      // if error code is 403, it means the user exceeded the quota limit
+      if (error.code === 403) {
+        CrudException.throwMe(error, new CrudException("Quota limit exceeded", 403));
+      }
+      CrudException.throwMe(error, new CrudException("Failed to create Drive item version", 500));
+    }
   };
 
   downloadGetToken = async (

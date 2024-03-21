@@ -54,8 +54,9 @@ export const e2e_createVersion = async (
   });
 };
 
-export const e2e_createDocumentFile = async (platform: TestPlatform) => {
-  const filePath = `${__dirname}/assets/test.txt`;
+export const e2e_createDocumentFile = async (platform: TestPlatform, documentPath?: string) => {
+  const subFilePath = documentPath ?? "assets/test.txt";
+  const filePath = `${__dirname}/${subFilePath}`;
   const token = await platform.auth.getJWTToken();
   const form = formAutoContent({ file: fs.createReadStream(filePath) });
   form.headers["authorization"] = `Bearer ${token}`;
