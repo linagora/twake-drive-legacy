@@ -40,8 +40,9 @@ export const e2e_createVersion = async (
   platform: TestPlatform,
   id: string,
   payload: Partial<FileVersion>,
+  jwt?: string,
 ) => {
-  const token = await platform.auth.getJWTToken();
+  const token = jwt ?? (await platform.auth.getJWTToken());
 
   return await platform.app.inject({
     method: "POST",

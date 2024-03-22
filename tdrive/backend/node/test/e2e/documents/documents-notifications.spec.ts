@@ -73,6 +73,8 @@ describe("the Drive feature", () => {
 
   it("Did notify the user after creating a new version for a file.", async () => {
     const item = await currentUser.createDefaultDocument();
+    const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+    const oneUserJWT = await platform.auth.getJWTToken({ sub: oneUser.user.id });
     const fileUploadResponse = await e2e_createDocumentFile(platform);
     const fileUploadResult = deserialize<ResourceUpdateResponse<File>>(
       ResourceUpdateResponse,
@@ -81,7 +83,7 @@ describe("the Drive feature", () => {
 
     const file_metadata = { external_id: fileUploadResult.resource.id };
 
-    await e2e_createVersion(platform, item.id, { filename: "file2", file_metadata });
+    await e2e_createVersion(platform, item.id, { filename: "file2", file_metadata }, oneUserJWT);
 
     expect(notifyDocumentVersionUpdated).toHaveBeenCalled();
   });

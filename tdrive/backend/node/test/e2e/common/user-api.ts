@@ -99,7 +99,7 @@ export default class UserApi {
     return filesUpload.resource;
   }
 
-  private getJWTTokenForUser(userId: string): string {
+  public getJWTTokenForUser(userId: string): string {
     const payload = {
       sub: userId,
       role: ""
