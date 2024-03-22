@@ -477,8 +477,9 @@ export class DocumentsService {
           if (key === "access_info") {
             const sharedWith = content.access_info.entities.filter(
               info =>
-                !item.access_info.entities.find(entity => entity.id === info.id) &&
-                info.type === "user",
+                info.type === "user" &&
+                info.id !== context.user.id &&
+                !item.access_info.entities.find(entity => entity.id === info.id),
             );
 
             item.access_info = content.access_info;
@@ -791,16 +792,18 @@ export class DocumentsService {
       await this.repository.save(item);
 
       // Notify the user that the document versions have been updated
-      this.logger.info("Notifying user that the document has been updated: ", {
-        item,
-        notificationEmitter: context.user.id,
-      });
-      gr.services.documents.engine.notifyDocumentVersionUpdated({
-        context,
-        item,
-        notificationEmitter: context.user.id,
-        notificationReceiver: item.creator,
-      });
+      if (context.user.id !== item.creator) {
+        this.logger.info("Notifying user that the document has been updated: ", {
+          item,
+          notificationEmitter: context.user.id,
+        });
+        gr.services.documents.engine.notifyDocumentVersionUpdated({
+          context,
+          item,
+          notificationEmitter: context.user.id,
+          notificationReceiver: item.creator,
+        });
+      }
 
       await updateItemSize(item.parent_id, this.repository, context);
 
