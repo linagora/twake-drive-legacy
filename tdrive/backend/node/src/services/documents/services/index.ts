@@ -432,7 +432,6 @@ export class DocumentsService {
 
       return driveItem;
     } catch (error) {
-      console.log("🚀🚀 error:", error);
       this.logger.error({ error: `${error}` }, "Failed to create drive item");
       CrudException.throwMe(error, new CrudException("Failed to create item", 500));
     }
