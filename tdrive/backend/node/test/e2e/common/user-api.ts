@@ -80,16 +80,9 @@ export default class UserApi {
     return await this.uploadFile(UserApi.ALL_FILES[Math.floor((Math.random() * UserApi.ALL_FILES.length))]);
   }
 
-  async injectUploadRequest(readable: Readable | string) {
-    function makeReadableFromString(str: string): Readable {
-      const result = new Readable();
-      result._read = () => {};
-      result.push(str);
-      result.push(null);
-      return result;
-    }
+  private async injectUploadRequest(readable: Readable | string) {
     if (typeof readable === "string")
-      readable = makeReadableFromString(readable);
+      readable = Readable.from(readable);
     const url = "/internal/services/files/v1";
     const form = formAutoContent({ file: readable });
     form.headers["authorization"] = `Bearer ${this.jwt}`;
@@ -106,11 +99,17 @@ export default class UserApi {
     const fullPath = `${__dirname}/assets/${filename}`;
     const filesUploadRaw = await this.injectUploadRequest(fs.createReadStream(fullPath));
 
-    const filesUpload: ResourceUpdateResponse<File> = deserialize<ResourceUpdateResponse<File>>(
-      ResourceUpdateResponse,
-      filesUploadRaw.body
-    );
-    return filesUpload.resource;
+    if (filesUploadRaw.statusCode == 200) {
+      const filesUpload: ResourceUpdateResponse<File> = deserialize<ResourceUpdateResponse<File>>(
+        ResourceUpdateResponse,
+        filesUploadRaw.body
+      );
+      return filesUpload.resource;
+    } else this.throwServerError(filesUploadRaw.statusCode);
+  }
+
+  private throwServerError(code: number) {
+    throw new Error("Error code: " + code)
   }
 
   private getJWTTokenForUser(userId: string): string {

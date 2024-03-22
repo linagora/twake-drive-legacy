@@ -50,7 +50,7 @@ describe("The Files feature", () => {
       //then file should be not found with 404 error and "File not found message"
       expect(fileDownloadResponse).toBeTruthy();
       expect(fileDownloadResponse.statusCode).toBe(500);
-    }, 120000);
+    });
 
     it("should fail an upload POST when the backend storage fails", async () => {
       const thrower = () => {
@@ -58,12 +58,13 @@ describe("The Files feature", () => {
       };
       const writeS3Mock = jest.spyOn(MinioClient.prototype, "putObject").mockImplementation(thrower);
       const writeLocalMock = jest.spyOn(LocalConnectorService.prototype, "write").mockImplementation(thrower);
-      // const writeMock = jest.spyOn(platform.storage, "write").mockImplementation(thrower)
-      const response = await helpers.injectUploadRequest("dummy");
-      expect(response).toBeTruthy();
-      expect(response.statusCode).toBe(500);
+
+      // expect(response.statusCode).toBe(500);
+      await expect(helpers.uploadRandomFile()).rejects.toThrow("Error code: 500");
+
+      // expect(response.statusCode).toBe(500);
       expect(writeS3Mock.mock.calls.length + writeLocalMock.mock.calls.length).toEqual(1);
-    }, 120000);
+    });
 
     it("Download file should return 200 if file exists", async () => {
       //given file
@@ -80,7 +81,7 @@ describe("The Files feature", () => {
       //then file should be not found with 404 error and "File not found message"
       expect(fileDownloadResponse).toBeTruthy();
       expect(fileDownloadResponse.statusCode).toBe(200);
-    }, 120000);
+    });
 
     it.skip("should save file and generate previews", async () => {
       for (const i in UserApi.ALL_FILES) {
@@ -101,6 +102,6 @@ describe("The Files feature", () => {
           expect(thumbnails.statusCode).toBe(200);
         }
       }
-    }, 1200000);
+    });
   });
 });
