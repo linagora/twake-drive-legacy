@@ -11,6 +11,7 @@ import { ResourceUpdateResponse } from "../../../src/utils/types";
 jest.mock("config");
 
 describe("the Drive feature", () => {
+  const filesUrl = "/internal/services/files/v1";
   let platform: TestPlatform;
   let currentUser: UserApi;
   let configHasSpy: jest.SpyInstance;
@@ -71,13 +72,20 @@ describe("the Drive feature", () => {
   });
 
   it("did not upload the drive item with size above quota", async () => {
-    const result: any = await currentUser.uploadFileAndCreateDocument("sample.mp4");
+    const item = await currentUser.uploadFile("sample.mp4");
+    expect(item).toBeDefined();
+    const result: any = await currentUser.createDocumentFromFile(item);
     expect(result).toBeDefined();
     expect(result.statusCode).toBe(403);
     expect(result.error).toBe("Forbidden");
     expect(result.message).toContain("Not enough space");
-
-    //TODO[ASH] check that the file was deleted
+    const fileDownloadResponse = await platform.app.inject({
+      method: "GET",
+      url: `${filesUrl}/companies/${platform.workspace.company_id}/files/${item.id}/download`,
+    });
+    // make sure the file was removed
+    expect(fileDownloadResponse).toBeTruthy();
+    expect(fileDownloadResponse.statusCode).toBe(404);
   });
 
   it("did create a version for a drive item", async () => {
@@ -98,5 +106,12 @@ describe("the Drive feature", () => {
     });
     expect(result).toBeDefined();
     expect(result.statusCode).toBe(403);
+    const fileDownloadResponse = await platform.app.inject({
+      method: "GET",
+      url: `${filesUrl}/companies/${platform.workspace.company_id}/files/${item.id}/download`,
+    });
+    // make sure the file was removed
+    expect(fileDownloadResponse).toBeTruthy();
+    expect(fileDownloadResponse.statusCode).toBe(404);
   });
 });
