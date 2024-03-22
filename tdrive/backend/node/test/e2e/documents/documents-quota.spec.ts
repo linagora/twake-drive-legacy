@@ -67,7 +67,6 @@ describe("the Drive feature", () => {
 
   it("did create the drive item with size under quota", async () => {
     const result = await currentUser.uploadFileAndCreateDocument("sample.doc");
-    console.log("result small file: ", result);
     expect(result).toBeDefined();
   });
 

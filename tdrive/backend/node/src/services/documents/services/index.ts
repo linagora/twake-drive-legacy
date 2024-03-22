@@ -794,12 +794,10 @@ export class DocumentsService {
       const metadata = await getFileMetadata(driveItemVersion.file_metadata.external_id, context);
 
       if (this.quotaEnabled) {
-        console.log("CREATE_VERSION::USER QUOTA ENABLED");
         const userQuota = await this.userQuota(context);
         const leftQuota = this.defaultQuota - userQuota;
 
         if (metadata.size > leftQuota) {
-          console.log("CREATE_VERSION::NO_SPACE_LEFT");
           // clean up everything
           await globalResolver.services.files.delete(metadata.external_id, context);
           throw new CrudException(`Not enough space: ${metadata.size}, ${leftQuota}.`, 403);
