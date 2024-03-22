@@ -142,9 +142,9 @@ class UserAPIClientService {
     });
   }
 
-  async getQuota(userId: string): Promise<UserQuota> {
+  async getQuota(companyId: string, userId: string): Promise<UserQuota> {
     return Api.get<UserQuota>(
-      `/internal/services/users/v1/users/${userId}/quota`,
+      `/internal/services/users/v1/users/${userId}/quota?companyId=${companyId}`,
       undefined,
       false
     ).then(result => {
