@@ -7,7 +7,7 @@ import { DriveItemAtom, DriveItemChildrenAtom } from '../state/store';
 import { BrowseFilter, DriveItem, DriveItemVersion } from '../types';
 import { SharedWithMeFilterState } from '../state/shared-with-me-filter';
 import Languages from 'features/global/services/languages-service';
-import { useUserQuota } from "features/users/hooks/use-user-quota";
+import { useUserQuota } from 'features/users/hooks/use-user-quota';
 
 /**
  * Returns the children of a drive item
@@ -60,7 +60,13 @@ export const useDriveActions = () => {
         return driveFile;
       } catch (e: any) {
         if (e.statusCode === 403) {
-          ToasterService.error(Languages.t('hooks.use-drive-actions.quota_limit_exceeded'));
+          ToasterService.info(
+            <>
+              <p>{Languages.t('hooks.use-drive-actions.quota_limit_exceeded_title')}</p>
+              <p>{Languages.t('hooks.use-drive-actions.quota_limit_exceeded_message')}</p>
+              <p>{Languages.t('hooks.use-drive-actions.quota_limit_exceeded_plans')}</p>
+            </>,
+          );
         } else {
           ToasterService.error(Languages.t('hooks.use-drive-actions.unable_create_file'));
         }
@@ -139,8 +145,8 @@ export const useDriveActions = () => {
         const updateBody = {
           company_id: companyId,
           user_id: userId,
-          level: level
-        }
+          level: level,
+        };
         await DriveApiClient.updateLevel(companyId, id, updateBody);
         await refresh(id || '');
       } catch (e) {
