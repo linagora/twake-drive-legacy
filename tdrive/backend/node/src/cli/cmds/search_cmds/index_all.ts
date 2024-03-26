@@ -32,7 +32,7 @@ class SearchIndexAll {
     const repository = repositories.get(options.repository);
     if (!repository) {
       throw (
-        "No such repository ready for indexation, available are: " +
+        "No repository set (or valid) ready for indexation, available are: " +
         Array.from(repositories.keys()).join(", ")
       );
     }
@@ -100,6 +100,7 @@ const services = [
   "storage",
   "tracker",
   "websocket",
+  "email-pusher",
 ];
 
 const command: yargs.CommandModule<unknown, unknown> = {
@@ -107,7 +108,6 @@ const command: yargs.CommandModule<unknown, unknown> = {
   describe: "command to reindex search middleware from db entities",
   builder: {
     repository: {
-      default: "",
       type: "string",
       description: "Choose a repository to reindex",
     },
@@ -117,7 +117,6 @@ const command: yargs.CommandModule<unknown, unknown> = {
       description: "Choose to repair entities too when possible",
     },
   },
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handler: async argv => {
     const spinner = ora({ text: "Reindex repository - " }).start();
     const platform = await tdrive.run(services);
@@ -126,17 +125,12 @@ const command: yargs.CommandModule<unknown, unknown> = {
 
     const repository = (argv.repository || "") as string;
 
-    if (!repository) {
-      throw "No repository was set.";
-    }
-
+    // Let this run even without a repository as its error message includes valid repository names
     await migrator.run({
       repository,
     });
 
     spinner.stop();
-
-    return;
   },
 };
 
