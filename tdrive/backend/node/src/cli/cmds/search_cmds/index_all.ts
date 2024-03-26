@@ -22,11 +22,12 @@ type Options = {
 };
 
 const waitTimeoutMS = (ms: number) => ms > 0 && new Promise(r => setTimeout(r, ms));
+const defaultPageSize = "100";
 
 async function iterateOverRepoPages<Entity>(
   repository: Repository<Entity>,
   forEachPage: (entities: Entity[]) => Promise<void>,
-  pageSizeAsStringForReasons: string = "100",
+  pageSizeAsStringForReasons: string = defaultPageSize,
   filter: FindFilter = {},
   delayPerPageMS: number = 200,
 ) {
@@ -79,24 +80,16 @@ class SearchIndexAll {
       CompanyUser,
     );
     let count = 0;
-    await iterateOverRepoPages(
-      repository,
-      async entities => {
-        for (const user of entities) {
-          const companies = await companiesUsersRepository.find(
-            { user_id: user.id },
-            {},
-            undefined,
-          );
-          user.cache ||= { companies: [] };
-          user.cache.companies = companies.getEntities().map(company => company.group_id);
-          await repository.save(user, undefined);
-        }
-        count += entities.length;
-        options.spinner.start(`Adding companies to cache of ${count} users...`);
-      },
-      "2",
-    );
+    await iterateOverRepoPages(repository, async entities => {
+      for (const user of entities) {
+        const companies = await companiesUsersRepository.find({ user_id: user.id }, {}, undefined);
+        user.cache ||= { companies: [] };
+        user.cache.companies = companies.getEntities().map(company => company.group_id);
+        await repository.save(user, undefined);
+      }
+      count += entities.length;
+      options.spinner.start(`Adding companies to cache of ${count} users...`);
+    });
     options.spinner.succeed(`Added companies to cache of ${count} users`);
   }
 
