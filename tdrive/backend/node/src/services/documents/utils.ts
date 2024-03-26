@@ -610,3 +610,36 @@ export const isInTrash = async (
   // Recursively check the parent item
   return isInTrash(parentItem, repository, context);
 };
+
+import { logger } from "../../core/platform/framework";
+import { officeExtensions, textExtensions, pdfExtensions } from "../../utils/mime";
+import { readableToString } from "../../utils/files";
+
+/** Return true if the given filename and mime type could be analysed by `getKeywordsOfFile` */
+export const couldGetKeywordsOfFile = async (mime: string, filename: string): Promise<boolean> =>
+  isFileType(mime, filename, textExtensions) ||
+  isFileType(mime, filename, pdfExtensions) ||
+  isFileType(mime, filename, officeExtensions);
+
+/** Extract keyword text from the provided readable */
+export const getKeywordsOfFile = async (
+  mime: string,
+  filename: string,
+  file: Readable,
+): Promise<string> => {
+  let content_strings = "";
+  const extension = filename.split(".").pop();
+  if (isFileType(mime, filename, textExtensions)) {
+    logger.info(`Processing text file:   ${filename}`);
+    content_strings = await readableToString(file);
+  }
+  if (isFileType(mime, filename, pdfExtensions)) {
+    logger.info(`Processing PDF file:    ${filename}`);
+    content_strings = await pdfFileToString(file);
+  }
+  if (isFileType(mime, filename, officeExtensions)) {
+    logger.info(`Processing office file: ${filename}`);
+    content_strings = await officeFileToString(file, extension);
+  }
+  return extractKeywords(content_strings);
+};
