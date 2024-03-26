@@ -41,7 +41,7 @@ will run unit tests only (`test:unit`). For possible tests to run, check the `pa
 The Twake backend CLI
 
 The Twake backend CLI provides a set of commands to manage/use/develop Tdrive from the `twake-cli` executable.
-Before using the CLI, you must `compile` Tdrive with `npm run build`. Once done, you can get help on on any command with the `--help` flag like `./bin/twake-cli --help`.
+Before using the CLI, you must `compile` Tdrive with `npm run build`. Once done, you can get help on on any command with the `--help` flag like `bin/twake-cli --help`.
 
 It uses the same configuration as the Tdrive backend application. Including environment variables and the `./config/default.json` file.
 
@@ -50,9 +50,6 @@ It uses the same configuration as the Tdrive backend application. Including envi
 This command re-indexes entities of the given repository from the database to the search service.
 
 ```sh
-<<<<<<< HEAD
-./bin/twake-cli search index --repository users --repairEntities
-=======
 bin/twake-cli search index --repository users --repairEntities
 ```
 
@@ -66,7 +63,16 @@ choices (or we're using it wrong).
 
 ```sh
 eval "$(bin/twake-cli completion)"
->>>>>>> c95ca33f (fixup! 📝 Updating README.md with CLI example (#438))
+```
+
+#### Bash completion
+
+It's a bit awkward to do real completion from a configuration since this isn't really a node module we recommend to install globally.
+This should setup a shell if you're in the right path however. It's yarg's auto generated completion though; so eg: it mixes up commands and
+choices (or we're using it wrong).
+
+```sh
+eval "$(bin/twake-cli completion)"
 ```
 
 ### Component Framework
