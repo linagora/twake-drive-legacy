@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import yargs from "yargs";
 import { logger } from "../core/platform/framework/logger";
+import printConfigSummary from "./lib/print_config_summary";
 
 process.env.NODE_ENV = "cli";
 
@@ -10,6 +11,10 @@ yargs
   .middleware([
     argv => {
       logger.level = argv.verbose ? "debug" : "fatal";
+      if (!argv.quietConfigSummary) {
+        console.error("Platform configuration:");
+        printConfigSummary().forEach(x => console.error(`\t${x}`));
+      }
     },
   ])
   .commandDir("cmds", {
@@ -20,6 +25,14 @@ yargs
     default: false,
     type: "boolean",
     description: "Run with verbose logging",
+    group: "Output",
+  })
+  .option("quietConfigSummary", {
+    alias: "q",
+    default: false,
+    type: "boolean",
+    description: "Do not print the configuration summary at startup",
+    group: "Output",
   })
   .demandCommand(1, "Please supply a valid command")
   .alias("help", "h")
