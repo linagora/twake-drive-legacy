@@ -11,7 +11,11 @@ import { DriveFile, TYPE as DriveFileTYPE } from "../../../services/documents/en
 import Repository, {
   FindFilter,
 } from "../../../core/platform/services/database/services/orm/repository/repository";
-import { EntityTarget, SearchServiceAPI } from "../../../core/platform/services/search/api";
+import {
+  EntityTarget,
+  FindOptions,
+  SearchServiceAPI,
+} from "../../../core/platform/services/search/api";
 import CompanyUser, { TYPE as CompanyUserTYPE } from "../../../services/user/entities/company_user";
 import runWithPlatform from "../../lib/run_with_platform";
 import SearchRepository from "src/core/platform/services/search/repository";
@@ -29,13 +33,15 @@ const defaultPageSize = "100";
 async function iterateOverRepoPages<Entity>(
   repository: Repository<Entity>,
   forEachPage: (entities: Entity[]) => Promise<void>,
-  pageSizeAsStringForReasons: string = defaultPageSize,
+  findOptions: FindOptions = {},
   filter: FindFilter = {},
+  pageSizeAsStringForReasons: string = defaultPageSize,
   delayPerPageMS: number = 200,
 ) {
   let page: Pagination = { limitStr: pageSizeAsStringForReasons };
   do {
-    const list = await repository.find(filter, { pagination: page }, undefined);
+    const options = { ...findOptions, pagination: page };
+    const list = await repository.find(filter, options, undefined);
     await forEachPage(list.getEntities());
     page = list.nextPage as Pagination;
     await waitTimeoutMS(delayPerPageMS);
@@ -87,12 +93,21 @@ abstract class ReindexerCLICommand<Entity> {
   /** Override in sub-classes to translate a page from database to search entities.
    * This is called by `reindexFromDBToSearch` so if that is overriden; this won't be called.
    */
-  protected async repairEntities(): Promise<void> {
-    this.statusWarn(`repairEntities > No repair action for ${this.table}`);
-  }
-
   protected async mapEntitiesToReIndexFromDBToSearch(entities: Entity[]): Promise<Entity[]> {
     return entities;
+  }
+
+  /** Override in sub-classes that have filters (eg. from arguments) for the entities to re-index/repair */
+  protected async prepareFindOptionsForItemsToReIndex(): Promise<FindOptions | undefined> {
+    return undefined;
+  }
+
+  /** Override in sub-classes that handle the --repairEntities argument.
+   * It is executed before reindexFromDBToSearch. What repair means depends
+   * on the entity type.
+   */
+  protected async repairEntities(_findOptions: FindOptions): Promise<void> {
+    this.statusWarn(`repairEntities > No repair action for ${this.table}`);
   }
 
   /** Override in a sub-class to completely replace the re-indexing logic.
@@ -100,16 +115,20 @@ abstract class ReindexerCLICommand<Entity> {
    *     - calls `mapEntitiesToReIndexFromDBToSearch` to convert each page to a search entity
    *     - and upserts the result into the search repository
    */
-  protected async reindexFromDBToSearch(): Promise<void> {
+  protected async reindexFromDBToSearch(findOptions: FindOptions): Promise<void> {
     const repository = await this.dbRepository();
     this.statusStart("Start indexing...");
     let count = 0;
-    await iterateOverRepoPages(repository, async entities => {
-      entities = await this.mapEntitiesToReIndexFromDBToSearch(entities);
-      await this.search.upsert(entities);
-      count += entities.length;
-      this.statusStart(`Indexed ${count} ${this.table}...`);
-    });
+    await iterateOverRepoPages(
+      repository,
+      async entities => {
+        entities = await this.mapEntitiesToReIndexFromDBToSearch(entities);
+        await this.search.upsert(entities);
+        count += entities.length;
+        this.statusStart(`Indexed ${count} ${this.table}...`);
+      },
+      findOptions,
+    );
     if (count === 0) this.statusWarn(`Index ${this.table} finished; but 0 items included`);
     else this.statusSucceed(`${count} ${this.table} indexed`);
     const giveFlushAChanceDurationMS = 10000;
@@ -120,8 +139,9 @@ abstract class ReindexerCLICommand<Entity> {
 
   /** Run both operations: repair if requested and re-index */
   public async run(): Promise<void> {
-    if (this.options.repairEntities) await this.repairEntities();
-    await this.reindexFromDBToSearch();
+    const findOptions = await this.prepareFindOptionsForItemsToReIndex();
+    if (this.options.repairEntities) await this.repairEntities(findOptions);
+    await this.reindexFromDBToSearch(findOptions);
   }
 }
 
@@ -136,7 +156,7 @@ class UserReindexerCLICommand extends ReindexerCLICommand<User> {
     super(platform, options, UserTYPE, User);
   }
 
-  protected override async repairEntities(): Promise<void> {
+  protected override async repairEntities(_findOptions: FindOptions): Promise<void> {
     this.statusStart("repairEntities > Adding companies to cache of user");
     const companiesUsersRepository = await this.database.getRepository(
       CompanyUserTYPE,
