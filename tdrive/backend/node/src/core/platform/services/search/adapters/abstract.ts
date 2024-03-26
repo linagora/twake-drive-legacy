@@ -30,6 +30,9 @@ export class SearchAdapter implements SearchAdapterInterface {
   connect(): Promise<void> {
     throw new Error("Method not implemented.");
   }
+  disconnect(): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
   upsert(entities: any[]): Promise<void> {
     throw new Error("Method not implemented.");
   }

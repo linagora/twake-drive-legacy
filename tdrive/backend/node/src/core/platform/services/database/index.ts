@@ -36,6 +36,14 @@ export default class Database extends TdriveService<DatabaseServiceAPI> {
     return this;
   }
 
+  public async doStop(): Promise<this> {
+    if (this.service) {
+      await this.service.disconnect();
+      this.service = null;
+    }
+    return this;
+  }
+
   api(): DatabaseServiceAPI {
     return this.service;
   }

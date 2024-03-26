@@ -131,7 +131,9 @@ const command: yargs.CommandModule<unknown, unknown> = {
       repository,
       spinner,
     });
-
+    spinner.start("Shutting down platform...");
+    await platform.stop();
+    spinner.succeed("Platform shutdown");
     spinner.stop();
   },
 };

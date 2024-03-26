@@ -50,6 +50,12 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     return this;
   }
 
+  async disconnect(): Promise<this> {
+    if (this.client) await this.client.end();
+    this.client = null;
+    return this;
+  }
+
   async init(): Promise<this> {
     if (!this.client) {
       await this.connect();

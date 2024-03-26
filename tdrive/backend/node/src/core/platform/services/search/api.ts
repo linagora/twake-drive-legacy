@@ -46,6 +46,7 @@ export type IndexedEntity = {
 
 export interface SearchAdapterInterface {
   connect(): Promise<void>;
+  disconnect(): Promise<void>;
   upsert(entities: any[]): Promise<void>;
   remove(entities: any[]): Promise<void>;
 

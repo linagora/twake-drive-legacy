@@ -23,6 +23,11 @@ export interface Connector extends Initializable {
   connect(): Promise<this>;
 
   /**
+   * Disconnect from the database
+   */
+  disconnect(): Promise<this>;
+
+  /**
    * Get the type of connector
    */
   getType(): DatabaseType;

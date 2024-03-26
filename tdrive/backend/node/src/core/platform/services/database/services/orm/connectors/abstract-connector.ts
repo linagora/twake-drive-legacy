@@ -9,6 +9,7 @@ export abstract class AbstractConnector<T extends ConnectionOptions> implements 
   constructor(protected type: DatabaseType, protected options: T, protected secret: string) {}
 
   abstract connect(): Promise<this>;
+  abstract disconnect(): Promise<this>;
 
   abstract drop(): Promise<this>;
 

@@ -32,6 +32,13 @@ export default class DatabaseService implements DatabaseServiceAPI {
     return this.connector;
   }
 
+  async disconnect() {
+    if (this.connector) {
+      await this.connector.disconnect();
+      this.connector = null;
+    }
+  }
+
   getManager(): Manager<unknown> {
     return new Manager<unknown>(this.connector);
   }

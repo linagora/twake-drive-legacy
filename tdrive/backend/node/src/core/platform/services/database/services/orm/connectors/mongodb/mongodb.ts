@@ -36,6 +36,12 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions> {
     return this;
   }
 
+  async disconnect(): Promise<this> {
+    if (this.client) await this.client.close();
+    this.client = null;
+    return this;
+  }
+
   getClient(): mongo.MongoClient {
     return this.client;
   }

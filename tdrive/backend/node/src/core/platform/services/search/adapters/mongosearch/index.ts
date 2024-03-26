@@ -45,6 +45,14 @@ export default class MongoSearch extends SearchAdapter implements SearchAdapterI
     this.mongodb = await service.getDatabase();
   }
 
+  public async disconnect() {
+    if (this.mongodb) {
+      const service = this.database.getConnector() as MongoConnector;
+      await service.disconnect();
+      this.mongodb = null;
+    }
+  }
+
   private async createIndex(
     entityDefinition: EntityDefinition,
     columns: { [name: string]: ColumnDefinition },

@@ -73,6 +73,14 @@ export default class Search extends TdriveService<SearchServiceAPI> {
     return this;
   }
 
+  public async doStop(): Promise<this> {
+    if (this.service) {
+      await this.service.disconnect();
+      this.service = null;
+    }
+    return this;
+  }
+
   public async upsert(entities: never[]) {
     return this.service.upsert(entities);
   }

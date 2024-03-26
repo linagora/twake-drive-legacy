@@ -29,6 +29,7 @@ export default class ESAndOpenSearch extends SearchAdapter implements SearchAdap
   private bulkReaders = 0;
   private buffer: Operation[] = [];
   private client: OpenClient | ESClient;
+  private pendingTimeout: NodeJS.Timeout = null;
 
   constructor(
     readonly database: DatabaseServiceAPI,
@@ -73,6 +74,18 @@ export default class ESAndOpenSearch extends SearchAdapter implements SearchAdap
       );
     }
     this.startBulkReader();
+  }
+
+  public async disconnect() {
+    if (this.client) {
+      const client = this.client;
+      this.client = null;
+      if (this.pendingTimeout) {
+        clearTimeout(this.pendingTimeout);
+        this.pendingTimeout = null;
+      }
+      await client.close();
+    }
   }
 
   private async createIndex(
@@ -214,10 +227,17 @@ export default class ESAndOpenSearch extends SearchAdapter implements SearchAdap
 
     let buffer;
     do {
-      await new Promise(r =>
-        setTimeout(r, parseInt(`${this.configuration.flushInterval}`) || 3000),
+      await new Promise<void>(
+        r =>
+          (this.pendingTimeout = setTimeout(() => {
+            this.pendingTimeout = null;
+            r();
+          }, parseInt(`${this.configuration.flushInterval}`) || 3000)),
       );
       buffer = this.buffer;
+      if (!this.client)
+        // disconnect was called; break this tail loop
+        return;
     } while (buffer.length === 0);
     this.buffer = [];
 

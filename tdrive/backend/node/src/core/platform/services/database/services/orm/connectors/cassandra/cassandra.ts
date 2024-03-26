@@ -178,6 +178,12 @@ export class CassandraConnector extends AbstractConnector<CassandraConnectionOpt
     return this;
   }
 
+  async disconnect(): Promise<this> {
+    if (this.client) await this.client.shutdown();
+    this.client = null;
+    return this;
+  }
+
   async getTableDefinition(name: string): Promise<string[]> {
     let result: string[];
 
