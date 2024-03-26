@@ -334,19 +334,13 @@ export class DocumentsService {
         }
 
         if (fileToProcess) {
-          if (this.quotaEnabled) {
-            const userQuota = await this.userQuota(context);
-            const leftQuota = this.defaultQuota - userQuota;
+          // if quota is enabled, check if the user has enough space
+          await this.checkQuotaAndCleanUp(
+            fileToProcess.upload_data.size,
+            fileToProcess.id,
+            context,
+          );
 
-            if (fileToProcess.upload_data.size > leftQuota) {
-              // clean up everything
-              await globalResolver.services.files.delete(fileToProcess.id, context);
-              throw new CrudException(
-                `Not enough space: ${fileToProcess.upload_data.size}, ${leftQuota}.`,
-                403,
-              );
-            }
-          }
           driveItem.size = fileToProcess.upload_data.size;
           driveItem.is_directory = false;
           driveItem.extension = fileToProcess.metadata.name.split(".").pop();
@@ -793,16 +787,8 @@ export class DocumentsService {
       const driveItemVersion = getDefaultDriveItemVersion(version, context);
       const metadata = await getFileMetadata(driveItemVersion.file_metadata.external_id, context);
 
-      if (this.quotaEnabled) {
-        const userQuota = await this.userQuota(context);
-        const leftQuota = this.defaultQuota - userQuota;
-
-        if (metadata.size > leftQuota) {
-          // clean up everything
-          await globalResolver.services.files.delete(metadata.external_id, context);
-          throw new CrudException(`Not enough space: ${metadata.size}, ${leftQuota}.`, 403);
-        }
-      }
+      // if quota is enabled, check if the user has enough space
+      await this.checkQuotaAndCleanUp(metadata.size, metadata.external_id, context);
 
       driveItemVersion.file_size = metadata.size;
       driveItemVersion.file_metadata.size = metadata.size;
@@ -851,10 +837,6 @@ export class DocumentsService {
       return driveItemVersion;
     } catch (error) {
       logger.error({ error: `${error}` }, "Failed to create Drive item version");
-      // if error code is 403, it means the user exceeded the quota limit
-      if (error.code === 403) {
-        CrudException.throwMe(error, new CrudException("Quota limit exceeded", 403));
-      }
       CrudException.throwMe(error, new CrudException("Failed to create Drive item version", 500));
     }
   };
@@ -1151,5 +1133,17 @@ export class DocumentsService {
     );
 
     return await this.getTab(tabId, context);
+  };
+
+  checkQuotaAndCleanUp = async (size: number, fileId: string, context: DriveExecutionContext) => {
+    if (!this.quotaEnabled) return;
+
+    const userQuota = await this.userQuota(context);
+    const leftQuota = this.defaultQuota - userQuota;
+
+    if (size > leftQuota) {
+      await globalResolver.services.files.delete(fileId, context);
+      throw new CrudException(`Not enough space: ${size}, ${leftQuota}.`, 403);
+    }
   };
 }
