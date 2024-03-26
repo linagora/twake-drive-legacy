@@ -68,16 +68,6 @@ choices (or we're using it wrong).
 eval "$(bin/twake-cli completion)"
 ```
 
-#### Bash completion
-
-It's a bit awkward to do real completion from a configuration since this isn't really a node module we recommend to install globally.
-This should setup a shell if you're in the right path however. It's yarg's auto generated completion though; so eg: it mixes up commands and
-choices (or we're using it wrong).
-
-```sh
-eval "$(bin/twake-cli completion)"
-```
-
 ### Component Framework
 
 The backend is developed using a software component approach in order to compose and adapt the platform based on needs and constraints.

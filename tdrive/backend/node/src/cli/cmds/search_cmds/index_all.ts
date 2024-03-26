@@ -22,6 +22,7 @@ type Options = {
   repairEntities: boolean;
 };
 
+const repairEntitiesArgumentDetails = [];
 const waitTimeoutMS = (ms: number) => ms > 0 && new Promise(r => setTimeout(r, ms));
 const defaultPageSize = "100";
 
@@ -41,6 +42,9 @@ async function iterateOverRepoPages<Entity>(
   } while (page.page_token);
 }
 
+/** This is an abstract base class for re-index cli commands; it stores runtime options
+ *  into fields; runs repair first if request and re-indexes generically from the database
+ *  to search services. */
 abstract class ReindexerCLICommand<Entity> {
   protected readonly database: DatabaseServiceAPI;
   protected readonly search: SearchServiceAPI;
@@ -80,6 +84,9 @@ abstract class ReindexerCLICommand<Entity> {
     this.options.spinner.info(`${this.table} > ${info}`);
   }
 
+  /** Override in sub-classes to translate a page from database to search entities.
+   * This is called by `reindexFromDBToSearch` so if that is overriden; this won't be called.
+   */
   protected async repairEntities(): Promise<void> {
     this.statusWarn(`repairEntities > No repair action for ${this.table}`);
   }
@@ -88,6 +95,11 @@ abstract class ReindexerCLICommand<Entity> {
     return entities;
   }
 
+  /** Override in a sub-class to completely replace the re-indexing logic.
+   * - Iterates over pages of the entity from the database repository
+   *     - calls `mapEntitiesToReIndexFromDBToSearch` to convert each page to a search entity
+   *     - and upserts the result into the search repository
+   */
   protected async reindexFromDBToSearch(): Promise<void> {
     const repository = await this.dbRepository();
     this.statusStart("Start indexing...");
@@ -105,6 +117,8 @@ abstract class ReindexerCLICommand<Entity> {
     await waitTimeoutMS(giveFlushAChanceDurationMS);
     this.statusSucceed("Done!");
   }
+
+  /** Run both operations: repair if requested and re-index */
   public async run(): Promise<void> {
     if (this.options.repairEntities) await this.repairEntities();
     await this.reindexFromDBToSearch();
@@ -149,6 +163,9 @@ RepositoryNameToCTOR.set(
   "users",
   (platform, options) => new UserReindexerCLICommand(platform, options),
 );
+repairEntitiesArgumentDetails.push(
+  "users: Rebuild cache.companies and save to database if changed",
+);
 
 class DocumentsReindexerCLICommand extends ReindexerCLICommand<DriveFile> {
   constructor(platform: TdrivePlatform, options: Options) {
@@ -158,6 +175,9 @@ class DocumentsReindexerCLICommand extends ReindexerCLICommand<DriveFile> {
 RepositoryNameToCTOR.set(
   "documents",
   (platform, options) => new DocumentsReindexerCLICommand(platform, options),
+);
+repairEntitiesArgumentDetails.push(
+  "documents: Download and re-extract keywords before re-indexing",
 );
 
 const reindexingArgumentGroupTitle = "Re-indexing options";
@@ -176,7 +196,9 @@ const command: yargs.CommandModule<unknown, unknown> = {
     repairEntities: {
       default: false,
       type: "boolean",
-      description: "Repair entities too when possible",
+      description: ["Repair entities too when possible", ...repairEntitiesArgumentDetails].join(
+        "\n- ",
+      ),
       group: reindexingArgumentGroupTitle,
     },
   },
