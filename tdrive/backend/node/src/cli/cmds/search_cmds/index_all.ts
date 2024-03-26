@@ -128,7 +128,7 @@ class SearchIndexAll {
     options.spinner.succeed("Done!");
   }
 }
-
+const reindexingArgumentGroupTitle = "Re-indexing options";
 const repositoryArgumentName = "repository";
 const command: yargs.CommandModule<unknown, unknown> = {
   command: "index",
@@ -136,12 +136,16 @@ const command: yargs.CommandModule<unknown, unknown> = {
   builder: {
     [repositoryArgumentName]: {
       type: "string",
-      description: `Repository name: ${SearchIndexAll.getSupportedRepoNames().join(", ")}`,
+      description: "Repository to re-index.",
+      choices: SearchIndexAll.getSupportedRepoNames(),
+      demandOption: true,
+      group: reindexingArgumentGroupTitle,
     },
     repairEntities: {
       default: false,
       type: "boolean",
       description: "Repair entities too when possible",
+      group: reindexingArgumentGroupTitle,
     },
   },
   handler: async argv => {
