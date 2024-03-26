@@ -12,6 +12,7 @@ import CompanyUser, { TYPE as CompanyUserTYPE } from "../../../services/user/ent
 import gr from "../../../services/global-resolver";
 
 type Options = {
+  spinner: ora.Ora;
   repository?: string;
   repairEntities?: boolean;
 };
@@ -25,7 +26,7 @@ class SearchIndexAll {
     this.search = this.platform.getProvider<SearchServiceAPI>("search");
   }
 
-  public async run(options: Options = {}): Promise<void> {
+  public async run(options: Options): Promise<void> {
     const repositories: Map<string, Repository<any>> = new Map();
     repositories.set("users", await this.database.getRepository(UserTYPE, User));
 
@@ -39,7 +40,7 @@ class SearchIndexAll {
 
     // Complete user with companies in cache
     if (options.repository === "users" && options.repairEntities) {
-      console.log("Complete user with companies in cache");
+      options.spinner.info("Complete user with companies in cache");
       const companiesUsersRepository = await this.database.getRepository(
         CompanyUserTYPE,
         CompanyUser,
@@ -67,23 +68,23 @@ class SearchIndexAll {
       } while (page.page_token);
     }
 
-    console.log("Start indexing...");
+    options.spinner.start("Start indexing...");
     let count = 0;
     // Get all items
     let page: Pagination = { limitStr: "100" };
     do {
-      console.log("Indexed " + count + " items...");
       const list = await repository.find({}, { pagination: page }, undefined);
       page = list.nextPage as Pagination;
       await this.search.upsert(list.getEntities());
       count += list.getEntities().length;
+      options.spinner.start("Indexed " + count + " items...");
       await new Promise(r => setTimeout(r, 200));
     } while (page.page_token);
 
-    console.log("Emptying flush (10s)...");
+    options.spinner.succeed(`${count} items indexed`);
+    options.spinner.start("Emptying flush (10s)...");
     await new Promise(r => setTimeout(r, 10000));
-
-    console.log("Done!");
+    options.spinner.succeed("Done!");
   }
 }
 
@@ -128,6 +129,7 @@ const command: yargs.CommandModule<unknown, unknown> = {
     // Let this run even without a repository as its error message includes valid repository names
     await migrator.run({
       repository,
+      spinner,
     });
 
     spinner.stop();
