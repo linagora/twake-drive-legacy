@@ -1,6 +1,8 @@
 import yargs from "yargs";
 import tdrive from "../../../tdrive";
 import ora from "ora";
+
+import config from "../../../core/config";
 import { TdrivePlatform } from "../../../core/platform/platform";
 import { DatabaseServiceAPI } from "../../../core/platform/services/database/api";
 import { Pagination } from "../../../core/platform/framework/api/crud-service";
@@ -88,22 +90,6 @@ class SearchIndexAll {
   }
 }
 
-const services = [
-  "search",
-  "database",
-  "webserver",
-  "auth",
-  "counter",
-  "cron",
-  "message-queue",
-  "push",
-  "realtime",
-  "storage",
-  "tracker",
-  "websocket",
-  "email-pusher",
-];
-
 const command: yargs.CommandModule<unknown, unknown> = {
   command: "index",
   describe: "command to reindex search middleware from db entities",
@@ -120,10 +106,9 @@ const command: yargs.CommandModule<unknown, unknown> = {
   },
   handler: async argv => {
     const spinner = ora({ text: "Reindex repository - " }).start();
-    const platform = await tdrive.run(services);
+    const platform = await tdrive.run(config.get("services"));
     await gr.doInit(platform);
     const migrator = new SearchIndexAll(platform);
-
     const repository = (argv.repository || "") as string;
 
     // Let this run even without a repository as its error message includes valid repository names
