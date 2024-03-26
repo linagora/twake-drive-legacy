@@ -14,10 +14,10 @@ import Repository, {
 import { EntityTarget, SearchServiceAPI } from "../../../core/platform/services/search/api";
 import CompanyUser, { TYPE as CompanyUserTYPE } from "../../../services/user/entities/company_user";
 import runWithPlatform from "../../lib/run_with_platform";
+import SearchRepository from "src/core/platform/services/search/repository";
 
 type Options = {
   spinner: ora.Ora;
-  repositoryName?: string;
   repairEntities: boolean;
 };
 
@@ -40,90 +40,125 @@ async function iterateOverRepoPages<Entity>(
   } while (page.page_token);
 }
 
-type RepositoryConstructor<Entity> = (database: DatabaseServiceAPI) => Promise<Repository<Entity>>;
-
-const makeRepoConstructor =
-  <Entity>(table: string, entity: EntityTarget<Entity>): RepositoryConstructor<Entity> =>
-  database =>
-    database.getRepository<Entity>(table, entity);
-
-/** The commandline name for the user repository. It has specific code for the repairEntities so is defined here. */
-const UsersRepoName = "users";
-
-class SearchIndexAll {
-  database: DatabaseServiceAPI;
-  search: SearchServiceAPI;
-
-  constructor(readonly platform: TdrivePlatform) {
+abstract class ReindexerCLICommand<Entity> {
+  protected readonly database: DatabaseServiceAPI;
+  protected readonly search: SearchServiceAPI;
+  constructor(
+    protected readonly platform: TdrivePlatform,
+    private readonly options: Options,
+    private readonly table: string,
+    private readonly entity: EntityTarget<Entity>,
+  ) {
     this.database = this.platform.getProvider<DatabaseServiceAPI>("database");
     this.search = this.platform.getProvider<SearchServiceAPI>("search");
   }
+  private _dbRepo: Repository<Entity>;
+  protected async dbRepository() {
+    return (this._dbRepo =
+      this._dbRepo || (await this.database.getRepository<Entity>(this.table, this.entity)));
+  }
+  private _searchRepo: SearchRepository<Entity>;
+  protected async searchRepository() {
+    return (this._searchRepo =
+      this._searchRepo || this.search.getRepository<Entity>(this.table, this.entity));
+  }
 
-  private static readonly supportedRepos = new Map<string, RepositoryConstructor<any>>([
-    [UsersRepoName, makeRepoConstructor(UserTYPE, User)],
-    ["documents", makeRepoConstructor(DriveFileTYPE, DriveFile)],
-  ]);
-  public static isRepoSupported = (repositoryName: string) =>
-    this.supportedRepos.has(repositoryName);
-  public static getSupportedRepoNames = () => [...this.supportedRepos.keys()];
-  private getRepository = (repositoryName: string) =>
-    SearchIndexAll.supportedRepos.get(repositoryName)(this.database);
+  protected statusStart(info: string) {
+    this.options.spinner.start(`${this.table} > ${info}`);
+  }
+  protected statusSucceed(info: string) {
+    this.options.spinner.succeed(`${this.table} > ${info}`);
+  }
+  protected statusWarn(info: string) {
+    this.options.spinner.warn(`${this.table} > ${info}`);
+  }
+  protected statusFail(info: string) {
+    this.options.spinner.fail(`${this.table} > ${info}`);
+  }
+  protected statusInfo(info: string) {
+    this.options.spinner.info(`${this.table} > ${info}`);
+  }
 
-  private async repairEntitiesInUsers(
-    options: Options,
-    repository: Repository<User>,
-  ): Promise<void> {
-    // Complete user with companies in cache
-    options.spinner.start("Adding companies to cache of user");
+  protected async repairEntities(): Promise<void> {
+    this.statusWarn(`repairEntities > No repair action for ${this.table}`);
+  }
+
+  protected async mapEntitiesToReIndexFromDBToSearch(entities: Entity[]): Promise<Entity[]> {
+    return entities;
+  }
+
+  protected async reindexFromDBToSearch(): Promise<void> {
+    const repository = await this.dbRepository();
+    this.statusStart("Start indexing...");
+    let count = 0;
+    await iterateOverRepoPages(repository, async entities => {
+      entities = await this.mapEntitiesToReIndexFromDBToSearch(entities);
+      await this.search.upsert(entities);
+      count += entities.length;
+      this.statusStart(`Indexed ${count} ${this.table}...`);
+    });
+    if (count === 0) this.statusWarn(`Index ${this.table} finished; but 0 items included`);
+    else this.statusSucceed(`${count} ${this.table} indexed`);
+    const giveFlushAChanceDurationMS = 10000;
+    this.statusStart(`Emptying flush (${giveFlushAChanceDurationMS / 1000}s)...`);
+    await waitTimeoutMS(giveFlushAChanceDurationMS);
+    this.statusSucceed("Done!");
+  }
+  public async run(): Promise<void> {
+    if (this.options.repairEntities) await this.repairEntities();
+    await this.reindexFromDBToSearch();
+  }
+}
+
+/** Serves as an index of classes for the repos to reindex; to specialise bits of behaviour and what not */
+const RepositoryNameToCTOR = new Map<
+  string,
+  (platform: TdrivePlatform, options: Options) => ReindexerCLICommand<any>
+>();
+
+class UserReindexerCLICommand extends ReindexerCLICommand<User> {
+  constructor(platform: TdrivePlatform, options: Options) {
+    super(platform, options, UserTYPE, User);
+  }
+
+  protected override async repairEntities(): Promise<void> {
+    this.statusStart("repairEntities > Adding companies to cache of user");
     const companiesUsersRepository = await this.database.getRepository(
       CompanyUserTYPE,
       CompanyUser,
     );
     let count = 0;
+    const repository = await this.dbRepository();
     await iterateOverRepoPages(repository, async entities => {
       for (const user of entities) {
         const companies = await companiesUsersRepository.find({ user_id: user.id }, {}, undefined);
+        const prevCache = JSON.stringify(user.cache);
         user.cache ||= { companies: [] };
         user.cache.companies = companies.getEntities().map(company => company.group_id);
-        await repository.save(user, undefined);
+        const newCache = JSON.stringify(user.cache);
+        if (prevCache != newCache) await repository.save(user, undefined);
       }
       count += entities.length;
-      options.spinner.start(`Adding companies to cache of ${count} users...`);
+      this.statusStart(`repairEntities > Adding companies to cache of ${count} users...`);
     });
-    options.spinner.succeed(`Added companies to cache of ${count} users`);
-  }
-
-  private repairEntities(options: Options, repository: Repository<any>): Promise<void> {
-    switch (options.repositoryName) {
-      case UsersRepoName:
-        return this.repairEntitiesInUsers(options, repository);
-      default:
-        options.spinner.warn(`No repair action for repository ${options.repositoryName}`);
-        break;
-    }
-  }
-
-  public async run(options: Options): Promise<void> {
-    const repository = await this.getRepository(options.repositoryName);
-
-    if (options.repairEntities) await this.repairEntities(options, repository);
-
-    options.spinner.start(`Start indexing ${options.repositoryName}...`);
-    let count = 0;
-    await iterateOverRepoPages(repository, async entities => {
-      await this.search.upsert(entities);
-      count += entities.length;
-      options.spinner.start(`Indexed ${count} ${options.repositoryName}...`);
-    });
-    if (count === 0)
-      options.spinner.warn(`Index ${options.repositoryName} finished; but 0 items included`);
-    else options.spinner.succeed(`${count} ${options.repositoryName} indexed`);
-    const giveFlushAChanceDurationMS = 10000;
-    options.spinner.start(`Emptying flush (${giveFlushAChanceDurationMS / 1000}s)...`);
-    await waitTimeoutMS(giveFlushAChanceDurationMS);
-    options.spinner.succeed("Done!");
+    this.statusSucceed(`repairEntities > Added companies to cache of ${count} users`);
   }
 }
+RepositoryNameToCTOR.set(
+  "users",
+  (platform, options) => new UserReindexerCLICommand(platform, options),
+);
+
+class DocumentsReindexerCLICommand extends ReindexerCLICommand<DriveFile> {
+  constructor(platform: TdrivePlatform, options: Options) {
+    super(platform, options, DriveFileTYPE, DriveFile);
+  }
+}
+RepositoryNameToCTOR.set(
+  "documents",
+  (platform, options) => new DocumentsReindexerCLICommand(platform, options),
+);
+
 const reindexingArgumentGroupTitle = "Re-indexing options";
 const repositoryArgumentName = "repository";
 const command: yargs.CommandModule<unknown, unknown> = {
@@ -133,7 +168,7 @@ const command: yargs.CommandModule<unknown, unknown> = {
     [repositoryArgumentName]: {
       type: "string",
       description: "Repository to re-index.",
-      choices: SearchIndexAll.getSupportedRepoNames(),
+      choices: [...RepositoryNameToCTOR.keys()],
       demandOption: true,
       group: reindexingArgumentGroupTitle,
     },
@@ -158,18 +193,15 @@ const command: yargs.CommandModule<unknown, unknown> = {
       }
     }
 
-    runWithPlatform("Re-index " + argv.repository, async ({ spinner, platform }) => {
+    runWithPlatform("Re-index", async ({ spinner, platform }) => {
       try {
-        const migrator = new SearchIndexAll(platform);
-        for (const repositoryName of eachOnlyOnce(repositories)) {
-          await migrator.run({
-            repositoryName,
+        for (const repositoryName of eachOnlyOnce(repositories))
+          await RepositoryNameToCTOR.get(repositoryName)(platform, {
             spinner,
             repairEntities: !!argv.repairEntities,
-          });
-        }
+          }).run();
       } catch (err) {
-        spinner.fail(`Error indexing: ${err.stack}`);
+        spinner.fail(err.stack || err);
         return 1;
       }
     });

@@ -22,7 +22,7 @@ export default async function runWithPlatform(
     platform: TdrivePlatform;
   }) => Promise<number | undefined> | Promise<void>,
 ) {
-  const spinner = ora({ prefixText: prefix + " -" });
+  const spinner = ora({ prefixText: prefix + " >" });
   spinner.start("Platform: starting...");
   const platform = await tdrive.run(config.get("services"));
   await gr.doInit(platform);
