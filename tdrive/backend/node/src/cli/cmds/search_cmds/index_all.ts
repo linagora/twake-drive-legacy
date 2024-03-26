@@ -15,6 +15,7 @@ import { EntityTarget, SearchServiceAPI } from "../../../core/platform/services/
 import CompanyUser, { TYPE as CompanyUserTYPE } from "../../../services/user/entities/company_user";
 import runWithPlatform from "../../lib/run_with_platform";
 import SearchRepository from "src/core/platform/services/search/repository";
+import parseYargsCommaSeparatedStringArray from "../../utils/yargs_comma_array";
 
 type Options = {
   spinner: ora.Ora;
@@ -180,22 +181,12 @@ const command: yargs.CommandModule<unknown, unknown> = {
     },
   },
   handler: async argv => {
-    const repositoryArg = argv[repositoryArgumentName];
-    const repositories =
-      typeof repositoryArg === "string" ? [repositoryArg] : (repositoryArg as [string]);
-
-    function* eachOnlyOnce<T>(list: Iterable<T>): Iterable<T> {
-      const seen = new Set<T>();
-      for (const item of list) {
-        if (seen.has(item)) continue;
-        seen.add(item);
-        yield item;
-      }
-    }
-
+    const repositories = parseYargsCommaSeparatedStringArray(
+      argv[repositoryArgumentName] as string /* ignore typechecker */,
+    );
     runWithPlatform("Re-index", async ({ spinner, platform }) => {
       try {
-        for (const repositoryName of eachOnlyOnce(repositories))
+        for (const repositoryName of repositories)
           await RepositoryNameToCTOR.get(repositoryName)(platform, {
             spinner,
             repairEntities: !!argv.repairEntities,
