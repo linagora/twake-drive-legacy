@@ -43,6 +43,9 @@ The Twake backend CLI
 The Twake backend CLI provides a set of commands to manage/use/develop Tdrive from the `twake-cli` executable.
 Before using the CLI, you must `compile` Tdrive with `npm run build`. Once done, you can get help on on any command with the `--help` flag like `bin/twake-cli --help`.
 
+To have prettied output when using verbose, you can use the npm script instead, (but don't forget the `--` before
+arguments): `npm run cli -- --help`. You still need to compile the cli separately.
+
 It uses the same configuration as the Tdrive backend application. Including environment variables and the `./config/default.json` file.
 
 #### The 'search index' command
