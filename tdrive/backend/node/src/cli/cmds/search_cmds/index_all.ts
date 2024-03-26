@@ -112,15 +112,16 @@ class SearchIndexAll {
 
     if (options.repairEntities) await this.repairEntities(options, repository);
 
-    options.spinner.start("Start indexing...");
+    options.spinner.start(`Start indexing ${options.repositoryName}...`);
     let count = 0;
     await iterateOverRepoPages(repository, async entities => {
       await this.search.upsert(entities);
       count += entities.length;
-      options.spinner.start("Indexed " + count + " items...");
+      options.spinner.start(`Indexed ${count} ${options.repositoryName}...`);
     });
-    if (count === 0) options.spinner.warn("Index finieshed; but 0 items included");
-    else options.spinner.succeed(`${count} items indexed`);
+    if (count === 0)
+      options.spinner.warn(`Index ${options.repositoryName} finished; but 0 items included`);
+    else options.spinner.succeed(`${count} ${options.repositoryName} indexed`);
     const giveFlushAChanceDurationMS = 10000;
     options.spinner.start(`Emptying flush (${giveFlushAChanceDurationMS / 1000}s)...`);
     await waitTimeoutMS(giveFlushAChanceDurationMS);
@@ -144,24 +145,29 @@ const command: yargs.CommandModule<unknown, unknown> = {
     },
   },
   handler: async argv => {
-    const repositoryName = (argv[repositoryArgumentName] || "") as string;
-    if (!(repositoryName && SearchIndexAll.isRepoSupported(repositoryName)))
-      throw new Error(
-        `${
-          repositoryName ? `Invalid (${JSON.stringify(repositoryName)})` : "Missing"
-        } repository.\n` +
-          `\tSet with --${repositoryArgumentName} .\n` +
-          `\tPossible values: ${SearchIndexAll.getSupportedRepoNames().join(", ")}.`,
-      );
+    const repositoryArg = argv[repositoryArgumentName];
+    const repositories =
+      typeof repositoryArg === "string" ? [repositoryArg] : (repositoryArg as [string]);
+
+    function* eachOnlyOnce<T>(list: Iterable<T>): Iterable<T> {
+      const seen = new Set<T>();
+      for (const item of list) {
+        if (seen.has(item)) continue;
+        seen.add(item);
+        yield item;
+      }
+    }
 
     runWithPlatform("Re-index " + argv.repository, async ({ spinner, platform }) => {
       try {
         const migrator = new SearchIndexAll(platform);
-        await migrator.run({
-          repositoryName,
-          spinner,
-          repairEntities: !!argv.repairEntities,
-        });
+        for (const repositoryName of eachOnlyOnce(repositories)) {
+          await migrator.run({
+            repositoryName,
+            spinner,
+            repairEntities: !!argv.repairEntities,
+          });
+        }
       } catch (err) {
         spinner.fail(`Error indexing: ${err.stack}`);
         return 1;
