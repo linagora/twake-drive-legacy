@@ -37,27 +37,37 @@ docker-compose -f ./docker-compose.test.yml run node npm run test:unit
 will run unit tests only (`test:unit`). For possible tests to run, check the `package.json` scripts.
 
 ### Command Line Interface (CLI)
- 
-The Tdrive backend CLI provides a set of commands to manage/use/develop Tdrive from the `tdrive-cli` binary.
-Before to use the CLI, you must `compile` Tdrive with `npm run build`. Once done, you can get help on on any command with the `--help` flag like `./bin/tdrive-cli console --help`.
 
-#### The 'console merge' command
+The Twake backend CLI
 
-This command allows to connect to the database configured in the `./config/default.json` file and to "merge" the Tdrive users and companies into the "Tdrive Console".
+The Twake backend CLI provides a set of commands to manage/use/develop Tdrive from the `twake-cli` executable.
+Before using the CLI, you must `compile` Tdrive with `npm run build`. Once done, you can get help on on any command with the `--help` flag like `./bin/twake-cli --help`.
+
+It uses the same configuration as the Tdrive backend application. Including environment variables and the `./config/default.json` file.
+
+#### The 'search index' command
+
+This command re-indexes entities of the given repository from the database to the search service.
 
 ```sh
-./bin/tdrive-cli console merge --url http://console.tdrive.app --client tdrive-app --secret supersecret
+<<<<<<< HEAD
+./bin/twake-cli search index --repository users --repairEntities
+=======
+bin/twake-cli search index --repository users --repairEntities
 ```
 
-The simplified console workflow is like (some parts are done in parallel):
+- The `--repairEntities` flag means different actions for different repositories, see the output of `--help` for more details.
 
-1. Get all the companies
-2. Iterate over companies and create them in the console side
-3. For each company, get all the users
-4. Iterate over all the users and create them in the console (if the user is in several companies, create once, add it to all the companies)
-5. For each company, get all the admins and choose the oldest one which will be 'marked' as the owner on the console side
+#### Bash completion
 
-At the end of the 'merge', a report will be displayed.
+It's a bit awkward to do real completion from a configuration since this isn't really a node module we recommend to install globally.
+This should setup a shell if you're in the right path however. It's yarg's auto generated completion though; so eg: it mixes up commands and
+choices (or we're using it wrong).
+
+```sh
+eval "$(bin/twake-cli completion)"
+>>>>>>> c95ca33f (fixup! 📝 Updating README.md with CLI example (#438))
+```
 
 ### Component Framework
 
