@@ -6,6 +6,8 @@ import { DatabaseServiceAPI } from "../../../core/platform/services/database/api
 import { Pagination } from "../../../core/platform/framework/api/crud-service";
 
 import User, { TYPE as UserTYPE } from "../../../services/user/entities/user";
+import { DriveFile, TYPE as DriveFileTYPE } from "../../../services/documents/entities/drive-file";
+
 import Repository, {
   FindFilter,
 } from "../../../core/platform/services/database/services/orm/repository/repository";
@@ -58,6 +60,7 @@ class SearchIndexAll {
 
   private static readonly supportedRepos = new Map<string, RepositoryConstructor<any>>([
     [UsersRepoName, makeRepoConstructor(UserTYPE, User)],
+    ["documents", makeRepoConstructor(DriveFileTYPE, DriveFile)],
   ]);
   public static isRepoSupported = (repositoryName: string) =>
     this.supportedRepos.has(repositoryName);
