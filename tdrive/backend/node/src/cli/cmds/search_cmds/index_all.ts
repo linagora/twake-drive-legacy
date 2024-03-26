@@ -6,7 +6,9 @@ import { DatabaseServiceAPI } from "../../../core/platform/services/database/api
 import { Pagination } from "../../../core/platform/framework/api/crud-service";
 
 import User, { TYPE as UserTYPE } from "../../../services/user/entities/user";
-import Repository from "../../../core/platform/services/database/services/orm/repository/repository";
+import Repository, {
+  FindFilter,
+} from "../../../core/platform/services/database/services/orm/repository/repository";
 import { EntityTarget, SearchServiceAPI } from "../../../core/platform/services/search/api";
 import CompanyUser, { TYPE as CompanyUserTYPE } from "../../../services/user/entities/company_user";
 import runWithPlatform from "../../lib/run_with_platform";
@@ -16,6 +18,24 @@ type Options = {
   repositoryName?: string;
   repairEntities: boolean;
 };
+
+const waitTimeoutMS = (ms: number) => ms > 0 && new Promise(r => setTimeout(r, ms));
+
+async function iterateOverRepoPages<Entity>(
+  repository: Repository<Entity>,
+  forEachPage: (entities: Entity[]) => Promise<void>,
+  pageSizeAsStringForReasons: string = "100",
+  filter: FindFilter = {},
+  delayPerPageMS: number = 200,
+) {
+  let page: Pagination = { limitStr: pageSizeAsStringForReasons };
+  do {
+    const list = await repository.find(filter, { pagination: page }, undefined);
+    await forEachPage(list.getEntities());
+    page = list.nextPage as Pagination;
+    await waitTimeoutMS(delayPerPageMS);
+  } while (page.page_token);
+}
 
 type RepositoryConstructor<Entity> = (database: DatabaseServiceAPI) => Promise<Repository<Entity>>;
 
@@ -50,30 +70,31 @@ class SearchIndexAll {
     repository: Repository<User>,
   ): Promise<void> {
     // Complete user with companies in cache
-    options.spinner.start("Complete user with companies in cache");
+    options.spinner.start("Adding companies to cache of user");
     const companiesUsersRepository = await this.database.getRepository(
       CompanyUserTYPE,
       CompanyUser,
     );
-    let page: Pagination = { limitStr: "100" };
     let count = 0;
-    do {
-      const list = await repository.find({}, { pagination: page }, undefined);
-
-      for (const user of list.getEntities()) {
-        const companies = await companiesUsersRepository.find({ user_id: user.id }, {}, undefined);
-
-        user.cache ||= { companies: [] };
-        user.cache.companies = companies.getEntities().map(company => company.group_id);
-        await repository.save(user, undefined);
-      }
-      count += list.getEntities().length;
-      options.spinner.start(`Completed ${count} users with companies in cache...`);
-
-      page = list.nextPage as Pagination;
-      await new Promise(r => setTimeout(r, 2000));
-    } while (page.page_token);
-    options.spinner.succeed(`Completed ${count} users with companies in cache`);
+    await iterateOverRepoPages(
+      repository,
+      async entities => {
+        for (const user of entities) {
+          const companies = await companiesUsersRepository.find(
+            { user_id: user.id },
+            {},
+            undefined,
+          );
+          user.cache ||= { companies: [] };
+          user.cache.companies = companies.getEntities().map(company => company.group_id);
+          await repository.save(user, undefined);
+        }
+        count += entities.length;
+        options.spinner.start(`Adding companies to cache of ${count} users...`);
+      },
+      "2",
+    );
+    options.spinner.succeed(`Added companies to cache of ${count} users`);
   }
 
   private repairEntities(options: Options, repository: Repository<any>): Promise<void> {
@@ -93,20 +114,16 @@ class SearchIndexAll {
 
     options.spinner.start("Start indexing...");
     let count = 0;
-    // Get all items
-    let page: Pagination = { limitStr: "100" };
-    do {
-      const list = await repository.find({}, { pagination: page }, undefined);
-      page = list.nextPage as Pagination;
-      await this.search.upsert(list.getEntities());
-      count += list.getEntities().length;
+    await iterateOverRepoPages(repository, async entities => {
+      await this.search.upsert(entities);
+      count += entities.length;
       options.spinner.start("Indexed " + count + " items...");
-      await new Promise(r => setTimeout(r, 200));
-    } while (page.page_token);
+    });
     if (count === 0) options.spinner.warn("Index finieshed; but 0 items included");
     else options.spinner.succeed(`${count} items indexed`);
-    options.spinner.start("Emptying flush (10s)...");
-    await new Promise(r => setTimeout(r, 10000));
+    const giveFlushAChanceDurationMS = 10000;
+    options.spinner.start(`Emptying flush (${giveFlushAChanceDurationMS / 1000}s)...`);
+    await waitTimeoutMS(giveFlushAChanceDurationMS);
     options.spinner.succeed("Done!");
   }
 }
@@ -145,7 +162,6 @@ const command: yargs.CommandModule<unknown, unknown> = {
           spinner,
           repairEntities: !!argv.repairEntities,
         });
-        return 0;
       } catch (err) {
         spinner.fail(`Error indexing: ${err.stack}`);
         return 1;
