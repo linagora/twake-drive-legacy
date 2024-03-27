@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import yargs from "yargs";
 import { logger } from "../core/platform/framework/logger";
-import printConfigSummary from "./lib/print_config_summary";
+import printConfigSummary from "./lib/print-config-summary";
 
 process.env.NODE_ENV = "cli";
 

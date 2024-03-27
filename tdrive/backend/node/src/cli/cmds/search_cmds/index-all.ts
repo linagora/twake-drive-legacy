@@ -1,7 +1,7 @@
 import yargs from "yargs";
 
 import type { TdrivePlatform } from "../../../core/platform/platform";
-import runWithPlatform from "../../lib/run_with_platform";
+import runWithPlatform from "../../lib/run-with-platform";
 import parseYargsCommaSeparatedStringArray from "../../utils/yargs-comma-array";
 import runWithLoggerLevel from "../../utils/run-with-logger-level";
 
