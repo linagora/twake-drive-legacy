@@ -323,8 +323,9 @@ const command: yargs.CommandModule<unknown, unknown> = {
     const filterDocumentsByUserEMail = parseYargsCommaSeparatedStringArray(
       argv.filterDocumentsByUserEMail as string /* ignore typechecker */,
     );
-    runWithPlatform("Re-index", async ({ spinner, platform }) => {
+    await runWithPlatform("Re-index", async ({ spinner, platform }) => {
       try {
+        logger.level = "debug";
         for (const repositoryName of repositories)
           await RepositoryNameToCTOR.get(repositoryName)(platform, {
             spinner,
