@@ -3,14 +3,11 @@ import ora from "ora";
 
 import { TdrivePlatform } from "../../../core/platform/platform";
 import { DatabaseServiceAPI } from "../../../core/platform/services/database/api";
-import { Pagination } from "../../../core/platform/framework/api/crud-service";
 
 import User, { TYPE as UserTYPE } from "../../../services/user/entities/user";
 import { DriveFile, TYPE as DriveFileTYPE } from "../../../services/documents/entities/drive-file";
 
-import Repository, {
-  FindFilter,
-} from "../../../core/platform/services/database/services/orm/repository/repository";
+import Repository from "../../../core/platform/services/database/services/orm/repository/repository";
 import {
   EntityTarget,
   FindOptions,
@@ -19,7 +16,9 @@ import {
 import CompanyUser, { TYPE as CompanyUserTYPE } from "../../../services/user/entities/company_user";
 import runWithPlatform from "../../lib/run_with_platform";
 import SearchRepository from "src/core/platform/services/search/repository";
-import parseYargsCommaSeparatedStringArray from "../../utils/yargs_comma_array";
+import parseYargsCommaSeparatedStringArray from "../../utils/yargs-comma-array";
+import waitTimeoutMS from "../../utils/wait-timeout";
+import iterateOverRepoPages from "../../utils/iterate-over-repository-pages";
 import globalResolver from "../../../services/global-resolver";
 import { couldGetKeywordsOfFile, getKeywordsOfFile } from "../../../services/documents/utils";
 
@@ -30,26 +29,6 @@ type Options = {
 };
 
 const repairEntitiesArgumentDetails = [];
-const waitTimeoutMS = (ms: number) => ms > 0 && new Promise(r => setTimeout(r, ms));
-const defaultPageSize = "100";
-
-async function iterateOverRepoPages<Entity>(
-  repository: Repository<Entity>,
-  forEachPage: (entities: Entity[]) => Promise<void>,
-  findOptions: FindOptions = {},
-  filter: FindFilter = {},
-  pageSizeAsStringForReasons: string = defaultPageSize,
-  delayPerPageMS: number = 200,
-) {
-  let page: Pagination = { limitStr: pageSizeAsStringForReasons };
-  do {
-    const options = { ...findOptions, pagination: page };
-    const list = await repository.find(filter, options, undefined);
-    await forEachPage(list.getEntities());
-    page = list.nextPage as Pagination;
-    await waitTimeoutMS(delayPerPageMS);
-  } while (page.page_token);
-}
 
 /** This is an abstract base class for re-index cli commands; it stores runtime options
  *  into fields; runs repair first if request and re-indexes generically from the database
@@ -231,6 +210,21 @@ class DocumentsReindexerCLICommand extends ReindexerCLICommand<DriveFile> {
     return { $in: [["creator", [...rawUserIds, ...emailsToIds.values()]]] };
   }
   protected override async repairEntities(findOptions: FindOptions): Promise<void> {
+    /*
+    //Todo:
+      - [ ] Batch saves
+      - [ ] Refactor repair into mapping
+      - [ ] Check save does upsert
+      - [ ] Remove logs
+      - [ ] Document this:
+          For each item in DB
+            Download
+              - [ ] Decide if download fails ? Flag file ? Delete entity ?
+            If keywords changed
+              Save to DB
+            - [ ] Delete file
+    */
+
     const repository = await this.dbRepository();
     await iterateOverRepoPages(
       repository,
@@ -286,6 +280,24 @@ RepositoryNameToCTOR.set(
 repairEntitiesArgumentDetails.push(
   "documents: Download and re-extract keywords before re-indexing",
 );
+class _BufferedAction<Entity> {
+  private buffer: Entity[];
+  constructor(
+    private readonly batchSize: number,
+    private readonly action: (entities: Entity[]) => Promise<void>,
+  ) {}
+  public async flush() {
+    const buffer = this.buffer;
+    if (!buffer.length) return;
+    this.buffer = new Array(this.batchSize);
+    return this.action(buffer);
+  }
+  public async save(entity: Entity) {
+    this.buffer.push(entity);
+    if (this.buffer.length >= this.batchSize) await this.flush();
+  }
+}
+import { logger } from "../../../core/platform/framework/logger";
 
 const reindexingArgumentGroupTitle = "Re-indexing options";
 const repositoryArgumentName = "repository";
