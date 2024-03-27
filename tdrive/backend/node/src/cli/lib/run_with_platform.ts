@@ -5,6 +5,8 @@ import tdrive from "../../tdrive";
 import gr from "../../services/global-resolver";
 import type { TdrivePlatform } from "../../core/platform/platform";
 
+//TODO: When this gets used for all commands; update verboseDuringRun from search/index-all and move to root index
+
 /**
  * Start the platform and its services, run the command (passed as
  * the `handler` callback), then cleanly shut down the platform.

@@ -3,6 +3,7 @@ import yargs from "yargs";
 import type { TdrivePlatform } from "../../../core/platform/platform";
 import runWithPlatform from "../../lib/run_with_platform";
 import parseYargsCommaSeparatedStringArray from "../../utils/yargs-comma-array";
+import runWithLoggerLevel from "../../utils/run-with-logger-level";
 
 import type BaseReindexer from "./index-all/base-reindexer";
 import type ReindexerOptions from "./index-all/reindexer-options";
@@ -58,6 +59,14 @@ const command: yargs.CommandModule<unknown, unknown> = {
         "When processing documents, limit to those owned by the users with the provided comma separated e-mails",
       group: "Filtering for documents repository",
     },
+    verboseDuringRun: {
+      type: "boolean",
+      alias: "V",
+      description:
+        "Set to verbose logging except for startup and shutdown of Platform. Use flag once for 'info' level, twice for 'debug'.",
+      group: "Output",
+      count: true,
+    },
   },
   handler: async argv => {
     const repositories = parseYargsCommaSeparatedStringArray(
@@ -67,19 +76,28 @@ const command: yargs.CommandModule<unknown, unknown> = {
       argv.filterDocumentsByUserEMail as string /* ignore typechecker */,
     );
     await runWithPlatform("Re-index", async ({ spinner, platform }) => {
-      try {
-        for (const repositoryName of repositories)
-          await RepositoryNameToCTOR.get(repositoryName)
-            .ctor(platform, {
-              spinner,
-              repairEntities: !!argv.repairEntities,
-              filterDocumentsByUserEMail,
-            })
-            .run();
-      } catch (err) {
-        spinner.fail(err.stack || err);
-        return 1;
-      }
+      return await runWithLoggerLevel(
+        argv.verboseDuringRun
+          ? (argv.verboseDuringRun as number) > 1
+            ? "debug"
+            : "info"
+          : undefined,
+        async () => {
+          try {
+            for (const repositoryName of repositories)
+              await RepositoryNameToCTOR.get(repositoryName)
+                .ctor(platform, {
+                  spinner,
+                  repairEntities: !!argv.repairEntities,
+                  filterDocumentsByUserEMail,
+                })
+                .run();
+          } catch (err) {
+            spinner.fail(err.stack || err);
+            return 1;
+          }
+        },
+      );
     });
   },
 };

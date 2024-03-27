@@ -12,12 +12,16 @@ import waitTimeoutMS from "../../../utils/wait-timeout";
 import iterateOverRepoPages from "../../../utils/iterate-over-repository-pages";
 import type ReindexerOptions from "./reindexer-options";
 
+const pluralificationate = (noun: string) => noun.replace(/s$/i, "").replace(/y$/i, "ie") + "s";
+
 /** This is an abstract base class for re-index cli commands; it stores runtime options
  *  into fields; runs repair first if requested and re-indexes generically from the database
  *  to search services. */
 export default abstract class BaseReindexer<Entity> {
   protected readonly database: DatabaseServiceAPI;
   protected readonly search: SearchServiceAPI;
+  private readonly tablePlural: string;
+
   constructor(
     protected readonly platform: TdrivePlatform,
     protected readonly options: ReindexerOptions,
@@ -26,12 +30,15 @@ export default abstract class BaseReindexer<Entity> {
   ) {
     this.database = this.platform.getProvider<DatabaseServiceAPI>("database");
     this.search = this.platform.getProvider<SearchServiceAPI>("search");
+    this.tablePlural = pluralificationate(this.table);
   }
+
   private _dbRepo: Repository<Entity>;
   protected async dbRepository() {
     return (this._dbRepo =
       this._dbRepo || (await this.database.getRepository<Entity>(this.table, this.entity)));
   }
+
   private _searchRepo: SearchRepository<Entity>;
   protected async searchRepository() {
     return (this._searchRepo =
@@ -39,19 +46,19 @@ export default abstract class BaseReindexer<Entity> {
   }
 
   protected statusStart(info: string) {
-    this.options.spinner.start(`${this.table} > ${info}`);
+    this.options.spinner.start(`${this.tablePlural} > ${info}`);
   }
   protected statusSucceed(info: string) {
-    this.options.spinner.succeed(`${this.table} > ${info}`);
+    this.options.spinner.succeed(`${this.tablePlural} > ${info}`);
   }
   protected statusWarn(info: string) {
-    this.options.spinner.warn(`${this.table} > ${info}`);
+    this.options.spinner.warn(`${this.tablePlural} > ${info}`);
   }
   protected statusFail(info: string) {
-    this.options.spinner.fail(`${this.table} > ${info}`);
+    this.options.spinner.fail(`${this.tablePlural} > ${info}`);
   }
   protected statusInfo(info: string) {
-    this.options.spinner.info(`${this.table} > ${info}`);
+    this.options.spinner.info(`${this.tablePlural} > ${info}`);
   }
 
   /** Override in sub-classes to translate a page from database to search entities.
@@ -71,7 +78,7 @@ export default abstract class BaseReindexer<Entity> {
    * on the entity type.
    */
   protected async repairEntities(_findOptions: FindOptions): Promise<void> {
-    this.statusWarn(`repairEntities > No repair action for ${this.table}`);
+    this.statusWarn(`repairEntities > No repair action for ${this.tablePlural}`);
   }
 
   /** Override in a sub-class to completely replace the re-indexing logic.
@@ -89,12 +96,12 @@ export default abstract class BaseReindexer<Entity> {
         entities = await this.mapEntitiesToReIndexFromDBToSearch(entities);
         await this.search.upsert(entities);
         count += entities.length;
-        this.statusStart(`Indexed ${count} ${this.table}...`);
+        this.statusStart(`Indexed ${count} ${this.tablePlural}...`);
       },
       findOptions,
     );
-    if (count === 0) this.statusWarn(`Index ${this.table} finished; but 0 items included`);
-    else this.statusSucceed(`${count} ${this.table} indexed`);
+    if (count === 0) this.statusWarn(`Index ${this.tablePlural} finished; but 0 items included`);
+    else this.statusSucceed(`${count} ${this.tablePlural} indexed`);
     const giveFlushAChanceDurationMS = 10000;
     this.statusStart(`Emptying flush (${giveFlushAChanceDurationMS / 1000}s)...`);
     await waitTimeoutMS(giveFlushAChanceDurationMS);

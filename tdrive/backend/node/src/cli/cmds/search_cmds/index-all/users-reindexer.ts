@@ -24,7 +24,8 @@ export default class UsersReindexer extends BaseReindexer<User> {
       CompanyUserTYPE,
       CompanyUser,
     );
-    let count = 0;
+    let count = 0,
+      countChanged = 0;
     const repository = await this.dbRepository();
     await iterateOverRepoPages(repository, async entities => {
       for (const user of entities) {
@@ -33,11 +34,18 @@ export default class UsersReindexer extends BaseReindexer<User> {
         user.cache ||= { companies: [] };
         user.cache.companies = companies.getEntities().map(company => company.group_id);
         const newCache = JSON.stringify(user.cache);
-        if (prevCache != newCache) await repository.save(user, undefined);
+        if (prevCache != newCache) {
+          await repository.save(user, undefined);
+          countChanged++;
+        }
       }
       count += entities.length;
-      this.statusStart(`repairEntities > Adding companies to cache of ${count} users...`);
+      this.statusStart(
+        `repairEntities > Adding companies to cache of ${count} users (${countChanged} changed)...`,
+      );
     });
-    this.statusSucceed(`repairEntities > Added companies to cache of ${count} users`);
+    this.statusSucceed(
+      `repairEntities > Added companies to cache of ${count} users (${countChanged} changed)`,
+    );
   }
 }

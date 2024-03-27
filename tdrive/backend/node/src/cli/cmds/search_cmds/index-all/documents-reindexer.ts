@@ -60,6 +60,8 @@ export default class DocumentsReindexer extends BaseReindexer<DriveFile> {
     "Download and re-extract keywords before re-indexing";
   protected override async repairEntities(findOptions: FindOptions): Promise<void> {
     const repository = await this.dbRepository();
+    let count = 0,
+      countChanged = 0;
     await iterateOverRepoPages(
       repository,
       async entities => {
@@ -70,6 +72,7 @@ export default class DocumentsReindexer extends BaseReindexer<DriveFile> {
           this.statusInfo(
             `-> Downloading ${entity.name} (${entity.size}b id: ${entity.id} creator: ${entity.creator}`,
           );
+          count++;
           try {
             if (
               entity.size === 0 ||
@@ -97,11 +100,13 @@ export default class DocumentsReindexer extends BaseReindexer<DriveFile> {
             if (content_keywords !== entity.content_keywords) {
               entity.content_keywords = content_keywords;
               repository.save(entity);
+              countChanged++;
             }
           } catch (err) {
             this.statusFail(err.stack);
           }
         }
+        this.statusStart(`Repaired ${count} documents (${countChanged} changed)`);
       },
       findOptions,
     );
