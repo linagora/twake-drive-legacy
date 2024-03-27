@@ -1,5 +1,5 @@
 ---
-description: How we use resumable on TDrive
+description: How we use resumable on Twake Drive
 ---
 
 # Resumable.js
@@ -9,7 +9,7 @@ description: How we use resumable on TDrive
 ## What is Resumable.js
 
 ::: info
-Using Resumable is not mandatory to upload a file to TDrive. You can do it manually, see REST APIs page.
+Using Resumable is not mandatory to upload a file to Twake Drive. You can do it manually, see REST APIs page.
 :::
 
 It’s a JavaScript library providing multiple simultaneous, stable and resumable uploads via the HTML5 File API.

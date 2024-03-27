@@ -1,14 +1,14 @@
 ---
-description: File on TDrive
+description: File on Twake Drive
 ---
 
 # 📄 Files
-
+<!-- TODO[NOT UP TO DATE] -->
 ## description
 
-**Files** is everything related to file upload in TDrive after the migration to Node.js. Note that the TDrive Drive isn't part of this migration because it will be replaced by Linshare.
+**Files** is everything related to file upload in Twake Drive after the migration to Node.js. Note that the Twake Drive isn't part of this migration because it will be replaced by Linshare.
 
-TDrive Files upload support chunk upload and file encryption.
+Twake Drive Files upload support chunk upload and file encryption.
 
 ## Wording
 
@@ -18,7 +18,7 @@ TDrive Files upload support chunk upload and file encryption.
 
 ## Encryption
 
-Files and Storage services in TDrive feature encryption at rest in **aes-256-cbc**.
+Files and Storage services in Twake Drive feature encryption at rest in **aes-256-cbc**.
 
 Each file is encrypted with two layers:
 

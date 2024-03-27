@@ -4,7 +4,7 @@ description: >-
   to our channel service ? You are in the right place !
 ---
 
-# What is a service in TDrive ?
+# What is a service in Twake Drive ?
 
 The backend is developed using a **software component approach** in order to compose and adapt the platform based on needs and constraints. The current section describes this approach, and how to extend it by creating new components.
 
@@ -25,9 +25,9 @@ The platform currently have some limitations:
 
 ## Discover what is in a service
 
-To unfold the internal ways of services in TDrive, we will follow a simple request journey into our framework.
+To unfold the internal ways of services in Twake Drive, we will follow a simple request journey into our framework.
 
-1. The requests starts from TDrive Frontend or Postman for instance,
+1. The requests starts from Twake Drive Frontend or Postman for instance,
 2. it then goes to a controller which validate the request parameters and extract them for the services,
 3. the services uses the given parameters to get/set entities in database and returns a proper reply.
 

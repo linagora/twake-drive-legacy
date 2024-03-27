@@ -1,16 +1,16 @@
 ---
-description: More details about TDrive configuration.
+description: More details about Twake Drive configuration.
 ---
 
 # ⚙️ Server configuration
 
 ### Detach the configuration and start using your own
 
-Each configuration file is optional, if not given, TDrive will fallback to default configuration.
+Each configuration file is optional, if not given, Twake Drive will fallback to default configuration.
 
 #### Backend configuration
 
-You can find an example of TDrive configuration (default configuration) here: [https://github.com/TDriveApp/TDrive/blob/main/tdrive/backend/node/config/default.json](https://github.com/TDriveApp/TDrive/blob/main/tdrive/backend/node/config/default.json)
+You can find an example of Twake Drive configuration (default configuration) here: [https://github.com/linagora/twake-drive/blob/main/tdrive/backend/node/config/default.json](https://github.com/linagora/twake-drive/blob/main/tdrive/backend/node/config/default.json)
 
 Copy the content of this file and put it in `[docker-compose.yml location]/configuration/backend-node/production.json`
 
@@ -18,7 +18,7 @@ Copy the content of this file and put it in `[docker-compose.yml location]/confi
 
 #### Frontend configuration (only for scalable mode)
 
-You can find an example of TDrive configuration (default configuration) here: [https://github.com/TDriveApp/TDrive/blob/main/tdrive/frontend/src/app/environment/environment.ts.dist](https://github.com/TDriveApp/TDrive/blob/main/tdrive/frontend/src/app/environment/environment.ts.dist)
+You can find an example of Twake Drive configuration (default configuration) here: [https://github.com/linagora/twake-drive/blob/main/tdrive/frontend/src/app/environment/environment.ts.dist](https://github.com/linagora/twake-drive/blob/main/tdrive/frontend/src/app/environment/environment.ts.dist)
 
 Copy the content of this file and put it in `[docker-compose.yml location]/configuration/frontend/environment.ts`
 

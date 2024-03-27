@@ -1,7 +1,7 @@
 ---
 description: >-
-  If you are here, you probably have a very great idea for TDrive, like adding a
-  brand new feature into TDrive, maybe a coffee maker service ? ☕️
+  If you are here, you probably have a very great idea for Twake Drive, like adding a
+  brand new feature into Twake Drive, maybe a coffee maker service ? ☕️
 ---
 
 # Create a new service
@@ -19,10 +19,10 @@ In order to illustrate how to create a component, let's create a fake Notificati
 
 ```javascript
 // File src/services/notification/index.ts
-import { TDriveService } from "../../core/platform/framework";
+import { TdriveService } from "../../core/platform/framework";
 import NotificationServiceAPI from "./api.ts";
 
-export default class NotificationService extends TDriveService<NotificationServiceAPI> {
+export default class NotificationService extends TdriveService<NotificationServiceAPI> {
   version = "1";
   name = "notification";
   service: NotificationServiceAPI;
@@ -33,15 +33,15 @@ export default class NotificationService extends TDriveService<NotificationServi
 }
 ```
 
-1. Our `NotificationService` class extends the generic `TDriveService` class and we defined the `NotificationServiceAPI` as its generic type parameter. It means that in the platform, the other components will be able to retrieve the component from its name and then consume the API defined in the `NotificationServiceAPI` interface and exposed by the `api` method.
+1. Our `NotificationService` class extends the generic `TdriveService` class and we defined the `NotificationServiceAPI` as its generic type parameter. It means that in the platform, the other components will be able to retrieve the component from its name and then consume the API defined in the `NotificationServiceAPI` interface and exposed by the `api` method.
 
-   We need to create this `NotificationServiceAPI` interface which must extend the `TDriveServiceProvider` from the platform like:
+   We need to create this `NotificationServiceAPI` interface which must extend the `TdriveServiceProvider` from the platform like:
 
 ```javascript
 // File src/services/notification/api.ts
-import { TDriveServiceProvider } from "../../core/platform/framework/api";
+import { TdriveServiceProvider } from "../../core/platform/framework/api";
 
-export default interface NotificationServiceAPI extends TDriveServiceProvider {
+export default interface NotificationServiceAPI extends TdriveServiceProvider {
 
   /**
    * Send a message to a list of recipients
@@ -65,17 +65,17 @@ export class NotificationServiceImpl implements NotificationServiceAPI {
 }
 ```
 
-1. `NotificationServiceImpl` now needs to be instanciated from the `NotificationService` class since this is where we choose to keep its reference and expose it. There are several places which can be used to instanciate it, in the constructor itself, or in one of the `TDriveService` lifecycle hooks. The `TDriveService` abstract class has several lifecycle hooks which can be extended by the service implementation for customization pusposes:
+1. `NotificationServiceImpl` now needs to be instanciated from the `NotificationService` class since this is where we choose to keep its reference and expose it. There are several places which can be used to instanciate it, in the constructor itself, or in one of the `TdriveService` lifecycle hooks. The `TdriveService` abstract class has several lifecycle hooks which can be extended by the service implementation for customization pusposes:
 2. `public async doInit(): Promise<this>;` Customize the `init` step of the component. This is generally the place where services are instanciated. From this step, you can retrieve services consumed by the current component which have been already initialized by the platform.
 3. `public async doStart(): Promise<this>;` Customize the `start` step of the component. You have access to all other services which are already started.
 
 ```javascript
 // File src/services/notification/index.ts
-import { TDriveService } from "../../core/platform/framework";
+import { TdriveService } from "../../core/platform/framework";
 import NotificationServiceAPI from "./api.ts";
 import NotificationServiceImpl from "./services/api.ts";
 
-export default class NotificationService extends TDriveService<NotificationServiceAPI> {
+export default class NotificationService extends TdriveService<NotificationServiceAPI> {
   version = "1";
   name = "notification";
   service: NotificationServiceAPI;
@@ -95,12 +95,12 @@ export default class NotificationService extends TDriveService<NotificationServi
 1. Now that the service is fully created, we can consume it from any other service in the platform. To do this, we rely on Typescript decorators to define the links between components. For example, let's say that the a `MessageService` needs to call the `NotificationServiceAPI`, we can create the link with the help of the `@Consumes` decorator and get a reference to the `NotificationServiceAPI` by calling the `getProvider` on the component context like:
 
 ```javascript
-import { TDriveService, Consumes } from "../../core/platform/framework";
+import { TdriveService, Consumes } from "../../core/platform/framework";
 import MessageServiceAPI from "./providapier";
 import NotificationServiceAPI from "../notification/api";
 
 @Consumes(["notification"])
-export default class MessageService extends TDriveService<MessageServiceAPI> {
+export default class MessageService extends TdriveService<MessageServiceAPI> {
 
   public async doInit(): Promise<this> {
     const notificationService = this.context.getProvider<NotificationServiceAPI>("notification");
@@ -115,12 +115,12 @@ export default class MessageService extends TDriveService<MessageServiceAPI> {
 The platform and services configuration is defined in the `config/default.json` file. It uses [node-config](https://github.com/lorenwest/node-config) under the hood and to configuration file inheritence is supported in the platform.
 
 The list of services to start is defined in the `services` array like:
-
+<!-- TODO[NOT UP TO DATE] -->
 ```javascript
 {
   "services": ["auth", "user", "channels", "webserver", "websocket", "database", "realtime"]
 }
-```
+```<!-- TODO[NOT UP TO DATE] -->
 
 Then each service can have its own configuration block which is accessible from its service name i.e. `websocket` service configuration is defined in the `websocket` element like:
 
@@ -143,7 +143,7 @@ Then each service can have its own configuration block which is accessible from 
 On the component class side, the configuration object is directly accessible from the `configuration` property like:
 
 ```javascript
-export default class WebSocket extends TDriveService<WebSocketAPI> {
+export default class WebSocket extends TdriveService<WebSocketAPI> {
   async doInit(): Promise<this> {
     // get the "path" value, defaults to "/socket" if not defined
     const path = this.configuration.get < string > ("path", "/socket");
@@ -166,7 +166,7 @@ After creating a new service, you can add controllers, business services and ent
 
 ## Create a new technical service
 
-Now you are bringing things a step further, you are going to add new core services in TDrive, like for instance a new database connector or encryption system.
+Now you are bringing things a step further, you are going to add new core services in Twake Drive, like for instance a new database connector or encryption system.
 
 Creating a new core service is as easy as creating a functional service. But it must be in `src/core/platform/services` .
 

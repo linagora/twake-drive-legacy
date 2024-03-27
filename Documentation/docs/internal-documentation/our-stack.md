@@ -4,14 +4,14 @@ description: Here is the list of our middlewares and their usages.
 
 # 📚 Our stack
 
-Write an article describing our stack at TDrive composed of:
+Write an article describing our stack at Twake Drive composed of:
 
 - In full mode a docker containing: node, react behind nginx, elasticsearch, scylladb, redis, rabbitmq
 - In simple mode a docker containing: node, react and mongodb for db and search
 
 ### Simple mode
 
-The simple mode of TDrive messaging app is designed for quick setup and development purposes. It is a more straightforward mode that uses a single container to deploy the components. The technical stack of this mode includes the following components:
+The simple mode of Twake Drive messaging app is designed for quick setup and development purposes. It is a more straightforward mode that uses a single container to deploy the components. The technical stack of this mode includes the following components:
 
 - Node: A JavaScript runtime environment used to develop server-side applications.
 - React: A JavaScript library used to build user interfaces.
@@ -21,7 +21,7 @@ The simple mode is great for companies that want a quick and easy setup for thei
 
 ### Full mode
 
-The full mode of TDrive messaging app is designed to handle large-scale production loads with more than 1000 active users. It uses a container-based approach to deploy the components and ensure scalability. The technical stack of this mode includes the following components:
+The full mode of Twake Drive messaging app is designed to handle large-scale production loads with more than 1000 active users. It uses a container-based approach to deploy the components and ensure scalability. The technical stack of this mode includes the following components:
 
 - Node: A JavaScript runtime environment used to develop server-side applications.
 - React: A JavaScript library used to build user interfaces.

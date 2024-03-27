@@ -1,12 +1,12 @@
 ---
-description: How applications are managed in TDrive backend
+description: How applications are managed in Twake Drive backend
 ---
 
 # 🍎 Applications
 
 #### Description
 
-**Applications** is everything related to connectors in TDrive.
+**Applications** is everything related to connectors in Twake Drive.
 
 An application is described by an identity sheet containing this information:
 

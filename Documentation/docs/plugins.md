@@ -1,4 +1,4 @@
-# Tdrive - How to enable plugins
+# Twake Drive - How to enable plugins
 
 ## Edit the /backend/node/config/{env}.json file to add the plugin, here is an example with onlyoffice:
 
@@ -120,4 +120,4 @@ Note:
 
 When starting the docker-compose, the plugin will be available on https://[frontend]/plugins/onlyoffice/ you can test everything works by opening the url https://[frontend]/plugins/onlyoffice/assets/logo.png .
 
-If the logo displays, then open TDrive, and see if you can create a new OnlyOffice Spreadsheet when clicking on "New".
+If the logo displays, then open Twake Drive, and see if you can create a new OnlyOffice Spreadsheet when clicking on "New".
