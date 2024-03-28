@@ -29,8 +29,13 @@ export default async function runWithPlatform(
   const platform = await tdrive.run(config.get("services"));
   await gr.doInit(platform);
   spinner.succeed("Platform: started");
-  const exitCode = await handler({ spinner, config, platform });
-  if (typeof exitCode === "number") process.exitCode = exitCode;
+  try {
+    const exitCode = await handler({ spinner, config, platform });
+    if (typeof exitCode === "number") process.exitCode = exitCode;
+  } catch (err) {
+    spinner.fail(err.stack || err);
+    process.exitCode = 1;
+  }
   spinner.start("Platform: shutting down...");
   await platform.stop();
   spinner.succeed("Platform: shutdown");

@@ -83,19 +83,14 @@ const command: yargs.CommandModule<unknown, unknown> = {
             : "info"
           : undefined,
         async () => {
-          try {
-            for (const repositoryName of repositories)
-              await RepositoryNameToCTOR.get(repositoryName)
-                .ctor(platform, {
-                  spinner,
-                  repairEntities: !!argv.repairEntities,
-                  filterDocumentsByUserEMail,
-                })
-                .run();
-          } catch (err) {
-            spinner.fail(err.stack || err);
-            return 1;
-          }
+          for (const repositoryName of repositories)
+            await RepositoryNameToCTOR.get(repositoryName)
+              .ctor(platform, {
+                spinner,
+                repairEntities: !!argv.repairEntities,
+                filterDocumentsByUserEMail,
+              })
+              .run();
         },
       );
     });
