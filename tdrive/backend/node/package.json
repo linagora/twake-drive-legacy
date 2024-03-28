@@ -10,7 +10,7 @@
     "build:copy-config": "cp -R config dist",
     "build:copy-templates": "cpy src/**/*.eta dist/",
     "build:watch": "npm run build:clean && npm run build:copy-assets && tsc-watch --project . --noClear --outDir ./dist",
-    "cli": "__tdcli() { bin/twake-cli \"$@\" | pino-pretty ; } ; __tdcli",
+    "cli": "__tdcli() { set -o pipefail ; bin/twake-cli \"$@\" | pino-pretty ; } ; __tdcli",
     "dev": "tsc-watch --project . --noClear --outDir ./dist --onSuccess \"nodemon ./dist/server.js\" | pino-pretty",
     "dev:cli": "tsc-watch --project . --noClear --outDir ./dist --onSuccess \"nodemon ./dist/cli/index.js workspace user\" | pino-pretty",
     "dev:cli-dry": "tsc-watch --project . --noClear --outDir ./dist --onSuccess \"nodemon ./dist/cli/index.js console merge --dry\" | pino-pretty",
