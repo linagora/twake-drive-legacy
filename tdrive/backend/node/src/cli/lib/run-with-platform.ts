@@ -6,6 +6,7 @@ import gr from "../../services/global-resolver";
 import type { TdrivePlatform } from "../../core/platform/platform";
 
 //TODO: When this gets used for all commands; update verboseDuringRun from search/index-all and move to root index
+//      And consider moving print-config-summary call here.
 
 /**
  * Start the platform and its services, run the command (passed as

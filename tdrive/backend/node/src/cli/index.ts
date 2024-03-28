@@ -10,7 +10,7 @@ yargs
   .usage("Usage: $0 <command> [options]")
   .middleware([
     argv => {
-      logger.level = argv.verbose ? "debug" : "fatal";
+      logger.level = argv.verbose ? "debug" : "error";
       if (!argv.quietConfigSummary) {
         console.error("Platform configuration:");
         printConfigSummary().forEach(x => console.error(`\t${x}`));
