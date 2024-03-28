@@ -12,10 +12,8 @@ import type { TdrivePlatform } from "../../core/platform/platform";
  * Start the platform and its services, run the command (passed as
  * the `handler` callback), then cleanly shut down the platform.
  * @param prefix Prefix text to set on the Ora spinner
- * @param handler Callback to run the actual command.
- *    - If it returns a number, that will be the exit code of the process.
- *    - No attempt to catch errors is done here. If it throws, the platform
- *      shutdown will be skipped and normal unhandled exception stuff will go on.
+ * @param handler Callback to run the actual command. If it returns a number,
+ *   that will be the exit code of the process.
  */
 export default async function runWithPlatform(
   prefix: string,
