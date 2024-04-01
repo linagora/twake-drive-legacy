@@ -331,5 +331,8 @@
     "scenes.app.shared_with_me.shared_by": "Partagé par",
     "scenes.app.shared_with_me.shared_date": "Date de partage",
     "scenes.app.shared_with_me.edit": "Modifier",
-    "components.item_context_menu.manage_users": "Gérer les utilisateurs"
+    "components.item_context_menu.manage_users": "Gérer les utilisateurs",
+    "ONLYOFFICE Word Document": "Créer un document",
+    "ONLYOFFICE Excel Document": "Créer une feuille de calcul",
+    "ONLYOFFICE PowerPoint Document": "Créer une présentation"
 }

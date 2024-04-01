@@ -332,5 +332,8 @@
     "scenes.app.shared_with_me.name": "Name",
     "scenes.app.shared_with_me.shared_by": "Shared by",
     "scenes.app.shared_with_me.shared_date": "Shared date",
-    "scenes.app.shared_with_me.edit": "Edit"
+    "scenes.app.shared_with_me.edit": "Edit",
+    "ONLYOFFICE Word Document": "Create a Document",
+    "ONLYOFFICE Excel Document": "Create a Spreadsheet",
+    "ONLYOFFICE PowerPoint Document": "Create a Presentation" 
 }

@@ -330,5 +330,8 @@
     "scenes.app.shared_with_me.name": "Название",
     "scenes.app.shared_with_me.shared_by": "Кто открыл доступ",
     "scenes.app.shared_with_me.shared_date": "Дата предоставления доступа",
-    "scenes.app.shared_with_me.edit": "Редактировать"
+    "scenes.app.shared_with_me.edit": "Редактировать",
+    "ONLYOFFICE Word Document": "Создать документ",
+    "ONLYOFFICE Excel Document": "Создать электронную таблицу",
+    "ONLYOFFICE PowerPoint Document": "Создать презентацию"
 }

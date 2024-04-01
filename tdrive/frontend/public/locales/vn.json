@@ -330,5 +330,8 @@
     "scenes.app.shared_with_me.name": "Tên",
     "scenes.app.shared_with_me.shared_by": "Được chia sẻ bởi",
     "scenes.app.shared_with_me.shared_date": "Ngày chia sẻ",
-    "scenes.app.shared_with_me.edit": "Chỉnh sửa"
+    "scenes.app.shared_with_me.edit": "Chỉnh sửa",
+    "ONLYOFFICE Word Document": "Tạo Tài liệu Word",
+    "ONLYOFFICE Excel Document": "Tạo Bảng tính Excel",
+    "ONLYOFFICE PowerPoint Document": "Tạo Bài thuyết trình PowerPoint"
 }
