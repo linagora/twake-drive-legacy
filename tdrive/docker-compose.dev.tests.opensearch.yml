@@ -1,0 +1,71 @@
+version: "3.4"
+
+# docker-compose -f docker-compose.dev.tests.mongo.yml stop mongo; rm -R docker-data/mongo/; docker-compose -f docker-compose.dev.tests.mongo.yml run -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb node npm run test:e2e
+
+services:
+
+  opensearch-node1:
+    image: opensearchproject/opensearch:2.11.0 # Specifying the latest available image - modify if you want a specific version
+    container_name: opensearch-node1
+    environment:
+      - cluster.name=opensearch-cluster # Name the cluster
+      - node.name=opensearch-node1 # Name the node that will run in this container
+      - discovery.seed_hosts=opensearch-node1 # Nodes to look for when discovering the cluster
+      - cluster.initial_cluster_manager_nodes=opensearch-node1 # Nodes eligible to serve as cluster manager
+      - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+#      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=admin
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
+#    volumes:
+#      - opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
+    ports:
+      - 9200:9200 # REST API
+#      - 9600:9600 # Performance Analyzer
+#   networks:
+ #     - opensearch-net # All of the containers will join the same Docker bridge network
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: tdrive
+      POSTGRES_PASSWORD: tdrive_secret
+      POSTGRES_USER: tdrive_user
+    ports:
+      - "5432:5432"
+
+  node:
+    image: tdrive/tdrive-node:test
+    build:
+      context: .
+      dockerfile: docker/tdrive-node/Dockerfile
+      target: development
+    volumes:
+      - ./coverage/:/usr/src/app/coverage/
+    environment:
+      - LOG_LEVEL=error
+      - NODE_ENV=test
+      - DB_DRIVER=postgres
+      - DB_POSTGRES_DBNAME=tdrive
+      - DB_POSTGRES_HOST=postgres
+      - DB_POSTGRES_PASSWORD=tdrive_secret
+      - DB_POSTGRES_PORT=5432
+      - DB_POSTGRES_USERNAME=tdrive_user
+      - PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
+      - SEARCH_OS_FLUSHINTERVAL=1
+      - SEARCH_OS_ENDPOINT=https://opensearch-node1:9200
+      - SEARCH_OS_PASSWORD=admin
+      - SEARCH_OS_USE_AUTH=true
+      - SEARCH_OS_USERNAME=admin
+    depends_on:
+      - postgres
+      - opensearch-node1
+    links:
+      - postgres
+      - opensearch-node1

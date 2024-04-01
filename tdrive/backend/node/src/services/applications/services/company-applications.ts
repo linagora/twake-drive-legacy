@@ -28,14 +28,16 @@ export class CompanyApplicationServiceImpl implements TdriveServiceProvider, Ini
         return null;
       }
 
-      return {
+      const app = {
         ...{
           id: pk.application_id,
           company_id: pk.company_id,
           application_id: pk.application_id,
         },
-        application: application,
+        application: { ...application },
       };
+      app.application.api = null;
+      return app;
     } catch (err) {
       console.error(err);
       return null;
@@ -62,11 +64,14 @@ export class CompanyApplicationServiceImpl implements TdriveServiceProvider, Ini
         companyApplication.application_id,
         context,
       );
-      if (application)
-        applications.push({
+      if (application) {
+        const app = {
           ...companyApplication,
-          application: application,
-        });
+          application: { ...application },
+        };
+        app.application.api = null;
+        applications.push(app);
+      }
     }
 
     return new ListResult<CompanyApplicationWithApplication>("applications", applications, null);

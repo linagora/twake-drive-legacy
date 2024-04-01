@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
 import cassandra, { types } from "cassandra-driver";
 import { md5 } from "../../../../../../../crypto";
 import { defer, Subject, throwError, timer } from "rxjs";
@@ -48,10 +48,7 @@ export interface CassandraConnectionOptions {
   delay?: number;
 }
 
-export class CassandraConnector extends AbstractConnector<
-  CassandraConnectionOptions,
-  cassandra.Client
-> {
+export class CassandraConnector extends AbstractConnector<CassandraConnectionOptions> {
   private client: cassandra.Client;
   private keyspaceExists = false;
 

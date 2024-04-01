@@ -28,6 +28,7 @@ services:
       - PUBSUB_TYPE=local
       - ./docker-data/documents/:/storage/
     volumes:
+      - ./backend/node/profiles:/usr/src/app/profiles
       - ./backend/node/src:/usr/src/app/src
       - ./docker-data/documents/:/storage/
     depends_on:
@@ -61,10 +62,12 @@ services:
       - tdrive_network
     
   onlyoffice-connector:
-    image: onlyoffice-connector
+    build:
+      context: .
+      dockerfile: docker/onlyoffice-connector/Dockerfile
     environment:
       - CREDENTIALS_ENDPOINT=http://tdrive_node:4000
-      - ONLY_OFFICE_SERVER=http://localhost:8090/
+      - ONLY_OFFICE_SERVER=http://onlyoffice:8090/
       - SERVER_ORIGIN=http://onlyoffice-connector:5000
       - SERVER_PORT=5000
       - SERVER_PREFIX=/plugins/onlyoffice
@@ -109,7 +112,6 @@ services:
   
   onlyoffice:
     image: docker.io/onlyoffice/documentserver
-    hostname: onlyoffice
     ports:
       - 8090:80
     networks:

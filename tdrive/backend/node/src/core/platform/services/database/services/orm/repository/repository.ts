@@ -32,6 +32,7 @@ export type FindOptions = {
    * The $in operator selects the documents where the value of a field equals any value in the specified array
    */
   $in?: inType[];
+  $nin?: inType[];
   $like?: likeType[];
 };
 
@@ -96,18 +97,20 @@ export default class Repository<EntityType> {
   }
 
   async save(entity: EntityType, _context?: ExecutionContext): Promise<void> {
-    (await this.manager.persist(entity).flush()).reset();
+    this.manager.persist(entity);
+    return this.manager.flush().then(manager => manager.reset());
   }
 
   async saveAll(entities: EntityType[] = [], _context?: ExecutionContext): Promise<void> {
     logger.debug("services.database.repository - Saving entities");
 
     entities.forEach(entity => this.manager.persist(entity));
-    await (await this.manager.flush()).reset();
+    return this.manager.flush().then(manager => manager.reset());
   }
 
   async remove(entity: EntityType, _context?: ExecutionContext): Promise<void> {
-    await (await this.manager.remove(entity).flush()).reset();
+    this.manager.remove(entity);
+    return this.manager.flush().then(manager => manager.reset());
   }
 
   //Avoid using this except when no choice

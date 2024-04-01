@@ -11,7 +11,7 @@ import { AuthProvider, InitParameters } from '../auth-provider';
 import jwtStorageService, { JWTDataType } from '@features/auth/jwt-storage-service';
 import LocalStorage from '@features/global/framework/local-storage-service';
 import ConsoleApiClient from '@features/console/api/console-api-client';
-import JwtStorageService from "@features/auth/jwt-storage-service";
+import JwtStorageService from '@features/auth/jwt-storage-service';
 
 const OIDC_CALLBACK_URL = '/oidccallback';
 const OIDC_SIGNOUT_URL = '/signout';
@@ -53,7 +53,7 @@ export default class OIDCAuthProviderService
         redirect_uri: getAsFrontUrl(OIDC_CALLBACK_URL),
         response_type: 'code',
         response_mode: 'query',
-        scope: 'openid profile email address phone offline_access',
+        scope: 'openid profile email address phone offline_access applications',
         post_logout_redirect_uri: getAsFrontUrl(OIDC_SIGNOUT_URL),
         silent_redirect_uri: getAsFrontUrl(OIDC_SILENT_URL),
         automaticSilentRenew: false,
@@ -70,15 +70,15 @@ export default class OIDCAuthProviderService
         this.signOut();
       }
 
-      this.userManager.events.addUserSessionChanged((... args) => {
+      this.userManager.events.addUserSessionChanged((...args) => {
         this.logger.debug('User Session changed：', args);
       });
 
-      this.userManager.events.addSilentRenewError((... args) => {
+      this.userManager.events.addSilentRenewError((...args) => {
         this.logger.debug('Silent Renew Error：', args);
       });
 
-      this.userManager.events.addUserUnloaded((... args) => {
+      this.userManager.events.addUserUnloaded((...args) => {
         this.logger.debug('User unloaded：', args);
       });
 
@@ -97,7 +97,7 @@ export default class OIDCAuthProviderService
         await this.signIn();
       });
     }
-    this.logger.info("Init completed")
+    this.logger.info('Init completed');
     return this;
   }
 
@@ -119,14 +119,14 @@ export default class OIDCAuthProviderService
           this.onInitialized();
           this.initialized = true;
         }
-        this.logger.info("Setting new access token");
+        this.logger.info('Setting new access token');
         await this.params?.onNewToken(jwt);
       } catch (err) {
         this.logger.error(
           'OIDC user loaded listener, error while getting the JWT from OIDC token',
           err,
         );
-        await this.signinRedirect();
+        throw Error('Error while getting the JWT from OIDC token');
       }
     } else {
       await this.signinRedirect();
@@ -173,11 +173,12 @@ export default class OIDCAuthProviderService
       this.logger.info('getJWTFromOidcToken, user expired');
     }
 
-    const jwt = await ConsoleApiClient.getNewAccessToken(
-      { id_token: user.id_token, access_token: user.access_token },
-    );
+    const jwt = await ConsoleApiClient.getNewAccessToken({
+      id_token: user.id_token,
+      access_token: user.access_token,
+    });
 
-    JwtStorageService.updateJWT(jwt)
+    JwtStorageService.updateJWT(jwt);
 
     return jwt;
   }

@@ -9,15 +9,13 @@ import { buildSelectQuery } from "./query-builder";
 import { transformValueFromDbString, transformValueToDbString } from "./typeTransforms";
 import { logger } from "../../../../../../framework";
 
-export { MongoPagination } from "./pagination";
-
 export interface MongoConnectionOptions {
   // TODO: More options
   uri: string;
   database: string;
 }
 
-export class MongoConnector extends AbstractConnector<MongoConnectionOptions, mongo.MongoClient> {
+export class MongoConnector extends AbstractConnector<MongoConnectionOptions> {
   private client: mongo.MongoClient;
 
   async init(): Promise<this> {
@@ -75,6 +73,7 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions, mo
     return true;
   }
   async upsert(entities: any[], _options: UpsertOptions = {}): Promise<boolean[]> {
+    logger.trace(`services.database.orm.mongodb.upsert - entities count: ${entities.length}`);
     return new Promise(async resolve => {
       const promises: Promise<mongo.UpdateResult>[] = [];
 
@@ -83,6 +82,11 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions, mo
       entities.forEach(entity => {
         const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
         const primaryKey = unwrapPrimarykey(entityDefinition);
+        logger.trace(
+          `services.database.orm.mongodb.upsert[${_options.action}] - Entity{${
+            entityDefinition.name
+          }: ${JSON.stringify(entity)}`,
+        );
 
         //Set updated content
         const set: any = {};

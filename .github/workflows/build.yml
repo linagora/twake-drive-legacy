@@ -1,0 +1,157 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "tdrive/backend/node/**"
+      - "tdrive/frontend/**"
+      - "tdrive/connectors/onlyoffice-connector/**"
+      - "tdrive/backend/utils/ldap-sync/**"
+      - "tdrive/backend/utils/nextcloud-migration/**"
+
+jobs:
+  setup:
+    name: Setup jobs
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - "tdrive/backend/node/**"
+            frontend:
+              - "tdrive/frontend/**"
+            onlyoffice-connector:
+              - "tdrive/connectors/onlyoffice-connector/**"
+            ldap-sync:
+              - "tdrive/backend/utils/ldap-sync/**"
+            nextcloud-migration:
+              - "tdrive/backend/utils/nextcloud-migration/**"
+
+  lint-backend:
+    runs-on: ubuntu-latest
+    if: contains(needs.setup.outputs.changes, 'backend')
+    needs:
+      - setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prettier code style check
+        run: |
+          cd tdrive
+          docker-compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn node npm run lint:prettier
+      - name: Lint
+        run: |
+          cd tdrive
+          docker-compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn node npm run lint
+
+  test-backend:
+    runs-on: ubuntu-latest
+    if: contains(needs.setup.outputs.changes, 'backend')
+    needs:
+      - setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: e2e-mongo-s3-test
+        run: |
+          cd tdrive
+          docker-compose -f docker-compose.tests.yml run --rm -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb -e PUBSUB_TYPE=local node npm run test:all
+          docker-compose -f docker-compose.tests.yml down
+      - name: e2e-opensearch-test
+        run: |
+          cd tdrive
+          docker-compose -f docker-compose.dev.tests.opensearch.yml up -d --force-recreate opensearch-node1 postgres node
+          sleep 60
+          docker-compose -f docker-compose.dev.tests.opensearch.yml logs
+          docker-compose -f docker-compose.dev.tests.opensearch.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=opensearch -e DB_DRIVER=postgres -e PUBSUB_TYPE=local node npm run test:all
+          docker-compose -f docker-compose.dev.tests.opensearch.yml down
+      - name: e2e-cassandra-test
+        run: |
+          cd tdrive
+          docker-compose -f docker-compose.tests.yml up -d scylladb elasticsearch rabbitmq
+          sleep 60
+          docker-compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=elasticsearch -e DB_DRIVER=cassandra node npm run test:all
+      - name: coverage
+        uses: adRise/jest-cov-reporter@main
+        with:
+          branch-coverage-report-path: ./tdrive/coverage/coverage-summary.json
+          base-coverage-report-path: ./tdrive/coverage/coverage-summary.json
+          delta: 0.3
+          fullCoverageDiff: true
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    if: contains(needs.setup.outputs.changes, 'frontend')
+    needs:
+      - setup
+    env:
+      FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: cd tdrive/frontend/ && yarn install
+      - run: cp tdrive/frontend/src/app/environment/environment.ts.dist tdrive/frontend/src/app/environment/environment.ts
+      - if: ${{ env.FRONTEND_ENV }}
+        run: echo ${{ secrets.FRONTEND_ENV }} > tdrive/frontend/src/app/environment/environment.ts
+      - run: cd tdrive/frontend/ && yarn test
+      - run: cd tdrive/frontend/ && yarn build
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: tdrive/frontend/build/
+
+  build-onlyoffice-connector:
+    runs-on: ubuntu-latest
+    if: contains(needs.setup.outputs.changes, 'onlyoffice-connector')
+    needs:
+      - setup
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies and build
+        run: |
+          cd tdrive/connectors/onlyoffice-connector
+          npm i
+          npm run build --if-present
+          npm run lint
+
+  build-ldap-sync:
+    runs-on: ubuntu-20.04
+    if: contains(needs.setup.outputs.changes, 'ldap-sync')
+    needs:
+      - setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ldap sync
+        run: cd tdrive/backend/utils/ldap-sync && npm i && npm run build
+
+  build-nextcloud-migration:
+    runs-on: ubuntu-20.04
+    if: contains(needs.setup.outputs.changes, 'nextcloud-migration')
+    needs:
+      - setup
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Nextcloud migration
+        run: cd tdrive/backend/utils/nextcloud-migration && npm i && npm run build

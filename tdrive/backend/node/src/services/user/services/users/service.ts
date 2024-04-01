@@ -33,6 +33,7 @@ import { getPublicUserRoom, getUserRoom } from "../../realtime";
 import NodeCache from "node-cache";
 import gr from "../../../global-resolver";
 import { formatUser } from "../../../../utils/users";
+import { TYPE as DriveFileType, DriveFile } from "../../../documents/entities/drive-file";
 
 export class UserServiceImpl {
   version: "1";
@@ -40,6 +41,7 @@ export class UserServiceImpl {
   searchRepository: SearchRepository<User>;
   companyUserRepository: Repository<CompanyUser>;
   extUserRepository: Repository<ExternalUser>;
+  driveFileRepository: Repository<DriveFile>;
   private deviceRepository: Repository<Device>;
   private cache: NodeCache;
 
@@ -56,6 +58,7 @@ export class UserServiceImpl {
     );
 
     this.deviceRepository = await gr.database.getRepository<Device>(DeviceType, Device);
+    this.driveFileRepository = await gr.database.getRepository<DriveFile>(DriveFileType, DriveFile);
 
     this.cache = new NodeCache({ stdTTL: 0.2, checkperiod: 120 });
 

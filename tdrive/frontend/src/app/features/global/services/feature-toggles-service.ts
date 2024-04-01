@@ -8,6 +8,10 @@ export enum FeatureNames {
   EDIT_FILES = 'chat:edit_files',
   UNLIMITED_STORAGE = 'chat:unlimited_storage', //Currently inactive
   COMPANY_INVITE_MEMBER = 'company:invite_member',
+  COMPANY_SEARCH_USERS = 'company:search_users',
+  COMPANY_SHARED_DRIVE = 'company:shared_drive',
+  COMPANY_DISPLAY_EMAIL = 'company:display_email',
+  COMPANY_USER_QUOTA = 'company:user_quota',
 }
 
 export type FeatureValueType = boolean | number;
@@ -22,6 +26,11 @@ availableFeaturesWithDefaults.set(FeatureNames.MULTIPLE_WORKSPACES, true);
 availableFeaturesWithDefaults.set(FeatureNames.EDIT_FILES, true);
 availableFeaturesWithDefaults.set(FeatureNames.UNLIMITED_STORAGE, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_INVITE_MEMBER, true);
+availableFeaturesWithDefaults.set(FeatureNames.COMPANY_INVITE_MEMBER, true);
+availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SEARCH_USERS, true);
+availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SHARED_DRIVE, true);
+availableFeaturesWithDefaults.set(FeatureNames.COMPANY_DISPLAY_EMAIL, true);
+availableFeaturesWithDefaults.set(FeatureNames.COMPANY_USER_QUOTA, false);
 
 /**
  * ChannelServiceImpl that allow you to manage feature flipping in Tdrive using react feature toggles
@@ -42,6 +51,8 @@ class FeatureTogglesService {
   }
 
   public setFeaturesFromCompanyPlan(plan: { features: { [key: string]: FeatureValueType } }): void {
+    console.debug("Setting company features");
+    console.debug(plan);
     for (const [featureName, defaultValue] of availableFeaturesWithDefaults) {
       this.setActiveFeatureName(
         featureName,
@@ -54,14 +65,16 @@ class FeatureTogglesService {
     if (typeof value === 'boolean') {
       this.activeFeatureNames = this.activeFeatureNames.filter(name => name !== featureName);
       if (value) this.activeFeatureNames.push(featureName);
-      this.activeFeatureValues.set(featureName, !!value);
+      this.activeFeatureValues.set(featureName, value);
     } else {
       this.activeFeatureValues.set(featureName, value);
     }
   }
 
   public isActiveFeatureName(featureName: FeatureNames) {
-    return this.activeFeatureNames.includes(featureName);
+    const b = this.activeFeatureNames.includes(featureName);
+    console.debug(`Feature ${featureName} is ${b}`);
+    return b;
   }
 
   public getFeatureValue<T>(featureName: FeatureNames): T {

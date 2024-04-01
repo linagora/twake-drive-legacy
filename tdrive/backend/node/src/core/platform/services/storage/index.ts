@@ -3,7 +3,7 @@ import { Stream, Readable } from "stream";
 import Multistream from "multistream";
 import { Consumes, logger, TdriveService } from "../../framework";
 import LocalConnectorService, { LocalConfiguration } from "./connectors/local/service";
-import S3ConnectorService from "./connectors/S3/service";
+import S3ConnectorService from "./connectors/S3/s3-service";
 import StorageAPI, {
   DeleteOptions,
   ReadOptions,
@@ -38,7 +38,14 @@ export default class StorageService extends TdriveService<StorageAPI> implements
     const type = this.getConnectorType();
     if (type === "S3") {
       logger.info("Using 'S3' connector for storage.");
-      this.homeDir = this.configuration.get<string>("S3.bucket");
+      try {
+        this.homeDir = this.configuration.get<string>("S3.homeDirectory");
+      } catch (e) {
+        this.logger.warn("Home directory is not set, using S3.bucket instead");
+      }
+      if (!this.homeDir) {
+        this.homeDir = this.configuration.get<string>("S3.bucket");
+      }
       return new S3ConnectorService({
         bucket: this.configuration.get<string>("S3.bucket"),
         region: this.configuration.get<string>("S3.region"),
@@ -47,11 +54,13 @@ export default class StorageService extends TdriveService<StorageAPI> implements
         useSSL: Boolean(this.configuration.get<boolean>("S3.useSSL")),
         accessKey: this.configuration.get<string>("S3.accessKey"),
         secretKey: this.configuration.get<string>("S3.secretKey"),
+        disableRemove: this.configuration.get<boolean>("S3.disableRemove"),
       });
     } else {
       logger.info("Using 'local' connector for storage.");
-      const defaultHomeDir = this.configuration.get<string>("local.path");
-      if (defaultHomeDir) this.homeDir = `/${defaultHomeDir}`;
+      // const defaultHomeDir = this.configuration.get<string>("local.path");
+      // if (defaultHomeDir) this.homeDir = `${defaultHomeDir}`;
+      logger.trace(`Home directory for the storage: ${this.homeDir}`);
     }
     logger.info(
       `Using 'local' connector for storage${
@@ -64,6 +73,10 @@ export default class StorageService extends TdriveService<StorageAPI> implements
 
   getHomeDir(): string {
     return this.homeDir;
+  }
+
+  exists(path: string, options?: ReadOptions): Promise<boolean> {
+    return this.getConnector().exists(path, options);
   }
 
   async write(path: string, stream: Stream, options?: WriteOptions): Promise<WriteMetadata> {

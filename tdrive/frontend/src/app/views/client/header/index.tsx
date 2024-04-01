@@ -8,16 +8,16 @@ import version from '../../../environment/version';
 export default ({ openSideMenu }: { openSideMenu: () => void }) => {
   return (
     <div className="bg-white dark:bg-zinc-900 h-16 sm:h-20 p-4 sm:p-6 flex space-between items-center">
-      <div className="sm:block hidden shrink-0 w-1/6 max-w-xs" style={{ minWidth: 100 }}>
+      <div className="sm:block hidden shrink-0 w-2/6 max-w-xs" style={{ minWidth: 100 }}>
         <div className="sm:inline-grid">
           <img
-            src="/public/img/logo/logo-text-black.png"
-            className="h-6 ml-1 dark:hidden block"
+            src="/public/img/logo/logo-text-black.svg"
+            className="h-9 ml-1 dark:hidden block"
             alt="Tdrive"
           />
           <img
-            src="/public/img/logo/logo-text-white.png"
-            className="h-6 ml-1 dark:block hidden"
+            src="/public/img/logo/logo-text-white.svg"
+            className="h-9 ml-1 dark:block hidden"
             alt="Tdrive"
           />
         </div>

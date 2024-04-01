@@ -1,6 +1,6 @@
 {
-  "hello": "Bonjour",
-  "virtual-folder.shared-drive": "Drive Partagé",
-  "virtual-folder.my-drive": "Mon Drive",
-  "virtual-folder.trash": "Corbeille"
+    "hello": "Bonjour",
+    "virtual-folder.shared-drive": "Disque Partagé",
+    "virtual-folder.my-drive": "Mon disque",
+    "virtual-folder.trash": "Corbeille"
 }

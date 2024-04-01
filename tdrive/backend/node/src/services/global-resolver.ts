@@ -25,7 +25,6 @@ import { ConsoleServiceImpl } from "./console/service";
 import { DocumentsService } from "./documents/services";
 import { DocumentsEngine } from "./documents/services/engine";
 import { FileServiceImpl } from "./files/services";
-import OnlineServiceImpl from "./online/service";
 import { PreviewProcessService } from "./previews/services/files/processing/service";
 import { StatisticsServiceImpl } from "./statistics/service";
 import { TagsService } from "./tags/services/tags";
@@ -68,7 +67,6 @@ type TdriveServices = {
     hooks: ApplicationHooksService;
   };
   files: FileServiceImpl;
-  online: OnlineServiceImpl;
   documents: {
     documents: DocumentsService;
     engine: DocumentsEngine;
@@ -132,7 +130,6 @@ class GlobalResolver {
         hooks: await new ApplicationHooksService().init(),
       },
       files: await new FileServiceImpl().init(),
-      online: await new OnlineServiceImpl().init(),
       documents: {
         documents: await new DocumentsService().init(),
         engine: await new DocumentsEngine().init(),

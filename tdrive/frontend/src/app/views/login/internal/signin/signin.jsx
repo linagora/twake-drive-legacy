@@ -18,7 +18,7 @@ export default class Signin extends Component {
       username: '',
       email: LoginService.emailInit,
       password: '',
-      name: '',
+      lastName: '',
       firstName: '',
       phone: '',
       code: '',
@@ -37,8 +37,8 @@ export default class Signin extends Component {
     Languages.addListener(this);
   }
   componentDidMount() {
-    if (this.input) {
-      this.input.focus();
+    if (this.inputToFocusFirst) {
+      this.inputToFocusFirst.focus();
     }
   }
   componentWillUnmount() {
@@ -48,9 +48,9 @@ export default class Signin extends Component {
   componentDidUpdate(_prevProps, prevState) {
     if (
       (prevState.page === 1 && this.state.page === 2) ||
-      (prevState.page === 2 && this.state.page === 3 && this.input)
+      (prevState.page === 2 && this.state.page === 3 && this.inputToFocusFirst)
     ) {
-      if (this.input) this.input.focus();
+      if (this.inputToFocusFirst) this.inputToFocusFirst.focus();
     }
   }
   displayStep() {
@@ -75,6 +75,9 @@ export default class Signin extends Component {
 
           <Input
             id="first_name_create"
+            refInput={ref => {
+              this.inputToFocusFirst = ref;
+            }}
             className="bottom-margin medium full_width"
             onKeyDown={e => {
               if (e.keyCode === 13) {
@@ -91,9 +94,6 @@ export default class Signin extends Component {
           />
           <Input
             id="last_name_create"
-            refInput={ref => {
-              this.input = ref;
-            }}
             className="bottom-margin medium full_width"
             onKeyDown={e => {
               if (e.keyCode === 13) {
@@ -105,8 +105,8 @@ export default class Signin extends Component {
               [],
               'Last name',
             )}
-            value={this.state.name}
-            onChange={evt => this.setState({ name: evt.target.value })}
+            value={this.state.lastName}
+            onChange={evt => this.setState({ lastName: evt.target.value })}
           />
 
           <br />

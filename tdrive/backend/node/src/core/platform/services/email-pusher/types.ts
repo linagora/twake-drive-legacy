@@ -18,7 +18,9 @@ export type EmailBuilderRenderedResult = {
   subject: string;
 };
 
-export type EmailBuilderTemplateName = "notification-digest" | "notification-document";
+export type EmailBuilderTemplateName =
+  | "notification-document-shared"
+  | "notification-document-version-updated";
 
 export type EmailPusherPayload = {
   subject: string;
@@ -51,6 +53,7 @@ export type SMTPClientConfigType = {
   port: number;
   secure?: boolean;
   requireTLS?: boolean;
+  ignoreTLS?: boolean;
   auth?: {
     user: string;
     pass: string;

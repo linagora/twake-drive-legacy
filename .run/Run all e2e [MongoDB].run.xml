@@ -3,13 +3,13 @@
     <node-interpreter value="project" />
     <jest-package value="$PROJECT_DIR$/tdrive/backend/node/node_modules/jest" />
     <working-dir value="$PROJECT_DIR$/tdrive/backend/node" />
-    <jest-options value="--forceExit --testTimeout=3000000 --maxWorkers=1" />
+    <jest-options value="--forceExit --testTimeout=30000 --maxWorkers=1" />
     <envs>
       <env name="DB_DRIVER" value="mongodb" />
       <env name="DB_MONGO_URI" value="mongodb://localhost:27017" />
       <env name="PUBSUB_TYPE" value="local" />
       <env name="SEARCH_DRIVER" value="mongodb" />
-      <env name="STORAGE_LOCAL_PATH" value="$USER_HOME$/dev/linagora/TDrive/tdrive/docker-data" />
+      <env name="STORAGE_LOCAL_PATH" value="/tmp" />
     </envs>
     <scope-kind value="DIRECTORY" />
     <test-directory value="$PROJECT_DIR$/tdrive/backend/node/test/e2e" />

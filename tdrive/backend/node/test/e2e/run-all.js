@@ -20,7 +20,7 @@ if (process.env.CI || localDevTests.length === 0) {
 if (localDevTests) {
   console.log("Only this tests will be run:", localDevTests);
 } else {
-  console.log("Will run all the tests");
+  console.log("Will run all the tests.");
 }
 
 function exec(command, args, debug = false) {

@@ -59,6 +59,11 @@ export class FileController {
     }
   }
 
+  async checkConsistency(request: FastifyRequest, response: FastifyReply): Promise<void> {
+    const data = await gr.services.files.checkConsistency();
+    response.send(data);
+  }
+
   async thumbnail(
     request: FastifyRequest<{ Params: { company_id: string; id: string; index: string } }>,
     response: FastifyReply,
@@ -99,6 +104,37 @@ export class FileController {
     const deleteResult = await gr.services.files.delete(params.id, context);
 
     return { status: deleteResult.deleted ? "success" : "error" };
+  }
+
+  async checkFileS3Exists(
+    request: FastifyRequest<{ Params: { company_id: string; id: string } }>,
+  ): Promise<{ isInS3: boolean }> {
+    const params = request.params;
+    return await gr.services.files.checkFileExistsS3(params.id);
+  }
+
+  async restoreFileS3(
+    request: FastifyRequest<{
+      Params: { company_id: string; id: string };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Querystring: any;
+    }>,
+  ): Promise<{ resource: PublicFile }> {
+    const params = request.params;
+    let file: null | Multipart = null;
+    if (request.isMultipart()) {
+      file = await request.file();
+    }
+
+    const q = request.query;
+    const options: any = {
+      totalChunks: parseInt(q.resumableTotalChunks || q.total_chunks) || 1,
+      chunkNumber: parseInt(q.resumableChunkNumber || q.chunk_number) || 1,
+    };
+
+    const result = await gr.services.files.restoreFileS3(params.id, file, options);
+
+    return result;
   }
 }
 

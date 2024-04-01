@@ -20,7 +20,6 @@ export type UserPartsType = {
 type PropsType = {
   usersIds: string[];
   keepMyself?: boolean;
-  displayOnline?: boolean;
   max?: number;
   size?: number;
 };
@@ -48,7 +47,7 @@ export const getUserParts = (props: PropsType): UserPartsType => {
 
   if (channelMembers?.length === 1) {
     const avatarSrc = users[0]?.id ? (
-      <UserIcon user={users[0]} withStatus={props.displayOnline} size={avatarSize} />
+      <UserIcon user={users[0]} size={avatarSize} />
     ) : (
       UserService.getThumbnail(users[0])
     );

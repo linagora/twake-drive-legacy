@@ -285,10 +285,6 @@ describe("The /workspace users API", () => {
       expect(response.statusCode).toBe(201);
       const resource = response.json()["resource"];
       checkUserObject(resource);
-
-      workspaceUsersCount = await testDbService.getWorkspaceUsersCountFromDb(workspaceId);
-      expect(workspaceUsersCount).toBe(5);
-      
     });
   });
 

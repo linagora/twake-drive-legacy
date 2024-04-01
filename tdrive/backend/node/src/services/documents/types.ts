@@ -52,6 +52,7 @@ export type SearchDocumentsOptions = {
   fields?: string[];
   onlyDirectlyShared?: boolean;
   onlyUploadedNotByMe?: boolean;
+  pagination?: Paginable;
 };
 
 export type SearchDocumentsBody = {

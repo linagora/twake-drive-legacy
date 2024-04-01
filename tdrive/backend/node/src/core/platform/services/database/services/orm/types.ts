@@ -46,7 +46,7 @@ export type ColumnType =
 export type EntityTarget<Entity> = ObjectType<Entity>;
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export type ObjectType<T> = { new (): T } | Function;
+export type ObjectType<T> = { new (): T };
 
 /** Local Event bus */
 

@@ -13,7 +13,8 @@ import path from "path";
 import swaggerPlugin from "fastify-swagger";
 import { SkipCLI } from "../../framework/decorators/skip";
 import fs from "fs";
-// import { throws } from "assert";
+import { ExecutionContext, executionStorage } from "../../framework/execution-storage";
+
 export default class WebServerService extends TdriveService<WebServerAPI> implements WebServerAPI {
   name = "webserver";
   version = "1";
@@ -39,6 +40,11 @@ export default class WebServerService extends TdriveService<WebServerAPI> implem
     this.server = fastify({
       maxParamLength: 300, //We have big urls with uuids and devices tokens
       logger: false,
+    });
+
+    this.server.addHook("onRequest", (req, res, done) => {
+      const defaultStoreValues = { request_id: req.id } as ExecutionContext;
+      executionStorage.run(defaultStoreValues, done);
     });
 
     this.server.addHook("onResponse", (req, reply, done) => {
@@ -74,15 +80,15 @@ export default class WebServerService extends TdriveService<WebServerAPI> implem
       swagger: {
         info: {
           title: "Tdrive Swagger",
-          description: "Automatically generate Tdrive Swagger API",
+          description: "Automatically generated Twake Drive Swagger API",
           version: "0.1.0",
         },
         externalDocs: {
-          url: "http://linagora.github.io/Tdrive",
+          url: "https://linagora.github.io/twake-drive",
           description: "Find more info here",
         },
-        host: "localhost",
-        schemes: ["http"],
+        host: this.configuration.get<string>("host"),
+        schemes: ["https", "http"],
         consumes: ["application/json"],
         produces: ["application/json"],
         tags: [],

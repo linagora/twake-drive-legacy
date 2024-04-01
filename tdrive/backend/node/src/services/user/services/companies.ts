@@ -276,9 +276,6 @@ export class CompanyServiceImpl {
     }
 
     entity.role = role;
-    if (level) {
-      entity.level = level;
-    }
     entity.applications = applications;
     await this.companyUserRepository.save(entity, context);
 

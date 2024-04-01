@@ -6,7 +6,6 @@ import { getFilesTree } from '@components/uploads/file-tree-utils';
 import UploadZone from '@components/uploads/upload-zone';
 import { setTdriveTabToken } from '@features/drive/api-client/api-client';
 import { useDriveItem } from '@features/drive/hooks/use-drive-item';
-import { DriveRealtimeObject } from '@features/drive/hooks/use-drive-realtime';
 import { useDriveUpload } from '@features/drive/hooks/use-drive-upload';
 import { DriveItemSelectedList } from '@features/drive/state/store';
 import { formatBytes } from '@features/drive/utils';
@@ -77,6 +76,11 @@ export default memo(
     const [parentId, _setParentId] = useRecoilState(
       DriveCurrentFolderAtom({ context: context, initialFolderId: dirId || viewId || initialParentId || 'user_'+user?.id }),
     );
+
+    // set the initial view to the user's home directory
+    useEffect(() => {
+      !dirId && !viewId && history.push(RouterServices.generateRouteFromState({viewId: parentId}));
+    }, [viewId, dirId]);
 
     const [loadingParentChange, setLoadingParentChange] = useState(false);
     const {
@@ -215,6 +219,7 @@ export default memo(
         onCheck: (v: boolean) =>
             setChecked(_.pickBy({ ...checked, [child.id]: v }, _.identity)),
         onBuildContextMenu: () => onBuildContextMenu(details, child),
+        inPublicSharing,
       };
       return (
           isMobile ? (
@@ -259,7 +264,6 @@ export default memo(
             onDrop={handleDrop}
 
           >
-            <DriveRealtimeObject id={parentId} key={parentId} />
             {role == "admin" && <UsersModal />}
             <VersionsModal />
             <AccessModal />
@@ -344,7 +348,7 @@ export default memo(
                     </div>
                   </div>
                 ) : (
-                  <HeaderPath path={path || []} inTrash={inTrash} setParentId={setParentId} />
+                  <HeaderPath path={path || []} inTrash={inTrash} setParentId={setParentId} inPublicSharing={inPublicSharing} />
                 )}
                 <div className="grow" />
 
@@ -353,18 +357,20 @@ export default memo(
                     {formatBytes(item?.size || 0)} {Languages.t('scenes.app.drive.used')}
                   </BaseSmall>
                 )}
-                <Menu menu={() => onBuildContextMenu(details)}>
-                  {' '}
-                  <Button theme="secondary" className="ml-4 flex flex-row items-center">
-                    <span>
-                      {selectedCount > 1
-                        ? `${selectedCount} items`
-                        : Languages.t('scenes.app.drive.context_menu')}{' '}
-                    </span>
+                {viewId !== 'shared_with_me' && (
+                  <Menu menu={() => onBuildContextMenu(details)}>
+                    {' '}
+                    <Button theme="secondary" className="ml-4 flex flex-row items-center">
+                      <span>
+                        {selectedCount > 1
+                          ? `${selectedCount} items`
+                          : Languages.t('scenes.app.drive.context_menu')}{' '}
+                      </span>
 
-                    <ChevronDownIcon className="h-4 w-4 ml-2 -mr-1" />
-                  </Button>
-                </Menu>
+                      <ChevronDownIcon className="h-4 w-4 ml-2 -mr-1" />
+                    </Button>
+                  </Menu>
+                )}
               </div>
 
 
@@ -387,7 +393,7 @@ export default memo(
                             onClick={() => {
                               const route = RouterServices.generateRouteFromState({dirId: child.id});
                               history.push(route);
-                              return setParentId(child.id);
+                              if (inPublicSharing) return setParentId(child.id);
                             }}
                             checked={checked[child.id] || false}
                             onCheck={v =>

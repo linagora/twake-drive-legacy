@@ -48,7 +48,9 @@ const PropertiesModalContent = ({ id, onClose }: { id: string; onClose: () => vo
   }, [item?.name]);
 
   return (
-    <ModalContent title={Languages.t('compenents.ProprietiesModalContent_rename') + " " + item?.name}>
+    <ModalContent
+      title={Languages.t('compenents.ProprietiesModalContent_rename') + ' ' + item?.name}
+    >
       <InputLabel
         className="mt-4"
         label={Languages.t('compenents.ProprietiesModalContent_name')}
@@ -71,8 +73,11 @@ const PropertiesModalContent = ({ id, onClose }: { id: string; onClose: () => vo
           if (item) {
             let finalName = name;
             if (!item?.is_directory) {
-              const ext = item?.name.split('.').pop();
-              finalName = name.split('.')[0] + (ext !== item?.name ? '.' + ext : '');
+              const lastDotIndex = finalName.lastIndexOf('.');
+              if (lastDotIndex !== -1) {
+                const fileExtension = name.slice(lastDotIndex);
+                finalName = finalName.slice(0, lastDotIndex) + fileExtension;
+              }
             }
             await update({ name: finalName }, id, item.parent_id);
           }

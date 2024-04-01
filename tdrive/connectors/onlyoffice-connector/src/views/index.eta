@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+  <script type="text/javascript" src="<%= it.onlyoffice_server %>web-apps/apps/api/documents/api.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no,shrink-to-fit=no" />
+</head>
+
+<body style="height: 100%">
+  <div id="onlyoffice_container" style="top: 0; left: 0; width: 100%; height: 100%; position: absolute; color: #fff; text-align: center; background-color: <%= it.color %>"></div>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      window.user = {
+        id: "<%= it.user_id %>",
+        username: "<%= it.username %>",
+        language: "<%= it.language %>",
+        userimage: "<%= it.user_image %>"
+      };
+      window.mode = "<%= it.mode %>"
+      window.baseURL = `<%= it.server %>/${window.mode}/`;
+
+      $('#onlyoffice_container').html("<div id='onlyoffice_container_instance'></div>");
+
+      let doc = {
+        title: "<%= it.filename %>",
+        url: `${window.baseURL}read?file_id=<%= it.file_id %>&company_id=<%= it.company_id %>&token=<%= it.token %>`,
+        fileType: "<%= it.file_type %>",
+        key: "<%= it.file_version_id %>",
+        token: "<%= it.file_id %>",
+        permissions: {
+          download: true,
+          edit: <%= it.editable %>,
+          preview: <%= it.preview %>,
+        }
+      }
+      const documentChangeHandler = function (event) {
+        $.ajax({
+          url: `${window.baseURL}save?file_id=<%= it.file_id %>&company_id=<%= it.company_id %>&token=<%= it.token %>`,
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            file_id: "<%= it.file_id %>",
+            key: "<%= it.file_version_id %>",
+            token: "<%= it.token %>"
+          }),
+          success: function() {
+            console.log('save success');
+          },
+          error: function() {
+            console.log('save error');
+          }
+        });
+      }
+
+      window.docEditor = new DocsAPI.DocEditor('onlyoffice_container_instance', {
+        scrollSensitivity: window.mode === 'text' ? 100 : 40,
+        width: '100%',
+        height: '100%',
+        documentType: window.mode,
+        document: doc,
+        token: "<%= it.file_id %>",
+        type: screen.width < 600 ? 'mobile' : 'desktop',
+        editorConfig: {
+          callbackUrl: `${window.baseURL}save?file_id=<%= it.file_id %>&company_id=<%= it.company_id %>&token=<%= it.token %>`,
+          lang: window.user.language,
+          user: {
+            id: window.user.id,
+            name: window.user.username,
+          },
+          customization: {
+            chat: false,
+            compactToolbar: true,
+            about: false,
+            feedback: false,
+            goback: {
+              text: '',
+              blank: false,
+              url: '#',
+            },
+          },
+        },
+        events: {
+          onDocumentStateChange: documentChangeHandler,
+        }
+      });
+    
+    });
+  </script>
+</body>
+
+</html>

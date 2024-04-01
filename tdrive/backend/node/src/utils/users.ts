@@ -35,18 +35,6 @@ export async function formatUser(
     cache: { companies: user.cache?.companies || [] },
   } as UserObject;
 
-  const userOnline = await gr.services.online.get({ user_id: user.id });
-  if (userOnline) {
-    const { last_seen, is_connected } = userOnline;
-
-    resUser = {
-      ...resUser,
-      last_seen,
-      is_connected,
-      last_activity: last_seen,
-    };
-  }
-
   if (options?.includeCompanies) {
     const userCompanies = await gr.services.users.getUserCompanies({ id: user.id });
 

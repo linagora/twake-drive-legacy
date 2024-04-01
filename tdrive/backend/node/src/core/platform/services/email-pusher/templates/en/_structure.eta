@@ -1,12 +1,12 @@
 <%~ includeFile("../common/_structure.eta", Object.assign(it, {
    follow_us: "Follow us on social media",
-   sent_by: "Sent by LINAGORA | 100 Terrasse Boieldieu Tour Franklin 92042 Paris La Défense",
+   sent_by: "Sent by LINAGORA | 37 Rue Pierre Poli, 92130 Issy-les-Moulineaux, France",
    help: "Help center",
    privacy: "Privacy Policy",
    terms: "Terms of Service",
    links: {
-       help: "https://tdrive.app/",
-       privacy: "https://tdrive.app/en/privacy-policy/",
-       terms: "https://tdrive.app/en/terms-of-service/"
+       help: "#",
+       privacy: "#",
+       terms: "#"
    }
 })) %>

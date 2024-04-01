@@ -1,0 +1,28 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run all e2e [OpenSearch]" type="JavaScriptTestRunnerJest">
+    <node-interpreter value="node" />
+    <node-options value="--experimental-specifier-resolution=node --experimental-vm-modules" />
+    <jest-package value="$PROJECT_DIR$/tdrive/backend/node/node_modules/jest" />
+    <working-dir value="$PROJECT_DIR$/tdrive/backend/node" />
+    <jest-options value="--forceExit --coverage --maxWorkers=1 --testTimeout=30000" />
+    <envs>
+      <env name="DB_DRIVER" value="postgres" />
+      <env name="DB_MONGO_URI" value="mongodb://localhost:27017" />
+      <env name="DB_POSTGRES_DBNAME" value="tdrive" />
+      <env name="DB_POSTGRES_HOST" value="localhost" />
+      <env name="DB_POSTGRES_PASSWORD" value="tdrive_secret" />
+      <env name="DB_POSTGRES_PORT" value="5432" />
+      <env name="DB_POSTGRES_USERNAME" value="tdrive_user" />
+      <env name="PUBSUB_TYPE" value="local" />
+      <env name="SEARCH_DRIVER" value="opensearch" />
+      <env name="SEARCH_OS_ENDPOINT" value="https://localhost:9200" />
+      <env name="SEARCH_OS_PASSWORD" value="admin" />
+      <env name="SEARCH_OS_USE_AUTH" value="true" />
+      <env name="SEARCH_OS_USERNAME" value="admin" />
+      <env name="STORAGE_LOCAL_PATH" value="/tmp" />
+    </envs>
+    <scope-kind value="DIRECTORY" />
+    <test-directory value="$PROJECT_DIR$/tdrive/backend/node/test/e2e" />
+    <method v="2" />
+  </configuration>
+</component>

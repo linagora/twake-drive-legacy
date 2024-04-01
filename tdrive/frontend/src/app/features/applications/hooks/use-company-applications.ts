@@ -9,7 +9,6 @@ import {
 } from '../state/company-applications';
 import CompanyApplicationsAPIClient from 'app/features/applications/api/company-applications-api-client';
 import { useCurrentCompany } from '../../companies/hooks/use-companies';
-import { useRealtimeRoom } from 'app/features/global/hooks/use-realtime';
 import { Application } from 'app/features/applications/types/application';
 import { LoadingState } from 'app/features/global/state/atoms/Loading';
 import useRouterWorkspace from 'app/features/router/hooks/use-router-workspace';
@@ -101,18 +100,6 @@ export function useCompanyApplications(companyId = '') {
     refresh,
   };
 }
-
-export const useCompanyApplicationsRealtime = (companyId = '') => {
-  const { company } = useCurrentCompany();
-  companyId = companyId || company?.id || '';
-
-  const { refresh } = useCompanyApplications(companyId);
-
-  const room = CompanyApplicationsAPIClient.websockets(companyId || '')[0];
-  useRealtimeRoom<Application[]>(room, 'useCompanyApplications', () => {
-    refresh();
-  });
-};
 
 /**
  * Use a single application

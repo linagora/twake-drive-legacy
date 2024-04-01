@@ -40,6 +40,7 @@ export function buildSelectQuery<Entity>(
   findOptions = secureOperators(transformValueToDbString, findOptions, entityType, options);
   where = buildComparison(where, findOptions);
   where = buildIn(where, findOptions);
+  where = buildNin(where, findOptions);
 
   return where;
 }
@@ -62,6 +63,17 @@ export function buildIn(where: any, options: FindOptions = {}): any {
     options.$in.forEach(element => {
       if (!where[element[0]]) where[element[0]] = {};
       where[element[0]]["$in"] = element[1];
+    });
+  }
+
+  return where;
+}
+
+export function buildNin(where: any, options: FindOptions = {}): any {
+  if (options.$nin) {
+    options.$nin.forEach(element => {
+      if (!where[element[0]]) where[element[0]] = {};
+      where[element[0]]["$nin"] = element[1];
     });
   }
 

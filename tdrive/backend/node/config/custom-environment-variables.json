@@ -17,6 +17,7 @@
     "level": "LOG_LEVEL"
   },
   "webserver": {
+    "host": "TWAKE_DRIVE_HOST",
     "logger": {
       "level": "LOG_LEVEL"
     },
@@ -53,6 +54,14 @@
       "contactPoints": "DB_CASSANDRA_URI",
       "localDataCenter": "DB_CASSANDRA_LOCALDATACENTER",
       "keyspace": "DB_CASSANDRA_KEYSPACE"
+    },
+    "postgres": {
+      "database": "DB_POSTGRES_DBNAME",
+      "host": "DB_POSTGRES_HOST",
+      "user": "DB_POSTGRES_USERNAME",
+      "password": "DB_POSTGRES_PASSWORD",
+      "port": "DB_POSTGRES_PORT",
+      "ssl": "DB_POSTGRES_USE_SSL"
     }
   },
   "search": {
@@ -63,7 +72,13 @@
       "useAuth": "SEARCH_ES_USE_AUTH",
       "username": "SEARCH_ES_USERNAME",
       "password": "SEARCH_ES_PASSWORD"
-
+    },
+    "opensearch": {
+      "endpoint": "SEARCH_OS_ENDPOINT",
+      "flushInterval": "SEARCH_OS_FLUSHINTERVAL",
+      "useAuth": "SEARCH_OS_USE_AUTH",
+      "username": "SEARCH_OS_USERNAME",
+      "password": "SEARCH_OS_PASSWORD"
     }
   },
   "storage": {
@@ -74,26 +89,29 @@
       "path": "STORAGE_LOCAL_PATH"
     },
     "S3": {
+      "homeDirectory": "STORAGE_S3_HOME_DIRECTORY",
       "bucket": "STORAGE_S3_BUCKET",
       "region": "STORAGE_S3_REGION",
       "endPoint": "STORAGE_S3_ENDPOINT",
       "port": "STORAGE_S3_PORT",
       "useSSL": "STORAGE_S3_USE_SSL",
       "accessKey": "STORAGE_S3_ACCESS_KEY",
-      "secretKey": "STORAGE_S3_SECRET_KEY"
+      "secretKey": "STORAGE_S3_SECRET_KEY",
+      "disableRemove": "STORAGE_S3_DISABLE_REMOVE"
     }
   },
-  "email-pusher":{
+  "email-pusher": {
     "email_interface": "EMAIL_INTERFACE",
-    "endpoint":"EMAIL_ENDPOINT",
-    "api_key":"EMAIL_API_KEY",
-    "sender":"EMAIL_SENDER",
+    "endpoint": "EMAIL_ENDPOINT",
+    "api_key": "EMAIL_API_KEY",
+    "sender": "EMAIL_SENDER",
     "smtp_user": "EMAIL_SMTP_USER",
     "smtp_password": "EMAIL_SMTP_PASSWORD",
     "smtp_host": "EMAIL_SMTP_HOST",
     "smtp_port": "EMAIL_SMTP_PORT",
     "smtp_tls": "EMAIL_SMTP_SECURE",
-    "debug": "EMAIL_DEBUG"
+    "debug": "EMAIL_DEBUG",
+    "platform_url": "PLATFORM_URL"
   },
   "message-queue": {
     "type": "PUBSUB_TYPE",
@@ -117,7 +135,13 @@
     "server": "PLUGINS_SERVER"
   },
   "drive": {
+    "featureSharedDrive": "ENABLE_FEATURE_SHARED_DRIVE",
     "rootAdmins": "DRIVE_ROOT_ADMINS",
-    "defaultLanguage": "DRIVE_DEFAULT_LANGUAGE"
+    "defaultLanguage": "DRIVE_DEFAULT_LANGUAGE",
+    "defaultCompany": "DRIVE_DEFAULT_COMPANY",
+    "defaultUserQuota": "DRIVE_DEFAULT_USER_QUOTA",
+    "featureSearchUsers": "ENABLE_FEATURE_SEARCH_USERS",
+    "featureDisplayEmail": "ENABLE_FEATURE_DISPLAY_EMAIL",
+    "featureUserQuota": "ENABLE_FEATURE_USER_QUOTA"
   }
 }

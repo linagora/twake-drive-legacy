@@ -9,12 +9,16 @@ import { DatabaseEntitiesRemovedEvent, DatabaseEntitiesSavedEvent } from "./type
 import { localEventBus } from "../../../../framework/event-bus";
 
 export default class EntityManager<EntityType extends Record<string, any>> {
-  private toPersist: EntityType[] = [];
+  private toInsert: EntityType[] = [];
+  private toUpdate: EntityType[] = [];
   private toRemove: EntityType[] = [];
 
   constructor(readonly connector: Connector) {}
 
   public persist(entity: any): this {
+    logger.trace(
+      `services.database.orm.entity-manager.persist - entity: ${JSON.stringify(entity)}`,
+    );
     if (!entity.constructor.prototype._entity || !entity.constructor.prototype._columns) {
       logger.error("Can not persist this object %o", entity);
       throw Error("Cannot persist this object: it is not an entity.");
@@ -24,32 +28,7 @@ export default class EntityManager<EntityType extends Record<string, any>> {
     const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
     const primaryKey: string[] = unwrapPrimarykey(entityDefinition);
 
-    primaryKey.forEach(pk => {
-      if (entity[pk] === undefined) {
-        const definition = columnsDefinition[pk];
-
-        if (!definition) {
-          throw Error(`There is no definition for primary key ${pk}`);
-        }
-
-        //Create default value
-        switch (definition.options.generator || definition.type) {
-          case "uuid":
-            entity[pk] = uuidv4();
-            break;
-          case "timeuuid":
-            entity[pk] = uuidv1();
-            break;
-          case "number":
-            entity[pk] = 0;
-            break;
-          default:
-            entity[pk] = "";
-        }
-      }
-    });
-
-    //Apply the onUpsert
+    //apply on upsert(generating created_at, updated_at fields)
     for (const column in columnsDefinition) {
       const definition = columnsDefinition[column];
       if (definition.options.onUpsert) {
@@ -57,8 +36,39 @@ export default class EntityManager<EntityType extends Record<string, any>> {
       }
     }
 
-    this.toPersist = this.toPersist.filter(e => e !== entity);
-    this.toPersist.push(_.cloneDeep(entity));
+    // generate primary key
+    const emptyPkFields = primaryKey.filter(
+      pk => entity[columnsDefinition[pk].nodename] === undefined,
+    );
+    emptyPkFields.forEach(pk => {
+      const definition = columnsDefinition[pk];
+
+      if (!definition) {
+        throw Error(`There is no definition for primary key ${pk}`);
+      }
+      //Create default value
+      switch (definition.options.generator || definition.type) {
+        case "uuid":
+          entity[columnsDefinition[pk].nodename] = uuidv4();
+          break;
+        case "timeuuid":
+          entity[columnsDefinition[pk].nodename] = uuidv1();
+          break;
+        case "number":
+          entity[columnsDefinition[pk].nodename] = 0;
+          break;
+        default:
+          entity[columnsDefinition[pk].nodename] = "";
+      }
+    });
+
+    if (emptyPkFields.length > 0) {
+      this.toInsert = this.toInsert.filter(e => e !== entity);
+      this.toInsert.push(_.cloneDeep(entity));
+    } else {
+      this.toUpdate = this.toUpdate.filter(e => e !== entity);
+      this.toUpdate.push(_.cloneDeep(entity));
+    }
 
     return this;
   }
@@ -78,25 +88,38 @@ export default class EntityManager<EntityType extends Record<string, any>> {
   }
 
   public async flush(): Promise<this> {
-    this.toPersist = _.uniqWith(this.toPersist, _.isEqual);
+    this.toInsert = _.uniqWith(this.toInsert, _.isEqual);
+    this.toUpdate = _.uniqWith(this.toUpdate, _.isEqual);
     this.toRemove = _.uniqWith(this.toRemove, _.isEqual);
 
     localEventBus.publish("database:entities:saved", {
-      entities: this.toPersist.map(e => _.cloneDeep(e)),
+      entities: this.toInsert.map(e => _.cloneDeep(e)),
+    } as DatabaseEntitiesSavedEvent);
+
+    localEventBus.publish("database:entities:saved", {
+      entities: this.toUpdate.map(e => _.cloneDeep(e)),
     } as DatabaseEntitiesSavedEvent);
 
     localEventBus.publish("database:entities:saved", {
       entities: this.toRemove.map(e => _.cloneDeep(e)),
     } as DatabaseEntitiesRemovedEvent);
 
-    await this.connector.upsert(this.toPersist);
-    await this.connector.remove(this.toRemove);
+    if (this.toInsert.length > 0) {
+      await this.connector.upsert(this.toInsert, { action: "INSERT" });
+    }
+    if (this.toUpdate.length > 0) {
+      await this.connector.upsert(this.toUpdate, { action: "UPDATE" });
+    }
+    if (this.toRemove.length > 0) {
+      await this.connector.remove(this.toRemove);
+    }
 
     return this;
   }
 
   public reset(): void {
-    this.toPersist = [];
+    this.toInsert = [];
+    this.toUpdate = [];
     this.toRemove = [];
   }
 }

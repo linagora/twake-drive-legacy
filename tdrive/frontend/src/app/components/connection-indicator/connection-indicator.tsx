@@ -6,19 +6,10 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import Languages from '@features/global/services/languages-service';
 import { ConnectedState } from '@features/users/state/atoms/connected';
 import { useRecoilState } from 'recoil';
-import WebSocket, { WebsocketEvents } from '@features/global/types/websocket-types';
+// import WebSocket, { WebsocketEvents } from '@features/global/types/websocket-types';
 
 export default () => {
   const [{ connected, reconnecting }, setState] = useRecoilState(ConnectedState);
-
-  useEffect(() => {
-    WebSocket.get().on(WebsocketEvents.Disconnected, () => {
-      setState({ connected: false, reconnecting: false });
-    });
-    WebSocket.get().on(WebsocketEvents.Connected, () => {
-      setState({ connected: true, reconnecting: false });
-    });
-  }, [setState]);
 
   return (
     <div className={'connection_indicator ' + (connected === false ? 'visible' : '')}>

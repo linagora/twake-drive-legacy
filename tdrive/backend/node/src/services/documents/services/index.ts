@@ -1,6 +1,10 @@
 import SearchRepository from "../../../core/platform/services/search/repository";
 import { getLogger, logger, TdriveLogger } from "../../../core/platform/framework";
-import { CrudException, ListResult } from "../../../core/platform/framework/api/crud-service";
+import {
+  CrudException,
+  ListResult,
+  Pagination,
+} from "../../../core/platform/framework/api/crud-service";
 import Repository, {
   comparisonType,
   inType,
@@ -56,7 +60,7 @@ import {
   RealtimeEntityActionType,
   ResourcePath,
 } from "../../../core/platform/services/realtime/types";
-
+import config from "config";
 export class DocumentsService {
   version: "1";
   repository: Repository<DriveFile>;
@@ -65,6 +69,12 @@ export class DocumentsService {
   driveTdriveTabRepository: Repository<DriveTdriveTabEntity>;
   ROOT: RootType = "root";
   TRASH: TrashType = "trash";
+  quotaEnabled: boolean = config.has("drive.featureUserQuota")
+    ? config.get("drive.featureUserQuota")
+    : false;
+  defaultQuota: number = config.has("drive.defaultUserQuota")
+    ? config.get("drive.defaultUserQuota")
+    : 0;
   logger: TdriveLogger = getLogger("Documents Service");
 
   async init(): Promise<this> {
@@ -96,19 +106,40 @@ export class DocumentsService {
     context: DriveExecutionContext & { public_token?: string },
   ): Promise<BrowseDetails> => {
     if (isSharedWithMeFolder(id)) {
-      const children = await this.search(options, context);
-      return {
-        access: "read",
-        children: children.getEntities(),
-        nextPage: children.nextPage,
-        path: [] as Array<DriveFile>,
-      };
+      return this.sharedWithMe(options, context);
     } else {
       return {
         nextPage: null,
         ...(await this.get(id, context)),
       };
     }
+  };
+
+  sharedWithMe = async (
+    options: SearchDocumentsOptions,
+    context: DriveExecutionContext & { public_token?: string },
+  ): Promise<BrowseDetails> => {
+    const result = [];
+    let fileList: ListResult<DriveFile>;
+    do {
+      fileList = await this.search(options, context);
+      result.push(...fileList.getEntities());
+      options.pagination = fileList.nextPage;
+    } while (fileList.nextPage?.page_token);
+    return {
+      access: "read",
+      children: result,
+      nextPage: null,
+      path: [] as Array<DriveFile>,
+    };
+  };
+
+  userQuota = async (context: CompanyExecutionContext): Promise<number> => {
+    const children = await this.repository.find({
+      parent_id: "user_" + context.user.id,
+      company_id: context.company.id,
+    });
+    return children.getEntities().reduce((sum, child) => sum + child.size, 0);
   };
 
   /**
@@ -303,6 +334,13 @@ export class DocumentsService {
         }
 
         if (fileToProcess) {
+          // if quota is enabled, check if the user has enough space
+          await this.checkQuotaAndCleanUp(
+            fileToProcess.upload_data.size,
+            fileToProcess.id,
+            context,
+          );
+
           driveItem.size = fileToProcess.upload_data.size;
           driveItem.is_directory = false;
           driveItem.extension = fileToProcess.metadata.name.split(".").pop();
@@ -327,6 +365,39 @@ export class DocumentsService {
         this.repository,
         context,
       );
+      // TODO: notify the user a document has been added to the directory shared with them
+      try {
+        if (driveItem.parent_id !== "root" && driveItem.parent_id !== "trash") {
+          const parentItem = await this.repository.findOne(
+            {
+              id: driveItem.parent_id,
+              company_id: context.company.id,
+            },
+            {},
+            context,
+          );
+          const sharedWith = parentItem?.access_info
+            ? parentItem.access_info.entities.filter(
+                info => info.type === "user" && info.id !== context.user.id,
+              )
+            : [];
+
+          if (context.user.id !== parentItem?.creator && sharedWith.length > 0) {
+            // Notify the owner that the document has been shared with them
+            this.logger.info("Notifying the onwer that the document has been shared with them: ", {
+              sharedWith,
+            });
+            gr.services.documents.engine.notifyDocumentShared({
+              context,
+              item: driveItem,
+              notificationEmitter: context.user.id,
+              notificationReceiver: parentItem.creator,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("🚀🚀 error:", error);
+      }
 
       await this.repository.save(driveItem);
       driveItemVersion.drive_item_id = driveItem.id;
@@ -409,6 +480,7 @@ export class DocumentsService {
         if ((content as any)[key]) {
           if (
             key === "parent_id" &&
+            oldParent !== item.parent_id &&
             !(await canMoveItem(item.id, content.parent_id, this.repository, context))
           ) {
             throw Error("Move operation not permitted");
@@ -418,8 +490,9 @@ export class DocumentsService {
           if (key === "access_info") {
             const sharedWith = content.access_info.entities.filter(
               info =>
-                !item.access_info.entities.find(entity => entity.id === info.id) &&
-                info.type === "user",
+                info.type === "user" &&
+                info.id !== context.user.id &&
+                !item.access_info.entities.find(entity => entity.id === info.id),
             );
 
             item.access_info = content.access_info;
@@ -437,7 +510,7 @@ export class DocumentsService {
               });
             }
 
-            item.access_info.entities.forEach(async info => {
+            item.access_info.entities.forEach(info => {
               if (!info.grantor) {
                 info.grantor = context.user.id;
               }
@@ -470,13 +543,10 @@ export class DocumentsService {
 
       if (oldParent) {
         item.scope = await getItemScope(item, this.repository, context);
-        this.repository.save(item);
+        await this.repository.save(item);
 
         await updateItemSize(oldParent, this.repository, context);
-        this.notifyWebsocket(oldParent, context);
       }
-
-      this.notifyWebsocket(item.parent_id, context);
 
       if (item.parent_id === this.TRASH) {
         //When moving to trash we recompute the access level to make them flat
@@ -622,6 +692,7 @@ export class DocumentsService {
    * restore a Drive Document and its children
    *
    * @param {string} id - the item id
+   * @param item item to restore
    * @param {DriveExecutionContext} context - the execution context
    * @returns {Promise<void>}
    */
@@ -657,7 +728,7 @@ export class DocumentsService {
       throw new CrudException("User does not have access to this item or its children", 401);
     }
 
-    if (isInTrash(item, this.repository, context)) {
+    if (await isInTrash(item, this.repository, context)) {
       if (item.is_in_trash != true) {
         if (item.scope === "personal") {
           item.parent_id = "user_" + context.user.id;
@@ -668,9 +739,7 @@ export class DocumentsService {
         item.is_in_trash = false;
       }
     }
-    this.repository.save(item);
-
-    this.notifyWebsocket("trash", context);
+    await this.repository.save(item);
   };
 
   /**
@@ -718,6 +787,9 @@ export class DocumentsService {
       const driveItemVersion = getDefaultDriveItemVersion(version, context);
       const metadata = await getFileMetadata(driveItemVersion.file_metadata.external_id, context);
 
+      // if quota is enabled, check if the user has enough space
+      await this.checkQuotaAndCleanUp(metadata.size, metadata.external_id, context);
+
       driveItemVersion.file_size = metadata.size;
       driveItemVersion.file_metadata.size = metadata.size;
       driveItemVersion.file_metadata.name = metadata.name;
@@ -736,21 +808,22 @@ export class DocumentsService {
       await this.repository.save(item);
 
       // Notify the user that the document versions have been updated
-      this.logger.info("Notifying user that the document has been updated: ", {
-        item,
-        notificationEmitter: context.user.id,
-      });
-      gr.services.documents.engine.notifyDocumentVersionUpdated({
-        context,
-        item,
-        notificationEmitter: context.user.id,
-        notificationReceiver: item.creator,
-      });
+      if (context.user.id !== item.creator) {
+        this.logger.info("Notifying user that the document has been updated: ", {
+          item,
+          notificationEmitter: context.user.id,
+        });
+        gr.services.documents.engine.notifyDocumentVersionUpdated({
+          context,
+          item,
+          notificationEmitter: context.user.id,
+          notificationReceiver: item.creator,
+        });
+      }
 
-      this.notifyWebsocket(item.parent_id, context);
       await updateItemSize(item.parent_id, this.repository, context);
 
-      globalResolver.platformServices.messageQueue.publish<DocumentsMessageQueueRequest>(
+      await globalResolver.platformServices.messageQueue.publish<DocumentsMessageQueueRequest>(
         "services:documents:process",
         {
           data: {
@@ -763,8 +836,8 @@ export class DocumentsService {
 
       return driveItemVersion;
     } catch (error) {
-      this.logger.error({ error: `${error}` }, "Failed to create Drive item version");
-      throw new CrudException("Failed to create Drive item version", 500);
+      logger.error({ error: `${error}` }, "Failed to create Drive item version");
+      CrudException.throwMe(error, new CrudException("Failed to create Drive item version", 500));
     }
   };
 
@@ -866,6 +939,10 @@ export class DocumentsService {
       zlib: { level: 9 },
     });
 
+    archive.on("error", error => {
+      this.logger.error("error while creating ZIP file: ", error);
+    });
+
     for (const id of ids) {
       if (!(await checkAccess(id, null, "read", this.repository, context))) {
         this.logger.warn(`not enough permissions to download ${id}, skipping`);
@@ -880,6 +957,7 @@ export class DocumentsService {
       }
     }
 
+    //TODO[ASH] why do we need this call??
     archive.finalize();
 
     return archive;
@@ -912,9 +990,9 @@ export class DocumentsService {
     const result = await this.searchRepository.search(
       {},
       {
-        pagination: {
-          limitStr: "100",
-        },
+        pagination: options.pagination
+          ? Pagination.fromPaginable(options.pagination)
+          : new Pagination(),
         $in: [
           ...(options.onlyDirectlyShared ? [["access_entities", [context.user.id]] as inType] : []),
           ...(options.company_id ? [["company_id", [options.company_id]] as inType] : []),
@@ -928,6 +1006,7 @@ export class DocumentsService {
               ]
             : []),
         ],
+        $nin: [...(options.onlyUploadedNotByMe ? [["creator", [context.user.id]] as inType] : [])],
         $lte: [
           ...(options.last_modified_lt
             ? [["last_modified", options.last_modified_lt] as comparisonType]
@@ -956,8 +1035,11 @@ export class DocumentsService {
     if (!options.onlyDirectlyShared) {
       const filteredResult = await this.filter(result.getEntities(), async item => {
         try {
-          // Check access for each item
-          return await checkAccess(item.id, null, "read", this.repository, context);
+          //skip all the fiels
+          return (
+            !item.is_in_trash &&
+            (await checkAccess(item.id, null, "read", this.repository, context))
+          );
         } catch (error) {
           this.logger.warn("failed to check item access", error);
           return false;
@@ -969,12 +1051,11 @@ export class DocumentsService {
 
     if (options.onlyUploadedNotByMe) {
       const filteredResult = await this.filter(result.getEntities(), async item => {
-        return item.creator != context.user.id;
+        return item.creator != context.user.id && !item.is_in_trash;
       });
 
       return new ListResult(result.type, filteredResult, result.nextPage);
     }
-
     return result;
   };
 
@@ -986,12 +1067,11 @@ export class DocumentsService {
   }
 
   getTab = async (tabId: string, context: CompanyExecutionContext): Promise<DriveTdriveTab> => {
-    const tab = await this.driveTdriveTabRepository.findOne(
+    return await this.driveTdriveTabRepository.findOne(
       { company_id: context.company.id, tab_id: tabId },
       {},
       context,
     );
-    return tab;
   };
 
   setTab = async (
@@ -1053,5 +1133,17 @@ export class DocumentsService {
     );
 
     return await this.getTab(tabId, context);
+  };
+
+  checkQuotaAndCleanUp = async (size: number, fileId: string, context: DriveExecutionContext) => {
+    if (!this.quotaEnabled) return;
+
+    const userQuota = await this.userQuota(context);
+    const leftQuota = this.defaultQuota - userQuota;
+
+    if (size > leftQuota) {
+      await globalResolver.services.files.delete(fileId, context);
+      throw new CrudException(`Not enough space: ${size}, ${leftQuota}.`, 403);
+    }
   };
 }

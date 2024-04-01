@@ -2,7 +2,6 @@ import Api from '../../global/framework/api-service';
 import { CompanyType } from '@features/companies/types/company';
 import { WorkspaceType } from '@features/workspaces/types/workspace';
 import { TdriveService } from '../../global/framework/registry-decorator-service';
-import { WebsocketRoom } from '../../global/types/websocket-types';
 import _ from 'lodash';
 
 const PREFIX = '/internal/services/workspaces/v1/companies';
@@ -23,22 +22,15 @@ type UpdateWorkspaceInviteDomainResponse = {
 
 @TdriveService('WorkspaceAPIClientService')
 class WorkspaceAPIClient {
-  private realtime: Map<string, WebsocketRoom[]> = new Map();
-
-  websockets(companyId: string): WebsocketRoom[] {
-    return this.realtime.get(companyId) || [];
-  }
-
   /**
    * Get all workspaces for a company
    *
    * @param companyId
    */
   async list(companyId: string): Promise<WorkspaceType[]> {
-    return Api.get<{ resources: WorkspaceType[]; websockets: WebsocketRoom[] }>(
+    return Api.get<{ resources: WorkspaceType[] }>(
       `${PREFIX}/${companyId}/workspaces?websockets=1`,
     ).then(result => {
-      this.realtime.set(companyId, result.websockets);
       return result.resources && result.resources.length ? result.resources : [];
     });
   }

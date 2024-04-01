@@ -7,6 +7,7 @@ import { DriveItemAtom, DriveItemChildrenAtom } from '../state/store';
 import { BrowseFilter, DriveItem, DriveItemVersion } from '../types';
 import { SharedWithMeFilterState } from '../state/shared-with-me-filter';
 import Languages from 'features/global/services/languages-service';
+import { useUserQuota } from 'features/users/hooks/use-user-quota';
 
 /**
  * Returns the children of a drive item
@@ -15,6 +16,7 @@ import Languages from 'features/global/services/languages-service';
 export const useDriveActions = () => {
   const companyId = useRouterCompany();
   const sharedFilter = useRecoilValue(SharedWithMeFilterState);
+  const { getQuota } = useUserQuota();
 
   const refresh = useRecoilCallback(
     ({ set, snapshot }) =>
@@ -46,16 +48,30 @@ export const useDriveActions = () => {
 
   const create = useCallback(
     async (item: Partial<DriveItem>, version: Partial<DriveItemVersion>) => {
-      if (!item || !version) throw new Error("All ");
-      let driveFile = null;
+      if (!item || !version) throw new Error('All ');
       if (!item.company_id) item.company_id = companyId;
+
       try {
-        driveFile = await DriveApiClient.create(companyId, { item, version });
-        await refresh(driveFile.parent_id!);
-      } catch (e) {
-        ToasterService.error(Languages.t('hooks.use-drive-actions.unable_create_file'));
+        const driveFile = await DriveApiClient.create(companyId, { item, version });
+
+        await refresh(driveFile.parent_id);
+        await getQuota();
+
+        return driveFile;
+      } catch (e: any) {
+        if (e.statusCode === 403) {
+          ToasterService.info(
+            <>
+              <p>{Languages.t('hooks.use-drive-actions.quota_limit_exceeded_title')}</p>
+              <p>{Languages.t('hooks.use-drive-actions.quota_limit_exceeded_message')}</p>
+              <p>{Languages.t('hooks.use-drive-actions.quota_limit_exceeded_plans')}</p>
+            </>,
+          );
+        } else {
+          ToasterService.error(Languages.t('hooks.use-drive-actions.unable_create_file'));
+        }
+        return null;
       }
-      return driveFile;
     },
     [refresh],
   );
@@ -89,6 +105,7 @@ export const useDriveActions = () => {
       try {
         await DriveApiClient.remove(companyId, id);
         await refresh(parentId || '');
+        await getQuota();
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_remove_file'));
       }
@@ -128,8 +145,8 @@ export const useDriveActions = () => {
         const updateBody = {
           company_id: companyId,
           user_id: userId,
-          level: level
-        }
+          level: level,
+        };
         await DriveApiClient.updateLevel(companyId, id, updateBody);
         await refresh(id || '');
       } catch (e) {

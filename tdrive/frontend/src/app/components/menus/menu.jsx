@@ -22,10 +22,6 @@ export default class Menu extends React.Component {
       }
   */
 
-  static closeAll() {
-    MenusManager.closeAllMenus(); // Corrected method name to closeAllMenus()
-  }
-
   constructor(props) {
     super(props);
     this.state = {
@@ -51,21 +47,24 @@ export default class Menu extends React.Component {
     MenusManager.openMenu(menu, rect, position);
   }
 
-  openMenu(evt) {
+  async openMenu(evt) {
     if (this.open) {
-      this.closeAll();
+      this.open = false;
+      MenusManager.closeMenu();
+      this.setState({ isMenuOpen: false });
     } else {
-      this.open = true;
       evt.preventDefault();
       evt.stopPropagation();
       var elementRect = this.container.current.getBoundingClientRect(); // Fixed getBoundingClientRect()
       elementRect.x = elementRect.x || elementRect.left;
       elementRect.y = elementRect.y || elementRect.top;
-      this.previousMenusId = MenusManager.openMenu( // Updated variable name
+      this.previousMenusId = await MenusManager.openMenu(
         this.props.menu,
         elementRect,
         this.props.position,
       );
+      this.setState({ isMenuOpen: true }, () => this.open = true);
+      this.open = true;
       if (this.props.onOpen) this.props.onOpen();
     }
   }
@@ -77,7 +76,7 @@ export default class Menu extends React.Component {
 
     if (
       (MenusManager.menus.length === 0 && this.previousMenusNumber > 0) ||
-      MenusManager.lastOpenedId !== this.previousMenusId // Updated variable name
+      MenusManager.last_opened_id !== this.previousMenusId
     ) {
       if (this.open && this.props.onClose) {
         this.props.onClose();
@@ -103,18 +102,18 @@ export default class Menu extends React.Component {
       <div
         ref={this.container}
         style={this.props.style}
-        onClick={(evt) => {
-          console.log('if this open: ', this.state.isMenuOpen);
+        onClick={async (evt) => {
           if (this.props.toggle) {
             if (!this.open) {
-              this.setState({ ...this.state, isMenuOpen: true });
-              this.openMenu(evt);
+              await this.openMenu(evt);
             } else {
               MenusManager.closeMenu();
+              this.open = false;
+              this.setState({ isMenuOpen: false });
               this.props.onClose && this.props.onClose();
             }
           } else {
-            this.openMenu(evt);
+            await this.openMenu(evt);
           }
         }}
         className={this.props.className}

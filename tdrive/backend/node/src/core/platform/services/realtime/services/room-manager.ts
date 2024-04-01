@@ -80,7 +80,6 @@ export default class RoomManager implements RealtimeRoomManager {
     try {
       //Public rooms we just check the user is logged in
       if (
-        joinEvent.name.startsWith("/users/online") || //User online room
         joinEvent.name.startsWith("/users/") || //User update room
         joinEvent.name === "/ping"
       ) {

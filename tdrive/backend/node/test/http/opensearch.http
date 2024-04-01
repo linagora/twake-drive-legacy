@@ -1,0 +1,248 @@
+### Drop index
+DELETE https://localhost:9200/tdrive_files_extended
+Authorization: Basic admin admin
+
+### Delete Index
+DELETE https://localhost:9200/drive_files
+Authorization: Basic admin admin
+
+### Create index
+PUT https://localhost:9200/tdrive_files_extended?pretty
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+    "aliases": {},
+    "mappings": {
+      "_source": {
+        "enabled": true
+      }
+    }
+}
+
+### Check that it is created
+GET https://localhost:9200/_cat/indices
+Authorization: Basic admin admin
+
+### GET index info
+GET https://localhost:9200/drive_files
+Authorization: Basic admin admin
+
+### GET data to the index
+GET https://localhost:9200/drive_files/_doc/8c03c5a1-0146-11ee-82d9-f503f8a58e9d
+Authorization: Basic admin admin
+Content-Type: application/json
+
+### Put data to the index
+PUT https://localhost:9200/tdrive_files_extended/_doc/0001
+Content-Type: application/json
+
+{
+  "file_name": "file0001.txt",
+  "access_info": [
+    {
+        "type": "user",
+        "id": "user01",
+        "level": "read",
+        "grantor": "user02"
+    }
+  ]
+}
+
+###
+PUT https://localhost:9200/tdrive_files_extended/_doc/8c03c5a1-0146-11ee-82d9-f503f8a58e9d
+Content-Type: application/json
+
+{
+  "file_name": "file0002.png",
+  "access_info": [
+    {
+        "type": "user",
+        "id": "user01",
+        "level": "read",
+        "grantor": "user03"
+    }
+  ]
+}
+
+### Search all in the index by last_modified
+GET https://localhost:9200/drive_files/_search
+Content-Type: application/json
+
+{
+  "query": {
+
+    "bool": {
+      "boost": 1,
+      "must": [
+        {
+                  "range":
+                  {
+                    "last_modified": {
+                      "gte": "0"
+                    }
+                  }
+                },
+                {
+                  "range":
+                  {
+                    "last_modified": {
+                      "lte": "1685958426348"
+                    }
+                  }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "access_entities": {
+                    "query": "edfb30e0-0385-11ee-80e8-41892804174d",
+                    "operator": "AND"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "access_entities": {
+                    "query": "edd447f1-0385-11ee-80e8-41892804174d",
+                    "operator": "AND"
+                  }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "company_id": {
+                    "query": "edd447f1-0385-11ee-80e8-41892804174d",
+                    "operator": "AND"
+                  }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        }
+      ]
+    }
+  }
+}
+
+
+### Search all in the index and order by name
+GET https://localhost:9200/drive_files/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "boost": 1,
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "access_entities": {
+                    "query": "12fb6a40-03b3-11ee-af31-a569970b7f74",
+                    "operator": "AND"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "access_entities": {
+                    "query": "12f290a1-03b3-11ee-af31-a569970b7f74",
+                    "operator": "AND"
+                  }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "company_id": {
+                    "query": "12f290a1-03b3-11ee-af31-a569970b7f74",
+                    "operator": "AND"
+                  }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "name": "asc"
+    }
+  ]
+}
+
+### Search all in the index and order by name
+GET https://localhost:9200/drive_files/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "bool": {
+      "boost": 1,
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "access_entities": {
+                    "query": "4090dce0-03ba-11ee-97d7-fb8fa15d86a1",
+                    "operator": "AND"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "access_entities": {
+                    "query": "40808931-03ba-11ee-97d7-fb8fa15d86a1",
+                    "operator": "AND"
+                  }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        },
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "company_id": {
+                    "query": "40808931-03ba-11ee-97d7-fb8fa15d86a1",
+                    "operator": "AND"
+                  }
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        }
+      ]
+    }
+  }
+}
+
+
+

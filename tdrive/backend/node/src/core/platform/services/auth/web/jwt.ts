@@ -4,6 +4,7 @@ import cookie from "@fastify/cookie";
 import fp from "fastify-plugin";
 import config from "../../../../config";
 import { JwtType } from "../../types";
+import { executionStorage } from "../../../framework/execution-storage";
 
 const jwtPlugin: FastifyPluginCallback = (fastify, _opts, next) => {
   fastify.register(cookie);
@@ -30,6 +31,10 @@ const jwtPlugin: FastifyPluginCallback = (fastify, _opts, next) => {
       ...{ allow_tracking: jwt.track || false },
       ...{ public_token_document_id: jwt.public_token_document_id || null },
     };
+
+    executionStorage.getStore().user_id = request.currentUser.id;
+    executionStorage.getStore().user_email = request.currentUser.email;
+
     request.log.debug(`Authenticated as user ${request.currentUser.id}`);
   };
 

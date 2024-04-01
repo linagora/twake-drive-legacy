@@ -11,6 +11,8 @@ import {
   CrudException,
   DeleteResult,
   ExecutionContext,
+  ListResult,
+  Pagination,
 } from "../../../core/platform/framework/api/crud-service";
 import gr from "../../global-resolver";
 import {
@@ -18,17 +20,48 @@ import {
   PreviewMessageQueueRequest,
 } from "../../../services/previews/types";
 import { PreviewFinishedProcessor } from "./preview";
-import _ from "lodash";
+import _, { isNull, isUndefined } from "lodash";
+import User from "../../user/entities/user";
+import { DriveFile } from "../../documents/entities/drive-file";
+import { MissedDriveFile } from "../../documents/entities/missed-drive-file";
+import { FileVersion } from "../../documents/entities/file-version";
+import { getPath } from "../../documents/utils";
 
 export class FileServiceImpl {
   version: "1";
   repository: Repository<File>;
+  userRepository: Repository<User>;
+  documentRepository: Repository<DriveFile>;
+  missedFileRepository: Repository<MissedDriveFile>;
+  versionRepository: Repository<FileVersion>;
   private algorithm = "aes-256-cbc";
   private max_preview_file_size = 50000000;
+  private checkConsistencyInProgress = false;
 
   async init(): Promise<this> {
     try {
       await Promise.all([(this.repository = await gr.database.getRepository<File>("files", File))]);
+      await Promise.all([
+        (this.userRepository = await gr.database.getRepository<User>("user", User)),
+      ]);
+      await Promise.all([
+        (this.documentRepository = await gr.database.getRepository<DriveFile>(
+          "drive_files",
+          DriveFile,
+        )),
+      ]);
+      await Promise.all([
+        (this.missedFileRepository = await gr.database.getRepository<MissedDriveFile>(
+          "missed_drive_files",
+          MissedDriveFile,
+        )),
+      ]);
+      await Promise.all([
+        (this.versionRepository = await gr.database.getRepository<FileVersion>(
+          "drive_file_versions",
+          FileVersion,
+        )),
+      ]);
       gr.platformServices.messageQueue.processor.addHandler(
         new PreviewFinishedProcessor(this, this.repository),
       );
@@ -308,10 +341,128 @@ export class FileServiceImpl {
 
     return new DeleteResult("files", fileToDelete, true);
   }
-}
 
-function getFilePath(entity: File): string {
+  async checkConsistency(): Promise<any> {
+    const ver = new Date().getTime();
+    const data = [];
+    if (!this.checkConsistencyInProgress) {
+      this.checkConsistencyInProgress = true;
+      let result: ListResult<FileVersion>;
+      let page: Pagination = { limitStr: "20" };
+      try {
+        do {
+          result = await this.versionRepository.find({}, { pagination: page });
+          //check that the file exists
+          const jobs: Promise<void>[] = [];
+          for (const version of result.getEntities()) {
+            if (version.file_metadata.external_id) {
+              const checkFile = async () => {
+                try {
+                  const file = await this.getFile({
+                    id: version.file_metadata.external_id,
+                    company_id: "00000000-0000-4000-0000-000000000000",
+                  });
+                  const exist = await gr.platformServices.storage.exists(
+                    getFilePath(file) + "/chunk1",
+                  );
+                  if (exist) {
+                    logger.info(`File ${version.file_metadata.external_id} exists in S3`);
+                  } else {
+                    logger.info(`File ${version.file_metadata.external_id} DOES NOT exists in S3`);
+                    const doc = await this.documentRepository.findOne({
+                      id: version.drive_item_id,
+                      company_id: "00000000-0000-4000-0000-000000000000",
+                    });
+                    let user = await this.userRepository.findOne({ id: doc.creator });
+                    const isFromNextcloud = isUndefined(user) || isNull(user);
+                    const path = await getPath(doc.id, this.documentRepository, true, {
+                      company: { id: "00000000-0000-4000-0000-000000000000" },
+                    } as CompanyExecutionContext);
+                    if (isFromNextcloud) {
+                      if (path[0].id.startsWith("user_")) {
+                        user = await this.userRepository.findOne({ id: path[0].id.substring(5) });
+                      }
+                    }
+                    const missedFile = new MissedDriveFile();
+                    Object.assign(missedFile, {
+                      id: version.file_metadata.external_id,
+                      added: doc.added,
+                      doc_id: doc.id,
+                      file_id: version.file_metadata.external_id,
+                      creator: user?.id,
+                      name: doc.name,
+                      is_in_trash: doc.is_in_trash,
+                      user_email: user?.email_canonical,
+                      is_from_nextcloud: isFromNextcloud,
+                      path: path.map(e => e?.name).join("/"),
+                      size: doc.size,
+                      version: ver,
+                    });
+                    await this.missedFileRepository.save(missedFile);
+                    logger.info(`Missing file:: ${JSON.stringify(missedFile)}`);
+                  }
+                } catch (e) {
+                  logger.warn(`Can't find ${version.file_metadata.external_id} in DB`);
+                }
+              };
+              jobs.push(checkFile.bind(this)());
+            }
+          }
+          await Promise.all(jobs);
+          //go to next page
+          page = Pagination.fromPaginable(result.nextPage);
+        } while (page.page_token);
+      } finally {
+        this.checkConsistencyInProgress = false;
+        logger.info("Scanning for missing file finished.");
+      }
+    }
+    return data;
+  }
+
+  async checkFileExistsS3(id: string): Promise<any> {
+    try {
+      const doc = await this.documentRepository.findOne({
+        id,
+        company_id: "00000000-0000-4000-0000-000000000000",
+      });
+      const externalId = doc.last_version_cache.file_metadata.external_id;
+      const file = await this.getFile({
+        id: externalId,
+        company_id: "00000000-0000-4000-0000-000000000000",
+      });
+      const exist = await gr.platformServices.storage.exists(getFilePath(file) + "/chunk1");
+      if (exist) {
+        return { exist: true, file };
+      } else {
+        return { exist: false, file };
+      }
+    } catch (error) {
+      logger.error(`Error while checking file ${id} in S3`, error);
+      return { exist: false, file: null };
+    }
+  }
+
+  async restoreFileS3(id: string, file: Multipart, options: UploadOptions): Promise<any> {
+    try {
+      const result = await this.checkFileExistsS3(id);
+      if (result.exist) {
+        return { success: true };
+      }
+      await gr.platformServices.storage.write(getFilePath(result.file), file.file, {
+        chunkNumber: options.chunkNumber,
+        encryptionAlgo: this.algorithm,
+        encryptionKey: result.file.encryption_key,
+      });
+      return { success: true };
+    } catch (error) {
+      logger.error(`Error while uploading missing file ${id} to S3`, error);
+      return { success: false };
+    }
+  }
+}
+export const getFilePath = (entity: File): string => {
   return `${gr.platformServices.storage.getHomeDir()}/files/${entity.company_id}/${
     entity.user_id || "anonymous"
   }/${entity.id}`;
-}
+};

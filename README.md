@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="https://github.com/linagora/TDrive">
-   <img src="https://github.com/linagora/TDrive/assets/14924963/23b216dc-5331-440c-a28d-b07019e90f91" alt="Logo">
+  <a href="https://github.com/linagora/twake-drive">
+   <img src="https://github.com/linagora/twake-drive/assets/14924963/dbeafa1a-367b-4a88-8d72-b09b753a0415" alt="Logo">
   </a>
 
   <h3 align="center">twakedrive.app (🚀coming soon)</h3>
@@ -15,15 +15,15 @@
     |
     <a href="https://twakedrive.app">Website</a>
     |
-    <a href="https://github.com/linagora/TDrive/issues">Issues</a>
+    <a href="https://github.com/linagora/twake-drive/issues">Issues</a>
     |
-    <a href="https://github.com/linagora/TDrive/milestones">Roadmap</a>
+    <a href="https://github.com/linagora/twake-drive/milestones">Roadmap</a>
   </p>
 </p>
 
 ## About
 
-<img width="100%!" alt="booking-screen" src="https://github.com/linagora/TDrive/assets/14924963/e19079c6-99c4-41f5-83a2-b4ed4a8816d7">
+<img width="100%!" alt="booking-screen" src="https://github.com/linagora/twake-drive/assets/14924963/e19079c6-99c4-41f5-83a2-b4ed4a8816d7">
 
 ## Getting Started
 
@@ -31,7 +31,7 @@ To get a local copy up and running, please follow these simple steps.
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/linagora/TDrive
+   git clone https://github.com/linagora/twake-drive
    ```
 2. Run it with Docker
    ```sh
@@ -69,9 +69,9 @@ To get a local copy up and running, please follow these simple steps.
    ```
    > If you need more parameters, create/edit ```tdrive/backend/node/config/development.json``` file
 
-6. App will be running on port 3000
+6. The app will be running on port 3000
 
 
 ## License
 
-Tdrive is licensed under [Affero GPL v3](https://github.com/linagora/TDrive/blob/main/LICENSE)
+Twake Drive is licensed under [Affero GPL v3](https://github.com/linagora/twake-drive/blob/main/LICENSE)

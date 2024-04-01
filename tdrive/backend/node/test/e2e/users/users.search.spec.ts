@@ -81,7 +81,7 @@ describe("The /users API", () => {
       //Wait for indexation to happen
       await new Promise(r => setTimeout(r, 5000));
 
-      let resources = await search("ha");
+      let resources = await search("ha", platform.workspace.company_id);
       expect(resources.length).toBe(2);
 
       resources = await search("bob rabiot");

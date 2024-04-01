@@ -12,6 +12,8 @@ import FileUploadAPIClient from '../api/file-upload-api-client';
 import { isPendingFileStatusPending } from '../utils/pending-files';
 import { FileTreeObject } from "components/uploads/file-tree-utils";
 import { DriveApiClient } from "features/drive/api-client/api-client";
+import { ToasterService } from 'app/features/global/services/toaster-service';
+import Languages from 'app/features/global/services/languages-service';
 
 export enum Events {
   ON_CHANGE = 'notify',
@@ -206,6 +208,9 @@ class FileUploadService {
       pendingFile.resumable.on('fileError', () => {
         pendingFile.status = 'error';
         pendingFile.resumable.cancel();
+        const intendedFilename = (pendingFile.originalFile || {}).name || (pendingFile.backendFile || { metadata: {}}).metadata.name;
+        ToasterService.error(Languages.t('services.file_upload_service.toaster.upload_file_error', [intendedFilename],
+                                         'Error uploading file ' + intendedFilename));
         options?.callback?.(null, options?.context || {});
         this.notify();
       });

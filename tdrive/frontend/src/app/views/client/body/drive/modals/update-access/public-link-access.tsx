@@ -8,19 +8,19 @@ import { Input } from 'app/atoms/input/input-text';
 import { useEffect, useRef, useState } from 'react';
 import { AccessLevel } from './common';
 import moment from 'moment';
-import 'moment/min/locales'
+import 'moment/min/locales';
 import Languages from 'features/global/services/languages-service';
-
+import { debounce } from 'lodash';
 
 export const PublicLinkManager = ({ id, disabled }: { id: string; disabled?: boolean }) => {
   const { item, loading, update } = useDriveItem(id);
   const publicLink = getPublicLink(item);
 
-
-
   return (
     <>
-      <Base className="block mt-2 mb-1">{Languages.t('components.public-link-acess.public_link_acess')}</Base>
+      <Base className="block mt-2 mb-1">
+        {Languages.t('components.public-link-acess.public_link_acess')}
+      </Base>
       <div className="p-4 rounded-md border">
         <div className="flex flex-row overflow-hidden w-full">
           <div className="grow">
@@ -75,7 +75,7 @@ export const PublicLinkManager = ({ id, disabled }: { id: string; disabled?: boo
                     password: password || '',
                   },
                 },
-              });
+              }, true);
             }}
             onChangeExpiration={(expiration: number) => {
               update({
@@ -109,10 +109,19 @@ const PublicLinkOptions = (props: {
   const handlePasswordBlur = () => {
     props.onChangePassword(password);
   };
-  
+
+  const debouncedOnChangePassword = debounce(passwordValue => {
+    props.onChangePassword(passwordValue);
+  }, 500); // 500ms delay
 
   useEffect(() => {
-    props.onChangePassword(usePassword ? password : '');
+    // Ensure the effect runs only if usePassword or password changes
+    debouncedOnChangePassword(usePassword ? password : '');
+
+    // Cleanup function to cancel the debounced call if the component is unmounted or the dependencies change
+    return () => {
+      debouncedOnChangePassword.cancel();
+    };
   }, [usePassword, password]);
 
   useEffect(() => {
@@ -126,7 +135,9 @@ const PublicLinkOptions = (props: {
 
   return (
     <>
-      <Subtitle className="block mt-4 mb-1">{Languages.t('components.public-link-security')}</Subtitle>
+      <Subtitle className="block mt-4 mb-1">
+        {Languages.t('components.public-link-security')}
+      </Subtitle>
       <div className="flex items-center justify-center w-full h-10">
         <Checkbox
           disabled={props.disabled}
@@ -147,15 +158,14 @@ const PublicLinkOptions = (props: {
             // saves and copies password
             onClick={() => {
               if (password) copyToClipboard(password);
-              ToasterService.success(Languages.t('components.public-link-security_password_copied'));
+              ToasterService.success(
+                Languages.t('components.public-link-security_password_copied'),
+              );
             }}
           />
         )}
       </div>
       <div className="flex items-center justify-center w-full h-10">
-
-
-        
         <Checkbox
           disabled={props.disabled}
           onChange={s => {
@@ -166,7 +176,9 @@ const PublicLinkOptions = (props: {
           label={Languages.t('components.public-link-security_expired')}
         />
         {useExpiration && (expiration || 0) < Date.now() && (
-          <Info className="ml-2 text-red-500">({Languages.t('components.public-link-security_expired')})</Info>
+          <Info className="ml-2 text-red-500">
+            ({Languages.t('components.public-link-security_expired')})
+          </Info>
         )}
         {useExpiration && (expiration || 0) > Date.now() && (
           <Info className="ml-2">({expirationDate(expiration)})</Info>

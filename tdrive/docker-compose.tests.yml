@@ -24,6 +24,29 @@ services:
       - "6379:6379"
     environment:
       - REDIS_REPLICATION_MODE=master
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./test/.minio/data:/export
+      - ./test/.minio/config:/root/.minio
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=adminminio
+    command: server /export
+
+  createbucket:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 admin adminminio;
+      /usr/bin/mc rm -r --force myminio/drive;
+      /usr/bin/mc mb myminio/drive;
+      exit 0;
+      "
   node:
     image: tdrive/tdrive-node:test
     build:
@@ -39,11 +62,18 @@ services:
       - PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
       - SEARCH_ES_ENDPOINT=http://elasticsearch:9200
       - SEARCH_ES_FLUSHINTERVAL=1
+      - STORAGE_DRIVER=S3
+      - STORAGE_S3_BUCKET=drive
+      - STORAGE_S3_HOME_DIRECTORY=tdrive
+      - STORAGE_S3_ENDPOINT=minio
+      - STORAGE_S3_ACCESS_KEY=admin
+      - STORAGE_S3_SECRET_KEY=adminminio
     depends_on:
       - mongo
       - scylladb
       - rabbitmq
       - elasticsearch
+      - createbucket
     links:
       - mongo
       - scylladb

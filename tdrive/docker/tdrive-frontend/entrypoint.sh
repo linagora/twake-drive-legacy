@@ -32,7 +32,7 @@ case $SSL_CERTS in
     sed -i '/ *ssl_/d' /etc/nginx/sites-available/site.template
     ;;
   *)
-    echo: "SSL_CERTS var not defined setting selfsigned"
+    echo "SSL_CERTS var not defined setting selfsigned"
     export SSL_CERTS=selfsigned
     _selfsigned
     ;;

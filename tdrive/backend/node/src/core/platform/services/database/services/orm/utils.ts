@@ -6,10 +6,10 @@ export function getEntityDefinition(instance: any): {
   entityDefinition: EntityDefinition;
   columnsDefinition: { [name: string]: ColumnDefinition };
 } {
-  const entityConfituration = _.cloneDeep(instance.constructor.prototype._entity);
+  const entityConfiguration = _.cloneDeep(instance.constructor.prototype._entity);
   const entityColumns = _.cloneDeep(instance.constructor.prototype._columns);
   return {
-    entityDefinition: entityConfituration,
+    entityDefinition: entityConfiguration,
     columnsDefinition: entityColumns,
   };
 }
@@ -17,11 +17,10 @@ export function getEntityDefinition(instance: any): {
 export function unwrapPrimarykey(entityDefinition: EntityDefinition): string[] {
   const initial = [...entityDefinition.options.primaryKey];
   const partitionKey = initial.shift();
-  const primaryKey: string[] = [
+  return [
     ...(typeof partitionKey === "string" ? [partitionKey] : partitionKey),
     ...(initial as string[]),
   ];
-  return primaryKey;
 }
 
 export function unwrapIndexes(entityDefinition: EntityDefinition): string[] {
@@ -89,8 +88,7 @@ export function fromMongoDbOrderable(orderable: string): string {
     return null;
   }
   const uuid_arr = orderable.split("-");
-  const timeuuid = [uuid_arr[2], uuid_arr[1], uuid_arr[0], uuid_arr[3], uuid_arr[4]].join("-");
-  return timeuuid;
+  return [uuid_arr[2], uuid_arr[1], uuid_arr[0], uuid_arr[3], uuid_arr[4]].join("-");
 }
 
 /**
@@ -103,8 +101,7 @@ export function toMongoDbOrderable(timeuuid?: string): string {
     return null;
   }
   const uuid_arr = timeuuid.split("-");
-  const time_str = [uuid_arr[2], uuid_arr[1], uuid_arr[0], uuid_arr[3], uuid_arr[4]].join("-");
-  return time_str;
+  return [uuid_arr[2], uuid_arr[1], uuid_arr[0], uuid_arr[3], uuid_arr[4]].join("-");
 }
 
 /**

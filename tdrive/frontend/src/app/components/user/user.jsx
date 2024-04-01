@@ -2,7 +2,6 @@
 import React, { Component } from 'react';
 
 import UserService from '@features/users/services/current-user-service';
-import UserOnlineStatus from '../online-user-status/online-user-status';
 
 import './user.scss';
 
@@ -28,18 +27,6 @@ export default class User extends Component {
           height: this.props.size,
         }}
       >
-        {this.props.withStatus && (
-          <UserOnlineStatus
-            user={user}
-            notifications_disabled={notifications_disabled}
-            size={
-              (this.props.small ? 'small' : undefined) ||
-              (this.props.medium ? 'medium' : undefined) ||
-              (this.props.big ? 'big' : undefined) ||
-              'medium'
-            }
-          />
-        )}
       </div>
     );
   }

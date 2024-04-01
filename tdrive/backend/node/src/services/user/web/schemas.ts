@@ -92,6 +92,10 @@ export const companyObjectSchema = {
             [CompanyFeaturesEnum.CHAT_MULTIPLE_WORKSPACES]: { type: "boolean" },
             [CompanyFeaturesEnum.CHAT_UNLIMITED_STORAGE]: { type: "boolean" },
             [CompanyFeaturesEnum.COMPANY_INVITE_MEMBER]: { type: "boolean" },
+            [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]: { type: "boolean" },
+            [CompanyFeaturesEnum.COMPANY_SHARED_DRIVE]: { type: "boolean" },
+            [CompanyFeaturesEnum.COMPANY_DISPLAY_EMAIL]: { type: "boolean" },
+            [CompanyFeaturesEnum.COMPANY_USER_QUOTA]: { type: "boolean" },
             guests: { type: "number" }, // to rename or delete
             members: { type: "number" }, //  to rename or delete
             storage: { type: "number" }, //  to rename or delete
@@ -127,6 +131,45 @@ export const getUserSchema = {
       required: ["resource"],
     },
   },
+  tags: ["User"],
+  params: {
+    type: "object",
+    description: "Users",
+    properties: {
+      id: {
+        description: "User ID",
+        type: "string",
+      },
+    },
+  },
+};
+
+export const getQuotaSchema = {
+  type: "object",
+  properties: {
+    companyId: { type: "string" },
+  },
+  response: {
+    "2xx": {
+      type: "object",
+      properties: {
+        used: { type: "number" },
+        remaining: { type: "number" },
+        total: { type: "number" },
+      },
+    },
+  },
+  tags: ["User"],
+  params: {
+    type: "object",
+    description: "Users",
+    properties: {
+      id: {
+        description: "User ID",
+        type: "string",
+      },
+    },
+  },
 };
 
 export const setUserPreferencesSchema = {
@@ -143,6 +186,7 @@ export const setUserPreferencesSchema = {
     },
     required: [] as any[],
   },
+  tags: ["User"],
   response: {
     "2xx": userObjectSchema.properties.preferences,
   },

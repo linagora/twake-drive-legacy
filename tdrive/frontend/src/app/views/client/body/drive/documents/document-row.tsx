@@ -20,7 +20,6 @@ import { useEffect, useState } from 'react';
 import Avatar from '../../../../../atoms/avatar';
 import { PublicIcon } from '../components/public-icon';
 import {CheckableIcon, DriveItemOverlayProps, DriveItemProps} from './common';
-import { getDevice } from '../../../../../features/global/utils/device';
 import './style.scss';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
@@ -33,10 +32,11 @@ export const DocumentRow = ({
   checked,
   onClick,
   onBuildContextMenu,
+  inPublicSharing,
 }: DriveItemProps) => {
   const history = useHistory();
   const [hover, setHover] = useState(false);
-  const { open } = useDrivePreview();
+  const { open,close } = useDrivePreview();
   const company = useRouterCompany();
   const { itemId } = useRouteState();
 
@@ -48,18 +48,19 @@ export const DocumentRow = ({
   const hasThumbnails = !!metadata.thumbnails?.length || false;
 
   useEffect(() => {
+    // close the preview if the item is not set or the user navigated away
+    if(!itemId) {
+      close();
+    }
+    // open the preview if the item is set
     if(itemId == item.id) {
       open(item);
     }
   }, [itemId]);
 
   const preview = () => {
-    const device = getDevice();
-    console.log("DEVICE:: " + device);
-    if (device != "ios" && device != "android") {
-      history.push(RouterServices.generateRouteFromState({companyId: company, itemId: item.id, dirId: ''}));
-      open(item);
-    }
+    history.push(RouterServices.generateRouteFromState({companyId: company, itemId: item.id}));
+    if (inPublicSharing) open(item);
   };
 
   return (

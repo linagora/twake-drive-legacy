@@ -6,38 +6,6 @@ import * as fs from "fs";
 
 const url = "/internal/services/documents/v1";
 
-export const e2e_createDocument = async (
-  platform: TestPlatform,
-  item: Partial<DriveFile>,
-  version: Partial<FileVersion>,
-) => {
-  const token = await platform.auth.getJWTToken();
-
-  return await platform.app.inject({
-    method: "POST",
-    url: `${url}/companies/${platform.workspace.company_id}/item`,
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-    payload: {
-      item,
-      version,
-    },
-  });
-};
-
-export const e2e_getDocument = async (platform: TestPlatform, id: string | "root" | "trash") => {
-  const token = await platform.auth.getJWTToken();
-
-  return await platform.app.inject({
-    method: "GET",
-    url: `${url}/companies/${platform.workspace.company_id}/item/${id}`,
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-  });
-};
-
 export const e2e_deleteDocument = async (platform: TestPlatform, id: string | "root" | "trash") => {
   const token = await platform.auth.getJWTToken();
 
@@ -67,28 +35,14 @@ export const e2e_updateDocument = async (
   });
 };
 
-export const e2e_searchDocument = async (
-  platform: TestPlatform,
-  payload: Record<string, string>,
-) => {
-  const token = await platform.auth.getJWTToken();
-
-  return await platform.app.inject({
-    method: "POST",
-    url: `${url}/companies/${platform.workspace.company_id}/search`,
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-    payload,
-  });
-};
 
 export const e2e_createVersion = async (
   platform: TestPlatform,
   id: string,
   payload: Partial<FileVersion>,
+  jwt?: string,
 ) => {
-  const token = await platform.auth.getJWTToken();
+  const token = jwt ?? (await platform.auth.getJWTToken());
 
   return await platform.app.inject({
     method: "POST",
@@ -100,8 +54,9 @@ export const e2e_createVersion = async (
   });
 };
 
-export const e2e_createDocumentFile = async (platform: TestPlatform) => {
-  const filePath = `${__dirname}/assets/test.txt`;
+export const e2e_createDocumentFile = async (platform: TestPlatform, documentPath?: string) => {
+  const subFilePath = documentPath ?? "assets/test.txt";
+  const filePath = `${__dirname}/${subFilePath}`;
   const token = await platform.auth.getJWTToken();
   const form = formAutoContent({ file: fs.createReadStream(filePath) });
   form.headers["authorization"] = `Bearer ${token}`;
