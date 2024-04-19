@@ -93,7 +93,7 @@ export default () => {
         {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_SHARED_DRIVE) && (
           <Button
             onClick={() => {
-              // setParentId('root')
+              setParentId('root');
               history.push(
                 RouterServices.generateRouteFromState({
                   companyId: company,
