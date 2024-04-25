@@ -57,7 +57,7 @@ export const UploadModal = ({
                 <ChevronLeftIcon className="w-6 h-6" />
               </A>
             )}
-            <span className="ml-2">{Languages.t('components.create_modal.create_folder_or_doc')}</span>
+            <span className="ml-2">{Languages.t('components.create_modal.upload_folder_or_doc')}</span>
           </div>
         }
       >

@@ -282,6 +282,7 @@
     "components.disk_usage.used": "использовано",
     "components.disk_usage.in_trash": "в корзине",
     "components.create_modal.create_folder_or_doc": "Создать папку или файл",
+    "components.create_modal.upload_folder_or_doc": "Загрузить документ или папку",
     "components.create_modal.create_folder": "Создать папку",
     "components.create_modal.upload_files": "Загрузить файл",
     "components.create_modal.upload_folders": "Загрузить папку",
