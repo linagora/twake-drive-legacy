@@ -263,7 +263,7 @@ export class DocumentsController {
     }>,
   ): Promise<any> => {
     const { id } = request.params;
-    const update = request.body;
+    const update: any = request.body;
 
     if (!id) throw new CrudException("Missing id", 400);
 
@@ -384,7 +384,7 @@ export class DocumentsController {
         archive.pipe(response.raw);
       } else if (archiveOrFile.file) {
         const data = archiveOrFile.file;
-        const filename = data.name.replace(/[^a-zA-Z0-9 -_.]/g, "");
+        const filename = encodeURIComponent(data.name.replace(/[^\p{L}0-9 -_.]/gu, ""));
 
         response.header("Content-disposition", `attachment; filename="${filename}"`);
         if (data.size) response.header("Content-Length", data.size);
