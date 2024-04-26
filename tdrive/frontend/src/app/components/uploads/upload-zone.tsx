@@ -64,6 +64,7 @@ export default class UploadZone extends React.Component<PropsType, StateType> {
   setCallback() {
     this.file_input.onchange = (e: any) => {
       this.change(e);
+      e.target.value = null;
     };
   }
 
