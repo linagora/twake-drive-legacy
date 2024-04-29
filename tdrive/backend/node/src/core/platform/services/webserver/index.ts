@@ -10,7 +10,7 @@ import { serverErrorHandler } from "./error";
 import WebServerAPI from "./provider";
 import jwtPlugin from "../auth/web/jwt";
 import path from "path";
-import swaggerPlugin from "fastify-swagger";
+import swaggerPlugin from "@fastify/swagger";
 import { SkipCLI } from "../../framework/decorators/skip";
 import fs from "fs";
 import { ExecutionContext, executionStorage } from "../../framework/execution-storage";

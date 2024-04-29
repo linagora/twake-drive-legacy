@@ -5,7 +5,7 @@
       "module": "commonjs",
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
-      "target": "es6",
+      "target": "ESNext",
       "noImplicitAny": false,
       "moduleResolution": "node",
       "sourceMap": true,
@@ -13,7 +13,6 @@
       "baseUrl": ".",
       "paths": {
           "*": [
-              "node_modules/*",
               "src/types/*"
           ],
           "src/*": ["src/*"]
