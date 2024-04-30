@@ -105,7 +105,7 @@ const AccessChecker = ({
   const { details, loading, refresh } = useDriveItem(folderId);
   const companyId = useRouterCompany();
   const [password, setPassword] = useState((token || '').split('+')[1] || '');
-  const [accessGranted, setAccessGranted] = useState(false);
+  const [accessGranted, setAccessGranted] = useState<boolean | null>(null);
   //Preload applications mainly for shared view
   const { refresh: refreshApplications } = useCompanyApplications();
 
@@ -143,7 +143,7 @@ const AccessChecker = ({
   }, []);
 
 
-  if ((!details?.item?.id && !loading) || !accessGranted) {
+  if ((!details?.item?.id && !loading) || accessGranted === false) {
     return (
       <div className="text-center">
         <div style={{ height: '20vh' }} />
