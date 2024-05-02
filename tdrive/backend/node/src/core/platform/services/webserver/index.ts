@@ -1,19 +1,20 @@
 import { logger, TdriveService } from "../../framework";
 import { Server, IncomingMessage, ServerResponse } from "http";
-import { FastifyInstance, fastify } from "fastify";
-import sensible from "fastify-sensible";
+import { FastifyInstance, fastify, FastifyRegisterOptions, FastifyServerOptions } from "fastify";
+import sensible from "@fastify/sensible";
 import multipart from "fastify-multipart";
 import formbody from "@fastify/formbody";
 import fastifyStatic from "@fastify/static";
-import corsPlugin, { FastifyCorsOptions } from "fastify-cors";
+import corsPlugin, { FastifyCorsOptions } from "@fastify/cors";
 import { serverErrorHandler } from "./error";
 import WebServerAPI from "./provider";
 import jwtPlugin from "../auth/web/jwt";
 import path from "path";
-import swaggerPlugin from "@fastify/swagger";
+import swaggerPlugin, { FastifySwaggerOptions } from "@fastify/swagger";
 import { SkipCLI } from "../../framework/decorators/skip";
 import fs from "fs";
 import { ExecutionContext, executionStorage } from "../../framework/execution-storage";
+import { FastifyListenOptions } from "fastify/types/instance";
 
 export default class WebServerService extends TdriveService<WebServerAPI> implements WebServerAPI {
   name = "webserver";
@@ -102,9 +103,11 @@ export default class WebServerService extends TdriveService<WebServerAPI> implem
       staticCSP: false,
       transformStaticCSP: header => header,
       exposeRoute: true,
-    });
+    } as FastifyRegisterOptions<FastifySwaggerOptions>);
     this.server.register(jwtPlugin);
-    this.server.register(sensible, { errorHandler: false });
+    this.server.register(sensible, {
+      errorHandler: false,
+    } as FastifyRegisterOptions<FastifyServerOptions>);
     this.server.register(multipart);
     this.server.register(formbody);
     this.server.register(corsPlugin, this.configuration.get<FastifyCorsOptions>("cors", {}));
@@ -138,7 +141,10 @@ export default class WebServerService extends TdriveService<WebServerAPI> implem
         res.type("text/html").send(stream);
       });
 
-      await this.server.listen(this.configuration.get<number>("port", 3000), "0.0.0.0");
+      await this.server.listen({
+        port: this.configuration.get<number>("port", 3000),
+        host: "0.0.0.0",
+      } as FastifyListenOptions);
 
       this.server.ready(err => {
         if (err) throw err;

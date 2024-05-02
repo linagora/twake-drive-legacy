@@ -9,8 +9,8 @@ export interface authenticateDecorator {
 
 declare module "fastify" {
   interface FastifyInstance {
-    authenticate(): void;
-    authenticateOptional(): void;
+    authenticate(request: FastifyRequest): void;
+    authenticateOptional(request: FastifyRequest): void;
     io: SocketIO.Server;
   }
 

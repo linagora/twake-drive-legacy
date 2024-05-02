@@ -20,7 +20,7 @@ export class FileController {
     if (request.isMultipart()) {
       file = await request.file();
     }
-    const q = request.query;
+    const q: any = request.query;
     const options: UploadOptions = {
       totalChunks: parseInt(q.resumableTotalChunks || q.total_chunks) || 1,
       totalSize: parseInt(q.resumableTotalSize || q.total_size) || 0,
@@ -126,7 +126,7 @@ export class FileController {
       file = await request.file();
     }
 
-    const q = request.query;
+    const q: any = request.query;
     const options: any = {
       totalChunks: parseInt(q.resumableTotalChunks || q.total_chunks) || 1,
       chunkNumber: parseInt(q.resumableChunkNumber || q.chunk_number) || 1,

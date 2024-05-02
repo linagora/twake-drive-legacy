@@ -1,5 +1,5 @@
 import { FastifyReply } from "fastify";
-import { HttpErrorCodes } from "fastify-sensible/lib/httpError";
+import { HttpErrorCodes } from "@fastify/sensible/lib/httpError";
 import { CrudException } from "../core/platform/framework/api/crud-service";
 
 export function handleError(reply: FastifyReply, err: Error): void {

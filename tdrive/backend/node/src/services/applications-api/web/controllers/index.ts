@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyReply, FastifyRequest, HTTPMethods } from "fastify";
+import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import _ from "lodash";
 import { v4 } from "uuid";
 import { CrudException } from "../../../../core/platform/framework/api/crud-service";
@@ -155,7 +155,7 @@ export class ApplicationsApiController {
 
     fastify.inject(
       {
-        method: request.method as HTTPMethods,
+        method: request.method as any,
         url: route,
         payload: request.body as any,
         headers: _.pick(request.headers, "authorization"),
