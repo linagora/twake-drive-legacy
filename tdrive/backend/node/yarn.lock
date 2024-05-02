@@ -3634,23 +3634,31 @@ fastify-sensible@=3.0.1:
     type-is "^1.6.18"
     vary "^1.1.2"
 
-fastify-socket.io@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.npmjs.org/fastify-socket.io/-/fastify-socket.io-3.0.0.tgz"
-  integrity sha512-rVNs6NPY6ZoUQFMxZCRQreQpNyNkyKXrTbzXXzw55/grEegTW0meKBI02JAyWd2/T+k7nKB+d/7aNhYlB/Q5Bg==
+fastify-socket.io@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.npmjs.org/fastify-socket.io/-/fastify-socket.io-5.0.0.tgz"
+  integrity sha512-BQKGLVSsLn9s4IXLWjwZRGTNuFbXt5bPY2qeXJUFYFtu/0BxLqcE2WMOrWUZdFWy12kuEvXC76ObsilQKeSfqg==
+  dependencies:
+    fastify-plugin "^4.5.1"
+    tslib "^2.6.1"
+
+"fastify-websocket-deprecated@npm:fastify-websocket@4.2.2":
+  version "4.2.2"
+  resolved "https://registry.npmjs.org/fastify-websocket/-/fastify-websocket-4.2.2.tgz"
+  integrity sha512-Cx4CZwercvoPq4fc6f09VAoa3wqp9qOQUDHp8wMkCHau4zw7wGa+C3Oi2QNUvhvNqw6N4mH8WWYLEnGXUlnumg==
   dependencies:
     fastify-plugin "^3.0.0"
+    ws "^8.0.0"
 
-fastify-websocket@^2.0.11:
-  version "2.1.0"
-  resolved "https://registry.npmjs.org/fastify-websocket/-/fastify-websocket-2.1.0.tgz"
-  integrity sha512-u5zClCarOHctvzKq76Gc0rDwtWfU7pw+JGYETfSu77YzZ/uzXLDX4jB70vLliUc3nqK0zXFRDK2/KnEnfdF9Kw==
+fastify-websocket@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.npmjs.org/fastify-websocket/-/fastify-websocket-4.3.0.tgz"
+  integrity sha512-PLoXjlKHaWOEIJ7tHStM2i8aL4kdYVB8d1Umf7TdpQ93kG7OopO7eV4IAyO545kRiE8pyL1AbjlJeZ7irDA1aA==
   dependencies:
-    fastify-plugin "^3.0.0"
-    find-my-way "^3.0.5"
-    ws "^7.4.2"
+    fastify-websocket-deprecated "npm:fastify-websocket@4.2.2"
+    process-warning "^1.0.0"
 
-fastify@^4.26.2:
+fastify@^4.26.2, fastify@4.x.x:
   version "4.26.2"
   resolved "https://registry.npmjs.org/fastify/-/fastify-4.26.2.tgz"
   integrity sha512-90pjTuPGrfVKtdpLeLzND5nyC4woXZN5VadiNQCicj/iJU4viNHKhsAnb7jmv1vu2IzkLXyBiCzdWuzeXgQ5Ug==
@@ -3720,15 +3728,6 @@ filter-obj@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/filter-obj/-/filter-obj-1.1.0.tgz"
   integrity sha512-8rXg1ZnX7xzy2NGDVkBVaAy+lSlPNwad13BtgSlLuxfIslyt5Vg64U7tFcCt4WS1R0hvtnQybT/IyCkGZ3DpXQ==
-
-find-my-way@^3.0.5:
-  version "3.0.5"
-  resolved "https://registry.npmjs.org/find-my-way/-/find-my-way-3.0.5.tgz"
-  integrity sha512-FweGg0cv1sBX8z7WhvBX5B5AECW4Zdh/NiB38Oa0qwSNIyPgRBCl/YjxuZn/rz38E/MMBHeVKJ22i7W3c626Gg==
-  dependencies:
-    fast-decode-uri-component "^1.0.1"
-    safe-regex2 "^2.0.0"
-    semver-store "^0.3.0"
 
 find-my-way@^8.0.0:
   version "8.1.0"
@@ -7062,11 +7061,6 @@ selderee@^0.6.0:
   dependencies:
     parseley "^0.7.0"
 
-semver-store@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.npmjs.org/semver-store/-/semver-store-0.3.0.tgz"
-  integrity sha512-TcZvGMMy9vodEFSse30lWinkj+JgOBvPn8wRItpQRSayhc+4ssDs335uklkfvQQJgL/WvmHLVj4Ycv2s7QCQMg==
-
 semver@^5.6.0:
   version "5.7.2"
   resolved "https://registry.npmjs.org/semver/-/semver-5.7.2.tgz"
@@ -7131,7 +7125,7 @@ setprototypeof@1.2.0:
   resolved "https://registry.npmjs.org/setprototypeof/-/setprototypeof-1.2.0.tgz"
   integrity sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==
 
-sharp@^0.33.1:
+sharp@^0.33.3:
   version "0.33.3"
   resolved "https://registry.npmjs.org/sharp/-/sharp-0.33.3.tgz"
   integrity sha512-vHUeXJU1UvlO/BNwTpT0x/r53WkLUVxrmb5JTgW92fdFCFk0ispLMAeu/jPO2vjkXM1fYUi3K7/qcLF47pwM1A==
@@ -7267,7 +7261,7 @@ socket.io-parser@~4.2.4:
     "@socket.io/component-emitter" "~3.1.0"
     debug "~4.3.1"
 
-socket.io@^4.4.0, socket.io@^4.6.2:
+socket.io@^4.6.2:
   version "4.7.5"
   resolved "https://registry.npmjs.org/socket.io/-/socket.io-4.7.5.tgz"
   integrity sha512-DmeAkF6cwM9jSfmp6Dr/5/mfMwb5Z5qRrSXLpo3Fq5SqyU8CMF15jIN4ZhfSwu35ksM1qmHZDQ/DK5XTccSTvA==
@@ -7826,6 +7820,11 @@ tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
   resolved "https://registry.npmjs.org/tslib/-/tslib-1.14.1.tgz"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
+tslib@^2.6.1:
+  version "2.6.2"
+  resolved "https://registry.npmjs.org/tslib/-/tslib-2.6.2.tgz"
+  integrity sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==
+
 tsutils@^3.21.0:
   version "3.21.0"
   resolved "https://registry.npmjs.org/tsutils/-/tsutils-3.21.0.tgz"
@@ -8184,10 +8183,10 @@ write-json-file@~4.3.0:
     sort-keys "^4.0.0"
     write-file-atomic "^3.0.0"
 
-ws@^7.4.2:
-  version "7.5.9"
-  resolved "https://registry.npmjs.org/ws/-/ws-7.5.9.tgz"
-  integrity sha512-F+P9Jil7UiSKSkppIiD94dN07AwvFixvLIj1Og1Rl9GGMuNipJnV9JzjD6XuqmAeiswGvUmNLjr5cFuXwNS77Q==
+ws@^8.0.0:
+  version "8.17.0"
+  resolved "https://registry.npmjs.org/ws/-/ws-8.17.0.tgz"
+  integrity sha512-uJq6108EgZMAl20KagGkzCKfMEjxmKvZHG7Tlq0Z6nOky7YF7aq4mOx6xK8TJ/i1LeK4Qus7INktacctDgY8Ow==
 
 ws@~7.4.2:
   version "7.4.6"
