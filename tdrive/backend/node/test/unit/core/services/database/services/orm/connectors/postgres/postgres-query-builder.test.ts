@@ -27,8 +27,8 @@ describe('The PostgresQueryBuilder', () => {
     const query = subj.buildSelect(TestDbEntity, filter as { [key: string]: any }, null);
 
     //then
-    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" WHERE id = $1 AND company_id = $2 ORDER BY id DESC LIMIT 100 OFFSET 0`);
-    expect(query[1]).toEqual([filter.id, filter.company_id]);
+    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" WHERE company_id = $1 AND id = $2 ORDER BY id DESC LIMIT 100 OFFSET 0`);
+    expect(query[1]).toEqual([filter.company_id, filter.id]);
   });
 
   test('buildSelect query with array in filters', async () => {

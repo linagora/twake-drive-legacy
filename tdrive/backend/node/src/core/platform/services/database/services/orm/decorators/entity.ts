@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
-import { EntityDefinition } from "../types";
-
 type EntityOption = {
   type?: string;
   ttl?: number;
@@ -18,11 +16,10 @@ type EntityOption = {
 export function Entity(name: string, options: EntityOption): ClassDecorator {
   // eslint-disable-next-line @typescript-eslint/ban-types
   return function (constructor: Function): void {
-    const entityDefinition: EntityDefinition = {
+    constructor.prototype._entity = {
       name,
       type: options.type || name,
       options,
     };
-    constructor.prototype._entity = entityDefinition;
   };
 }
