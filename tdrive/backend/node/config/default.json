@@ -80,6 +80,7 @@
   "database": {
     "secret": "",
     "type": "cassandra",
+    "encryption": "aes-256-cbc",
     "mongodb": {
       "uri": "mongodb://mongo:27017",
       "database": "tdrive"

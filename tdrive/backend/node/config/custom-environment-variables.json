@@ -46,6 +46,7 @@
   "database": {
     "secret": "DB_SECRET",
     "type": "DB_DRIVER",
+    "encryption": "DB_ENCRYPTION_ALGORITHM",
     "mongodb": {
       "uri": "DB_MONGO_URI",
       "database": "DB_MONGO_DATABASE"
