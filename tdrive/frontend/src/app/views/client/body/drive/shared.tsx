@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
 import MenusBodyLayer from '@components/menus/menus-body-layer';
-import JWTStorage from '@features/auth/jwt-storage-service';
 import Api from '@features/global/framework/api-service';
 import Languages from '@features/global/services/languages-service';
 import { addApiUrlIfNeeded } from '@features/global/utils/URLUtils';
@@ -136,12 +135,7 @@ const AccessChecker = ({
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      await setPublicToken(token || '');
-    })();
-  }, []);
-
+  useEffect(() => void setPublicToken(token || ''), []);
 
   if ((!details?.item?.id && !loading) || accessGranted === false) {
     return (
@@ -179,5 +173,7 @@ const AccessChecker = ({
     );
   }
 
+  if (!accessGranted)
+    return <></>;
   return <>{children}</>;
 };
