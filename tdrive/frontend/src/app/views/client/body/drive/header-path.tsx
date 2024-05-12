@@ -162,9 +162,9 @@ const PathItem = ({
               MenusManager.openMenu(trashMenuItems, { x: evt.clientX, y: evt.clientY }, 'center');
             } else {
               if (viewId === 'root') {
-                onClick('root', '')
+                onClick('root', '');
               } else if (viewId === 'user_' + user?.id) {
-                onClick('user_' + user?.id, '')
+                onClick('user_' + user?.id, '');
               }
             }
           } else {
@@ -172,7 +172,7 @@ const PathItem = ({
           }
         }}
       >
-        <Title>
+        <Title noColor={last} className={last ? 'text-blue-500' : ''}>
           {(() => {
             const isTrash = viewId?.includes('trash_') || viewId === 'trash';
             const fileName = cutFileName(item?.name) || '';
