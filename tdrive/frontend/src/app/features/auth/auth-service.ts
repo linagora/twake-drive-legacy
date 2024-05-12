@@ -132,7 +132,11 @@ class AuthService {
     if (token) {
       this.logger.info("Save auth token to storage and cookie")
       JWT.updateJWT(token);
-      this.cookies.set(AuthService.AUTH_TOKEN_COOKIE, JWT.getJWT(), { path: "/" });
+      this.cookies.set(AuthService.AUTH_TOKEN_COOKIE, JWT.getJWT(), {
+        path: '/',
+        secure: true,
+        sameSite: 'none',
+      });
       // TODO: Update the user from API?
       // this.updateUser();
     } else {
