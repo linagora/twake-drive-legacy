@@ -31,19 +31,6 @@ export default (): JSX.Element => {
           prefix={() => (
             <SearchIcon className={'h-5 w-5 absolute m-auto top-0 bottom-0 left-3 text-blue-500'} />
           )}
-          suffix={() => (
-            <Button
-              theme="white"
-              size="sm"
-              className={
-                'rounded-full h-7 w-7 absolute m-auto top-0 bottom-0 right-3 text-zinc-500'
-              }
-              icon={() => <AdjustmentsIcon className="w-5 h-5 text-zinc-500" />}
-              onClick={() => {
-                ToasterService.info(Languages.t('components.searchpopup.soon'));
-              }}
-            />
-          )}
           input={({ className }) => (
             <Input
               value={searchState.query}
