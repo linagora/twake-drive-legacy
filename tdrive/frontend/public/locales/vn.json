@@ -157,7 +157,6 @@
     "components.searchpopup.no_results_for": "Không có kết quả nào cho",
     "components.searchpopup.try_new_search": "Thử tìm kiếm mới",
     "components.searchpopup.recent_files": "Các tệp gần đây",
-    "components.searchpopup.soon": "Tính năng này sẽ sớm ra mắt \uD83D\uDE80",
     "components.userlistmanager.no_users": "Không có người dùng.",
     "components.notifications.hidden_notifications_button.children": "Tin nhắn mới",
     "scenes.app.popup.adduserfromtdriveconsole.current_users_state": "{{$1}} email(s) sẽ được thêm",

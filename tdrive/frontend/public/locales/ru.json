@@ -257,7 +257,6 @@
     "components.searchpopup.try_new_search": "Искать еще раз",
     "components.searchpopup.recent_files": "Последние файлы",
     "components.searchpopup.header_title": "Поиск",
-    "components.searchpopup.soon": "Эта функциональность будет доступна скоро \uD83D\uDE80",
     "components.searchpopup.start_search": "Введите ключевые слова, чтобы начать поиск.",
     "scenes.apps.account.on_console": "Чтобы изменить глобальные настройки учетной записи, нажмите «Перейти к консоли».",
     "general.user.deactivated": "Пользователь больше не состоит в этой компании",

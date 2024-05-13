@@ -157,7 +157,6 @@
     "components.searchpopup.no_results_for": "There were no results for",
     "components.searchpopup.try_new_search": "Try a new search",
     "components.searchpopup.recent_files": "Recent files",
-    "components.searchpopup.soon": "This feature is coming soon \uD83D\uDE80",
     "components.userlistmanager.no_users": "No users.",
     "components.notifications.hidden_notifications_button.children": "New messages",
     "scenes.app.popup.adduserfromtdriveconsole.current_users_state": "{{$1}} email(s) will be added",
