@@ -22,6 +22,9 @@ export interface User {
   identity_provider_id?: uuid;
   // user email
   email?: string;
+
+  // session id
+  sid?: string;
   // server request
   server_request?: boolean; //Set to true if request if from the user, can be used to cancel any access restriction
   // application call

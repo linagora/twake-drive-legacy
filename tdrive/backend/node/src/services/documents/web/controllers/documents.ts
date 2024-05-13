@@ -565,11 +565,16 @@ export class DocumentsController {
     }
     await globalResolver.services.companies.setUserRole(document.item.company_id, user.id, "guest");
 
-    const token = globalResolver.platformServices.auth.generateJWT(user.id, user.email_canonical, {
-      track: false,
-      provider_id: "tdrive",
-      public_token_document_id: req.body.document_id,
-    });
+    const token = globalResolver.platformServices.auth.generateJWT(
+      user.id,
+      user.email_canonical,
+      "",
+      {
+        track: false,
+        provider_id: "tdrive",
+        public_token_document_id: req.body.document_id,
+      },
+    );
 
     return {
       access_token: token,

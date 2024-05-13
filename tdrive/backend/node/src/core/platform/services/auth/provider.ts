@@ -24,6 +24,7 @@ export default interface AuthServiceAPI extends TdriveServiceProvider {
   generateJWT(
     userId: uuid,
     email: string,
+    session: string,
     options: {
       track: boolean;
       provider_id: string;

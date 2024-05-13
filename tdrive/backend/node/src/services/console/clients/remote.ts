@@ -23,6 +23,7 @@ import { ConsoleServiceImpl } from "../service";
 import coalesce from "../../../utils/coalesce";
 import config from "config";
 import { CompanyUserRole } from "src/services/user/web/types";
+import Session from "../entities/session";
 export class ConsoleRemoteClient implements ConsoleServiceClient {
   version: "1";
 
@@ -165,6 +166,12 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
 
     await gr.services.users.save(user);
 
+    const sessionRepo = await gr.database.getRepository<Session>("session", Session);
+    await sessionRepo.save({
+      sub: user.id,
+      sid: userDTO._id,
+    });
+
     //For now TDrive works with only one company as we don't get it from the SSO
 
     let company = await gr.services.companies.getCompany({
@@ -252,5 +259,16 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
         value: user?.picture,
       },
     };
+  }
+
+  async updateUserSession(idToken: string): Promise<string> {
+    const sessionInfo = (await this.verifier.verifyIdToken(idToken, this.infos.client_id))
+      ?.claims as {
+      sub: string;
+      sid: string;
+    };
+    const sessionRepository = await gr.database.getRepository<Session>("session", Session);
+    await sessionRepository.save(sessionInfo);
+    return sessionInfo.sid;
   }
 }

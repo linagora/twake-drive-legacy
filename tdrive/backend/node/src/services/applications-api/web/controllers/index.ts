@@ -45,7 +45,7 @@ export class ApplicationsApiController {
 
     return {
       resource: {
-        access_token: gr.platformServices.auth.generateJWT(request.body.id, null, {
+        access_token: gr.platformServices.auth.generateJWT(request.body.id, null, "", {
           track: false,
           provider_id: "",
           application_id: request.body.id,

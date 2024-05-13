@@ -31,6 +31,7 @@ export class AuthService implements AuthServiceAPI {
   generateJWT(
     userId: uuid,
     email: string,
+    session: string,
     options: {
       track: boolean;
       provider_id: string;
@@ -54,6 +55,7 @@ export class AuthService implements AuthServiceAPI {
         iat: now - 60 * 10,
         nbf: now - 60 * 10,
         sub: userId,
+        sid: session,
         email: email,
         track: !!options.track,
         provider_id: options.provider_id || "",
@@ -66,6 +68,7 @@ export class AuthService implements AuthServiceAPI {
         iat: now - 60 * 10,
         nbf: now - 60 * 10,
         sub: userId,
+        sid: session,
         email: email,
         track: !!options.track,
         provider_id: options.provider_id || "",

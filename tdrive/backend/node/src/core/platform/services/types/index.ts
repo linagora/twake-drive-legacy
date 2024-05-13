@@ -1,6 +1,7 @@
 export type JwtType = {
   type: "access" | "refresh";
   sub: string;
+  sid: string;
   provider_id: string; //Console sub
   email: string;
   application_id?: string;
