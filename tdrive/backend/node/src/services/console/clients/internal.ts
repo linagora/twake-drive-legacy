@@ -109,4 +109,9 @@ export class ConsoleInternalClient implements ConsoleServiceClient {
     logger.info("Internal: resendVerificationEmail");
     throw new Error("Method should not be implemented.");
   }
+
+  backChannelLogout(_logoutToken: string): Promise<void> {
+    logger.info("Internal: backChannelLogout");
+    throw new Error("Method should not be implemented.");
+  }
 }

@@ -7,6 +7,7 @@ import Workspace, {
   getInstance as getWorkspaceInstance,
   WorkspacePrimaryKey,
 } from "./../../src/services/workspaces/entities/workspace";
+import Session from "../../src/services/console/entities/session";
 
 import { v1 as uuidv1 } from "uuid";
 import CompanyUser from "../../src/services/user/entities/company_user";
@@ -161,9 +162,9 @@ export class TestDbService {
     this.users.push(createdUser);
     if (workspacesPk && workspacesPk.length) {
       await gr.services.companies.setUserRole(
-          this.company ? this.company.id : workspacesPk[0].company_id,
-          createdUser.id,
-          options.companyRole ? options.companyRole : "member",
+        this.company ? this.company.id : workspacesPk[0].company_id,
+        createdUser.id,
+        options.companyRole ? options.companyRole : "member",
       );
     }
 
@@ -255,8 +256,27 @@ export class TestDbService {
     return this;
   }
 
+  async createSession(sid: string, sub: string): Promise<Session> {
+    const session = new Session();
+    session.sid = sid;
+    session.sub = sub;
+    const sessionRepository = await this.database.getRepository<Session>("session", Session);
+    await sessionRepository.save(session);
+    return session;
+  }
+
+  async getSessionById(sid: string): Promise<Session> {
+    const sessionRepository = await this.database.getRepository<Session>("session", Session);
+    return sessionRepository.findOne({ sid });
+  }
+
+  async getSessionByUserId(sub: string): Promise<Session> {
+    const sessionRepository = await this.database.getRepository<Session>("session", Session);
+    return sessionRepository.findOne({ sub });
+  }
+
   async cleanUp() {
-    await this.database.getConnector().drop()
+    await this.database.getConnector().drop();
   }
 
   getRepository = (type, entity) => {

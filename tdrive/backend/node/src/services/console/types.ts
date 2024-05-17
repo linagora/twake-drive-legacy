@@ -237,3 +237,7 @@ export interface AuthResponse {
   access_token?: AccessToken;
   error?: string;
 }
+
+export type ConsoleBackchannelLogoutRequest = {
+  logout_token: string;
+};

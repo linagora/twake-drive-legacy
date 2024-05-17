@@ -51,6 +51,13 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     handler: controller.resendVerificationEmail.bind(controller),
   });
 
+  fastify.route({
+    method: "POST",
+    url: "/backchannel_logout",
+    preValidation: [fastify.authenticate],
+    handler: controller.backChannelLogout.bind(controller),
+  });
+
   next();
 };
 

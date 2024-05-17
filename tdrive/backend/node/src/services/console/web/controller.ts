@@ -10,6 +10,7 @@ import {
   ConsoleHookResponse,
   ConsoleHookUser,
   ConsoleType,
+  ConsoleBackchannelLogoutRequest,
 } from "../types";
 import Company from "../../user/entities/company";
 import { CrudException } from "../../../core/platform/framework/api/crud-service";
@@ -309,5 +310,22 @@ export class ConsoleController {
       track: user?.preferences?.allow_tracking || false,
       provider_id: user.identity_provider_id,
     });
+  }
+
+  async backChannelLogout(
+    request: FastifyRequest<{ Body: ConsoleBackchannelLogoutRequest }>,
+    reply: FastifyReply,
+  ): Promise<void> {
+    try {
+      const logoutToken = request.body.logout_token;
+      if (!logoutToken) {
+        throw new CrudException("Missing logout_token", 400);
+      }
+      await gr.services.console.getClient().backChannelLogout(logoutToken);
+      reply.status(200).send({ success: true });
+    } catch (e) {
+      logger.error(e.message);
+      reply.status(400).send({ error: e.message });
+    }
   }
 }

@@ -166,11 +166,12 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
 
     await gr.services.users.save(user);
 
+    // update the user's session
+    const sessionBody = new Session();
+    sessionBody.sub = user.id;
+    sessionBody.sid = userDTO._id;
     const sessionRepo = await gr.database.getRepository<Session>("session", Session);
-    await sessionRepo.save({
-      sub: user.id,
-      sid: userDTO._id,
-    });
+    await sessionRepo.save(sessionBody);
 
     //For now TDrive works with only one company as we don't get it from the SSO
 
@@ -262,13 +263,36 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
   }
 
   async updateUserSession(idToken: string): Promise<string> {
-    const sessionInfo = (await this.verifier.verifyIdToken(idToken, this.infos.client_id))
-      ?.claims as {
-      sub: string;
-      sid: string;
-    };
+    const sessionInfo = (await this.verifier.verifyIdToken(idToken, this.infos.client_id))?.claims;
+    const sessionBody = new Session();
+    sessionBody.sub = sessionInfo.sub;
+    sessionBody.sid = sessionInfo.sid;
     const sessionRepository = await gr.database.getRepository<Session>("session", Session);
-    await sessionRepository.save(sessionInfo);
-    return sessionInfo.sid;
+    await sessionRepository.save(sessionBody);
+    return sessionBody.sid;
+  }
+
+  async backChannelLogout(logoutToken: string): Promise<void> {
+    const payload = await this.verifier.verifyLogoutToken(logoutToken);
+
+    if (!payload.iss || !payload.aud || !payload.iat || !payload.jti || !payload.events) {
+      throw new CrudException("Missing required claims", 400);
+    }
+
+    if (payload.nonce) {
+      throw new CrudException("Nonce claim is prohibited", 400);
+    }
+
+    if (!payload.sub && !payload.sid) {
+      throw new CrudException("Missing sub or sid claim", 400);
+    }
+
+    const sessionRepository = await gr.database.getRepository<Session>("session", Session);
+    const session =
+      (await sessionRepository.findOne({ sid: payload.sid })) ||
+      (await sessionRepository.findOne({ sub: payload.sub }));
+    if (session) {
+      await sessionRepository.remove(session);
+    }
   }
 }

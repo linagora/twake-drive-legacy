@@ -6,7 +6,7 @@ import config from "../../../../config";
 import { JwtType } from "../../types";
 import { executionStorage } from "../../../framework/execution-storage";
 import gr from "../../../../../services/global-resolver";
-import Session from "src/services/console/entities/session";
+import Session from "../../../../../services/console/entities/session";
 
 const jwtPlugin: FastifyPluginCallback = (fastify, _opts, next) => {
   fastify.register(cookie);
@@ -25,7 +25,8 @@ const jwtPlugin: FastifyPluginCallback = (fastify, _opts, next) => {
       sub: jwt.sub,
     });
     if (jwt.sid && session.sid != jwt.sid) {
-      // TODO fail for not matching session id
+      // fail for not matching session id
+      throw new Error("Session id does not match");
     }
     if (jwt.type === "refresh") {
       // TODO  in the future we must invalidate the refresh token (because it should be single use)

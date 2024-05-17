@@ -64,5 +64,7 @@ export interface ConsoleServiceClient {
 
   updateUserSession(idToken: string): Promise<string>;
 
+  backChannelLogout(logoutToken: string): Promise<void>;
+
   resendVerificationEmail(email: string): Promise<void>;
 }
