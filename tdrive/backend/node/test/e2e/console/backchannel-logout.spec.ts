@@ -2,12 +2,13 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { init, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import { v1 as uuidv1 } from "uuid";
-import jwt from "jsonwebtoken"; // import jwt for token creation
+import { OidcJwtVerifier } from "../../../src/services/console/clients/remote-jwks-verifier";
 
 describe("The /backchannel_logout API", () => {
-  const url = "/backchannel_logout";
+  const url = "/internal/services/console/v1/backchannel_logout";
   let platform: TestPlatform;
   let testDbService: TestDbService;
+  let verifierMock;
 
   beforeEach(async () => {
     platform = await init();
@@ -58,10 +59,27 @@ describe("The /backchannel_logout API", () => {
       // Add other session fields as needed
     };
     await testDbService.createSession(session.sid, session.sub);
+
+    const payload = {
+      iss: "tdrive_lemonldap",
+      sub: session.sub,
+      sid: session.sid,
+      aud: "your-audience",
+      iat: Math.floor(Date.now() / 1000),
+      jti: "jwt-id",
+      events: {
+        "http://schemas.openid.net/event/backchannel-logout": {},
+      },
+    };
+    verifierMock = jest.spyOn(OidcJwtVerifier.prototype, "verifyLogoutToken");
+    verifierMock.mockImplementation(() => {
+      return Promise.resolve(payload); // Return the predefined payload
+    });
   });
 
   afterAll(async () => {
-    await platform.tearDown();
+    await platform?.tearDown();
+    platform = null;
   });
 
   it.skip("should 400 when logout_token is missing", async () => {
@@ -73,27 +91,13 @@ describe("The /backchannel_logout API", () => {
 
     expect(response.statusCode).toBe(400);
     expect(response.json()).toEqual({
-      statusCode: 400,
-      error: "Bad Request",
-      message: "logout_token is required",
+      error: "Missing logout_token",
     });
   });
 
-  it.skip("should 200 when valid logout_token is provided", async () => {
+  it("should 200 when valid logout_token is provided", async () => {
     const session = await testDbService.getSessionByUserId(testDbService.users[0].id);
-
-    const logoutToken = jwt.sign(
-      {
-        iss: "issuer",
-        sub: session.sub,
-        sid: session.sid,
-        events: {
-          "http://schemas.openid.net/event/backchannel-logout": {},
-        },
-      },
-      "your-signing-key", // Replace with your actual signing key
-      { algorithm: "HS256" },
-    );
+    const logoutToken = "logout_token_rsa256";
 
     const response = await platform.app.inject({
       method: "POST",
@@ -102,7 +106,6 @@ describe("The /backchannel_logout API", () => {
         logout_token: logoutToken,
       },
     });
-
     expect(response.statusCode).toBe(200);
 
     // Verify the session is removed from the database

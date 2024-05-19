@@ -54,7 +54,6 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
   fastify.route({
     method: "POST",
     url: "/backchannel_logout",
-    preValidation: [fastify.authenticate],
     handler: controller.backChannelLogout.bind(controller),
   });
 
