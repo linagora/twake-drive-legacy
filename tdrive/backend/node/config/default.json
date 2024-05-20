@@ -9,8 +9,8 @@
       "mobile_googleplay": "https://play.google.com/store/apps/details?id=com.tdrive.tdrive&gl=FR"
     },
     "accounts": {
-      "_type": "remote",
-      "type": "internal",
+      "_type": "internal",
+      "type": "remote",
       "internal": {
         "disable_account_creation": false
       },
