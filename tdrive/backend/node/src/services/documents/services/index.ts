@@ -15,6 +15,8 @@ import { hasCompanyAdminLevel } from "../../../utils/company";
 import gr from "../../global-resolver";
 import { DriveFile, TYPE } from "../entities/drive-file";
 import { FileVersion, TYPE as FileVersionType } from "../entities/file-version";
+import User, { TYPE as UserType } from "../../user/entities/user";
+
 import {
   DriveTdriveTab as DriveTdriveTabEntity,
   TYPE as DriveTdriveTabRepoType,
@@ -56,12 +58,14 @@ import {
 import archiver from "archiver";
 import internal from "stream";
 import config from "config";
+
 export class DocumentsService {
   version: "1";
   repository: Repository<DriveFile>;
   searchRepository: SearchRepository<DriveFile>;
   fileVersionRepository: Repository<FileVersion>;
   driveTdriveTabRepository: Repository<DriveTdriveTabEntity>;
+  userRepository: Repository<User>;
   ROOT: RootType = "root";
   TRASH: TrashType = "trash";
   quotaEnabled: boolean = config.has("drive.featureUserQuota")
@@ -88,8 +92,10 @@ export class DocumentsService {
           DriveTdriveTabRepoType,
           DriveTdriveTabEntity,
         );
+      this.userRepository = await globalResolver.database.getRepository<User>(UserType, User);
     } catch (error) {
       logger.error({ error: `${error}` }, "Error while initializing Documents Service");
+      throw error;
     }
 
     return this;
@@ -670,6 +676,51 @@ export class DocumentsService {
       } else {
         //This item is not in trash, we move it to trash
         item.is_in_trash = true;
+        // Check item belongs to someone
+        if (item.creator !== context?.user?.id) {
+          const creator = await this.userRepository.findOne({ id: item.creator });
+          if (creator.type === "anonymous") {
+            const loadedCreators = new Map<string, User>();
+            const path = await getPath(
+              item.id,
+              this.repository,
+              true,
+              context,
+              async item => {
+                if (!item.creator) return true;
+                const user =
+                  loadedCreators.get(item.creator) ??
+                  (await this.userRepository.findOne({ id: item.creator }));
+                loadedCreators.set(item.creator, user);
+                return user.type !== "anonymous";
+              },
+              true,
+            );
+            const [firstOwnedItem] = path;
+            if (firstOwnedItem) {
+              const firstKnownCreator = loadedCreators.get(firstOwnedItem.creator);
+              const accessEntitiesWithoutUser = item.access_info.entities.filter(
+                ({ id, type }) => type != "user" || id != firstKnownCreator.id,
+              );
+              item.access_info.entities = [
+                ...accessEntitiesWithoutUser,
+                {
+                  type: "user",
+                  id: firstKnownCreator.id,
+                  level: "manage",
+                  grantor: context.user.id,
+                },
+              ];
+              item.creator = firstKnownCreator.id;
+            } else {
+              // Move to company trash
+              item.parent_id = "trash";
+              item.scope = "shared";
+            }
+            await this.repository.save(item);
+          }
+        }
+
         await this.update(item.id, item, context);
       }
       await updateItemSize(previousParentId, this.repository, context);

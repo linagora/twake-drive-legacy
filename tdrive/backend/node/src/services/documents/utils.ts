@@ -256,30 +256,44 @@ export const updateItemSize = async (
 };
 
 /**
- * gets the path for the driveitem
+ * Get a list of parents for the provided DriveFile id, in top-down order,
+ * but internally iterated towards the top.
  *
- * @param {string} id
- * @param {Repository<DriveFile>} repository
- * @param {boolean} ignoreAccess
- * @param {CompanyExecutionContext} context
- * @returns
+ * @param {boolean} ignoreAccess If user from context doesn't have
+ *   read access to an item, the item is not included and traversing
+ *   towards parents is stopped there.
+ * @param {(item: DriveFile) => Promise<boolean>} predicate If set,
+ *   returned items in the array include only those for which the
+ *   `predicate`'s result resolved to true.
+ * @param {boolean?} stopAtFirstMatch If true, the lowest item
+ *   in the hierarchy that matches the `predicate` will be the
+ *   only item in the returned array.
+ * @returns A promise to an array of DriveFile entries in order
+ *   starting from the root (eg. "My Drive"), and ending in the
+ *   DriveFile matching the provided `id` ; both included.
+ *
+ *   If `stopAtFirstMatch` is true and `predicate` is provided, the
+ *   result is an array with a single item or an empty array.
  */
 export const getPath = async (
   id: string,
   repository: Repository<DriveFile>,
   ignoreAccess?: boolean,
   context?: DriveExecutionContext,
+  predicate?: (item: DriveFile) => Promise<boolean>,
+  stopAtFirstMatch: boolean = false,
 ): Promise<DriveFile[]> => {
   id = id || "root";
-  if (isVirtualFolder(id))
-    return !context?.user?.public_token_document_id || ignoreAccess
-      ? [
-          {
-            id,
-            name: await getVirtualFoldersNames(id, context),
-          } as DriveFile,
-        ]
+  if (isVirtualFolder(id)) {
+    const virtualItem = {
+      id,
+      name: await getVirtualFoldersNames(id, context),
+    } as DriveFile;
+    return (!context?.user?.public_token_document_id || ignoreAccess) &&
+      (!predicate || (await predicate(virtualItem)))
+      ? [virtualItem]
       : [];
+  }
   const item = await repository.findOne({
     id,
     company_id: context.company.id,
@@ -288,8 +302,17 @@ export const getPath = async (
   if (!item || (!(await checkAccess(id, item, "read", repository, context)) && !ignoreAccess)) {
     return [];
   }
-
-  return [...(await getPath(item.parent_id, repository, ignoreAccess, context)), item];
+  const isMatch = !predicate || (await predicate(item));
+  if (stopAtFirstMatch && isMatch) return [item];
+  const parents = await getPath(
+    item.parent_id,
+    repository,
+    ignoreAccess,
+    context,
+    predicate,
+    stopAtFirstMatch,
+  );
+  return isMatch ? [...parents, item] : parents;
 };
 
 /**
