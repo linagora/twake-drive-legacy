@@ -1,6 +1,6 @@
 // @ts-ignore
 import fs from "fs";
-import { Readable } from 'stream';
+import { Readable } from "stream";
 import { ResourceUpdateResponse, Workspace } from "../../../src/utils/types";
 import { File } from "../../../src/services/files/entities/file";
 import { deserialize } from "class-transformer";
@@ -11,7 +11,7 @@ import { TestDbService } from "../utils.prepare.db";
 import { DriveFile } from "../../../src/services/documents/entities/drive-file";
 import { FileVersion } from "../../../src/services/documents/entities/file-version";
 import {
-  AccessTokenMockClass, DriveFileMockClass,
+  AccessTokenMockClass,
   DriveItemDetailsMockClass,
   SearchResultMockClass,
   UserQuotaMockClass
@@ -21,6 +21,7 @@ import { expect } from "@jest/globals";
 import { publicAccessLevel } from "../../../src/services/documents/types";
 import { UserQuota } from "../../../src/services/user/web/types";
 import { Api } from "../utils.api";
+import { OidcJwtVerifier } from "../../../src/services/console/clients/remote-jwks-verifier";
 
 export default class UserApi {
 
@@ -67,8 +68,39 @@ export default class UserApi {
       this.workspace = this.platform.workspace;
     }
     this.api = new Api(this.platform, this.user);
-    this.jwt = this.getJWTTokenForUser(this.user.id);
+    this.jwt = await this.doLogin();
   }
+
+  private async doLogin() {
+    const loginResponse = await this.login();
+
+    expect(loginResponse).toBeDefined();
+    expect(loginResponse.statusCode).toEqual(200);
+
+    const accessToken = deserialize<AccessTokenMockClass>(AccessTokenMockClass, loginResponse.body);
+    if (!accessToken.access_token?.value) throw Error("Auth error: authentication token doesn't exists in response")
+    return accessToken.access_token.value
+
+  }
+
+  /**
+   * Just send the login requests without any validation and login response assertion
+   */
+  public async login() {
+    const payload = {
+      claims: {
+        sub: this.user.id,
+        first_name: this.user.first_name,
+      }
+    };
+    const verifierMock = jest.spyOn(OidcJwtVerifier.prototype, "verifyIdToken");
+    verifierMock.mockImplementation(() => {
+      return Promise.resolve(payload); // Return the predefined payload
+    });
+
+    return await this.api.post("/internal/services/console/v1/login", { oidc_id_token: "sample_oidc_token" });
+  }
+
 
   public static async getInstance(platform: TestPlatform, newUser = false, options?: {}): Promise<UserApi> {
     const helpers = new UserApi(platform);

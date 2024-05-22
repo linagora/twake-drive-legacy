@@ -1,4 +1,9 @@
 {
+  "general": {
+    "accounts": {
+      "type": "remote"
+    }
+  },
   "database": {
     "secret": "",
     "mongodb": {
