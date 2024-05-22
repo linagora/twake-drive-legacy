@@ -107,8 +107,8 @@ export function toMongoDbOrderable(timeuuid?: string): string {
 /**
  * Check if filtering is necessary
  * @param {string} key
- * @returns {boolean} Returns true if key is "is_in_trash" or "scope", otherwise returns false.
+ * @returns {boolean} Returns true if key is "is_in_trash", "scope" or "sub", otherwise returns false.
  */
 export const filteringRequired = (key: string) => {
-  return key === "is_in_trash" || key === "scope" || "sub";
+  return key === "is_in_trash" || key === "scope" || key === "sub";
 };
