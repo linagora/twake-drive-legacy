@@ -3,21 +3,18 @@ import { init, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import { v1 as uuidv1 } from "uuid";
 import { OidcJwtVerifier } from "../../../src/services/console/clients/remote-jwks-verifier";
+import UserApi from "../common/user-api";
 
 describe("The /backchannel_logout API", () => {
   const url = "/internal/services/console/v1/backchannel_logout";
   let platform: TestPlatform;
-  let testDbService: TestDbService;
-  let verifierMock;
+  let currentUser;
 
   beforeEach(async () => {
     platform = await init();
+    currentUser = await UserApi.getInstance(platform);
   });
 
-  afterEach(async () => {
-    await platform.tearDown();
-    platform = null;
-  });
 
   beforeAll(async () => {
     platform = await init({
@@ -39,48 +36,13 @@ describe("The /backchannel_logout API", () => {
       ],
     });
 
-    testDbService = await TestDbService.getInstance(platform);
-    await testDbService.createCompany();
-    const workspacePk = { id: uuidv1(), company_id: testDbService.company.id };
-    await testDbService.createWorkspace(workspacePk);
-    await testDbService.createUser([workspacePk], {
-      workspaceRole: "moderator",
-      companyRole: "admin",
-      email: "admin@admin.admin",
-      username: "adminuser",
-      firstName: "admin",
-    });
-    await testDbService.createUser([workspacePk]);
-
-    // Add a session to the database
-    const session = {
-      sid: uuidv1(),
-      sub: testDbService.users[0].id,
-      // Add other session fields as needed
-    };
-    await testDbService.createSession(session.sid, session.sub);
-
-    const payload = {
-      iss: "tdrive_lemonldap",
-      sub: session.sub,
-      sid: session.sid,
-      aud: "your-audience",
-      iat: Math.floor(Date.now() / 1000),
-      jti: "jwt-id",
-      events: {
-        "http://schemas.openid.net/event/backchannel-logout": {},
-      },
-    };
-    verifierMock = jest.spyOn(OidcJwtVerifier.prototype, "verifyLogoutToken");
-    verifierMock.mockImplementation(() => {
-      return Promise.resolve(payload); // Return the predefined payload
-    });
   });
 
   afterAll(async () => {
-    await platform?.tearDown();
+    await platform.tearDown();
     platform = null;
   });
+
 
   it.skip("should 400 when logout_token is missing", async () => {
     const response = await platform.app.inject({
@@ -96,20 +58,11 @@ describe("The /backchannel_logout API", () => {
   });
 
   it("should 200 when valid logout_token is provided", async () => {
-    const session = await testDbService.getSessionByUserId(testDbService.users[0].id);
-    const logoutToken = "logout_token_rsa256";
-
-    const response = await platform.app.inject({
-      method: "POST",
-      url: url,
-      payload: {
-        logout_token: logoutToken,
-      },
-    });
+    const response = currentUser.logout();
     expect(response.statusCode).toBe(200);
 
     // Verify the session is removed from the database
-    const deletedSession = await testDbService.getSessionById(session.sid);
+    const deletedSession = await currentUser.dbService.getSessionById(currentUser.session);
     expect(deletedSession).toBeNull();
   });
 

@@ -44,6 +44,7 @@ export default class UserApi {
   workspace: Workspace;
   jwt: string;
   api: Api;
+  session: string;
 
   private constructor(
     platform: TestPlatform
@@ -87,10 +88,12 @@ export default class UserApi {
    * Just send the login requests without any validation and login response assertion
    */
   public async login() {
+    this.session = uuidv1();
     const payload = {
       claims: {
         sub: this.user.id,
         first_name: this.user.first_name,
+        //TODO put session somewhere here
       }
     };
     const verifierMock = jest.spyOn(OidcJwtVerifier.prototype, "verifyIdToken");
@@ -99,6 +102,31 @@ export default class UserApi {
     });
 
     return await this.api.post("/internal/services/console/v1/login", { oidc_id_token: "sample_oidc_token" });
+  }
+
+  public async logout() {
+    const payload = {
+      iss: "tdrive_lemonldap",
+      sub: this.user.id,
+      sid: this.session,
+      aud: "your-audience",
+      iat: Math.floor(Date.now() / 1000),
+      jti: "jwt-id",
+      events: {
+        "http://schemas.openid.net/event/backchannel-logout": {},
+      },
+    };
+    const verifierMock = jest.spyOn(OidcJwtVerifier.prototype, "verifyLogoutToken");
+    verifierMock.mockImplementation(() => {
+      return Promise.resolve(payload); // Return the predefined payload
+    });
+    const logoutToken = "logout_token_rsa256";
+
+    const response = await this.api.post("/internal/services/console/v1/backchannel_logout",  {
+      logout_token: logoutToken,
+    });
+
+    expect(response.statusCode).toBe(200);
   }
 
 
