@@ -7,6 +7,31 @@ import search from "./drive-file.search";
 export const TYPE = "drive_files";
 export type DriveScope = "personal" | "shared";
 
+/**
+ * This represents an item in the file hierarchy.
+ *
+ * DriveFile s do not have a notion of owner, only a creator. The `creator_id`
+ * is used to locate the root files. The `parent_id` fields then form the
+ * hierarchy.
+ *
+ * The `is_in_trash` field must be checked when enumerating as DrifeFiles with
+ * this field set are roots inside the trash folder. Only the root DriveFiles
+ * that were moved to trash have this set, items below them, while also in the
+ * trash, do not have this field set.
+ *
+ * The `parent_id` can point to the `id` of another `DriveFile`, or one
+ * of the named entries:
+ *   - `"user_$userid"`: Root of the personal "My Drive" folder of the user in the string.
+ *                       Usually this is assumed to be the creator, there is no official way
+ *                       of extracting the user id from the `parent_id`.
+ *   - `"trash_$userid"`: Trash folder for a given user (same note as `"user_$userid"`)
+ *   - `"root"`: Root of the creator's company "Shared Drive" feature
+ *   - The following virtual values never appear in the stored `parent_id` field but are used
+ *     in queries and URLs etc:
+ *     - `"trash"`: used to query items at the root of the creator with `is_in_trash == true`,
+ *        if `scope == "personal"`, otherwise the trash of the shared drive
+ *     - `"shared_with_me"`: for the feature of the same name
+ */
 @Entity(TYPE, {
   globalIndexes: [
     ["company_id", "parent_id"],
