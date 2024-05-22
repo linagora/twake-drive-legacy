@@ -3,13 +3,15 @@ import { Column, Entity } from "../../../core/platform/services/database/service
 
 export const TYPE = "session";
 
-//TODO here should be an index on sub, you are querying this after
 @Entity(TYPE, {
-  primaryKey: [["sub"]],
+  primaryKey: [["company_id"], "sid"],
+  globalIndexes: [["sid"]],
   type: TYPE,
 })
 export default class Session {
-  //TODO add company id here as well, we should be multi-tenant, and sub could be not unique
+  @Column("company_id", "uuid")
+  company_id: string;
+
   @Column("sub", "string")
   sub: string;
 
@@ -17,7 +19,7 @@ export default class Session {
   sid: string;
 }
 
-export type UserSessionPrimaryKey = Pick<Session, "sub">;
+export type UserSessionPrimaryKey = Pick<Session, "sid">;
 
 export function getInstance(session: Partial<Session> & UserSessionPrimaryKey): Session {
   return merge(new Session(), session);

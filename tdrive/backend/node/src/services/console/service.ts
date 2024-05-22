@@ -7,6 +7,8 @@ import gr from "../global-resolver";
 import { Configuration, TdriveServiceProvider } from "../../core/platform/framework";
 import assert from "assert";
 import { ExecutionContext } from "../../core/platform/framework/api/crud-service";
+import Repository from "src/core/platform/services/database/services/orm/repository/repository";
+import Session from "./entities/session";
 
 export class ConsoleServiceImpl implements TdriveServiceProvider {
   version: "1";
@@ -17,6 +19,7 @@ export class ConsoleServiceImpl implements TdriveServiceProvider {
     database: DatabaseServiceAPI;
   };
   private configuration: Configuration;
+  private sessionRepository: Repository<Session>;
 
   constructor(options?: ConsoleOptions) {
     this.consoleOptions = options;
@@ -44,12 +47,17 @@ export class ConsoleServiceImpl implements TdriveServiceProvider {
 
     this.consoleOptions.type = type;
     this.consoleType = type;
+    this.sessionRepository = await gr.database.getRepository<Session>("session", Session);
 
     return this;
   }
 
   getClient(): ConsoleServiceClient {
     return ConsoleClientFactory.create(this);
+  }
+
+  getSessionRepo(): Repository<Session> {
+    return this.sessionRepository;
   }
 
   async processPendingUser(user: User, context?: ExecutionContext): Promise<void> {

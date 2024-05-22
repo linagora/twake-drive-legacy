@@ -6,7 +6,6 @@ import config from "../../../../config";
 import { JwtType } from "../../types";
 import { executionStorage } from "../../../framework/execution-storage";
 import gr from "../../../../../services/global-resolver";
-import Session from "../../../../../services/console/entities/session";
 
 const jwtPlugin: FastifyPluginCallback = async (fastify, _opts, next) => {
   fastify.register(cookie);
@@ -19,16 +18,17 @@ const jwtPlugin: FastifyPluginCallback = async (fastify, _opts, next) => {
   });
 
   const authenticate = async (request: FastifyRequest) => {
-    const sessionRepository = await gr.database.getRepository<Session>("session", Session);
+    const sessionRepository = gr.services.console.getSessionRepo();
 
     const jwt: JwtType = await request.jwtVerify();
-    const session = await sessionRepository.findOne({
-      sub: jwt.sub,
-    });
-    if (jwt.sid && session.sid != jwt.sid) {
-      // fail for not matching session id
-      //TODO there could be multiple sessions for on sid
-      throw new Error("Session id does not match");
+    if (jwt.sid) {
+      const session = await sessionRepository.findOne({
+        sid: jwt.sid,
+      });
+      if (session.sid != jwt.sid) {
+        // fail for not matching session id
+        throw new Error("Session id does not match");
+      }
     }
     if (jwt.type === "refresh") {
       // TODO  in the future we must invalidate the refresh token (because it should be single use)

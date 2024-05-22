@@ -56,12 +56,15 @@ export default class UserApi {
     this.dbService = await TestDbService.getInstance(this.platform, true);
     if (newUser) {
       this.workspace = this.platform.workspace;
-      const workspacePK = { id: this.workspace.workspace_id, company_id: this.workspace.company_id };
+      const workspacePK = {
+        id: this.workspace.workspace_id,
+        company_id: this.workspace.company_id,
+      };
       this.user = await this.dbService.createUser([workspacePK], options, uuidv1());
       this.anonymous = await this.dbService.createUser([workspacePK],
         {
           ...options,
-          identity_provider: "anonymous"
+          identity_provider: "anonymous",
         },
         uuidv1());
     } else {
@@ -79,9 +82,9 @@ export default class UserApi {
     expect(loginResponse.statusCode).toEqual(200);
 
     const accessToken = deserialize<AccessTokenMockClass>(AccessTokenMockClass, loginResponse.body);
-    if (!accessToken.access_token?.value) throw Error("Auth error: authentication token doesn't exists in response")
-    return accessToken.access_token.value
-
+    if (!accessToken.access_token?.value)
+      throw Error("Auth error: authentication token doesn't exists in response");
+    return accessToken.access_token.value;
   }
 
   /**
@@ -93,15 +96,17 @@ export default class UserApi {
       claims: {
         sub: this.user.id,
         first_name: this.user.first_name,
-        //TODO put session somewhere here
-      }
+        sid: this.session,
+      },
     };
     const verifierMock = jest.spyOn(OidcJwtVerifier.prototype, "verifyIdToken");
     verifierMock.mockImplementation(() => {
       return Promise.resolve(payload); // Return the predefined payload
     });
 
-    return await this.api.post("/internal/services/console/v1/login", { oidc_id_token: "sample_oidc_token" });
+    return await this.api.post("/internal/services/console/v1/login", {
+      oidc_id_token: "sample_oidc_token",
+    });
   }
 
   public async logout() {

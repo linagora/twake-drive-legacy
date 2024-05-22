@@ -270,9 +270,9 @@ export class TestDbService {
     return sessionRepository.findOne({ sid });
   }
 
-  async getSessionByUserId(sub: string): Promise<Session> {
+  async getSessionsByUserId(sub: string): Promise<Session[]> {
     const sessionRepository = await this.database.getRepository<Session>("session", Session);
-    return sessionRepository.findOne({ sub });
+    return (await sessionRepository.find({ sub })).getEntities();
   }
 
   async cleanUp() {

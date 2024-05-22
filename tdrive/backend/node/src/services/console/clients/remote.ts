@@ -256,12 +256,26 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
 
   async updateUserSession(idToken: string): Promise<string> {
     const sessionInfo = (await this.verifier.verifyIdToken(idToken, this.infos.client_id))?.claims;
-    const sessionBody = new Session();
-    sessionBody.sub = sessionInfo.sub;
-    sessionBody.sid = sessionInfo.sid;
-    const sessionRepository = await gr.database.getRepository<Session>("session", Session);
-    await sessionRepository.save(sessionBody);
-    return sessionBody.sid;
+    // make sure sid claim is present in the token and not empty
+    if (sessionInfo.sid) {
+      const sessionRepository = gr.services.console.getSessionRepo();
+
+      // check for existing session
+      const existingSession = await sessionRepository.findOne({
+        sid: sessionInfo.sid,
+      });
+      if (existingSession) {
+        return existingSession.sid;
+      } else {
+        const sessionBody = new Session();
+        sessionBody.sub = sessionInfo.sub;
+        sessionBody.sid = sessionInfo.sid;
+        await sessionRepository.save(sessionBody);
+        return sessionBody.sid;
+      }
+    } else {
+      throw new CrudException("Missing sid claim", 400);
+    }
   }
 
   async backChannelLogout(logoutToken: string): Promise<void> {
@@ -279,11 +293,8 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
       throw new CrudException("Missing sub or sid claim", 400);
     }
 
-    const sessionRepository = await gr.database.getRepository<Session>("session", Session);
-    //TODO find session only by sid
-    const session =
-      (await sessionRepository.findOne({ sid: payload.sid })) ||
-      (await sessionRepository.findOne({ sub: payload.sub }));
+    const sessionRepository = gr.services.console.getSessionRepo();
+    const session = await sessionRepository.findOne({ sid: payload.sid });
     if (session) {
       await sessionRepository.remove(session);
     }

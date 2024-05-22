@@ -1,20 +1,19 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "@jest/globals";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import { v1 as uuidv1 } from "uuid";
-import { OidcJwtVerifier } from "../../../src/services/console/clients/remote-jwks-verifier";
 import UserApi from "../common/user-api";
 
 describe("The /backchannel_logout API", () => {
   const url = "/internal/services/console/v1/backchannel_logout";
   let platform: TestPlatform;
+  let testDbService: TestDbService;
   let currentUser;
 
   beforeEach(async () => {
     platform = await init();
     currentUser = await UserApi.getInstance(platform);
   });
-
 
   beforeAll(async () => {
     platform = await init({
@@ -35,14 +34,13 @@ describe("The /backchannel_logout API", () => {
         "platform-services",
       ],
     });
-
+    testDbService = await TestDbService.getInstance(platform);
   });
 
   afterAll(async () => {
     await platform.tearDown();
     platform = null;
   });
-
 
   it.skip("should 400 when logout_token is missing", async () => {
     const response = await platform.app.inject({
@@ -67,14 +65,32 @@ describe("The /backchannel_logout API", () => {
   });
 
   //TODO
-  //create a session
+  it("should create a session on login", async () => {
+    const session = currentUser.session;
+    expect(session).not.toBeNull();
+    expect(session).not.toBeUndefined();
+  });
 
   //I should recieve 401 after logout and trying to access with the same token
 
   //The same user can have multiple session, so I want to be able to log-in several times
 
-  //I want to be able to loging in multiple browser, log-out from on and still be logged in in another
+  it("should logout from one session and still be logged in another", async () => {
+    const userId = currentUser.id;
+    const session2 = { sid: uuidv1(), sub: userId };
+
+    await testDbService.createSession(session2.sid, session2.sub);
+
+    currentUser.logout();
+
+    // Verify session1 is removed
+    const deletedSession1 = await testDbService.getSessionById(currentUser.session);
+    expect(deletedSession1).toBeNull();
+
+    // Verify session2 still exists
+    const existingSession2 = await testDbService.getSessionById(session2.sid);
+    expect(existingSession2).not.toBeNull();
+  });
 
   //I want to be able to log-in/recieve access token several time with the same session id
-
 });
