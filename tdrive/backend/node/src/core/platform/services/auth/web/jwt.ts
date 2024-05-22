@@ -8,7 +8,7 @@ import { executionStorage } from "../../../framework/execution-storage";
 import gr from "../../../../../services/global-resolver";
 import Session from "../../../../../services/console/entities/session";
 
-const jwtPlugin: FastifyPluginCallback = (fastify, _opts, next) => {
+const jwtPlugin: FastifyPluginCallback = async (fastify, _opts, next) => {
   fastify.register(cookie);
   fastify.register(fastifyJwt, {
     secret: config.get("auth.jwt.secret"),
@@ -19,13 +19,15 @@ const jwtPlugin: FastifyPluginCallback = (fastify, _opts, next) => {
   });
 
   const authenticate = async (request: FastifyRequest) => {
-    const jwt: JwtType = await request.jwtVerify();
     const sessionRepository = await gr.database.getRepository<Session>("session", Session);
+
+    const jwt: JwtType = await request.jwtVerify();
     const session = await sessionRepository.findOne({
       sub: jwt.sub,
     });
     if (jwt.sid && session.sid != jwt.sid) {
       // fail for not matching session id
+      //TODO there could be multiple sessions for on sid
       throw new Error("Session id does not match");
     }
     if (jwt.type === "refresh") {

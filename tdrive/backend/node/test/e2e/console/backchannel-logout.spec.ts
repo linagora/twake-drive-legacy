@@ -112,4 +112,16 @@ describe("The /backchannel_logout API", () => {
     const deletedSession = await testDbService.getSessionById(session.sid);
     expect(deletedSession).toBeNull();
   });
+
+  //TODO
+  //create a session
+
+  //I should recieve 401 after logout and trying to access with the same token
+
+  //The same user can have multiple session, so I want to be able to log-in several times
+
+  //I want to be able to loging in multiple browser, log-out from on and still be logged in in another
+
+  //I want to be able to log-in/recieve access token several time with the same session id
+
 });

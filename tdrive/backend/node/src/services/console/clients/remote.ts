@@ -166,15 +166,7 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
 
     await gr.services.users.save(user);
 
-    // update the user's session
-    const sessionBody = new Session();
-    sessionBody.sub = user.id;
-    sessionBody.sid = userDTO._id;
-    const sessionRepo = await gr.database.getRepository<Session>("session", Session);
-    await sessionRepo.save(sessionBody);
-
     //For now TDrive works with only one company as we don't get it from the SSO
-
     let company = await gr.services.companies.getCompany({
       id: "00000000-0000-4000-0000-000000000000",
     });
@@ -288,6 +280,7 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
     }
 
     const sessionRepository = await gr.database.getRepository<Session>("session", Session);
+    //TODO find session only by sid
     const session =
       (await sessionRepository.findOne({ sid: payload.sid })) ||
       (await sessionRepository.findOne({ sub: payload.sub }));

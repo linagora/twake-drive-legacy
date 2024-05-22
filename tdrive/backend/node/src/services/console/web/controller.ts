@@ -300,12 +300,13 @@ export class ConsoleController {
     const userDTO = await client.getUserByAccessToken(idToken);
     const user = await client.updateLocalUserFromConsole(userDTO);
 
-    // update the user session
-    const session = await client.updateUserSession(idToken);
-
     if (!user) {
       throw CrudException.notFound(`User details not found for access token ${idToken}`);
     }
+
+    // update the user session
+    const session = await client.updateUserSession(idToken);
+
     return gr.platformServices.auth.generateJWT(user.id, user.email_canonical, session, {
       track: user?.preferences?.allow_tracking || false,
       provider_id: user.identity_provider_id,

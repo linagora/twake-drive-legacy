@@ -3,11 +3,13 @@ import { Column, Entity } from "../../../core/platform/services/database/service
 
 export const TYPE = "session";
 
+//TODO here should be an index on sub, you are querying this after
 @Entity(TYPE, {
   primaryKey: [["sub"]],
   type: TYPE,
 })
 export default class Session {
+  //TODO add company id here as well, we should be multi-tenant, and sub could be not unique
   @Column("sub", "string")
   sub: string;
 
@@ -17,6 +19,6 @@ export default class Session {
 
 export type UserSessionPrimaryKey = Pick<Session, "sub">;
 
-export function getInstance(userDevice: Partial<Session> & UserSessionPrimaryKey): Session {
-  return merge(new Session(), userDevice);
+export function getInstance(session: Partial<Session> & UserSessionPrimaryKey): Session {
+  return merge(new Session(), session);
 }
