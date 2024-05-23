@@ -103,7 +103,6 @@ export default class UserApi {
     verifierMock.mockImplementation(() => {
       return Promise.resolve(payload); // Return the predefined payload
     });
-
     return await this.api.post("/internal/services/console/v1/login", {
       oidc_id_token: "sample_oidc_token",
     });
@@ -131,7 +130,7 @@ export default class UserApi {
       logout_token: logoutToken,
     });
 
-    expect(response.statusCode).toBe(200);
+    return response;
   }
 
 
