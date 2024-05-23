@@ -22,15 +22,14 @@ describe("the Drive feature", () => {
     configGetSpy = jest.spyOn(config, "get");
 
     configHasSpy.mockImplementation((setting: string) => {
-      const value = jest.requireActual("config").has(setting);
-      return value;
+      return jest.requireActual("config").has(setting);
     });
     configGetSpy.mockImplementation((setting: string) => {
       if (setting === "drive.featureUserQuota") {
         return true;
       }
       if (setting === "drive.defaultUserQuota") {
-        return 2000000;
+        return 1000000;
       }
       return jest.requireActual("config").get(setting);
     });

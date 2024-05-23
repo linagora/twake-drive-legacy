@@ -120,7 +120,7 @@ function getExecutionContext(request: FastifyRequest): ExecutionContext {
   return {
     user: request.currentUser,
     url: request.url,
-    method: request.routerMethod,
+    method: request.routeOptions.method,
     transport: "http",
   };
 }

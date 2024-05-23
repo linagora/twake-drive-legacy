@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { Multipart } from "fastify-multipart";
+import { MultipartFile } from "@fastify/multipart";
 import { ResourceDeleteResponse } from "../../../../utils/types";
 import { CompanyExecutionContext } from "../types";
 import { UploadOptions } from "../../types";
@@ -16,7 +16,7 @@ export class FileController {
   ): Promise<{ resource: PublicFile }> {
     const context = getCompanyExecutionContext(request);
 
-    let file: null | Multipart = null;
+    let file: null | MultipartFile = null;
     if (request.isMultipart()) {
       file = await request.file();
     }
@@ -52,7 +52,7 @@ export class FileController {
       response.header("Content-disposition", `attachment; filename="${filename}"`);
       if (data.size) response.header("Content-Length", data.size);
       response.type(data.mime);
-      response.send(data.file);
+      return response.send(data.file);
     } catch (e) {
       console.log("!!!" + e);
       throw e;
@@ -121,7 +121,7 @@ export class FileController {
     }>,
   ): Promise<{ resource: PublicFile }> {
     const params = request.params;
-    let file: null | Multipart = null;
+    let file: null | MultipartFile = null;
     if (request.isMultipart()) {
       file = await request.file();
     }
@@ -148,7 +148,7 @@ function getCompanyExecutionContext(
 
     company: { id: request.params.company_id },
     url: request.url,
-    method: request.routerMethod,
+    method: request.routeOptions.method,
     reqId: request.id,
     transport: "http",
   };

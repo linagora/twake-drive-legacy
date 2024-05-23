@@ -2,7 +2,7 @@ import { logger, TdriveService } from "../../framework";
 import { Server, IncomingMessage, ServerResponse } from "http";
 import { FastifyInstance, fastify, FastifyRegisterOptions, FastifyServerOptions } from "fastify";
 import sensible from "@fastify/sensible";
-import multipart from "fastify-multipart";
+import multipart from "@fastify/multipart";
 import formbody from "@fastify/formbody";
 import fastifyStatic from "@fastify/static";
 import corsPlugin, { FastifyCorsOptions } from "@fastify/cors";

@@ -5,6 +5,7 @@ import { getFilePath } from "../../../src/services/files/services";
 import UserApi from "../common/user-api";
 import LocalConnectorService from "../../../src/core/platform/services/storage/connectors/local/service"
 import { Client as MinioClient } from "minio"
+import { toInteger } from "lodash";
 
 describe("The Files feature", () => {
   const url = "/internal/services/files/v1";
@@ -78,9 +79,14 @@ describe("The Files feature", () => {
         method: "GET",
         url: `${url}/companies/${platform.workspace.company_id}/files/${filesUpload.id}/download`,
       });
-      //then file should be not found with 404 error and "File not found message"
       expect(fileDownloadResponse).toBeTruthy();
       expect(fileDownloadResponse.statusCode).toBe(200);
+      //check the content length header that it's not empty
+      expect(fileDownloadResponse.headers["content-length"]).toBeDefined();
+      let length = toInteger(fileDownloadResponse.headers["content-length"]);
+      expect(length).toBeGreaterThan(0)
+      //and data is in place
+      expect((fileDownloadResponse.stream().read(100) as Buffer).length).toBeGreaterThanOrEqual(100)
     });
 
     it.skip("should save file and generate previews", async () => {

@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import { Readable } from "stream";
-import { Multipart } from "fastify-multipart";
+import { MultipartFile } from "@fastify/multipart";
 import { UploadOptions } from "../types";
 import { File } from "../entities/file";
 import Repository from "../../../../src/core/platform/services/database/services/orm/repository/repository";
@@ -73,7 +73,7 @@ export class FileServiceImpl {
 
   async save(
     id: string,
-    file: Multipart,
+    file: MultipartFile,
     options: UploadOptions,
     context: CompanyExecutionContext,
   ): Promise<File> {
@@ -443,7 +443,7 @@ export class FileServiceImpl {
     }
   }
 
-  async restoreFileS3(id: string, file: Multipart, options: UploadOptions): Promise<any> {
+  async restoreFileS3(id: string, file: MultipartFile, options: UploadOptions): Promise<any> {
     try {
       const result = await this.checkFileExistsS3(id);
       if (result.exist) {
