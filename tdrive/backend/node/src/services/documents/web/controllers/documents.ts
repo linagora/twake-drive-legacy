@@ -589,7 +589,7 @@ const getDriveExecutionContext = (
   user: req.currentUser,
   company: { id: req.params.company_id },
   url: req.url,
-  method: req.routerMethod,
+  method: req.routeOptions.method,
   reqId: req.id,
   transport: "http",
 });
@@ -603,7 +603,7 @@ function getCompanyExecutionContext(
     user: request.currentUser,
     company: { id: request.params.company_id },
     url: request.url,
-    method: request.routerMethod,
+    method: request.routeOptions.method,
     reqId: request.id,
     transport: "http",
   };

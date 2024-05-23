@@ -554,7 +554,7 @@ function getExecutionContext(
     company_id: request.params.company_id,
     workspace_id: request.params.workspace_id,
     url: request.url,
-    method: request.routerMethod,
+    method: request.routeOptions.method,
     transport: "http",
   };
 }

@@ -194,7 +194,7 @@ function getExecutionContext(request: FastifyRequest): ApplicationApiExecutionCo
     application_id: request.currentUser?.application_id,
     user: request.currentUser,
     url: request.url,
-    method: request.routerMethod,
+    method: request.routeOptions.method,
     transport: "http",
   };
 }
