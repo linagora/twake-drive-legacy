@@ -14,9 +14,11 @@ import globalResolver from "../../../src/services/global-resolver";
 import {FileServiceImpl} from "../../../src/services/files/services";
 import StorageAPI from "../../../src/core/platform/services/storage/provider";
 import {SearchServiceAPI} from "../../../src/core/platform/services/search/api";
+import Session from "../../../src/services/console/entities/session";
 
 type TokenPayload = {
   sub: string;
+  sid?: string;
   org?: {
     [companyId: string]: {
       role: string;
@@ -32,6 +34,7 @@ export type User = {
 
 export interface TestPlatform {
   currentUser: User;
+  currentSession: string;
   platform: TdrivePlatform;
   workspace: Workspace;
   app: FastifyInstance;
@@ -89,6 +92,7 @@ export async function init(
       storage,
       workspace: { company_id: "", workspace_id: "" },
       currentUser: { id: "" },
+      currentSession: uuidv1(),
       authService: auth,
       filesService: globalResolver.services.files,
       auth: {
@@ -111,10 +115,22 @@ export async function init(
   //await testPlatform.messageQueue.start();
 
   async function getJWTToken(
-    payload: TokenPayload = { sub: testPlatform.currentUser.id },
+    payload: TokenPayload = { sub: testPlatform.currentUser.id, sid: testPlatform.currentSession },
   ): Promise<string> {
+    const sessionRepository = await testPlatform.database.getRepository<Session>("session", Session);
     if (!payload.sub) {
       payload.sub = testPlatform.currentUser.id;
+    }
+    if (!payload.sid) {
+      payload.sid = testPlatform.currentSession;
+    }
+
+    let session = (await sessionRepository.find({ sub: payload.sub })).getEntities();
+    if (session.length == 0) {
+      const session = new Session();
+      session.sid = payload.sid;
+      session.sub = payload.sub;
+      await sessionRepository.save(session);
     }
 
     if (testPlatform.currentUser.isWorkspaceModerator) {

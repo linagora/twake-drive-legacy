@@ -20,8 +20,10 @@ const jwtPlugin: FastifyPluginCallback = async (fastify, _opts, next) => {
   const authenticate = async (request: FastifyRequest) => {
     const jwt: JwtType = await request.jwtVerify();
 
-    // Verify the SID exists and is valid
-    await gr.services.console.getClient().verifyJwtSid(jwt.sid);
+    // Verify the SID exists and is valid except tokens for the public link
+    if (!jwt.public_token_document_id) {
+      await gr.services.console.getClient().verifyJwtSid(jwt.sid);
+    }
 
     if (jwt.type === "refresh") {
       // TODO  in the future we must invalidate the refresh token (because it should be single use)
