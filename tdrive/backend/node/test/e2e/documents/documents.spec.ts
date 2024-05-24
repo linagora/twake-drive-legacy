@@ -15,6 +15,7 @@ import {
   DriveFileMockClass,
   DriveItemDetailsMockClass,
 } from "../common/entities/mock_entities";
+import { toInteger } from "lodash";
 
 describe("the Drive feature", () => {
   let platform: TestPlatform;
@@ -104,6 +105,24 @@ describe("the Drive feature", () => {
 
     expect(createItemResult.id).toEqual(updateItemResult.id);
     expect(updateItemResult.name).toEqual("somethingelse");
+  });
+
+  it("Download folder as a zip should work fine", async () => {
+    //given
+    await currentUser.uploadAllFilesAndCreateDocuments();
+
+    //when
+    const zipResponse = await currentUser.getFolder("user_" + currentUser.user.id);
+
+    //then
+    expect(zipResponse).toBeTruthy();
+    expect(zipResponse.statusCode).toBe(200);
+    //check the content length header that it's not empty
+    expect(zipResponse.headers["content-length"]).toBeDefined();
+    let length = toInteger(zipResponse.headers["content-length"]);
+    expect(length).toBeGreaterThan(0)
+    //and data is in place
+    expect((zipResponse.stream().read(100) as Buffer).length).toBeGreaterThanOrEqual(100)
   });
 
   it("did move an item to trash", async () => {

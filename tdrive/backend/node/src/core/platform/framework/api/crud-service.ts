@@ -135,6 +135,10 @@ export class CrudException extends Error {
     return new CrudException(details, 400);
   }
 
+  static unauthorized(details: string): CrudException {
+    return new CrudException(details, 401);
+  }
+
   static notFound(details: string): CrudException {
     return new CrudException(details, 404);
   }

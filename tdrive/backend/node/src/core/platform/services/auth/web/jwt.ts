@@ -6,6 +6,7 @@ import config from "../../../../config";
 import { JwtType } from "../../types";
 import { executionStorage } from "../../../framework/execution-storage";
 import gr from "../../../../../services/global-resolver";
+import { CrudException } from "../../../framework/api/crud-service";
 
 const jwtPlugin: FastifyPluginCallback = async (fastify, _opts, next) => {
   fastify.register(cookie);
@@ -50,7 +51,7 @@ const jwtPlugin: FastifyPluginCallback = async (fastify, _opts, next) => {
     try {
       await authenticate(request);
     } catch (err) {
-      throw fastify.httpErrors.unauthorized(`Bad credentials ${JSON.stringify(err)}`);
+      throw CrudException.unauthorized(`Bad credentials: ${err.message}`);
     }
   });
 

@@ -427,6 +427,8 @@ export class DocumentsController {
       });
 
       archive.pipe(reply.raw);
+
+      return reply;
     } catch (error) {
       logger.error({ error: `${error}` }, "failed to send zip file");
       throw new CrudException("Failed to create zip file", 500);
