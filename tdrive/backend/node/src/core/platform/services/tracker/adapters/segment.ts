@@ -1,4 +1,4 @@
-import Analytics from "analytics-node";
+import Analytics, { IdentifyParams, TrackParams } from "@segment/analytics-node";
 import { Analytics as AnalyticsAbtract } from "./types";
 import axios, { AxiosInstance } from "axios";
 
@@ -16,9 +16,10 @@ export default class Segment implements AnalyticsAbtract {
     this.host = "https://api.segment.io";
     this.timeout = 60000;
     this.axiosInstance = axios.create();
-    this.analytics = new Analytics(this.writeKey, {
+    this.analytics = new Analytics({
       host: this.host,
-      timeout: this.timeout,
+      writeKey: this.writeKey,
+      httpRequestTimeout: this.timeout,
     });
   }
 
@@ -30,7 +31,7 @@ export default class Segment implements AnalyticsAbtract {
     callback?: (err: Error) => void,
   ): void {
     try {
-      this.analytics.identify(message, callback);
+      this.analytics.identify(message as IdentifyParams, callback);
     } catch (err) {
       console.error(err);
     }
@@ -44,7 +45,7 @@ export default class Segment implements AnalyticsAbtract {
     callback?: (err: Error) => void,
   ): void {
     try {
-      this.analytics.track(message, callback);
+      this.analytics.track(message as TrackParams, callback);
     } catch (err) {
       console.error(err);
     }
