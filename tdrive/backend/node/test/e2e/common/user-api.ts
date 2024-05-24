@@ -91,7 +91,7 @@ export default class UserApi {
    * Just send the login requests without any validation and login response assertion
    */
   public async login(session?: string) {
-    if (session) {
+    if (session !== undefined) {
       this.session = session;
     } else {
       this.session = uuidv1();

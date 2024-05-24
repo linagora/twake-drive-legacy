@@ -60,7 +60,7 @@ describe("The /backchannel_logout API", () => {
     expect(response.statusCode).toBe(200);
 
     // Verify the session is removed from the database
-    let deletedSession = await currentUser.dbService.getSessionById(currentUser.session);
+    const deletedSession = await currentUser.dbService.getSessionById(currentUser.session);
     expect(deletedSession).toBeNull();
     expect((await currentUser.dbService.getSessionsByUserId(currentUser.user.id)).length).toEqual(0);
 
@@ -123,7 +123,12 @@ describe("The /backchannel_logout API", () => {
 
     expect((await currentUser.getDocument("user_" + currentUser.user.id)).statusCode).toEqual(200);
     const sessions = await currentUser.dbService.getSessionsByUserId(currentUser.user.id);
-    console.log(sessions)
     expect(sessions.length).toEqual(1);
+  });
+
+  it("should fail to login with empty session id", async () => {
+    const response = await currentUser.login("");
+    expect(response.statusCode).toBeDefined();
+    expect(response.statusCode).toBe(400);
   });
 });

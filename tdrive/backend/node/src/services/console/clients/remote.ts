@@ -299,4 +299,20 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
       await sessionRepository.remove(session);
     }
   }
+
+  async verifyJwtSid(sid: string): Promise<void> {
+    const sessionRepository = gr.services.console.getSessionRepo();
+    if (sid) {
+      const session = await sessionRepository.findOne({
+        sid,
+      });
+      if (!session) {
+        // fail for not matching session id
+        throw new Error("Invalid session id");
+      }
+    } else {
+      // fail for missing session id
+      throw new Error("Missing session id");
+    }
+  }
 }

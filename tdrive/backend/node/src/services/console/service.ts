@@ -47,7 +47,8 @@ export class ConsoleServiceImpl implements TdriveServiceProvider {
 
     this.consoleOptions.type = type;
     this.consoleType = type;
-    this.sessionRepository = await gr.database.getRepository<Session>("session", Session);
+    this.sessionRepository =
+      type === "remote" ? await gr.database.getRepository<Session>("session", Session) : null;
 
     return this;
   }

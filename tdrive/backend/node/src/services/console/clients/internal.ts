@@ -114,4 +114,8 @@ export class ConsoleInternalClient implements ConsoleServiceClient {
     logger.info("Internal: backChannelLogout");
     throw new Error("Method should not be implemented.");
   }
+
+  async verifyJwtSid(_sid: string): Promise<void> {
+    logger.info("Internal: verifyJwtSid");
+  }
 }

@@ -18,18 +18,11 @@ const jwtPlugin: FastifyPluginCallback = async (fastify, _opts, next) => {
   });
 
   const authenticate = async (request: FastifyRequest) => {
-    const sessionRepository = gr.services.console.getSessionRepo();
-
     const jwt: JwtType = await request.jwtVerify();
-    if (jwt.sid) {
-      const session = await sessionRepository.findOne({
-        sid: jwt.sid,
-      });
-      if (session.sid != jwt.sid) {
-        // fail for not matching session id
-        throw new Error("Session id does not match");
-      }
-    }
+
+    // Verify the SID exists and is valid
+    await gr.services.console.getClient().verifyJwtSid(jwt.sid);
+
     if (jwt.type === "refresh") {
       // TODO  in the future we must invalidate the refresh token (because it should be single use)
     }
