@@ -311,10 +311,11 @@ export const addDriveItemToArchive = async (
   context: CompanyExecutionContext,
   prefix?: string,
 ): Promise<void> => {
-  const item = entity || (await repository.findOne({ id, company_id: context.company.id }));
+  const itemPK = { id, company_id: context.company.id };
+  const item = entity || (await repository.findOne(itemPK));
 
   if (!item) {
-    throw Error("item not found");
+    throw Error(`Item '${JSON.stringify(itemPK)}' not found`);
   }
 
   if (!item.is_directory) {

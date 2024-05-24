@@ -286,7 +286,7 @@ describe("the public links feature", () => {
       anotherUser.jwt = token.value;
       await anotherUser.getDocumentOKCheck(doc.id);
 
-      expect((await anotherUser.getFolder(doc.id)).statusCode).toBe(200);
+      expect((await anotherUser.zipDocument(doc.id)).statusCode).toBe(200);
     });
   });
 });
