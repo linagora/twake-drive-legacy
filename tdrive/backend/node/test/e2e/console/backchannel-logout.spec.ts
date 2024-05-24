@@ -1,15 +1,13 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
-import { v1 as uuidv1 } from "uuid";
 import UserApi from "../common/user-api";
-import exp from "constants";
 
 describe("The /backchannel_logout API", () => {
   const url = "/internal/services/console/v1/backchannel_logout";
   let platform: TestPlatform;
   let testDbService: TestDbService;
-  let currentUser;
+  let currentUser: UserApi;
 
   beforeEach(async () => {
     platform = await init();
@@ -43,7 +41,7 @@ describe("The /backchannel_logout API", () => {
     platform = null;
   });
 
-  it.skip("should 400 when logout_token is missing", async () => {
+  it("should 400 when logout_token is missing", async () => {
     const response = await platform.app.inject({
       method: "POST",
       url: url,
@@ -62,8 +60,10 @@ describe("The /backchannel_logout API", () => {
     expect(response.statusCode).toBe(200);
 
     // Verify the session is removed from the database
-    const deletedSession = await currentUser.dbService.getSessionById(currentUser.session);
+    let deletedSession = await currentUser.dbService.getSessionById(currentUser.session);
     expect(deletedSession).toBeNull();
+    expect((await currentUser.dbService.getSessionsByUserId(currentUser.user.id)).length).toEqual(0);
+
   });
 
   it("should create a session on login", async () => {
@@ -72,47 +72,58 @@ describe("The /backchannel_logout API", () => {
     expect(session).not.toBeUndefined();
   });
 
-  it("should recieve 401 after logout and trying to access with the same token", async () => {
+  it("should receive 401 after logout and trying to access with the same token", async () => {
     const myDriveId = "user_" + currentUser.user.id;
+
+    let response = await currentUser.getDocument(myDriveId);
+    expect(response.statusCode).toBe(200);
+
     await currentUser.logout();
 
-    const response = await currentUser.getDocument(myDriveId);
+    response = await currentUser.getDocument(myDriveId);
     expect(response.statusCode).toBe(401);
   });
 
   it("should be able to log-in several times by having multiple sessions", async () => {
-    const userId = currentUser.user.id;
-    const oldSessionId = currentUser.session;
-
     // Perform a second login
-    await currentUser.login();
-    const newSessionId = currentUser.session;
+    const newUserSession = await UserApi.getInstance(platform);
+
+    //two sessions are different
+    expect(newUserSession.session).not.toEqual(currentUser.session);
 
     // Verify that the user has two sessions
-    const oldSession = await testDbService.getSessionById(oldSessionId);
+    const oldSession = await testDbService.getSessionById(currentUser.session);
     expect(oldSession).not.toBeNull();
-    expect(oldSession.sub).toBe(userId);
-    const newSession = await testDbService.getSessionById(newSessionId);
+    expect(oldSession.sub).toBe(currentUser.user.id);
+
+    const newSession = await testDbService.getSessionById(newUserSession.session);
     expect(newSession).not.toBeNull();
-    expect(newSession.sub).toBe(userId);
+    expect(newSession.sub).toBe(currentUser.user.id);
+
+    //check that we can send requests for both session
+    expect((await currentUser.getDocument("user_" + currentUser.user.id)).statusCode).toEqual(200);
+    expect((await newUserSession.getDocument("user_" + currentUser.user.id)).statusCode).toEqual(200);
+
   });
 
   it("should logout from one session and still be logged in another", async () => {
-    const userId = currentUser.id;
-    const session2 = { sid: uuidv1(), sub: userId };
-
-    await testDbService.createSession(session2.sid, session2.sub);
+    // Perform a second login
+    const newUserSession = await UserApi.getInstance(platform);
 
     await currentUser.logout();
 
     // Verify session1 is removed
-    const deletedSession1 = await testDbService.getSessionById(currentUser.session);
-    expect(deletedSession1).toBeNull();
-
-    // Verify session2 still exists
-    const existingSession2 = await testDbService.getSessionById(session2.sid);
-    expect(existingSession2).not.toBeNull();
+    expect((await currentUser.getDocument("user_" + currentUser.user.id)).statusCode).toEqual(401);
+    expect((await newUserSession.getDocument("user_" + currentUser.user.id)).statusCode).toEqual(200);
   });
 
-  //I want to be able to log-in/recieve access token several time with the same session id
+  it("I want to be able to log-in/recieve access token several time with the same session id", async () => {
+    await currentUser.login(currentUser.session);
+    await currentUser.login(currentUser.session);
+
+    expect((await currentUser.getDocument("user_" + currentUser.user.id)).statusCode).toEqual(200);
+    const sessions = await currentUser.dbService.getSessionsByUserId(currentUser.user.id);
+    console.log(sessions)
+    expect(sessions.length).toEqual(1);
+  });
 });

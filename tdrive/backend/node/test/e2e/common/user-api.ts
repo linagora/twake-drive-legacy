@@ -90,8 +90,12 @@ export default class UserApi {
   /**
    * Just send the login requests without any validation and login response assertion
    */
-  public async login() {
-    this.session = uuidv1();
+  public async login(session?: string) {
+    if (session) {
+      this.session = session;
+    } else {
+      this.session = uuidv1();
+    }
     const payload = {
       claims: {
         sub: this.user.id,
