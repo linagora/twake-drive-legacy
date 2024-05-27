@@ -12,6 +12,7 @@ export const TYPE = "group_user";
   type: TYPE,
 })
 export default class CompanyUser {
+  /** company_id */
   @Column("group_id", "timeuuid")
   group_id: string;
 
