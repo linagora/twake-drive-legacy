@@ -23,6 +23,10 @@ import { UserQuota } from "../../../src/services/user/web/types";
 import { Api } from "../utils.api";
 import { OidcJwtVerifier } from "../../../src/services/console/clients/remote-jwks-verifier";
 
+/** The UserApi is an abstraction for E2E tests that
+ * represents the high level actions a user can take
+ * in the application.
+ */
 export default class UserApi {
 
   private static readonly DOC_URL = "/internal/services/documents/v1";
@@ -54,8 +58,8 @@ export default class UserApi {
 
   private async init(newUser: boolean, options?: {}) {
     this.dbService = await TestDbService.getInstance(this.platform, true);
+    this.workspace = this.platform.workspace;
     if (newUser) {
-      this.workspace = this.platform.workspace;
       const workspacePK = {
         id: this.workspace.workspace_id,
         company_id: this.workspace.company_id,
@@ -69,7 +73,6 @@ export default class UserApi {
         uuidv1());
     } else {
       this.user = this.platform.currentUser;
-      this.workspace = this.platform.workspace;
     }
     this.api = new Api(this.platform, this.user);
     this.jwt = await this.doLogin();
@@ -227,6 +230,21 @@ export default class UserApi {
     return directory;
   }
 
+  /** Run the provided callback using the specified bearer JWT token.
+   * //TODO: Warning: does not override calls using `this.api` have to discuss
+   */
+  async impersonateWithJWT<T>(jwt: string, cb: () => Promise<T>): Promise<T> {
+    const previous = this.jwt;
+    this.jwt = jwt;
+    let result: T | undefined = undefined;
+    try {
+      result = await cb();
+    } finally {
+      this.jwt = previous;
+    }
+    return result;
+  }
+
   async createDocument(
     item: Partial<DriveFile>,
     version: Partial<FileVersion>
@@ -241,25 +259,26 @@ export default class UserApi {
     return deserialize<DriveFile>(DriveFile, response.body);
   };
 
-  async createDefaultDocument(): Promise<DriveFile> {
+  async createDefaultDocument(overrides?: Partial<DriveFile>): Promise<DriveFile> {
     const scope: "personal" | "shared" = "shared";
     const item = {
       name: "new test file",
       parent_id: "root",
       company_id: this.platform.workspace.company_id,
       scope,
+      ...overrides,
     };
 
     return await this.createDocument(item, {});
   };
 
-  async shareWithPublicLink(doc: Partial<DriveFile>, accessLevel: publicAccessLevel) {
+  async shareWithPublicLink(doc: Partial<DriveFile> & { id: string }, accessLevel: publicAccessLevel) {
     return await this.updateDocument(doc.id, {
       ...doc,
       access_info: {
-        ...doc.access_info,
+        ...doc.access_info!,
         public: {
-          ...doc.access_info.public!,
+          ...doc.access_info?.public!,
           level: accessLevel
         }
       }

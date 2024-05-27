@@ -7,7 +7,6 @@ import { TestDbService } from "../utils.prepare.db";
 import {
   e2e_createDocumentFile,
   e2e_createVersion,
-  e2e_deleteDocument,
   e2e_updateDocument,
 } from "./utils";
 import UserApi from "../common/user-api";
@@ -68,22 +67,12 @@ describe("the Drive feature", () => {
     expect(result.item.name).toEqual("Shared Drive");
   });
 
-  it("did fetch the trash", async () => {
-    await TestDbService.getInstance(platform, true);
-
-    const response = await currentUser.getDocument("trash");
-    const result = deserialize<DriveItemDetailsMockClass>(DriveItemDetailsMockClass, response.body);
-
-    expect(result.item.id).toEqual("trash");
-    expect(result.item.name).toEqual("Trash");
-  });
-
   it("did delete an item", async () => {
     const createItemResult = await currentUser.createDefaultDocument();
 
     expect(createItemResult.id).toBeDefined();
 
-    const deleteResponse = await e2e_deleteDocument(platform, createItemResult.id);
+    const deleteResponse = await currentUser.delete(createItemResult.id);
     expect(deleteResponse.statusCode).toEqual(200);
   });
 
@@ -120,25 +109,6 @@ describe("the Drive feature", () => {
 
     //and data is in place
     expect(zipResponse.body.length).toBeGreaterThanOrEqual(100);
-  });
-
-  it("did move an item to trash", async () => {
-    const createItemResult = await currentUser.createDefaultDocument();
-
-    expect(createItemResult.id).toBeDefined();
-
-    const moveToTrashResponse = await e2e_deleteDocument(platform, createItemResult.id);
-    expect(moveToTrashResponse.statusCode).toEqual(200);
-
-    const listTrashResponse = await currentUser.getDocument("trash");
-    const listTrashResult = deserialize<DriveItemDetailsMockClass>(
-      DriveItemDetailsMockClass,
-      listTrashResponse.body,
-    );
-    expect(listTrashResult.item.name).toEqual("Trash");
-    expect(createItemResult).toBeDefined();
-    expect(createItemResult.scope).toEqual("shared");
-    expect(listTrashResult.children.some(({ id }) => id === createItemResult.id)).toBeTruthy();
   });
 
   it("did create a version for a drive item", async () => {

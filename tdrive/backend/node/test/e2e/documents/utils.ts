@@ -6,18 +6,6 @@ import * as fs from "fs";
 
 const url = "/internal/services/documents/v1";
 
-export const e2e_deleteDocument = async (platform: TestPlatform, id: string | "root" | "trash") => {
-  const token = await platform.auth.getJWTToken();
-
-  return await platform.app.inject({
-    method: "DELETE",
-    url: `${url}/companies/${platform.workspace.company_id}/item/${id}`,
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
-  });
-};
-
 export const e2e_updateDocument = async (
   platform: TestPlatform,
   id: string | "root" | "trash",
@@ -34,7 +22,6 @@ export const e2e_updateDocument = async (
     payload: item,
   });
 };
-
 
 export const e2e_createVersion = async (
   platform: TestPlatform,
