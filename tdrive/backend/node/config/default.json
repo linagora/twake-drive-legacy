@@ -63,20 +63,12 @@
   },
   "database": {
     "secret": "",
-    "type": "cassandra",
+    "type": "mongodb",
     "encryption": "aes-256-cbc",
     "mongodb": {
       "uri": "mongodb://mongo:27017",
       "database": "tdrive"
     },
-    "cassandra": {
-      "contactPoints": ["scylladb:9042"],
-      "localDataCenter": "datacenter1",
-      "keyspace": "tdrive",
-      "wait": false,
-      "retries": 10,
-      "delay": 200
-    }
   },
   "message-queue": {
     "// possible 'type' values are": "'amqp' or 'local'",

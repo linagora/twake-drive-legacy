@@ -3,7 +3,6 @@ import { ConnectorFactory } from "./connector-factory";
 import { Connector } from "./orm/connectors";
 import Manager from "./orm/manager";
 import Repository from "./orm/repository/repository";
-import { CassandraConnectionOptions } from "./orm/connectors/cassandra/cassandra";
 import { MongoConnectionOptions } from "./orm/connectors/mongodb/mongodb";
 import { EntityTarget } from "./orm/types";
 import { RepositoryManager } from "./orm/repository/manager";
@@ -48,9 +47,6 @@ export default class DatabaseService implements DatabaseServiceAPI {
   }
 }
 
-export declare type ConnectionOptions =
-  | MongoConnectionOptions
-  | CassandraConnectionOptions
-  | PostgresConnectionOptions;
+export declare type ConnectionOptions = MongoConnectionOptions | PostgresConnectionOptions;
 
-export declare type DatabaseType = "mongodb" | "cassandra" | "postgres";
+export declare type DatabaseType = "mongodb" | "postgres";

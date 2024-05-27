@@ -43,11 +43,6 @@
       "uri": "DB_MONGO_URI",
       "database": "DB_MONGO_DATABASE"
     },
-    "cassandra": {
-      "contactPoints": "DB_CASSANDRA_URI",
-      "localDataCenter": "DB_CASSANDRA_LOCALDATACENTER",
-      "keyspace": "DB_CASSANDRA_KEYSPACE"
-    },
     "postgres": {
       "database": "DB_POSTGRES_DBNAME",
       "host": "DB_POSTGRES_HOST",

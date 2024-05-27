@@ -68,12 +68,6 @@ jobs:
           docker-compose -f docker-compose.dev.tests.opensearch.yml logs
           docker-compose -f docker-compose.dev.tests.opensearch.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=opensearch -e DB_DRIVER=postgres -e PUBSUB_TYPE=local node npm run test:all
           docker-compose -f docker-compose.dev.tests.opensearch.yml down
-      - name: e2e-cassandra-test
-        run: |
-          cd tdrive
-          docker-compose -f docker-compose.tests.yml up -d scylladb elasticsearch rabbitmq
-          sleep 60
-          docker-compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=elasticsearch -e DB_DRIVER=cassandra node npm run test:all
       - name: coverage
         uses: adRise/jest-cov-reporter@e13d7638888cad7788298f4022b203b31a10c7c8
         with:

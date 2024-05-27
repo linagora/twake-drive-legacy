@@ -1,9 +1,0 @@
-{
-  "name": "copy-cluster",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
-  "dependencies": {
-    "cassandra-driver": "^4.6.3"
-  }
-}

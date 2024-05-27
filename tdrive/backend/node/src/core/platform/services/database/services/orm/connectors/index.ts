@@ -1,6 +1,5 @@
 import { Initializable } from "../../../../../framework";
 import { DatabaseType } from "../..";
-import { CassandraConnectionOptions } from "./cassandra/cassandra";
 import { MongoConnectionOptions } from "./mongodb/mongodb";
 import { ColumnDefinition, EntityDefinition } from "../types";
 import { FindOptions } from "../repository/repository";
@@ -8,7 +7,6 @@ import { ListResult } from "../../../../../framework/api/crud-service";
 import { PostgresConnectionOptions } from "./postgres/postgres";
 
 export * from "./mongodb/mongodb";
-export * from "./cassandra/cassandra";
 
 export type UpsertOptions = {
   action?: "INSERT" | "UPDATE";
@@ -68,7 +66,4 @@ export interface Connector extends Initializable {
   ): Promise<ListResult<EntityType>>;
 }
 
-export declare type ConnectionOptions =
-  | MongoConnectionOptions
-  | CassandraConnectionOptions
-  | PostgresConnectionOptions;
+export declare type ConnectionOptions = MongoConnectionOptions | PostgresConnectionOptions;

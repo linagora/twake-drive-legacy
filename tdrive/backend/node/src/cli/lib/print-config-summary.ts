@@ -29,14 +29,6 @@ export default function printConfigSummary(useIcons: boolean = !!process.env.HAV
       "user",
       user,
     ],
-    cassandra: ({ contactPoints, localDataCenter, keyspace }) => [
-      "host",
-      contactPoints,
-      "datacenter",
-      localDataCenter,
-      "keyspace",
-      keyspace,
-    ],
     S3: ({ endPoint, port, accessKey, bucket }) => [
       "host",
       [endPoint, port],
@@ -62,7 +54,6 @@ export default function printConfigSummary(useIcons: boolean = !!process.env.HAV
     elasticsearch: "ES",
     opensearch: "OS",
     mongodb: "mongo",
-    cassandra: "Cass.",
   };
   if (useIcons) {
     const makeLyingLengthIcon = str => ({ length: 1, toString: _ => str } as string);
