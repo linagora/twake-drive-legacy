@@ -28,7 +28,7 @@ export type DriveItemDetails = {
 export type BrowseDetails = DriveItemDetails & { nextPage: Paginable };
 
 export type DriveFileAccessLevel = "read" | "write" | "manage";
-export type publicAccessLevel = "write" | "read" | "none";
+export type publicAccessLevel = "write" | "read" | "none" | "manage";
 
 export type RootType = "root";
 export type TrashType = "trash";

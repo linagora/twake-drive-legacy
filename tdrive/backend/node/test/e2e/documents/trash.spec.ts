@@ -102,7 +102,28 @@ describe("the Drive's documents' trash feature", () => {
       const deletionToTrashResponse = await currentUser.delete(anonymouslyUploadedDoc.id);
       expect(deletionToTrashResponse.statusCode).toBe(200);
 
-      expect((await getTrashContentIds()).indexOf(anonymouslyUploadedDoc.id)).toBeGreaterThanOrEqual(0);
+      expect((await getTrashContentIds())).toContain(anonymouslyUploadedDoc.id);
     });
+
+    it("If anonymous user deletes the files in should be in the users trash", async () => {
+      const publiclyWriteableFolder = await currentUser.createDirectory();
+      const anonymousUser  = await UserApi.getInstance(platform);
+
+      const setPublicWriteableResponse = await currentUser.shareWithPublicLink(publiclyWriteableFolder, "manage");
+      expect(setPublicWriteableResponse.statusCode).toBe(200);
+
+      anonymousUser.jwt = (await anonymousUser.getPublicLinkAccessToken(publiclyWriteableFolder)).value;
+      const anonymouslyUploadedDoc = await anonymousUser.uploadRandomFileAndCreateDocument(publiclyWriteableFolder.id);
+
+      const deletionToTrashResponse = await anonymousUser.delete(anonymouslyUploadedDoc.id);
+      expect(deletionToTrashResponse.statusCode).toBe(200);
+
+      expect((await getTrashContentIds())).toContain(anonymouslyUploadedDoc.id);
+    });
+
+    it("if another user deletes the files it should be in the users trash", async () => {
+      //TODO
+    });
+
   });
 });

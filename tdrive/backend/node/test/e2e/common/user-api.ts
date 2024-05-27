@@ -18,7 +18,7 @@ import {
 } from "./entities/mock_entities";
 import { logger } from "../../../src/core/platform/framework";
 import { expect } from "@jest/globals";
-import { publicAccessLevel } from "../../../src/services/documents/types";
+import { DriveFileAccessLevel, publicAccessLevel } from "../../../src/services/documents/types";
 import { UserQuota } from "../../../src/services/user/web/types";
 import { Api } from "../utils.api";
 import { OidcJwtVerifier } from "../../../src/services/console/clients/remote-jwks-verifier";
@@ -285,6 +285,23 @@ export default class UserApi {
     });
   }
 
+  async shareWithPublicLinkWithOkCheck(doc: Partial<DriveFile> & { id: string }, accessLevel: publicAccessLevel) {
+    const shareResponse =  await this.shareWithPublicLink(doc, accessLevel);
+    expect(shareResponse.statusCode).toBe(200);
+    return deserialize<DriveFile>(DriveFile, shareResponse.body);
+  }
+
+  async shareWithPermissions(doc: Partial<DriveFile> & { id: string }, toUserId: string, permissions: DriveFileAccessLevel) {
+    doc.access_info.entities.push({
+      type: "user",
+      id: toUserId,
+      level: permissions,
+      grantor: null,
+    });
+    console.log(`INFO:: ${doc.access_info}`);
+    return await this.updateDocument(doc.id, doc);
+  }
+
   async getPublicLinkAccessToken(doc: Partial<DriveFile>) {
     const accessRes = await this.platform.app.inject({
       method: "POST",
@@ -434,6 +451,7 @@ export default class UserApi {
     expect(response.statusCode).toBe(200);
     const doc = deserialize<DriveItemDetailsMockClass>(DriveItemDetailsMockClass, response.body);
     expect(doc.item?.id).toBe(id);
+    return doc;
   };
 
   async sharedWithMeDocuments(
