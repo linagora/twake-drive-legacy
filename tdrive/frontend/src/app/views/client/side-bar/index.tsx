@@ -44,7 +44,6 @@ export default () => {
   if (sharedWithMe) folderType = 'shared';
 
   useEffect(() => {
-    console.log('PARENT ID CHANGED: ', parentId);
     !itemId && !dirId && viewId && setParentId(viewId);
     dirId && viewId && setParentId(dirId);
   }, [viewId, itemId, dirId]);

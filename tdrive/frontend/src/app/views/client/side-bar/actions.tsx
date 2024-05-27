@@ -14,7 +14,7 @@ import { UploadModelAtom, UploadModal } from '../body/drive/modals/upload'
 import { Button } from '@atoms/button/button';
 import Languages from "features/global/services/languages-service";
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
-import RouterServices from '@features/router/services/router-service';
+import useRouteState from 'app/features/router/hooks/use-route-state';
 
 export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentId?: string }) => {
   const companyId = useRouterCompany();
@@ -95,8 +95,8 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
 
 export default () => {
   const { user } = useCurrentUser();
-  const { viewId } = RouterServices.getStateFromRoute();
-  const [parentId, _] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id  }));
+  const { viewId, dirId } = useRouteState();
+  const [parentId, _] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: dirId || viewId || 'user_'+user?.id  }));
   const { access, item } = useDriveItem(parentId);
   const { children: trashChildren } = useDriveItem(viewId === 'trash' ? 'trash' : 'trash_'+user?.id);
   const uploadZoneRef = useRef<UploadZone | null>(null);
