@@ -109,7 +109,7 @@ describe("the Drive feature", () => {
   it("Download folder as a zip should work fine", async () => {
     //given
     const folder = await currentUser.createDirectory("user_" + currentUser.user.id)
-    await currentUser.uploadAllFilesAndCreateDocuments(folder.id);
+    await currentUser.uploadRandomFileAndCreateDocument(folder.id);
 
     //when
     const zipResponse = await currentUser.zipDocument(folder.id);
