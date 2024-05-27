@@ -245,6 +245,13 @@ export default class UserApi {
     return result;
   }
 
+  /** Gets the public link access token then `impersonateWithJWT` as an anonymous user with that link */
+  async impersonatePublicLinkAccessOf<T>(item: Partial<DriveFile> & { id: string }, cb: () => Promise<T>): Promise<T> {
+    const publicToken = await this.getPublicLinkAccessToken(item);
+    expect(publicToken?.value?.length ?? "").toBeGreaterThan(0);
+    return this.impersonateWithJWT(publicToken?.value, cb);
+  }
+
   async createDocument(
     item: Partial<DriveFile>,
     version: Partial<FileVersion>

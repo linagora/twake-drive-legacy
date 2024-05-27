@@ -73,7 +73,7 @@ describe("the Drive's documents' trash feature", () => {
   });
 
   describe("deleting a file uploaded by an anonymous user should go to the sharers trash", () => {
-    async function getTrashContentIds() {
+    async function getCurrentUsersTrashContentIds() {
       const listTrashResponse = await currentUser.getDocument("trash");
       expect(listTrashResponse.statusCode).toBe(200);
       const listTrashResult = deserialize<DriveItemDetailsMockClass>(
@@ -83,26 +83,61 @@ describe("the Drive's documents' trash feature", () => {
       return listTrashResult.children.map(({id}) => id);
     }
 
-    async function uploadFileAsAnonymousUser(destinationSharedFolder: DriveFile) {
-      const publicToken = await currentUser.getPublicLinkAccessToken(destinationSharedFolder);
-      expect(publicToken?.value?.length ?? "").toBeGreaterThan(0);
-      return await currentUser.impersonateWithJWT(publicToken.value, () =>
-        currentUser.createDefaultDocument({
-          parent_id: destinationSharedFolder.id,
-        }));
-    }
-
     it("finds the owner from the immediate parent folder", async () => {
       const publiclyWriteableFolder = await currentUser.createDirectory();
       const setPublicWriteableResponse = await currentUser.shareWithPublicLink(publiclyWriteableFolder, "write");
       expect(setPublicWriteableResponse.statusCode).toBe(200);
 
-      const anonymouslyUploadedDoc = await uploadFileAsAnonymousUser(publiclyWriteableFolder);
+      const anonymouslyUploadedDoc = await currentUser.impersonatePublicLinkAccessOf(publiclyWriteableFolder, () =>
+        currentUser.createDefaultDocument({
+          parent_id: publiclyWriteableFolder.id,
+        }));
+      expect(publiclyWriteableFolder.creator).toEqual(currentUser.user.id);
+      expect(anonymouslyUploadedDoc.creator).not.toEqual(currentUser.user.id);
 
       const deletionToTrashResponse = await currentUser.delete(anonymouslyUploadedDoc.id);
       expect(deletionToTrashResponse.statusCode).toBe(200);
 
-      expect((await getTrashContentIds())).toContain(anonymouslyUploadedDoc.id);
+      expect((await getCurrentUsersTrashContentIds())).toContain(anonymouslyUploadedDoc.id);
+    });
+
+    it("finds the owner from the indirect parent folder", async () => {
+      const publiclyWriteableFolder = await currentUser.createDirectory();
+      const setPublicWriteableResponse = await currentUser.shareWithPublicLink(publiclyWriteableFolder, "write");
+      expect(setPublicWriteableResponse.statusCode).toBe(200);
+
+      const anonymouslyUploadedDoc = await currentUser.impersonatePublicLinkAccessOf(publiclyWriteableFolder, async () => {
+        const anonymouslyCreatedFolder = await currentUser.createDirectory(publiclyWriteableFolder.id);
+        expect(anonymouslyCreatedFolder.creator).not.toEqual(currentUser.user.id);
+        return currentUser.createDefaultDocument({
+          parent_id: anonymouslyCreatedFolder.id,
+        })
+      });
+      expect(publiclyWriteableFolder.creator).toEqual(currentUser.user.id);
+      expect(anonymouslyUploadedDoc.creator).not.toEqual(currentUser.user.id);
+
+      const deletionToTrashResponse = await currentUser.delete(anonymouslyUploadedDoc.id);
+      expect(deletionToTrashResponse.statusCode).toBe(200);
+
+      expect((await getCurrentUsersTrashContentIds())).toContain(anonymouslyUploadedDoc.id);
+    });
+
+    it.only("goes into the sharers trash even if another user deletes the file", async () => {
+      const publiclyWriteableFolder = await currentUser.createDirectory();
+      const setPublicWriteableResponse = await currentUser.shareWithPublicLink(publiclyWriteableFolder, "write");
+      expect(setPublicWriteableResponse.statusCode).toBe(200);
+
+      const anonymouslyUploadedDoc = await currentUser.impersonatePublicLinkAccessOf(publiclyWriteableFolder, () =>
+        currentUser.createDefaultDocument({
+          parent_id: publiclyWriteableFolder.id,
+        }));
+
+      const secondaryUser = await UserApi.getInstance(platform!);
+
+      const deletionToTrashResponse = await secondaryUser.delete(anonymouslyUploadedDoc.id);
+      expect(deletionToTrashResponse.statusCode).toBe(200);
+
+      expect((await getCurrentUsersTrashContentIds())).toContain(anonymouslyUploadedDoc.id);
     });
 
     it("If anonymous user deletes the files in should be in the users trash", async () => {
@@ -118,12 +153,7 @@ describe("the Drive's documents' trash feature", () => {
       const deletionToTrashResponse = await anonymousUser.delete(anonymouslyUploadedDoc.id);
       expect(deletionToTrashResponse.statusCode).toBe(200);
 
-      expect((await getTrashContentIds())).toContain(anonymouslyUploadedDoc.id);
+      expect((await getCurrentUsersTrashContentIds())).toContain(anonymouslyUploadedDoc.id);
     });
-
-    it("if another user deletes the files it should be in the users trash", async () => {
-      //TODO
-    });
-
   });
 });
