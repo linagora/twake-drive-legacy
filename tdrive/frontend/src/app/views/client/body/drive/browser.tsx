@@ -363,18 +363,20 @@ export default memo(
                     {formatBytes(item?.size || 0)} {Languages.t('scenes.app.drive.used')}
                   </BaseSmall>
                 )}
-                <Menu menu={() => onBuildContextMenu(details)}>
-                  {' '}
-                  <Button theme="secondary" className="ml-4 flex flex-row items-center">
-                    <span>
-                      {selectedCount > 1
-                        ? `${selectedCount} items`
-                        : Languages.t('scenes.app.drive.context_menu')}{' '}
-                    </span>
+                {viewId !== 'shared_with_me' && (
+                  <Menu menu={() => onBuildContextMenu(details)}>
+                    {' '}
+                    <Button theme="secondary" className="ml-4 flex flex-row items-center">
+                      <span>
+                        {selectedCount > 1
+                          ? `${selectedCount} items`
+                          : Languages.t('scenes.app.drive.context_menu')}{' '}
+                      </span>
 
-                    <ChevronDownIcon className="h-4 w-4 ml-2 -mr-1" />
-                  </Button>
-                </Menu>
+                      <ChevronDownIcon className="h-4 w-4 ml-2 -mr-1" />
+                    </Button>
+                  </Menu>
+                )}
               </div>
 
               <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
