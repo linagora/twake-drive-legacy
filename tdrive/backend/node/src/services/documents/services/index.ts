@@ -632,12 +632,12 @@ export class DocumentsService {
         this.logger.error({ error: `${error}` }, "Failed to grant access to the drive item");
         throw new CrudException("User does not have access to this item or its children", 401);
       }
-
+      const path = await getPath(item.parent_id, this.repository, true, context);
       const previousParentId = item.parent_id;
       if (
         (await isInTrash(item, this.repository, context)) ||
         item.parent_id === this.TRASH ||
-        (await getPath(item.parent_id, this.repository, true, context))[0].id === this.TRASH
+        path[0].id === this.TRASH
       ) {
         //This item is already in trash, we can delete it definitively
 
@@ -681,22 +681,19 @@ export class DocumentsService {
           const creator = await this.userRepository.findOne({ id: item.creator });
           if (creator.type === "anonymous") {
             const loadedCreators = new Map<string, User>();
-            const path = await getPath(
-              item.id,
-              this.repository,
-              true,
-              context,
-              async item => {
-                if (!item.creator) return true;
-                const user =
-                  loadedCreators.get(item.creator) ??
-                  (await this.userRepository.findOne({ id: item.creator }));
-                loadedCreators.set(item.creator, user);
-                return user.type !== "anonymous";
-              },
-              true,
-            );
-            const [firstOwnedItem] = path;
+            let firstOwnedItem: DriveFile | undefined;
+            for (let i = path.length - 1; i >= 0; i--) {
+              const item = path[i];
+              if (!item.creator) continue;
+              const user =
+                loadedCreators.get(item.creator) ??
+                (await this.userRepository.findOne({ id: item.creator }));
+              loadedCreators.set(item.creator, user);
+              if (user.type !== "anonymous") {
+                firstOwnedItem = item;
+                break;
+              }
+            }
             if (firstOwnedItem) {
               const firstKnownCreator = loadedCreators.get(firstOwnedItem.creator);
               const accessEntitiesWithoutUser = item.access_info.entities.filter(
@@ -704,6 +701,8 @@ export class DocumentsService {
               );
               item.access_info.entities = [
                 ...accessEntitiesWithoutUser,
+                // This is not functionally required, but creates an audit trace of what
+                // happened to this anonymously uploaded file
                 {
                   type: "user",
                   id: firstKnownCreator.id,
