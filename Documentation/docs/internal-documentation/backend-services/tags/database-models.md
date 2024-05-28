@@ -6,13 +6,8 @@ description: Documents database models
 
 **DriveFile**
 
-```javascript
-{
-  // Primary Key
-  "company_id": uuid;
-  "tag_id": string;
-
-  "name": string;
-  "colour": string;
+```TypeScript
+export class DriveFile {
+  tags: string[];
 }
 ```

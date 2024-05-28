@@ -1,12 +1,12 @@
 ---
-description: Tags on TDrive
+description: Tags on Twake Drive
 ---
 
 # 📁 Tags
 
 ## description
 
-**Tags** is everything related to tafs in TDrive after the migration to Node.js.
+**Tags** is everything related to tags in Twake Drive after the migration to Node.js.
 
 ## Models and APIs
 

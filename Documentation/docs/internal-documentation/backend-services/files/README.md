@@ -3,10 +3,9 @@ description: File on Twake Drive
 ---
 
 # 📄 Files
-<!-- TODO[NOT UP TO DATE] -->
 ## description
 
-**Files** is everything related to file upload in Twake Drive after the migration to Node.js. Note that the Twake Drive isn't part of this migration because it will be replaced by Linshare.
+**Files** is everything related to file upload in Twake Drive.
 
 Twake Drive Files upload support chunk upload and file encryption.
 
@@ -18,7 +17,14 @@ Twake Drive Files upload support chunk upload and file encryption.
 
 ## Encryption
 
-Files and Storage services in Twake Drive feature encryption at rest in **aes-256-cbc**.
+Files and Storage services in Twake Drive feature encryption at rest in **aes-256-gbc**. Or you can also set your desired algorithm is the Twake Drive configuration
+```JSON
+    {
+      "database": {
+        "encryption": "DB_ENCRYPTION_ALGORITHM"
+      }
+    }
+```
 
 Each file is encrypted with two layers:
 

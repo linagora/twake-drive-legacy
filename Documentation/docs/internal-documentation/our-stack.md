@@ -6,7 +6,7 @@ description: Here is the list of our middlewares and their usages.
 
 Write an article describing our stack at Twake Drive composed of:
 
-- In full mode a docker containing: node, react behind nginx, elasticsearch, scylladb, redis, rabbitmq
+- In full mode a docker containing: node, react behind nginx, Open Search, PostgreSQL, redis, rabbitmq
 - In simple mode a docker containing: node, react and mongodb for db and search
 
 ### Simple mode
@@ -26,8 +26,8 @@ The full mode of Twake Drive messaging app is designed to handle large-scale pro
 - Node: A JavaScript runtime environment used to develop server-side applications.
 - React: A JavaScript library used to build user interfaces.
 - Nginx: A web server used as a reverse proxy to distribute incoming requests to the appropriate backend service.
-- Elasticsearch: A distributed search and analytics engine used to perform advanced search operations.
-- Scylladb: A NoSQL database used to store large amounts of structured and unstructured data.
+- OpenSearch: A distributed search and analytics engine used to perform advanced search operations.
+- PostgreSQL: An advanced, open-source relational database management system known for its extensibility, SQL compliance, and robust performance.
 - Redis: An in-memory data structure store used to implement caching, messaging, and pub/sub functionalities.
 - Rabbitmq: An open-source message broker used to transmit messages between applications.
 

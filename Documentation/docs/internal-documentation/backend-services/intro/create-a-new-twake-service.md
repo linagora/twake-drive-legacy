@@ -17,7 +17,7 @@ In order to illustrate how to create a component, let's create a fake Notificati
 1. Create the folder `src/services/notification`
 2. Create an `index.ts` file which exports a `NotificationService` class
 
-```javascript
+```Typescript
 // File src/services/notification/index.ts
 import { TdriveService } from "../../core/platform/framework";
 import NotificationServiceAPI from "./api.ts";
@@ -37,7 +37,7 @@ export default class NotificationService extends TdriveService<NotificationServi
 
    We need to create this `NotificationServiceAPI` interface which must extend the `TdriveServiceProvider` from the platform like:
 
-```javascript
+```Typescript
 // File src/services/notification/api.ts
 import { TdriveServiceProvider } from "../../core/platform/framework/api";
 
@@ -52,7 +52,7 @@ export default interface NotificationServiceAPI extends TdriveServiceProvider {
 
 1. Now that the interfaces are defined, we need to create the `NotificationServiceAPI` implementation \(this is a dummy implementation which does nothing but illustrates the process\):
 
-```javascript
+```Typescript
 // File src/services/notification/services/api.ts
 import NotificationServiceAPI from "../api";
 
@@ -69,7 +69,7 @@ export class NotificationServiceImpl implements NotificationServiceAPI {
 2. `public async doInit(): Promise<this>;` Customize the `init` step of the component. This is generally the place where services are instanciated. From this step, you can retrieve services consumed by the current component which have been already initialized by the platform.
 3. `public async doStart(): Promise<this>;` Customize the `start` step of the component. You have access to all other services which are already started.
 
-```javascript
+```Typescript
 // File src/services/notification/index.ts
 import { TdriveService } from "../../core/platform/framework";
 import NotificationServiceAPI from "./api.ts";
@@ -94,7 +94,7 @@ export default class NotificationService extends TdriveService<NotificationServi
 
 1. Now that the service is fully created, we can consume it from any other service in the platform. To do this, we rely on Typescript decorators to define the links between components. For example, let's say that the a `MessageService` needs to call the `NotificationServiceAPI`, we can create the link with the help of the `@Consumes` decorator and get a reference to the `NotificationServiceAPI` by calling the `getProvider` on the component context like:
 
-```javascript
+```Typescript
 import { TdriveService, Consumes } from "../../core/platform/framework";
 import MessageServiceAPI from "./providapier";
 import NotificationServiceAPI from "../notification/api";
@@ -115,34 +115,37 @@ export default class MessageService extends TdriveService<MessageServiceAPI> {
 The platform and services configuration is defined in the `config/default.json` file. It uses [node-config](https://github.com/lorenwest/node-config) under the hood and to configuration file inheritence is supported in the platform.
 
 The list of services to start is defined in the `services` array like:
-<!-- TODO[NOT UP TO DATE] -->
-```javascript
+```JSON
 {
-  "services": ["auth", "user", "channels", "webserver", "websocket", "database", "realtime"]
+  "services": ["auth", "user", "channels", "webserver", "database"]
 }
-```<!-- TODO[NOT UP TO DATE] -->
+```
 
-Then each service can have its own configuration block which is accessible from its service name i.e. `websocket` service configuration is defined in the `websocket` element like:
+Then each service can have its own configuration block which is accessible from its service name i.e. `storage` service configuration is defined in the `storage` element like:
 
-```javascript
+```JSON
 {
-  "services": ["auth", "user", "channels", "webserver", "websocket", "orm"],
-  "websocket": {
-    "path": "/socket",
-    "adapters": {
-      "types": [],
-      "redis": {
-        "host": "redis",
-        "port": 6379
+  "services": ["auth", "user", "webserver", "storage"],
+  "storage": {
+     "type": "S3",
+     "S3": {
+        "endPoint": "play.min.io",
+        "port": 9000,
+        "useSSL": false,
+        "accessKey": "ABCD",
+        "secretKey": "xyz",
+        "disableRemove": false
+      },
+      "local": {
+         "path": "/tdrive"
       }
-    }
-  }
+   }
 }
 ```
 
 On the component class side, the configuration object is directly accessible from the `configuration` property like:
 
-```javascript
+```Typescript
 export default class WebSocket extends TdriveService<WebSocketAPI> {
   async doInit(): Promise<this> {
     // get the "path" value, defaults to "/socket" if not defined

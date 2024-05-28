@@ -2,11 +2,11 @@
 description: Drive on TDrive
 ---
 
-# 📁 Drive
+# 📁 Documents
 
 ## description
 
-**Drive** or **Documents** is the Nodejs drive implementation for tdrive, it contains drive items.
+**Documents** is the Nodejs drive implementation for tdrive, it contains drive items.
 
 A **Drive item** can be:
 

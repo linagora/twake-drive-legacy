@@ -37,7 +37,7 @@ This is where you declare the routing you want to use.
 
 ### /services : where the magic happen
 
-This is where you work for real, calling databases, sending websockets events, using tasks pushers etc.
+This is where you work for real, calling databases, sending events, using tasks pushers etc.
 
 ### /entities : where we keep the data
 
