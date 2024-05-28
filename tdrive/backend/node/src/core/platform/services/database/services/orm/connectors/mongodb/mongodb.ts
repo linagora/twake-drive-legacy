@@ -25,6 +25,10 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions> {
     return this;
   }
 
+  async migrate(name: string): Promise<string> {
+    return `checking ${name}: nothing changed...`;
+  }
+
   async connect(): Promise<this> {
     if (this.client) {
       return this;

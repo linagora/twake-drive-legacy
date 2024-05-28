@@ -25,6 +25,7 @@ export type ColumnOptions = {
   order?: "ASC" | "DESC";
   generator?: ColumnType;
   onUpsert?: (value: any) => any;
+  rename?: string;
 };
 
 export type ColumnType =

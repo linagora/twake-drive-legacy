@@ -74,6 +74,10 @@ export class CassandraConnector extends AbstractConnector<CassandraConnectionOpt
     return this;
   }
 
+  async migrate(name: string): Promise<string> {
+    return `checking ${name}: nothing changed...`;
+  }
+
   createKeyspace(): Promise<cassandra.types.ResultSet> {
     const query = `CREATE KEYSPACE IF NOT EXISTS ${this.options.keyspace} WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1': '2'} AND durable_writes = true;`;
     logger.info(query);

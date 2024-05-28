@@ -13,6 +13,8 @@ export abstract class AbstractConnector<T extends ConnectionOptions> implements 
 
   abstract drop(): Promise<this>;
 
+  abstract migrate(name: string): Promise<string>;
+
   abstract createTable(
     entity: EntityDefinition,
     columns: { [name: string]: ColumnDefinition },

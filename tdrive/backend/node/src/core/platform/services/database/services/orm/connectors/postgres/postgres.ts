@@ -56,6 +56,15 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     return this;
   }
 
+  async migrate(name: string): Promise<string> {
+    const query = `SELECT column_name, data_type, character_maximum_length, is_nullable
+                    FROM information_schema.columns
+                    WHERE table_name = '${name}';
+    `;
+    const tableSchema = await this.client.query(query);
+    return `${JSON.stringify(tableSchema.rows)}`;
+  }
+
   async init(): Promise<this> {
     if (!this.client) {
       await this.connect();
