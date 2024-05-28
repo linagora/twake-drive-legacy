@@ -216,12 +216,13 @@ export default class UserApi {
     return files;
   };
 
-  async createDirectory(parent = "root") {
+  async createDirectory(parent = "root", overrides?: Partial<DriveFile>) {
     const directory = await this.createDocument({
       company_id: this.platform.workspace.company_id,
       name: "Test Folder Name",
       parent_id: parent,
-      is_directory: true
+      is_directory: true,
+      ...overrides
     }, {});
     expect(directory).toBeDefined();
     expect(directory).not.toBeNull();
@@ -230,9 +231,7 @@ export default class UserApi {
     return directory;
   }
 
-  /** Run the provided callback using the specified bearer JWT token.
-   * //TODO: Warning: does not override calls using `this.api` have to discuss
-   */
+  /** Run the provided callback using the specified bearer JWT token */
   async impersonateWithJWT<T>(jwt: string, cb: () => Promise<T>): Promise<T> {
     const previous = this.jwt;
     this.jwt = jwt;
