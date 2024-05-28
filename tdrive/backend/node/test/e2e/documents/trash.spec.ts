@@ -1,6 +1,6 @@
 import { describe, beforeAll, it, expect, afterAll } from "@jest/globals";
 import { deserialize } from "class-transformer";
-import type { DriveFile } from "../../../src/services/documents/entities/drive-file";
+
 import { init, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import UserApi from "../common/user-api";
@@ -57,7 +57,6 @@ describe("the Drive's documents' trash feature", () => {
     expect(result.item.name).toEqual("Trash");
   });
 
-
   async function getTrashContentIds(scope: "shared" | "personal") {
     const id = scope === "shared" ? "trash" : currentUserTrash!;
     const listTrashResponse = await currentUser.getDocument(id);
@@ -99,14 +98,16 @@ describe("the Drive's documents' trash feature", () => {
     expect(createItemResult.scope).toEqual("personal");
 
     expect(await getTrashContentIds("personal")).not.toContain(createItemResult.id);
+
     const moveToTrashResponse = await currentUser.delete(createItemResult.id);
     expect(moveToTrashResponse.statusCode).toEqual(200);
+
     expect(await getTrashContentIds("personal")).toContain(createItemResult.id);
     expect(await getTrashContentIds("shared")).not.toContain(createItemResult.id);
   });
 
-  describe("deleting a file uploaded by an anonymous user should go to the sharers trash", () => {
-    it("finds the owner from the immediate parent folder", async () => {
+  describe("deleting a file uploaded by an anonymous user should go to the personal trash of the creator of the shared folder", () => {
+    it("finds the owner from the immediate shared parent folder", async () => {
       const publiclyWriteableFolder = await currentUser.createDirectory(currentUserRoot, { scope: "personal" });
       const setPublicWriteableResponse = await currentUser.shareWithPublicLink(publiclyWriteableFolder, "write");
       expect(setPublicWriteableResponse.statusCode).toBe(200);
@@ -125,7 +126,7 @@ describe("the Drive's documents' trash feature", () => {
       expect((await getTrashContentIds("personal"))).toContain(anonymouslyUploadedDoc.id);
     });
 
-    it("finds the owner from the indirect parent folder", async () => {
+    it("finds the owner from the indirect shared parent folder", async () => {
       const publiclyWriteableFolder = await currentUser.createDirectory(currentUserRoot, { scope: "personal" });
       const setPublicWriteableResponse = await currentUser.shareWithPublicLink(publiclyWriteableFolder, "write");
       expect(setPublicWriteableResponse.statusCode).toBe(200);
@@ -147,7 +148,7 @@ describe("the Drive's documents' trash feature", () => {
       expect((await getTrashContentIds("personal"))).toContain(anonymouslyUploadedDoc.id);
     });
 
-    it("goes into the sharers trash even if another user deletes the file", async () => {
+    it("goes into the creator of the shared folder s trash even if another user deletes the file", async () => {
       const publiclyWriteableFolder = await currentUser.createDirectory(currentUserRoot, { scope: "personal" });
       const setPublicWriteableResponse = await currentUser.shareWithPublicLink(publiclyWriteableFolder, "write");
       expect(setPublicWriteableResponse.statusCode).toBe(200);
