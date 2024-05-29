@@ -127,4 +127,15 @@ export const formatTime = (
     second: options?.keepSeconds ? "numeric" : undefined,
   }).format(new Date(time));
 };
+export const formatDateShort = (time : number | string) => {
+  const date = new Date(time);
+  const padZero = (num :number) => num.toString().padStart(2, '0');
 
+  const month = padZero(date.getMonth() + 1); // Months are zero-indexed
+  const day = padZero(date.getDate());
+  const year = date.getFullYear();
+  const hours = padZero(date.getHours());
+  const minutes = padZero(date.getMinutes());
+
+  return `${month}.${day}.${year} ${hours}:${minutes}`;
+};
