@@ -281,16 +281,36 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
   async backChannelLogout(logoutToken: string): Promise<void> {
     const payload = await this.verifier.verifyLogoutToken(logoutToken);
 
-    if (!payload.iss || !payload.aud || !payload.iat || !payload.jti || !payload.events) {
-      throw new CrudException("Missing required claims", 400);
+    if (!payload.iss) {
+      throw new CrudException("Missing required 'iss' claim", 400);
+    }
+
+    if (!payload.aud) {
+      throw new CrudException("Missing required 'aud' claim", 400);
+    }
+
+    if (!payload.iat) {
+      throw new CrudException("Missing required 'iat' claim", 400);
+    }
+
+    if (!payload.jti) {
+      throw new CrudException("Missing required 'jti' claim", 400);
+    }
+
+    if (!payload.events) {
+      throw new CrudException("Missing required 'events' claim", 400);
     }
 
     if (payload.nonce) {
       throw new CrudException("Nonce claim is prohibited", 400);
     }
 
-    if (!payload.sub && !payload.sid) {
-      throw new CrudException("Missing sub or sid claim", 400);
+    if (!payload.sub) {
+      throw new CrudException("Missing 'sub' claim", 400);
+    }
+
+    if (!payload.sid) {
+      throw new CrudException("Missing 'sid' claim", 400);
     }
 
     const sessionRepository = gr.services.console.getSessionRepo();
