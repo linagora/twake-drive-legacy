@@ -108,7 +108,13 @@ export default class WebServerService extends TdriveService<WebServerAPI> implem
     this.server.register(sensible, {
       errorHandler: false,
     } as FastifyRegisterOptions<FastifyServerOptions>);
-    this.server.register(multipart);
+    this.server.register(multipart, {
+      throwFileSizeLimit: true,
+      limits: {
+        // note that null, undefined, 0 and -1 do not remove the default 1mg limit
+        fileSize: 500 * 1024 * 1024 * 1024 * 1024,
+      },
+    });
     this.server.register(formbody);
     this.server.register(corsPlugin, this.configuration.get<FastifyCorsOptions>("cors", {}));
 
