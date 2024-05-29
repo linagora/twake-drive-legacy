@@ -159,9 +159,16 @@ describe("the Drive's documents' trash feature", () => {
           scope: "personal",
         }));
 
-      const secondaryUser = await UserApi.getInstance(platform!);
+      const secondaryUser = await UserApi.getInstance(platform!, true);
 
-      const deletionToTrashResponse = await secondaryUser.delete(anonymouslyUploadedDoc.id);
+      let deletionToTrashResponse = await secondaryUser.delete(anonymouslyUploadedDoc.id);
+      expect(deletionToTrashResponse.statusCode).toBe(500);
+
+      // The following depends on inheriting permissions being the default behaviour (subject to change in the future)
+      const changeRightsResponse = await currentUser.shareWithPermissions(publiclyWriteableFolder, secondaryUser.user.id, "manage");
+      expect(changeRightsResponse.statusCode).toBe(200);
+
+      deletionToTrashResponse = await secondaryUser.delete(anonymouslyUploadedDoc.id);
       expect(deletionToTrashResponse.statusCode).toBe(200);
 
       expect((await getTrashContentIds("personal"))).toContain(anonymouslyUploadedDoc.id);
