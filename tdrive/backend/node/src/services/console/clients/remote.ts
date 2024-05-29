@@ -281,40 +281,44 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
   async backChannelLogout(logoutToken: string): Promise<void> {
     const payload = await this.verifier.verifyLogoutToken(logoutToken);
 
-    if (!payload.iss) {
+    if (!payload.claims) {
+      throw new CrudException("Claims are missing in the jwt", 400);
+    }
+
+    if (!payload.claims.iss) {
       throw new CrudException("Missing required 'iss' claim", 400);
     }
 
-    if (!payload.aud) {
+    if (!payload.claims.aud) {
       throw new CrudException("Missing required 'aud' claim", 400);
     }
 
-    if (!payload.iat) {
+    if (!payload.claims.iat) {
       throw new CrudException("Missing required 'iat' claim", 400);
     }
 
-    if (!payload.jti) {
+    if (!payload.claims.jti) {
       throw new CrudException("Missing required 'jti' claim", 400);
     }
 
-    if (!payload.events) {
+    if (!payload.claims.events) {
       throw new CrudException("Missing required 'events' claim", 400);
     }
 
-    if (payload.nonce) {
+    if (payload.claims.nonce) {
       throw new CrudException("Nonce claim is prohibited", 400);
     }
 
-    if (!payload.sub) {
+    if (!payload.claims.sub) {
       throw new CrudException("Missing 'sub' claim", 400);
     }
 
-    if (!payload.sid) {
+    if (!payload.claims.sid) {
       throw new CrudException("Missing 'sid' claim", 400);
     }
 
     const sessionRepository = gr.services.console.getSessionRepo();
-    const session = await sessionRepository.findOne({ sid: payload.sid });
+    const session = await sessionRepository.findOne({ sid: payload.claims.sid });
     if (session) {
       await sessionRepository.remove(session);
     }

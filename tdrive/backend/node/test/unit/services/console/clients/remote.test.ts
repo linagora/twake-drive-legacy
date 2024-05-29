@@ -20,22 +20,29 @@ describe("Test back-channel logout", () => {
   const verifyTokenMock = jest.spyOn(OidcJwtVerifier.prototype, "verifyLogoutToken");
 
   const validToken = {
-    "sid": "Ev81/QODom0HXu9MGjCwnn1tDTpji+j0jopjRAE0ypo",
-    "aud": [
-      "twakedrive"
-    ],
-    "sub": "shepilov3@stg.lin-saas.com",
-    "iat": 1716986356,
-    "jti": "F9R6DYPE",
-    "events": {
-      "http://schemas.openid.net/event/backchannel-logout": {}
+    "header": {
+      "typ": "JWT",
+      "alg": "RS256",
+      "kid": "UrLwYyzqASOKT5wUedHERA"
     },
-    "iss": "https://sign-up.stg.lin-saas.com/"
+    "claims": {
+      "iat": 1716995003,
+      "sub": "shepilov3@stg.lin-saas.com",
+      "sid": "WSqrLJG8wNLECdxKIBrR9mdu3PmLFDUd4zHZ+1RLOYI",
+      "events": {
+        "http://schemas.openid.net/event/backchannel-logout": {}
+      },
+      "jti": "K9B59EPB",
+      "aud": [
+        "twakedrive"
+      ],
+      "iss": "https://sign-up.stg.lin-saas.com/"
+    }
   };
 
-  const mockTokenWithoutProperty = (prop: string) => {
+  const mockTokenWithoutClaim = (claim: string) => {
     const token = _.cloneDeep(validToken);
-    token[prop] = null
+    token.claims[claim] = null
     verifyTokenMock.mockImplementation(() => {
       return Promise.resolve(token); // Return the predefined payload
     });
@@ -43,7 +50,7 @@ describe("Test back-channel logout", () => {
 
   it("backChannelLogout should throw error if 'iss' claim is missing", () => {
     //given
-    mockTokenWithoutProperty("iss")
+    mockTokenWithoutClaim("iss")
     //when
     let logout = subj.backChannelLogout('');
     //then
@@ -53,7 +60,7 @@ describe("Test back-channel logout", () => {
 
   it("backChannelLogout should throw error if 'aud' claim is missing", () => {
     //given
-    mockTokenWithoutProperty("aud")
+    mockTokenWithoutClaim("aud")
     //when
     let logout = subj.backChannelLogout('');
     //then
@@ -62,7 +69,7 @@ describe("Test back-channel logout", () => {
 
   it("backChannelLogout should throw error if 'jti' claim is missing", () => {
     //given
-    mockTokenWithoutProperty("jti")
+    mockTokenWithoutClaim("jti")
     //when
     let logout = subj.backChannelLogout('');
     //then
@@ -71,7 +78,7 @@ describe("Test back-channel logout", () => {
 
   it("backChannelLogout should throw error if 'iat' claim is missing", () => {
     //given
-    mockTokenWithoutProperty("iat")
+    mockTokenWithoutClaim("iat")
     //when
     let logout = subj.backChannelLogout('');
     //then
@@ -80,7 +87,7 @@ describe("Test back-channel logout", () => {
 
   it("backChannelLogout should throw error if 'events' claim is missing", () => {
     //given
-    mockTokenWithoutProperty("events")
+    mockTokenWithoutClaim("events")
     //when
     let logout = subj.backChannelLogout('');
     //then
@@ -89,7 +96,7 @@ describe("Test back-channel logout", () => {
 
   it("backChannelLogout should throw error if 'sub' claim is missing", () => {
     //given
-    mockTokenWithoutProperty("sub")
+    mockTokenWithoutClaim("sub")
     //when
     let logout = subj.backChannelLogout('');
     //then
@@ -98,7 +105,7 @@ describe("Test back-channel logout", () => {
 
   it("backChannelLogout should throw error if 'sid' claim is missing", () => {
     //given
-    mockTokenWithoutProperty("sid")
+    mockTokenWithoutClaim("sid")
     //when
     let logout = subj.backChannelLogout('');
     //then

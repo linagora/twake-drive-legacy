@@ -117,15 +117,17 @@ export default class UserApi {
 
   public async logout() {
     const payload = {
-      iss: "tdrive_lemonldap",
-      sub: this.user.id,
-      sid: this.session,
-      aud: "your-audience",
-      iat: Math.floor(Date.now() / 1000),
-      jti: "jwt-id",
-      events: {
-        "http://schemas.openid.net/event/backchannel-logout": {},
-      },
+      claims: {
+        iss: "tdrive_lemonldap",
+        sub: this.user.id,
+        sid: this.session,
+        aud: "your-audience",
+        iat: Math.floor(Date.now() / 1000),
+        jti: "jwt-id",
+        events: {
+          "http://schemas.openid.net/event/backchannel-logout": {},
+        },
+      }
     };
     const verifierMock = jest.spyOn(OidcJwtVerifier.prototype, "verifyLogoutToken");
     verifierMock.mockImplementation(() => {
