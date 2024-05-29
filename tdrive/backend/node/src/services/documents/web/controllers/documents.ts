@@ -371,6 +371,7 @@ export class DocumentsController {
         });
 
         archive.pipe(response.raw);
+        return response;
       } else if (archiveOrFile.file) {
         const data = archiveOrFile.file;
         const filename = encodeURIComponent(data.name.replace(/[^\p{L}0-9 _.-]/gu, ""));
@@ -378,7 +379,7 @@ export class DocumentsController {
         response.header("Content-disposition", `attachment; filename="${filename}"`);
         if (data.size) response.header("Content-Length", data.size);
         response.type(data.mime);
-        response.send(data.file);
+        return response.send(data.file);
       }
     } catch (error) {
       logger.error({ error: `${error}` }, "failed to download file");
