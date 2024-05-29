@@ -78,7 +78,7 @@ export default class UserApi {
     this.jwt = await this.doLogin();
   }
 
-  private async doLogin() {
+  public async doLogin() {
     const loginResponse = await this.login();
 
     expect(loginResponse).toBeDefined();
@@ -133,13 +133,10 @@ export default class UserApi {
     verifierMock.mockImplementation(() => {
       return Promise.resolve(payload); // Return the predefined payload
     });
-    const logoutToken = "logout_token_rsa256";
 
-    const response = await this.api.post("/internal/services/console/v1/backchannel_logout",  {
-      logout_token: logoutToken,
+    return await this.api.post("/internal/services/console/v1/backchannel_logout", {
+      logout_token: "logout_token_rsa256",
     });
-
-    return response;
   }
 
 

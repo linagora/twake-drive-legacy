@@ -61,7 +61,8 @@ describe("The /backchannel_logout API", () => {
 
     // Verify the session is removed from the database
     const deletedSession = await currentUser.dbService.getSessionById(currentUser.session);
-    expect(deletedSession).toBeNull();
+    expect(deletedSession).not.toBeNull();
+    expect(deletedSession.revoked_at).toBeGreaterThan(0);
   });
 
   it("should create a session on login", async () => {
@@ -80,6 +81,35 @@ describe("The /backchannel_logout API", () => {
 
     response = await currentUser.getDocument(myDriveId);
     expect(response.statusCode).toBe(401);
+  });
+
+  it("should receive 401 after logout and try to login one more time with the same token", async () => {
+    //when
+    await currentUser.logout();
+
+    //then
+    const response = await currentUser.login(currentUser.session);
+    expect(response.statusCode).toBe(401);
+  });
+
+  it("should receive 401 after logout successfully after logout", async () => {
+    //given
+    const myDriveId = "user_" + currentUser.user.id;
+    let response = await currentUser.getDocument(myDriveId);
+    expect(response.statusCode).toBe(200);
+
+    //when
+    await currentUser.logout();
+
+    //then
+    response = await currentUser.login(currentUser.session);
+    expect(response.statusCode).toBe(401);
+
+    currentUser.jwt = await currentUser.doLogin();
+
+
+    response = await currentUser.getDocument(myDriveId);
+    expect(response.statusCode).toBe(200);
   });
 
   it("should be able to log-in several times by having multiple sessions", async () => {

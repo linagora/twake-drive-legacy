@@ -265,6 +265,9 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
         sid: sessionInfo.sid,
       });
       if (existingSession) {
+        if (existingSession.revoked_at) {
+          throw CrudException.unauthorized(`Session ${sessionInfo.sid} expired`);
+        }
         return existingSession.sid;
       } else {
         const sessionBody = new Session();
@@ -320,7 +323,8 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
     const sessionRepository = gr.services.console.getSessionRepo();
     const session = await sessionRepository.findOne({ sid: payload.claims.sid });
     if (session) {
-      await sessionRepository.remove(session);
+      session.revoked_at = new Date().getTime();
+      await sessionRepository.save(session);
     }
   }
 
@@ -332,7 +336,9 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
       });
       if (!session) {
         // fail for not matching session id
-        throw new Error("Invalid session id");
+        throw new Error(`Session ${sid} not found`);
+      } else if (session.revoked_at > 0) {
+        throw new Error(`Session ${sid} revoked`);
       }
     } else {
       // fail for missing session id

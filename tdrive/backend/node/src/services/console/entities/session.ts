@@ -5,7 +5,7 @@ export const TYPE = "session";
 
 @Entity(TYPE, {
   primaryKey: [["company_id"], "sid"],
-  globalIndexes: [["sid"]],
+  globalIndexes: [["sid"], ["revoked_at"]],
   type: TYPE,
 })
 export default class Session {
@@ -17,6 +17,9 @@ export default class Session {
 
   @Column("sid", "string")
   sid: string;
+
+  @Column("revoked_at", "number")
+  revoked_at: number;
 }
 
 export type UserSessionPrimaryKey = Pick<Session, "sid">;
