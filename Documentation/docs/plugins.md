@@ -98,7 +98,7 @@ For instance with onlyoffice, you can find the plugin here: https://github.com/l
 
 In the docker-compose.yml you can add the following:
 
-```yml
+```yaml
 plugins_onlyoffice:
   image: onlyoffice-connector
   restart: unless-stopped
