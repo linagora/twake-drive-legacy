@@ -341,6 +341,8 @@ export const addDriveItemToArchive = async (
     throw Error(`Item '${JSON.stringify(itemPK)}' not found`);
   }
 
+  if (item.is_in_trash) return;
+
   if (!item.is_directory) {
     const file_id = item.last_version_cache.file_metadata.external_id;
     const file = await gr.services.files.download(file_id, context);
