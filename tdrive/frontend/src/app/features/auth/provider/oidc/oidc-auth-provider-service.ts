@@ -120,13 +120,19 @@ export default class OIDCAuthProviderService
           this.initialized = true;
         }
         this.logger.info('Setting new access token');
-        await this.params?.onNewToken(jwt);
+        this.params?.onNewToken(jwt);
       } catch (err) {
         this.logger.error(
           'OIDC user loaded listener, error while getting the JWT from OIDC token',
           err,
         );
-        throw Error('Error while getting the JWT from OIDC token');
+        //if we can't retrieve the internal token with the current oidc token
+        // for example in case of its expiration or SLO
+        //just reinitialize OIDC flow in this case
+        await this.userManager?.removeUser();
+        await this.signinRedirect();
+        //and throw error to cancel post-login callbacks
+        // throw Error('Error while getting the JWT from OIDC token');
       }
     } else {
       await this.signinRedirect();
