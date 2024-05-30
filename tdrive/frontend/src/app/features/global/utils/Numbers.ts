@@ -137,5 +137,5 @@ export const formatDateShort = (time : number | string) => {
   const hours = padZero(date.getHours());
   const minutes = padZero(date.getMinutes());
 
-  return `${month}.${day}.${year} ${hours}:${minutes}`;
+  return `${day}.${month}.${year} ${hours}:${minutes}`;
 };
