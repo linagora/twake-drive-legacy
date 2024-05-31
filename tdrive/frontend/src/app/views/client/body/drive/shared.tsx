@@ -72,11 +72,11 @@ export default () => {
           </span>
         </div>
         <div className="shrink-0">
-          <a href="https://tdrive.app" target="_BLANK" rel="noreferrer" className="!text-white">
+          <a href="https://twake.app" target="_BLANK" rel="noreferrer" className="!text-white">
             <span className="nomobile text-white">
               {Languages.t('scenes.app.mainview.create_account')}
             </span>
-            Tdrive Workplace &nbsp; 👉
+            Twake Workplace &nbsp; 👉
           </a>
         </div>
       </div>
