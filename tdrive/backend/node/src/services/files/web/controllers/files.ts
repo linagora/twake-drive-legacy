@@ -78,6 +78,7 @@ export class FileController {
       if (data.size) response.header("Content-Length", data.size);
       response.type(data.type);
       response.send(data.file);
+      return response;
     } catch (err) {
       console.log(err);
       response.statusCode = 500;
