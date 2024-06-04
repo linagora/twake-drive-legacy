@@ -206,7 +206,7 @@ export default memo(
           },
         })
       }
-      
+
     }
 
     function draggableMarkup(index: number, child: any) {
@@ -226,13 +226,13 @@ export default memo(
           isMobile ? (
             <DocumentRow {...commonProps} />
           ) : (
-            <Draggable id={index}>
+            <Draggable id={index} key={index}>
               <DocumentRow {...commonProps} />
             </Draggable>
           )
       );
     }
-    
+
 
     return (
       <>

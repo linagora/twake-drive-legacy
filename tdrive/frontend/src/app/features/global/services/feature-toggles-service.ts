@@ -51,8 +51,6 @@ class FeatureTogglesService {
   }
 
   public setFeaturesFromCompanyPlan(plan: { features: { [key: string]: FeatureValueType } }): void {
-    console.debug("Setting company features");
-    console.debug(plan);
     for (const [featureName, defaultValue] of availableFeaturesWithDefaults) {
       this.setActiveFeatureName(
         featureName,
@@ -72,9 +70,7 @@ class FeatureTogglesService {
   }
 
   public isActiveFeatureName(featureName: FeatureNames) {
-    const b = this.activeFeatureNames.includes(featureName);
-    console.debug(`Feature ${featureName} is ${b}`);
-    return b;
+    return this.activeFeatureNames.includes(featureName);
   }
 
   public getFeatureValue<T>(featureName: FeatureNames): T {
