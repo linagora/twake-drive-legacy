@@ -53,17 +53,17 @@ export default class ApplicationsApiService extends TdriveService<undefined> {
                 return;
               }
 
-              rep.send(response.data);
+              await rep.send(response.data);
             } catch (err) {
               logger.error(`${err}`);
               rep.raw.statusCode = 500;
               rep.raw.end(JSON.stringify({ error: err.message }));
             }
           });
-          logger.info("Listening at ", "/" + prefix + "/*");
+          logger.info("Listening at /" + prefix + "/*");
         } catch (e) {
           logger.error(e);
-          logger.info("Can't listen to ", "/" + prefix + "/*");
+          logger.info("Can't listen to /" + prefix + "/*");
         }
       }
     }
