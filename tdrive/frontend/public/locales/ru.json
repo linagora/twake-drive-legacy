@@ -331,7 +331,6 @@
     "components.item_context_menu.trash.empty": "Очистить корзину",
     "components.item_context_menu.add_documents": "Добавить документ в папку",
     "components.item_context_menu.download_folder": "Скачать папку",
-    "components.item_context_menu.go_to_trash": "Перейти в корзину",
     "components.item_context_menu.all": "Все",
     "components.item_context_menu.today": "Сегодня",
     "components.item_context_menu.last_week": "За неделю",

@@ -94,7 +94,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
               icon: 'download-alt',
               text: Languages.t('components.item_context_menu.download'),
               onClick: () => {
-                if (item.is_directory) {
+                if (item && item.is_directory) {
                   downloadZip([item!.id]);
                   console.log(item!.id);
                 } else {
@@ -329,14 +329,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                   text: Languages.t('components.item_context_menu.manage_users'),
                   hide: parent.item!.id != 'root',
                   onClick: () => setUsersModalState({ open: true }),
-                },
-                { type: 'separator', hide: inTrash || parent.access === 'read' },
-                {
-                  type: 'menu',
-                  text: Languages.t('components.item_context_menu.go_to_trash'),
-                  hide: inTrash || parent.access === 'read',
-                  onClick: () => setParentId('trash'),
-                },
+                }
               ];
           if (menu.length && newMenuActions.filter(a => !a.hide).length) {
             menu = [...menu, { type: 'separator' }];

@@ -332,7 +332,6 @@
     "components.item_context_menu.trash.empty": "Vider la corbeille",
     "components.item_context_menu.add_documents": "Ajouter un document ou un dossier",
     "components.item_context_menu.download_folder": "Télécharger le dossier",
-    "components.item_context_menu.go_to_trash": "Voir la corbeille",
     "components.item_context_menu.all": "Tous",
     "components.item_context_menu.today": "Aujourd'hui",
     "components.item_context_menu.last_week": "La semaine dernière",

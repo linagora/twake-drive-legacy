@@ -341,7 +341,6 @@
     "components.item_context_menu.trash.empty": "Empty trash",
     "components.item_context_menu.add_documents": "Add document or folder",
     "components.item_context_menu.download_folder": "Download folder",
-    "components.item_context_menu.go_to_trash": "Go to trash",
     "components.item_context_menu.manage_users": "Manager users",
     "components.item_context_menu.all": "All",
     "components.item_context_menu.today": "Today",
