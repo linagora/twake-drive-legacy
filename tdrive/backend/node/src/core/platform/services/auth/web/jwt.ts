@@ -22,7 +22,7 @@ const jwtPlugin: FastifyPluginCallback = async (fastify, _opts, next) => {
     const jwt: JwtType = await request.jwtVerify();
 
     // Verify the SID exists and is valid except tokens for the public link
-    if (!jwt.public_token_document_id) {
+    if (!jwt.public_token_document_id && !jwt.application_id) {
       await gr.services.console.getClient().verifyJwtSid(jwt.sid);
     }
 
