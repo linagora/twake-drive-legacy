@@ -27,7 +27,7 @@ export default class ApplicationsApiService extends TdriveService<undefined> {
       if (domain && prefix) {
         try {
           fastify.all("/" + prefix + "/*", async (req, rep) => {
-            logger.info("Proxying", req.method, req.url, "to", domain);
+            logger.info(`Proxying ${req.method} ${req.url} to ${domain}`);
             try {
               const response = await axios.request({
                 url: domain + req.url,
@@ -55,7 +55,8 @@ export default class ApplicationsApiService extends TdriveService<undefined> {
 
               await rep.send(response.data);
             } catch (err) {
-              logger.error(`${err}`);
+              logger.error(err);
+              if (err.errors) err.errors.forEach(err => logger.error(err));
               rep.raw.statusCode = 500;
               rep.raw.end(JSON.stringify({ error: err.message }));
             }
