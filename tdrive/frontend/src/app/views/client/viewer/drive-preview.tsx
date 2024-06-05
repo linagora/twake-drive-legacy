@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Transition } from '@headlessui/react';
 import { fadeTransition } from 'src/utils/transitions';
-import { DownloadIcon, XIcon } from '@heroicons/react/outline';
+import { DownloadIcon, XIcon, ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/outline';
 import { addShortcut, removeShortcut } from '@features/global/services/shortcut-service';
-import { getDevice } from '@features/global/utils/device';
 import RouterServices from '@features/router/services/router-service';
 import useRouterCompany from '@features/router/hooks/use-router-company';
 import {
@@ -33,6 +32,12 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
   const [modalLoading, setModalLoading] = useState(true);
   const { loading: loadingData } = useDrivePreviewLoading();
   let animationTimeout: number = setTimeout(() => undefined);
+
+  const { download, extension } = useDrivePreviewDisplayData();
+  const { type = '' } = useDrivePreviewDisplayData();
+  const name = status.details?.item.name;
+
+
   const handleSwitchRight = () => {
     const currentItem = status.item;
     if (currentItem) {
@@ -77,15 +82,12 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
     }
   }, [loading]);
 
-  const switchPreview = (item: DriveItem) => {
-    const device = getDevice();
-    if (device != 'ios' && device != 'android') {
-      close();
-      history.push(
-        RouterServices.generateRouteFromState({ companyId: company, itemId: item.id, }),
-      );
-      open(item);
-    }
+  const switchPreview = async (item: DriveItem) => {
+    close();
+    history.push(
+      RouterServices.generateRouteFromState({ companyId: company, itemId: item.id, }),
+    );
+    open(item);
   };
   return (
     <Modal
@@ -121,51 +123,54 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
         <div className="px-16 py-2 grow relative overflow-hidden">
           <DriveDisplay />
         </div>
-        <Footer />
+        <div className="z-10 p-5 bg-black w-full flex text-white">
+          <div className="grow overflow-hidden text-ellipsis">
+            <Text.Base noColor className="w-full block text-white whitespace-nowrap">
+              {name}
+            </Text.Base>
+            <Text.Info className="whitespace-nowrap">
+              {formatDate(
+                +(status.details?.item.added || '') ||
+                status.details?.item.last_version_cache.date_added,
+              )}{' '}
+              • {extension?.toLocaleUpperCase()},{' '}
+              {formatSize(
+                status.details?.item.last_version_cache.file_metadata.size ||
+                status.details?.item.size,
+              )}
+            </Text.Info>
+          </div>
+          <div className="whitespace-nowrap flex items-center">
+            <Controls type={type} />
+            <Button
+              iconSize="lg"
+              className="ml-4 !rounded-full"
+              theme="dark"
+              size="lg"
+              icon={ArrowLeftIcon}
+              onClick={ handleSwitchLeft }
+            />
+            <Button
+              iconSize="lg"
+              className="ml-4 !rounded-full"
+              theme="dark"
+              size="lg"
+              icon={ArrowRightIcon}
+              onClick={ handleSwitchRight }
+            />
+            <Button
+              iconSize="lg"
+              className="ml-4 !rounded-full"
+              theme="dark"
+              size="lg"
+              icon={DownloadIcon}
+              onClick= {() => {
+                download && (window.location.href = download);
+              }}
+            />
+          </div>
+        </div>
       </Transition>
     </Modal>
-  );
-};
-
-const Footer = (): React.ReactElement => {
-  const { status } = useDrivePreview();
-  const { download, extension } = useDrivePreviewDisplayData();
-  const { type = '' } = useDrivePreviewDisplayData();
-  const name = status.details?.item.name;
-
-  return (
-    <>
-      <div className="z-10 p-5 bg-black w-full flex text-white">
-        <div className="grow overflow-hidden text-ellipsis">
-          <Text.Base noColor className="w-full block text-white whitespace-nowrap">
-            {name}
-          </Text.Base>
-          <Text.Info className="whitespace-nowrap">
-            {formatDate(
-              +(status.details?.item.added || '') ||
-                status.details?.item.last_version_cache.date_added,
-            )}{' '}
-            • {extension?.toLocaleUpperCase()},{' '}
-            {formatSize(
-              status.details?.item.last_version_cache.file_metadata.size ||
-                status.details?.item.size,
-            )}
-          </Text.Info>
-        </div>
-        <div className="whitespace-nowrap flex items-center">
-          <Controls type={type} />
-          <Button
-            iconSize="lg"
-            className="ml-4 !rounded-full"
-            theme="dark"
-            size="lg"
-            icon={DownloadIcon}
-            onClick={() => {
-              download && (window.location.href = download);
-            }}
-          />
-        </div>
-      </div>
-    </>
   );
 };
