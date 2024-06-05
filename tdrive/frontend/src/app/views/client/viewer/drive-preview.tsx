@@ -78,15 +78,18 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
     if (loading) {
       animationTimeout = window.setTimeout(() => {
         setModalLoading(false);
-      }, 400);
+      }, 100);
     }
   }, [loading]);
 
   const switchPreview = async (item: DriveItem) => {
     close();
-    history.push(
-      RouterServices.generateRouteFromState({ companyId: company, itemId: item.id, }),
-    );
+    //TODO[ASH] fix state management for this component
+    //right now changing the routing leads to a lot of components rerender
+    //and galery become unusable
+    // history.push(
+    //   RouterServices.generateRouteFromState({ companyId: company, itemId: item.id, }),
+    // );
     open(item);
   };
   return (
