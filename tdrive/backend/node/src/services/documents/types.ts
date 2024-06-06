@@ -56,9 +56,9 @@ export type SearchDocumentsOptions = {
 };
 
 export type BrowseDocumentsOptions = {
-  filter: SearchDocumentsBody;
-  sort: SortDocumentsBody;
-  paginate: PaginateDocumentBody;
+  filter?: SearchDocumentsBody;
+  sort?: SortDocumentsBody;
+  paginate?: PaginateDocumentBody;
 };
 
 export type SearchDocumentsBody = {

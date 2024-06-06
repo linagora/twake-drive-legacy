@@ -187,7 +187,7 @@ export class DocumentsController {
 
     const options: SearchDocumentsOptions = {
       ...request.body.filter,
-      company_id: request.body.filter.company_id || context.company.id,
+      company_id: request.body.filter?.company_id || context.company.id,
       view: DriveFileDTOBuilder.VIEW_SHARED_WITH_ME,
       onlyDirectlyShared: true,
       onlyUploadedNotByMe: true,
