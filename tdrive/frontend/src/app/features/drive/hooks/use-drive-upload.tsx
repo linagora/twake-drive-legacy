@@ -50,7 +50,7 @@ export const useDriveUpload = () => {
     // Create all directories
     logger.debug("Start creating directories ...");
     const filesPerParentId = await FileUploadService.createDirectories(tree.tree, context);
-    await refresh(context.parentId);
+    await refresh(context.parentId, true);
     logger.debug("All directories created");
 
     // Upload files into directories
@@ -90,7 +90,7 @@ export const useDriveUpload = () => {
         },
       });
     }
-    await refresh(context.parentId);
+    await refresh(context.parentId, true);
   };
 
   const uploadFromUrl = (

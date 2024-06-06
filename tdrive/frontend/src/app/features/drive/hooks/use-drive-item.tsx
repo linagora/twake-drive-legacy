@@ -38,7 +38,6 @@ export const useDriveItem = (id: string) => {
         setPaginateItem(prev => ({ ...prev, page: 0 }));
         await refreshItem(parentId);
       } finally {
-        setPaginateItem(prev => ({ ...prev, page: prev.limit }));
         setLoading(false);
       }
     },
@@ -111,7 +110,7 @@ export const useDriveItem = (id: string) => {
           const details = await nextPage(id);
           setChildren(prev => [...prev, ...details.children]);
         } catch (e) {
-          console.log('error is: ', e);
+          console.log('error loading next page: ', e);
           ToasterService.error('Unable to load more items.');
         } finally {
           set(DriveItemPagination, prev => ({

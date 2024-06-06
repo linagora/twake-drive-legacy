@@ -22,13 +22,18 @@ export const useDriveActions = () => {
 
   const refresh = useRecoilCallback(
     ({ set, snapshot }) =>
-      async (parentId: string) => {
+      async (parentId: string, resetPagination?: boolean) => {
         if (parentId) {
           const filter: BrowseFilter = {
             company_id: companyId,
             mime_type: sharedFilter.mimeType.value,
           };
-          const pagination = await snapshot.getPromise(DriveItemPagination);
+          let pagination = await snapshot.getPromise(DriveItemPagination);
+
+          if (resetPagination) {
+            pagination = { page: 0, limit: pagination.limit };
+            set(DriveItemPagination, pagination);
+          }
           try {
             const details = await DriveApiClient.browse(companyId, parentId, filter, sortItem, pagination);
             set(DriveItemChildrenAtom(parentId), details.children);
@@ -43,6 +48,8 @@ export const useDriveActions = () => {
             return details;
           } catch (e) {
             ToasterService.error(Languages.t('hooks.use-drive-actions.unable_load_file'));
+          } finally {
+            set(DriveItemPagination, { page: pagination.limit, limit: pagination.limit });
           }
         }
       },
@@ -57,7 +64,7 @@ export const useDriveActions = () => {
       try {
         const driveFile = await DriveApiClient.create(companyId, { item, version });
 
-        await refresh(driveFile.parent_id);
+        await refresh(driveFile.parent_id, true);
         await getQuota();
 
         return driveFile;
