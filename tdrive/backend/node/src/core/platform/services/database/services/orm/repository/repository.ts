@@ -78,7 +78,7 @@ export default class Repository<EntityType> {
     }
 
     if (!options.pagination) {
-      options.pagination = new Pagination("", "100");
+      options.pagination = new Pagination("", "1000");
     }
 
     return await this.connector.find(this.entityType, filters, options);
