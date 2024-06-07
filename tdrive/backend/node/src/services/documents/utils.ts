@@ -351,25 +351,30 @@ export const addDriveItemToArchive = async (
       throw Error("file not found");
     }
 
-    archive.append(file.file, { name: file.name, prefix: prefix ?? "" });
+    archive.append(file.file, { name: item.name, prefix: prefix ?? "" });
     return;
   } else {
-    const items = await repository.find({
-      parent_id: item.id,
-      company_id: context.company.id,
-    });
-
-    for (const child of items.getEntities()) {
-      await addDriveItemToArchive(
-        child.id,
-        child,
-        archive,
-        repository,
-        context,
-        `${prefix || ""}${item.name}/`,
+    let nextPage = "";
+    do {
+      const items = await repository.find(
+        {
+          parent_id: item.id,
+          company_id: context.company.id,
+        },
+        { pagination: new Pagination(nextPage, "10") },
       );
-    }
-
+      for (const child of items.getEntities()) {
+        await addDriveItemToArchive(
+          child.id,
+          child,
+          archive,
+          repository,
+          context,
+          `${prefix || ""}${item.name}/`,
+        );
+      }
+      nextPage = items.nextPage?.page_token;
+    } while (nextPage > "");
     return;
   }
 };
@@ -636,6 +641,7 @@ export const isInTrash = async (
 import { logger } from "../../core/platform/framework";
 import { officeExtensions, textExtensions, pdfExtensions } from "../../utils/mime";
 import { readableToString } from "../../utils/files";
+import { Pagination } from "../../core/platform/framework/api/crud-service";
 
 /** Return true if the given filename and mime type could be analysed by `getKeywordsOfFile` */
 export const couldGetKeywordsOfFile = async (mime: string, filename: string): Promise<boolean> =>
