@@ -219,7 +219,6 @@ export class DocumentsService {
       sized: "size",
     };
     const sortField = {};
-    console.log(sort, paginate, sortFieldMapping);
     sortField[sortFieldMapping[sort?.by] || "is_directory"] = sort?.order || "asc";
 
     //Get children if it is a directory

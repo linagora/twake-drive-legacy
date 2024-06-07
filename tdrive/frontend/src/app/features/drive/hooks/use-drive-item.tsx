@@ -32,16 +32,16 @@ export const useDriveItem = (id: string) => {
   } = useDriveActions();
   const { uploadVersion: _uploadVersion } = useDriveUpload();
   const refresh = useCallback(
-    async (parentId: string) => {
+    async (parentId: string, resetPagination?: boolean) => {
       setLoading(true);
       try {
         setPaginateItem(prev => ({ ...prev, page: 0 }));
-        await refreshItem(parentId);
+        await refreshItem(parentId, resetPagination);
       } finally {
         setLoading(false);
       }
     },
-    [setLoading, refreshItem],
+    [id, setLoading, refreshItem],
   );
 
   const remove = useCallback(async () => {
@@ -105,7 +105,7 @@ export const useDriveItem = (id: string) => {
 
   const loadNextPage = useRecoilCallback(
     ({ set }) =>
-      async () => {
+      async (id: string) => {
         try {
           const details = await nextPage(id);
           setChildren(prev => [...prev, ...details.children]);

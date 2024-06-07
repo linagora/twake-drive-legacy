@@ -71,7 +71,6 @@ export class DriveApiClient {
   }
 
   static async browse(companyId: string, id: string | 'trash' | '', filter: BrowseFilter, sort: BrowseSort, paginate: BrowsePaginate) {
-    console.log("sorting by: ", sort.by, "order: ", sort.order);
     return await Api.post<BrowseQuery, DriveItemDetails>(
       `/internal/services/documents/v1/companies/${companyId}/browse/${id}${appendTdriveToken()}`,
       {

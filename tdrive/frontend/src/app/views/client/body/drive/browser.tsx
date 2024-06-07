@@ -240,12 +240,11 @@ export default memo(
     const scrollViwer = useRef<HTMLDivElement>(null);
 
     const handleScroll = async () => {
-      console.log('scrolling');
       const scrollTop = scrollViwer.current?.scrollTop || 0;
       const scrollHeight = scrollViwer.current?.scrollHeight || 0;
       const clientHeight = scrollViwer.current?.clientHeight || 0;
-      if (scrollTop + clientHeight >= scrollHeight) {
-        await loadNextPage();
+      if (scrollTop > 0 && scrollTop + clientHeight >= scrollHeight) {
+        await loadNextPage(parentId);
       }
     };
 
@@ -254,7 +253,7 @@ export default memo(
       return () => {
         scrollViwer.current?.removeEventListener('scroll', handleScroll);
       };
-    }, []);
+    }, [parentId]);
 
     return (
       <>
