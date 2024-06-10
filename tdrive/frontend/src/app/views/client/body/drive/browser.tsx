@@ -23,6 +23,7 @@ import {
 } from './context-menu';
 import {DocumentRow, DocumentRowOverlay} from './documents/document-row';
 import { FolderRow } from './documents/folder-row';
+import { FolderRowSkeleton } from './documents/folder-row-skeleton';
 import HeaderPath from './header-path';
 import { ConfirmDeleteModal } from './modals/confirm-delete';
 import { ConfirmTrashModal } from './modals/confirm-trash';
@@ -450,6 +451,7 @@ export default memo(
                       ></DocumentRowOverlay>
                     ) : null}
                   </DragOverlay>
+                  {loading && <FolderRowSkeleton />}
                 </div>
               </DndContext>
             </div>

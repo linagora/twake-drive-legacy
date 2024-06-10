@@ -20,7 +20,7 @@ export const useDriveItem = (id: string) => {
   // const children = useRecoilValue(DriveItemChildrenAtom(id));
   const [children, setChildren] = useRecoilState(DriveItemChildrenAtom(id));
   const [loading, setLoading] = useRecoilState(LoadingStateInitTrue('useDriveItem-' + id));
-  const [_, setPaginateItem] = useRecoilState(DriveItemPagination)
+  const [_, setPaginateItem] = useRecoilState(DriveItemPagination);
   const {
     refresh: refreshItem,
     create,
@@ -104,12 +104,30 @@ export const useDriveItem = (id: string) => {
   );
 
   const loadNextPage = useRecoilCallback(
-    ({ set }) =>
+    ({ set, snapshot }) =>
       async (id: string) => {
+        // get current pagination state
+        const pagination = await snapshot.getPromise(DriveItemPagination);
+
+        // if end is true, do not load more
+        if (pagination.lastPage === true) return;
+        setLoading(true);
+
         try {
           const details = await nextPage(id);
+          if (details.children.length === 0) {
+            set(DriveItemPagination, prev => ({
+              ...prev,
+              lastPage: true,
+            }));
+          }
           setChildren(prev => [...prev, ...details.children]);
         } catch (e) {
+          // set pagination end to true
+          set(DriveItemPagination, prev => ({
+            ...prev,
+            lastPage: true,
+          }));
           console.log('error loading next page: ', e);
           ToasterService.error('Unable to load more items.');
         } finally {
@@ -118,6 +136,7 @@ export const useDriveItem = (id: string) => {
             page: (prev.page + prev.limit),
           }));
         }
+        setLoading(false);
       },
     [id, nextPage],
   );

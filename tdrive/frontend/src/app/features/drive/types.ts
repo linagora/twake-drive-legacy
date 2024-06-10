@@ -16,7 +16,8 @@ export type BrowseSort = {
 
 export type BrowsePaginate = { 
   page: number;
-  limit: number
+  limit: number;
+  lastPage?: boolean;
 };
 
 export type DriveItemDetails = {
