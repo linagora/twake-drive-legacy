@@ -66,7 +66,7 @@ const VersionModalContent = ({ id }: { id: string }) => {
         }}
       >
         {access !== 'read' && (
-          <div className={'flex flex-row items-center bg-zinc-100 rounded-md mb-4 p-4'}>
+          <div className={'flex flex-row items-center bg-zinc-100 dark:bg-zinc-900 rounded-md mb-4 p-4'}>
             <div className="flex flex-row">
               <div className="grow flex items-center">
                 <Base>
