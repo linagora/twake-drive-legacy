@@ -103,6 +103,8 @@ export const useDriveUpload = () => {
     request.responseType = 'blob';
     request.onload = function () {
       try {
+        if (request.status != 200)
+          throw new Error(`Unexpected response status code: ${request.status} from ${JSON.stringify(url)}`);
         const file = new File([request.response], name);
         FileUploadService.upload([file], {
           context: {
@@ -136,7 +138,8 @@ export const useDriveUpload = () => {
           },
         });
       } catch (e) {
-        ToasterService.error('Error while creating an empty file.');
+        logger.error(`Error creating file`, e);
+        ToasterService.error('Error while creating a new file from template.');
       }
     };
     request.send();
