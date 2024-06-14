@@ -111,45 +111,6 @@ class ApiService implements IApiService {
     }
   };
 
-  public runCommand = async (c: string, key: string): Promise<void> => {
-    try {
-      loggerService.info('SENDING COMMAND TO: ', `${ONLY_OFFICE_SERVER}coauthoring/CommandService.ashx`);
-      const response = await axios.post(`${ONLY_OFFICE_SERVER}coauthoring/CommandService.ashx`, {
-        c,
-        key,
-        userdata: '',
-      });
-      const { data } = response;
-      switch (data.error) {
-        case 0:
-          loggerService.info('File saved successfully');
-          break;
-        case 1:
-          loggerService.error('Document key is missing or no document with such key could be found.');
-          throw new Error('Document key is missing or no document with such key could be found.');
-        case 2:
-          loggerService.error('Callback url not correct.');
-          throw new Error('Callback url not correct.');
-        case 3:
-          loggerService.error('Internal server error.');
-          throw new Error('Internal server error.');
-        case 4:
-          loggerService.error('No changes were applied to the document before the forcesave command was received.');
-          throw new Error('No changes were applied to the document before the forcesave command was received.');
-        case 5:
-          loggerService.error('Command not correct.');
-          throw new Error('Command not correct.');
-        case 6:
-          loggerService.error('Invalid token.');
-          throw new Error('Invalid token.');
-        default:
-          loggerService.error('Unknown error occurred.');
-          throw new Error('Unknown error occurred.');
-      }
-    } catch (error) {
-      loggerService.error(`Error executing command: ${c}, ${error}`);
-    }
-  };
 }
 
 export default new ApiService();

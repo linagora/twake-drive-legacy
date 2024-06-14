@@ -4,6 +4,7 @@ import apiService from '@/services/api.service';
 import driveService from '@/services/drive.service';
 import fileService from '@/services/file.service';
 import loggerService from '@/services/logger.service';
+import onlyofficeService, * as OnlyOffice from '@/services/onlyoffice.service';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
@@ -129,7 +130,9 @@ class OnlyOfficeController {
         });
       } else {
         loggerService.error('URL not present, force saving file');
-        await apiService.runCommand('forcesave', key);
+        await onlyofficeService.forceSave(key).catch(error => {
+          loggerService.warn("Expected error while force saving without changes (ignored):", error);
+        });
       }
 
       res.send({
