@@ -7,6 +7,7 @@ import {
 import axios, { Axios, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { CREDENTIALS_ENDPOINT, CREDENTIALS_ID, CREDENTIALS_SECRET, ONLY_OFFICE_SERVER } from '@config';
 import loggerService from './logger.service';
+import * as Utils from '@/utils';
 
 /** Client for the Twake Drive backend API on behalf of the plugin (or provided token in parameters) */
 class ApiService implements IApiService {
@@ -73,7 +74,7 @@ class ApiService implements IApiService {
   private refreshToken = async (): Promise<string> => {
     try {
       const response = await axios.post<IApiServiceApplicationTokenRequestParams, { data: IApiServiceApplicationTokenResponse }>(
-        `${CREDENTIALS_ENDPOINT.replace(/\/$/, '')}/api/console/v1/login`,
+        Utils.joinURL([CREDENTIALS_ENDPOINT, '/api/console/v1/login']),
         {
           id: CREDENTIALS_ID,
           secret: CREDENTIALS_SECRET,

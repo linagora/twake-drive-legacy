@@ -1,6 +1,7 @@
 import { EditConfigInitResult, IEditorService, ModeParametersType } from '@/interfaces/editor.interface';
 import { UserType } from '@/interfaces/user.interface';
 import { ONLY_OFFICE_SERVER } from '@config';
+import * as Utils from '@/utils';
 
 class EditorService implements IEditorService {
   public init = async (
@@ -12,12 +13,14 @@ class EditorService implements IEditorService {
     file_id: string,
   ): Promise<EditConfigInitResult> => {
     const { color, mode: fileMode } = this.getFileMode(file_name);
+    let [, extension] = Utils.splitFilename(file_name);
 
+    extension = extension.toLocaleLowerCase();
     return {
       color,
       file_id,
       file_version_id,
-      file_type: file_name.split('.').pop(),
+      file_type: extension,
       filename: file_name,
       language: user.preferences.locale || 'en',
       mode: fileMode,
@@ -32,7 +35,8 @@ class EditorService implements IEditorService {
   };
 
   private getFileMode = (filename: string): ModeParametersType => {
-    const extension = filename.split('.').pop();
+    let [, extension] = Utils.splitFilename(filename);
+    extension = extension.toLocaleLowerCase();
 
     if (
       [

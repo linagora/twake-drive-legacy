@@ -7,6 +7,7 @@ import { DriveFileType } from '@/interfaces/drive.interface';
 import fileService from '@/services/file.service';
 import { OfficeToken } from '@/interfaces/routes.interface';
 import loggerService from '@/services/logger.service';
+import * as Utils from '@/utils';
 
 interface RequestQuery {
   mode: string;
@@ -89,10 +90,13 @@ class IndexController {
       );
 
       res.redirect(
-        `${SERVER_ORIGIN ?? ''}/${SERVER_PREFIX.replace(
-          /(\/+$|^\/+)/gm,
-          '',
-        )}/editor?office_token=${officeToken}&token=${token}&file_id=${file_id}&company_id=${company_id}&preview=${preview}`,
+        Utils.joinURL([SERVER_ORIGIN ?? '', SERVER_PREFIX, 'editor'], {
+          token,
+          file_id,
+          company_id,
+          preview,
+          office_token: officeToken,
+        })
       );
     } catch (error) {
       next(error);
@@ -126,7 +130,7 @@ class IndexController {
 
       res.render('index', {
         ...initResponse,
-        server: SERVER_ORIGIN.replace(/\/+$/, '') + '/' + SERVER_PREFIX.replace(/(\/+$|^\/+)/, '') || `${req.protocol}://${req.get('host')}/`,
+        server: Utils.joinURL([SERVER_ORIGIN, SERVER_PREFIX]),
         token: inPageToken,
       });
     } catch (error) {
