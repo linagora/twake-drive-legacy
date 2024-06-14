@@ -2,6 +2,7 @@ import { DriveFileType, IDriveService } from '@/interfaces/drive.interface';
 import apiService from './api.service';
 import loggerService from './logger.service';
 
+/** Client for the Twake Drive backend API dealing with `DriveItem`s  */
 class DriveService implements IDriveService {
   public get = async (params: { company_id: string; drive_file_id: string; user_token?: string }): Promise<DriveFileType> => {
     try {

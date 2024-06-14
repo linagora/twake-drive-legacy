@@ -23,7 +23,17 @@ interface RequestEditorQuery {
   file_id: string;
 }
 
+/**
+ * These routes are called by Twake Drive frontend. The user's browser opens ( +) `${config.plugin.edition_url}/` (`index`).
+ * The user is redirected from there to open directly the OnlyOffice edition server's web UI, with appropriate preview or not
+ * and rights checks.
+ */
 class IndexController {
+  /**
+   * Opened by the user's browser, proxied through the Twake Drive backend. Checks access to the
+   * file with the backend, then redirects the user to the `editor` method but directly on this
+   * connector, not proxied by Twake Drive's backend anymore.
+   */
   public index = async (req: Request<{}, {}, {}, RequestQuery>, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { file_id, drive_file_id, company_id, preview, token } = req.query;
@@ -89,6 +99,9 @@ class IndexController {
     }
   };
 
+  /**
+   * Renders this connector's view to initialise the Docs API client side component.
+   */
   public editor = async (req: Request<{}, {}, {}, RequestEditorQuery>, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { office_token } = req.query;

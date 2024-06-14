@@ -7,6 +7,8 @@ import {
 import axios, { Axios, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { CREDENTIALS_ENDPOINT, CREDENTIALS_ID, CREDENTIALS_SECRET, ONLY_OFFICE_SERVER } from '@config';
 import loggerService from './logger.service';
+
+/** Client for the Twake Drive backend API on behalf of the plugin (or provided token in parameters) */
 class ApiService implements IApiService {
   private axios: Axios;
   private initialized: Promise<string>;
@@ -20,7 +22,7 @@ class ApiService implements IApiService {
     setInterval(() => {
       this.initialized = this.refreshToken();
       loggerService.info('Refreshing token 🪙');
-    }, 1000 * 60); //Every 10 minutes
+    }, 1000 * 60); //TODO: should be Every 10 minutes
   }
 
   public get = async <T>(params: IApiServiceRequestParams<T>): Promise<T> => {

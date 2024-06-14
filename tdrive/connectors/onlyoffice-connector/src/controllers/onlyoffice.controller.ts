@@ -21,7 +21,16 @@ interface SaveRequestBody {
   users: string[];
 }
 
+/** These expose a OnlyOffice document storage service methods, called by the OnlyOffice document editing service
+ * to load and save files
+ */
 class OnlyOfficeController {
+  /**
+   * Get a file from Twake Drive backend, and proxy it back the previewer/editor (via the document editing service).
+   *
+   * Parameters are standard Express middleware.
+   * @see https://api.onlyoffice.com/editors/open
+   */
   public read = async (req: Request<{}, {}, {}, RequestQuery>, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { token } = req.query;
@@ -55,6 +64,13 @@ class OnlyOfficeController {
     }
   };
 
+  /**
+   * Receive a file from OnlyOffice document editing service and save it into Twake Drive backend
+   *
+   * Parameters are standard Express middleware.
+   * @see https://api.onlyoffice.com/editors/save
+   * @see https://api.onlyoffice.com/editors/callback
+   */
   public save = async (req: Request<{}, {}, SaveRequestBody, RequestQuery>, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { url, key } = req.body;
