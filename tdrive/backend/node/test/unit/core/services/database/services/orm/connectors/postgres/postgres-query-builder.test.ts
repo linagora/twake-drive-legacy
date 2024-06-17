@@ -1,7 +1,7 @@
 import {
   PostgresQueryBuilder
 } from "../../../../../../../../../src/core/platform/services/database/services/orm/connectors/postgres/postgres-query-builder";
-import { expect, jest } from "@jest/globals";
+import { expect, jest, test, describe, beforeEach, afterEach } from "@jest/globals";
 import { randomInt, randomUUID } from "crypto";
 import { newTestDbEntity, normalizeWhitespace, TestDbEntity } from "./utils";
 import {
@@ -127,6 +127,32 @@ describe('The PostgresQueryBuilder', () => {
     assertUpdateQueryParams(entity, query[1] as any[])
   });
 
+  test('buildatomicCompareAndSet to value', async () => {
+    const entity = newTestDbEntity();
+
+    const newValue = "new-tag-value";
+    const [queryText, params] = subj.buildatomicCompareAndSet(entity, "tags", null, newValue);
+
+    expect(normalizeWhitespace(queryText as string)).toBe(`UPDATE "test_table" SET tags = $1 WHERE company_id = $2 AND id = $3 AND tags = $4 RETURNING tags`);
+    expect(params[0]).toBe(JSON.stringify(newValue));
+    expect(params[1]).toBe(entity.company_id);
+    expect(params[2]).toBe(entity.id);
+    expect(params[3]).toBe(null);
+  });
+
+  test('buildatomicCompareAndSet to null', async () => {
+    const entity = newTestDbEntity();
+
+    const previousValue = "new-tag-value";
+    const [queryText, params] = subj.buildatomicCompareAndSet(entity, "tags", previousValue, null);
+
+    expect(normalizeWhitespace(queryText as string)).toBe(`UPDATE "test_table" SET tags = $1 WHERE company_id = $2 AND id = $3 AND tags = $4 RETURNING tags`);
+    expect(params[0]).toBe(null);
+    expect(params[1]).toBe(entity.company_id);
+    expect(params[2]).toBe(entity.id);
+    expect(params[3]).toBe(JSON.stringify(previousValue));
+  });
+
   const assertInsertQueryParams = (actual: TestDbEntity, expected: any[]) => {
     expect(expected[0]).toBe(actual.company_id);
     expect(expected[1]).toBe(actual.id);
@@ -144,6 +170,5 @@ describe('The PostgresQueryBuilder', () => {
     expect(expected[4]).toBe(actual.company_id);
     expect(expected[5]).toBe(actual.id);
   }
-
 
 });

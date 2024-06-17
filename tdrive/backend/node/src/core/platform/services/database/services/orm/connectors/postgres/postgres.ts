@@ -270,19 +270,70 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
         return this.execute(this.queryBuilder.buildInsert(entity));
       }
     } else {
-      return false;
+      throw new Error("Missing or unknown UpsertOptions.action");
+    }
+  }
+
+  async atomicCompareAndSet<Entity, FieldValueType>(
+    entity: Entity,
+    fieldName: keyof Entity,
+    previousValue: FieldValueType,
+    newValue: FieldValueType,
+  ): Promise<{
+    didSet: boolean;
+    currentValue: FieldValueType | null;
+  }> {
+    const { updateQuery, getValueQuery } = this.queryBuilder.buildatomicCompareAndSet(
+      entity,
+      fieldName,
+      previousValue,
+      newValue,
+    );
+    const result = await this.executeRaw(updateQuery);
+    if (!result)
+      throw new Error(
+        `Error updating ${JSON.stringify(fieldName)} field of ${JSON.stringify(
+          entity["id"],
+        )} from ${JSON.stringify(previousValue)} to ${JSON.stringify(
+          newValue,
+        )}. Search logs for 'services.database.orm.postgres - Error with SQL query'`,
+      );
+    if (result.rowCount > 1)
+      throw new Error(
+        `Unexpected modified count ${JSON.stringify(result)} on postgres update(${JSON.stringify(
+          updateQuery,
+        )})`,
+      );
+    let currentValue = newValue;
+    if (result.rowCount == 0) {
+      const readValue = await this.executeRaw(getValueQuery);
+      if (readValue.rows.length == 0)
+        throw new Error(
+          `Error setting ${fieldName as string} atomically, no row matched PK: ${JSON.stringify(
+            getValueQuery,
+          )}`,
+        );
+      currentValue = readValue.rows[0][readValue.fields[0].name];
+    }
+    return {
+      didSet: result.rowCount > 0,
+      currentValue,
+    };
+  }
+
+  private async executeRaw(query: Query): Promise<QueryResult | null> {
+    logger.debug(`service.database.orm.postgres - Query: "${query[0]}"`);
+    try {
+      return await this.client.query(query[0] as string, query[1] as never[]);
+    } catch (err) {
+      logger.error({ err }, `services.database.orm.postgres - Error with SQL query: ${query[0]}`);
+      return null;
     }
   }
 
   private async execute(query: Query) {
-    logger.debug(`service.database.orm.postgres - Query: "${query[0]}"`);
-    try {
-      const result: QueryResult = await this.client.query(query[0] as string, query[1] as never[]);
-      return result.rowCount > 0;
-    } catch (err) {
-      logger.error({ err }, `services.database.orm.postgres - Error with SQL query: ${query[0]}`);
-      return false;
-    }
+    const result = await this.executeRaw(query);
+    return result && result.rowCount > 0;
   }
 
   async getTableDefinition(name: string): Promise<string[]> {

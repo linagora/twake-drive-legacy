@@ -154,6 +154,65 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions> {
     });
   }
 
+  async atomicCompareAndSet<Entity, FieldValueType>(
+    entity: Entity,
+    fieldName: keyof Entity,
+    previousValue: FieldValueType,
+    newValue: FieldValueType,
+  ): Promise<{
+    didSet: boolean;
+    currentValue: FieldValueType | null;
+  }> {
+    const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
+    const primaryKey = unwrapPrimarykey(entityDefinition);
+    const db = await this.getDatabase();
+    const collection = db.collection(`${entityDefinition.name}`);
+    const columnName = (Object.entries(columnsDefinition).filter(
+      ([, { nodename }]) => nodename === fieldName,
+    )[0] ?? [])[0];
+    const transformValue = (key, value) =>
+      transformValueToDbString(value, columnsDefinition[key].type, {
+        columns: columnsDefinition[key].options,
+        secret: this.secret,
+        disableSalts: true,
+        column: { key },
+      });
+    const where: any = {};
+    primaryKey.forEach(key => {
+      where[key] = transformValue(key, entity[columnsDefinition[key].nodename]);
+    });
+    where[columnName] = transformValue(columnName, previousValue);
+    const set = { [columnName]: newValue === undefined ? null : newValue };
+
+    const result = await collection.updateOne(where, { $set: set });
+    if (result.modifiedCount > 1)
+      throw new Error(
+        `Unexpected modified count ${JSON.stringify(result)} on mongo update(${JSON.stringify(
+          where,
+        )}, ${JSON.stringify(set)})`,
+      );
+
+    let currentValue: FieldValueType;
+    if (result.modifiedCount > 0) {
+      currentValue = newValue;
+    } else {
+      delete where[columnName];
+      const existingItem = await collection.findOne(where, {});
+      if (!existingItem)
+        throw new Error(
+          `Error setting ${entityDefinition.name}'s ${
+            fieldName as string
+          } atomically, no row matched PK: ${JSON.stringify(where)}`,
+        );
+      currentValue = existingItem[fieldName as string];
+    }
+
+    return {
+      didSet: result.modifiedCount === 1,
+      currentValue,
+    };
+  }
+
   async remove(entities: any[]): Promise<boolean[]> {
     return new Promise(async resolve => {
       const promises: Promise<mongo.DeleteResult>[] = [];
