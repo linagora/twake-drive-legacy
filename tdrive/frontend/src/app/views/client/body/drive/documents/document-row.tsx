@@ -27,24 +27,13 @@ export const DocumentRow = ({
 }: DriveItemProps) => {
   const history = useHistory();
   const [hover, setHover] = useState(false);
-  const { open, close } = useDrivePreview();
+  const { open, close, isOpen } = useDrivePreview();
   const company = useRouterCompany();
-  const { itemId } = useRouteState();
-
-  useEffect(() => {
-    // close the preview if the item is not set or the user navigated away
-    if (!itemId) {
-      close();
-    }
-    // open the preview if the item is set
-    if (itemId == item.id) {
-      open(item);
-    }
-  }, [itemId]);
 
   const preview = () => {
+    open(item);
     history.push(RouterServices.generateRouteFromState({ companyId: company, itemId: item.id }));
-    if (inPublicSharing) open(item);
+    // history.push(RouterServices.generateRouteFromState({ companyId: company, itemId: item.id }));
   };
 
   return (

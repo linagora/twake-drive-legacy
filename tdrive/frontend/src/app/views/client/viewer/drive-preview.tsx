@@ -104,7 +104,8 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
         className="z-10 cursor-pointer absolute right-5 top-5 w-20 h-20 text-white hover:text-black rounded-full p-1 bg-gray-500 hover:bg-white bg-opacity-25"
         onClick={() => {
           close();
-          history.push(RouterServices.generateRouteFromState({ companyId: company,  itemId: '' }));
+          // small delay to allow the modal to close
+          // history.push(RouterServices.generateRouteFromState({ companyId: company,  itemId: '' }));
         }}
       />
 

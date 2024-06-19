@@ -78,7 +78,7 @@ export default memo(
       : 'member';
     setTdriveTabToken(tdriveTabContextToken || null);
     const [filter, __] = useRecoilState(SharedWithMeFilterState);
-    const { viewId, dirId } = useRouteState();
+    const { viewId, dirId, itemId } = useRouteState();
     const [parentId, _setParentId] = useRecoilState(
       DriveCurrentFolderAtom({
         context: context,
