@@ -29,11 +29,17 @@ export const useDrivePreviewModal = () => {
     }
   };
 
+  const openWithId: (id: string) => void = (id: string) => {
+    DriveApiClient.get(company, id).then((item) => {
+      open(item?.item);
+    });
+  }
+
   const close = () => {
     setStatus({ item: null, loading: true });
   }
 
-  return { open, close, isOpen: !!status.item };
+  return { open, close, isOpen: !!status.item, openWithId };
 };
 
 export const useDrivePreview = () => {

@@ -49,6 +49,7 @@ import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 import { ConfirmModal } from './modals/confirm-move';
 import { useHistory } from 'react-router-dom';
 import { SortIcon } from 'app/atoms/icons-agnostic';
+import { useDrivePreview, useDrivePreviewLoading } from 'app/features/drive/hooks/use-drive-preview';
 
 export const DriveCurrentFolderAtom = atomFamily<
     string,
@@ -79,6 +80,9 @@ export default memo(
     setTdriveTabToken(tdriveTabContextToken || null);
     const [filter, __] = useRecoilState(SharedWithMeFilterState);
     const { viewId, dirId, itemId } = useRouteState();
+    const { status } = useDrivePreview();
+    const { openWithId, close } = useDrivePreview();
+    const { loading: isModalLoading } = useDrivePreviewLoading();
     const [parentId, _setParentId] = useRecoilState(
       DriveCurrentFolderAtom({
         context: context,
@@ -92,6 +96,18 @@ export default memo(
         !viewId &&
         history.push(RouterServices.generateRouteFromState({ viewId: parentId }));
     }, [viewId, dirId]);
+
+    useEffect(() => {
+      if (!isModalLoading && !status.item) {
+        if (itemId) {
+          openWithId(itemId);
+        } else {
+          close();
+        }
+      }
+    }, [status, isModalLoading, itemId]);
+
+
 
     const [loadingParentChange, setLoadingParentChange] = useState(false);
     const {

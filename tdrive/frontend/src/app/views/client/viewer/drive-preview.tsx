@@ -105,7 +105,7 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
         onClick={() => {
           close();
           // small delay to allow the modal to close
-          // history.push(RouterServices.generateRouteFromState({ companyId: company,  itemId: '' }));
+          history.push(RouterServices.generateRouteFromState({ companyId: company,  itemId: '' }));
         }}
       />
 
