@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - main
-      - sonar
-  pull_request:
-    branches:
-      - sonar
 
 jobs:
   build:
