@@ -109,3 +109,22 @@ export const createVersionSchema = {
     "2xx": fileVersionSchema,
   },
 };
+
+export const beginEditingSchema = {
+  body: {
+    type: "object",
+    properties: {
+      editorApplicationId: { type: "string" },
+    },
+    required: ["editorApplicationId"],
+  },
+  response: {
+    "2xx": {
+      type: "object",
+      properties: {
+        editingSessionKey: { type: "string" },
+      },
+      required: ["editingSessionKey"],
+    },
+  },
+};

@@ -58,6 +58,9 @@ import {
 import archiver from "archiver";
 import internal from "stream";
 import config from "config";
+import { randomUUID } from "crypto";
+import { MultipartFile } from "@fastify/multipart";
+import { UploadOptions } from "../../files/types";
 
 export class DocumentsService {
   version: "1";
@@ -262,6 +265,45 @@ export class DocumentsService {
       children: children,
       access: await getAccessLevel(id, entity, this.repository, context),
     };
+  };
+
+  /**
+   * Fetches a drive element by its `editing_session_key`
+   *
+   * @param {string} editing_session_key - the editing_session_key of the DriveFile to fetch
+   * @param {DriveExecutionContext} context
+   * @returns {Promise<DriveItemDetails>}
+   */
+  getByEditingSessionKey = async (
+    editing_session_key: string,
+    context: DriveExecutionContext & { public_token?: string },
+  ): Promise<DriveFile> => {
+    if (!editing_session_key) {
+      this.logger.error("Invalid editing_session_key: " + JSON.stringify(editing_session_key));
+      throw new CrudException("Invalid editing_session_key", 400);
+    }
+    if (!context) {
+      this.logger.error("invalid context");
+      return null;
+    }
+    const entity = await this.repository.findOne({ editing_session_key }, {}, context);
+    if (!entity) {
+      this.logger.error("Drive item not found");
+      throw new CrudException("Item not found", 404);
+    }
+    //Check access to entity
+    try {
+      //TODO: may need to check for read only if we permit readonly editors to join
+      const hasAccess = await checkAccess(entity.id, entity, "write", this.repository, context);
+      if (!hasAccess) {
+        this.logger.error("user does not have access drive item " + entity.id);
+        throw Error("user does not have access to this item");
+      }
+    } catch (error) {
+      this.logger.error({ error: `${error}` }, "Failed to grant access to the drive item");
+      throw new CrudException("User does not have access to this item or its children", 401);
+    }
+    return entity;
   };
 
   getAccess = async (
@@ -879,6 +921,78 @@ export class DocumentsService {
     }
   };
 
+  /**
+   * If not already in an editing session, uses the `editing_session_key` of the
+   * `DriveFile` entity to store a unique new value to expect an update later
+   * with only that key provided.
+   * @param id DriveFile ID of the document to begin editing
+   * @param editorApplicationId Editor/Application/Plugin specific identifier
+   * @param context
+   * @returns An object in the format `{}` with the unique identifier for the
+   *   editing session
+   */
+  beginEditing = async (
+    id: string,
+    editorApplicationId: string,
+    context: DriveExecutionContext,
+  ) => {
+    const isoUTCDateNoSpecialCharsNoMS = new Date()
+      .toISOString()
+      .replace(/\..+$/, "")
+      .replace(/[ZT:-]/g, "");
+    const newKey = [
+      isoUTCDateNoSpecialCharsNoMS,
+      editorApplicationId,
+      randomUUID().replace(/-+/g, ""),
+    ].join("-");
+    // OnlyOffice key limits: 128 chars, [0-9a-zA-z=_-]
+    // This is specific to it, but the constraint seems strict enough
+    // that any other system needing such a unique identifier would find
+    // this compatible. This value must be ensured to be the strictest
+    // common denominator to all plugin/interop systems. Plugins that
+    // require something even stricter have the option of maintaining
+    // a look up table to an acceptable value.
+    if (newKey.length > 128 || !/^[0-9a-zA-Z=_]+$/m.test(editorApplicationId))
+      CrudException.throwMe(
+        new Error('Invalid "editorApplicationId" string. Must be short and only alpha numeric'),
+        new CrudException("Invalid editorApplicationId", 400),
+      );
+
+    if (!context) {
+      this.logger.error("invalid execution context");
+      return null;
+    }
+
+    const hasAccess = await checkAccess(id, null, "write", this.repository, context);
+    if (!hasAccess) {
+      logger.error("user does not have access drive item " + id);
+      CrudException.throwMe(
+        new Error("user does not have access to the drive item"),
+        new CrudException("user does not have access drive item", 401),
+      );
+    }
+
+    try {
+      const driveFile = await this.repository.findOne(
+        {
+          id,
+          company_id: context.company.id,
+        },
+        {},
+        context,
+      );
+      const result = await this.repository.atomicCompareAndSet(
+        driveFile,
+        "editing_session_key",
+        null,
+        newKey,
+      );
+      return { editingSessionKey: result.currentValue };
+    } catch (error) {
+      logger.error({ error: `${error}` }, "Failed to begin editing Drive item");
+      CrudException.throwMe(error, new CrudException("Failed to begin editing Drive item", 500));
+    }
+  };
   downloadGetToken = async (
     ids: string[],
     versionId: string | null,

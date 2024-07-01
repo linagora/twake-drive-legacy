@@ -93,7 +93,7 @@ export class DriveFile {
 
   /**
    * If this field is non-null, then an editing session is in progress (probably in OnlyOffice).
-   * Should be in the format `appid-timestamp-hexuuid` where `appid` and `timestamp` have no `-`
+   * Should be in the format `timestamp-appid-hexuuid` where `appid` and `timestamp` have no `-`
    * characters.
    */
   @Type(() => String)

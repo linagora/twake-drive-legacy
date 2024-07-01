@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginCallback } from "fastify";
 import { DocumentsController } from "./controllers";
-import { createDocumentSchema, createVersionSchema } from "./schemas";
+import { createDocumentSchema, createVersionSchema, beginEditingSchema } from "./schemas";
 // import profilerPlugin from "../../../utils/profiler";
 
 const baseUrl = "/companies/:company_id";
@@ -77,6 +77,21 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     preValidation: [fastify.authenticateOptional],
     schema: createVersionSchema,
     handler: documentsController.createVersion.bind(documentsController),
+  });
+
+  fastify.route({
+    method: "POST",
+    url: `${serviceUrl}/:id/editing_session`,
+    preValidation: [fastify.authenticateOptional],
+    schema: beginEditingSchema,
+    handler: documentsController.beginEditing.bind(documentsController),
+  });
+
+  fastify.route({
+    method: "GET",
+    url: `${serviceUrl}/editing_session/:editing_session_key`,
+    preValidation: [fastify.authenticateOptional],
+    handler: documentsController.getByEditingSessionKey.bind(documentsController),
   });
 
   fastify.route({

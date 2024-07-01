@@ -28,6 +28,7 @@ export class DriveFileMockClass {
     tags: string[];
     last_modified: number;
     access_info: MockAccessInformation;
+    editing_session_key: string;
     creator: string;
     is_directory: boolean;
     scope: "personal" | "shared";
