@@ -97,16 +97,6 @@ export default memo(
         history.push(RouterServices.generateRouteFromState({ viewId: parentId }));
     }, [viewId, dirId]);
 
-    useEffect(() => {
-      if (!isModalLoading && !status.item) {
-        if (itemId) {
-          openWithId(itemId);
-        } else {
-          close();
-        }
-      }
-    }, [status, isModalLoading, itemId]);
-
 
 
     const [loadingParentChange, setLoadingParentChange] = useState(false);

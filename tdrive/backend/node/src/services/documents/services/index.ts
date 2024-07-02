@@ -220,10 +220,11 @@ export class DocumentsService {
     };
     const sortField = {};
     sortField[sortFieldMapping[sort?.by] || "is_directory"] = sort?.order || "asc";
-
+    const dbType = await globalResolver.database.getConnector().getType();
+    const dbOffset = dbType === "mongodb" ? 0 : 1;
     //Get children if it is a directory
     let pagination: Pagination;
-    if (paginate) pagination = new Pagination(`${paginate.page}`, `${paginate.limit}`, false);
+    if (paginate) pagination = new Pagination(`${paginate?.page || dbOffset}`, `${paginate.limit}`, false);
     let children = isDirectory
       ? (
           await this.repository.find(
@@ -247,9 +248,7 @@ export class DocumentsService {
                   }),
             },
             {
-              sort: {
-                name: "asc",
-              },
+              sort: sortField,
               pagination,
             },
             context,

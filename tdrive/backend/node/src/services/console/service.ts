@@ -35,14 +35,14 @@ export class ConsoleServiceImpl implements TdriveServiceProvider {
 
     this.consoleOptions = {
       type: type,
-      authority: s.authority,
-      client_id: s.client_id,
-      client_secret: s.client_secret,
-      audience: s.audience,
-      issuer: s.issuer,
-      jwks_uri: s.jwks_uri,
-      redirect_uris: s.redirect_uris,
-      disable_account_creation: s.disable_account_creation,
+      authority: s?.authority,
+      client_id: s?.client_id,
+      client_secret: s?.client_secret,
+      audience: s?.audience,
+      issuer: s?.issuer,
+      jwks_uri: s?.jwks_uri,
+      redirect_uris: s?.redirect_uris,
+      disable_account_creation: s?.disable_account_creation,
     };
 
     this.consoleOptions.type = type;
