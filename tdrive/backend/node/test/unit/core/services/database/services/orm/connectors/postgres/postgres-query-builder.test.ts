@@ -119,7 +119,7 @@ describe('The PostgresQueryBuilder', () => {
 
   test('buildSelect query with sort option', async () => {
     //given
-    const options = { sort: { added: "asc", id: "desc" } };
+    const options = { sort: { added: "asc" as SortDirection, id: "desc" as SortDirection } };
 
     //when
     const query = subj.buildSelect(TestDbEntity, null, options);

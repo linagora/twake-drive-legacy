@@ -224,7 +224,8 @@ export class DocumentsService {
     const dbOffset = dbType === "mongodb" ? 0 : 1;
     //Get children if it is a directory
     let pagination: Pagination;
-    if (paginate) pagination = new Pagination(`${paginate?.page || dbOffset}`, `${paginate.limit}`, false);
+    if (paginate)
+      pagination = new Pagination(`${paginate?.page || dbOffset}`, `${paginate.limit}`, false);
     let children = isDirectory
       ? (
           await this.repository.find(
