@@ -8,6 +8,20 @@ import {
   comparisonType
 } from "../../../../../../../../../src/core/platform/services/database/services/orm/repository/repository";
 
+type SortDirection = "asc" | "desc";
+
+type SortOption = {
+  [field: string]: SortDirection;
+};
+
+interface FindOptions {
+  sort?: SortOption;
+  pagination?: {
+    limitStr: string;
+    page_token: string;
+  };
+}
+
 describe('The PostgresQueryBuilder', () => {
 
   const subj: PostgresQueryBuilder = new PostgresQueryBuilder("");
@@ -101,6 +115,43 @@ describe('The PostgresQueryBuilder', () => {
     //then
     expect(normalizeWhitespace(query[0] as string)).toBe(`DELETE FROM "test_table" WHERE company_id = $1 AND id = $2`);
     expect(query[1]).toEqual([entity.company_id, entity.id]);
+  });
+
+  test('buildSelect query with sort option', async () => {
+    //given
+    const options = { sort: { added: "asc", id: "desc" } };
+
+    //when
+    const query = subj.buildSelect(TestDbEntity, null, options);
+
+    //then
+    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" ORDER BY added ASC, id DESC LIMIT 100 OFFSET 0`);
+    expect(query[1]).toEqual([]);
+  });
+
+  test('buildSelect query with pagination', async () => {
+    //given
+    const options = { pagination: { limitStr: "50", page_token: "2" } };
+
+    //when
+    const query = subj.buildSelect(TestDbEntity, null, options);
+
+    //then
+    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" ORDER BY id DESC LIMIT 50 OFFSET 50`);
+    expect(query[1]).toEqual([]);
+  });
+
+  test('buildSelect query with filter, sort, and pagination', async () => {
+    //given
+    const filter = { id: randomUUID(), company_id: randomUUID() };
+    const options = { sort: { added: "asc" as SortDirection, id: "desc" as SortDirection }, pagination: { limitStr: "10", page_token: "3" } };
+
+    //when
+    const query = subj.buildSelect(TestDbEntity, filter as { [key: string]: any }, options);
+
+    //then
+    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" WHERE id = $1 AND company_id = $2 ORDER BY added ASC, id DESC LIMIT 10 OFFSET 20`);
+    expect(query[1]).toEqual([filter.id, filter.company_id]);
   });
 
   test('buildInsert', async () => {
