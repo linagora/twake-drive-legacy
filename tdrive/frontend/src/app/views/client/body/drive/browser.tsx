@@ -10,9 +10,9 @@ import { useDriveUpload } from '@features/drive/hooks/use-drive-upload';
 import { DriveItemSelectedList, DriveItemSort } from '@features/drive/state/store';
 import { formatBytes } from '@features/drive/utils';
 import useRouterCompany from '@features/router/hooks/use-router-company';
-import _ from 'lodash';
+import _, { set } from 'lodash';
 import { memo, Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import { atomFamily, useRecoilState, useSetRecoilState } from 'recoil';
+import { atomFamily, useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil';
 import { DrivePreview } from '../../viewer/drive-preview';
 import {
   useOnBuildContextMenu,
@@ -82,6 +82,7 @@ export default memo(
     const { viewId, dirId, itemId } = useRouteState();
     const { status } = useDrivePreview();
     const { openWithId, close } = useDrivePreview();
+    const [sortLabel] = useRecoilState(DriveItemSort)
     const { loading: isModalLoading } = useDrivePreviewLoading();
     const [parentId, _setParentId] = useRecoilState(
       DriveCurrentFolderAtom({
@@ -256,11 +257,11 @@ export default memo(
     };
 
     useEffect(() => {
-      scrollViwer.current?.addEventListener('scroll', handleScroll, { passive: true });
+      if(!loading) scrollViwer.current?.addEventListener('scroll', handleScroll, { passive: true });
       return () => {
         scrollViwer.current?.removeEventListener('scroll', handleScroll);
       };
-    }, [parentId]);
+    }, [parentId, loading]);
 
     return (
       <>
@@ -391,12 +392,12 @@ export default memo(
                     {formatBytes(item?.size || 0)} {Languages.t('scenes.app.drive.used')}
                   </BaseSmall>
                 )}
-                <Menu menu={() => onBuildSortContextMenu()}>
+
+                <Menu menu={() => onBuildSortContextMenu()} sortData={sortLabel}>
                   {' '}
                   <Button theme="outline" className="ml-4 flex flex-row items-center">
-                    <SortIcon className="h-4 w-4 mr-2 -ml-1" />
-                    <span>By date</span>
-
+                  <SortIcon className={`h-4 w-4 mr-2 -ml-1 ${sortLabel.order === 'asc' ? 'transform rotate-180' : ''}`} />
+                    <span>By {sortLabel.by}</span>
                     <ChevronDownIcon className="h-4 w-4 ml-2 -mr-1" />
                   </Button>
                 </Menu>

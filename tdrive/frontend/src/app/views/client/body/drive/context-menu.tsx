@@ -526,21 +526,6 @@ export const useOnBuildSortContextMenu = () => {
     const menuItems = [
       {
         type: 'menu',
-        text: 'Directory',
-        icon: sortItem.by === 'directory' ? 'check' : 'sort-check',
-        onClick: () => {
-          // keep the old value for sortItem and change the by value
-          setSortItem(prevSortItem => {
-            const newSortItem = {
-              ...prevSortItem,
-              by: 'directory',
-            };
-            return newSortItem;
-          });
-        },
-      },
-      {
-        type: 'menu',
         text: 'Date',
         icon: sortItem.by === 'date' ? 'check' : 'sort-check',
         onClick: () => {
@@ -577,20 +562,6 @@ export const useOnBuildSortContextMenu = () => {
             const newSortItem = {
               ...prevSortItem,
               by: 'size',
-            };
-            return newSortItem;
-          });
-        },
-      },
-      {
-        type: 'menu',
-        text: 'Shared',
-        icon: sortItem.by === 'shared' ? 'check' : 'sort-check',
-        onClick: () => {
-          setSortItem(prevSortItem => {
-            const newSortItem = {
-              ...prevSortItem,
-              by: 'shared',
             };
             return newSortItem;
           });

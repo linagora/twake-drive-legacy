@@ -59,7 +59,7 @@ describe("The Documents Browser Window and API", () => {
       expect(docs.children.length).toBeLessThanOrEqual(limit);
     });
 
-    it.skip("Should sort documents by name in ascending order", async () => {
+    it("Should sort documents by name in ascending order", async () => {
       const myDriveId = "user_" + currentUser.user.id;
       await currentUser.uploadAllFilesOneByOne(myDriveId);
 
@@ -74,7 +74,7 @@ describe("The Documents Browser Window and API", () => {
       expect(isSorted).toBe(true);
     });
 
-    it.skip("Should sort documents by name in descending order", async () => {
+    it("Should sort documents by name in descending order", async () => {
       const myDriveId = "user_" + currentUser.user.id;
       await currentUser.uploadAllFilesOneByOne(myDriveId);
 
@@ -89,7 +89,7 @@ describe("The Documents Browser Window and API", () => {
       expect(isSorted).toBe(true);
     });
 
-    it.skip("Should sort documents by date in ascending order", async () => {
+    it("Should sort documents by date in ascending order", async () => {
       const myDriveId = "user_" + currentUser.user.id;
       await currentUser.uploadAllFilesOneByOne(myDriveId);
 
@@ -106,7 +106,7 @@ describe("The Documents Browser Window and API", () => {
       expect(isSorted).toBe(true);
     });
 
-    it.skip("Should sort documents by date in descending order", async () => {
+    it("Should sort documents by date in descending order", async () => {
       const myDriveId = "user_" + currentUser.user.id;
       await currentUser.uploadAllFilesOneByOne(myDriveId);
 
@@ -123,38 +123,7 @@ describe("The Documents Browser Window and API", () => {
       expect(isSorted).toBe(true);
     });
 
-
-    it.skip("Should sort documents by scope in ascending order", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
-      const sortBy = "scope";
-      const sortOrder = "asc";
-      const docs = await currentUser.browseDocuments(myDriveId, {
-        sort: { by: sortBy, order: sortOrder },
-      });
-      expect(docs).toBeDefined();
-
-      const isSorted = docs.children.every((item, i, arr) => !i || arr[i - 1].scope <= item.scope);
-      expect(isSorted).toBe(true);
-    });
-
-    it.skip("Should sort documents by scope in descending order", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
-      const sortBy = "shared";
-      const sortOrder = "desc";
-      const docs = await currentUser.browseDocuments(myDriveId, {
-        sort: { by: sortBy, order: sortOrder },
-      });
-      expect(docs).toBeDefined();
-
-      const isSorted = docs.children.every((item, i, arr) => !i || arr[i - 1].scope >= item.scope);
-      expect(isSorted).toBe(true);
-    });
-
-    it.skip("Should sort documents by size in ascending order", async () => {
+    it("Should sort documents by size in ascending order", async () => {
       const myDriveId = "user_" + currentUser.user.id;
       await currentUser.uploadAllFilesOneByOne(myDriveId);
 
@@ -169,7 +138,7 @@ describe("The Documents Browser Window and API", () => {
       expect(isSorted).toBe(true);
     });
 
-    it.skip("Should sort documents by size in descending order", async () => {
+    it("Should sort documents by size in descending order", async () => {
       const myDriveId = "user_" + currentUser.user.id;
       await currentUser.uploadAllFilesOneByOne(myDriveId);
 
@@ -181,36 +150,6 @@ describe("The Documents Browser Window and API", () => {
       expect(docs).toBeDefined();
 
       const isSorted = docs.children.every((item, i, arr) => !i || arr[i - 1].size >= item.size);
-      expect(isSorted).toBe(true);
-    });
-
-    it.skip("Should sort documents by type/directory in ascending order", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
-      const sortBy = "directory";
-      const sortOrder = "asc";
-      const docs = await currentUser.browseDocuments(myDriveId, {
-        sort: { by: sortBy, order: sortOrder },
-      });
-      expect(docs).toBeDefined();
-
-      const isSorted = docs.children.every((item, i, arr) => !i || arr[i - 1].is_directory <= item.is_directory);
-      expect(isSorted).toBe(true);
-    });
-
-    it.skip("Should sort documents by type/directory in descending order", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
-      const sortBy = "directory";
-      const sortOrder = "desc";
-      const docs = await currentUser.browseDocuments(myDriveId, {
-        sort: { by: sortBy, order: sortOrder },
-      });
-      expect(docs).toBeDefined();
-
-      const isSorted = docs.children.every((item, i, arr) => !i || arr[i - 1].is_directory >= item.is_directory);
       expect(isSorted).toBe(true);
     });
   });

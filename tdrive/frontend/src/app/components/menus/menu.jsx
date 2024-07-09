@@ -26,6 +26,7 @@ export default class Menu extends React.Component {
     super(props);
     this.state = {
       isMenuOpen: false,
+      by: ''
     };
     this.open = false; // Added initialization for open state
     this.container = React.createRef(); // Ref for container div
@@ -94,6 +95,10 @@ export default class Menu extends React.Component {
       return true;
     }
 
+    if (this.props.sortData !== nextProps.sortData) {
+      return true;
+    }
+
     return false;
   }
 
@@ -118,7 +123,10 @@ export default class Menu extends React.Component {
         }}
         className={this.props.className}
       >
+        <>
         {this.props.children}
+        </>
+
       </div>
     );
   }

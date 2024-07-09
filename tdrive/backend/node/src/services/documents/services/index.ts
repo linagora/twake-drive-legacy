@@ -212,20 +212,25 @@ export class DocumentsService {
         ).getEntities();
 
     const sortFieldMapping = {
-      directory: "is_directory",
       name: "name",
-      date: "added",
-      shared: "scope",
-      sized: "size",
+      date: "last_modified",
+      size: "size",
     };
     const sortField = {};
-    sortField[sortFieldMapping[sort?.by] || "is_directory"] = sort?.order || "asc";
+    sortField[sortFieldMapping[sort?.by] || "name"] = sort?.order || "asc";
+
     const dbType = await globalResolver.database.getConnector().getType();
-    const dbOffset = dbType === "mongodb" ? 0 : 1;
-    //Get children if it is a directory
-    let pagination: Pagination;
-    if (paginate)
-      pagination = new Pagination(`${paginate?.page || dbOffset}`, `${paginate.limit}`, false);
+
+    // Initialize pagination
+    let pagination;
+
+    if (paginate) {
+      const { page, limit } = paginate;
+      const pageNumber = dbType === "mongodb" ? page : page / limit + 1;
+
+      pagination = new Pagination(`${pageNumber}`, `${limit}`, false);
+    }
+      
     let children = isDirectory
       ? (
           await this.repository.find(

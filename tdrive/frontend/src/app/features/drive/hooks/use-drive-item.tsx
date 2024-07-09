@@ -121,7 +121,14 @@ export const useDriveItem = (id: string) => {
               lastPage: true,
             }));
           }
-          setChildren(prev => [...prev, ...details.children]);
+          // set children and remove duplicates
+          setChildren(prev => [
+            ...prev,
+            ...details.children.filter(
+              (item, index, self) =>
+                index === self.findIndex(t => t.id === item.id),
+            ),
+          ]);
         } catch (e) {
           // set pagination end to true
           set(DriveItemPagination, prev => ({

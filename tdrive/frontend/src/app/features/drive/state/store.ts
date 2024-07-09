@@ -19,8 +19,8 @@ export const DriveItemSelectedList = atom<{[key: string]: boolean }>({
 export const DriveItemSort = atom<BrowseSort>({
   key: 'DriveItemSort',
   default: {
-    by: 'directory',
-    order: 'desc',
+    by: 'date',
+    order: 'asc',
   },
 });
 

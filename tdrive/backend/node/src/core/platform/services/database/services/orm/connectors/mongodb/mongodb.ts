@@ -228,7 +228,9 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions> {
       .find(query)
       .sort(sort)
       .skip(Math.max(0, parseInt(options.pagination.page_token || "0")))
-      .limit(Math.max(0, parseInt(options.pagination.limitStr || "100")));
+      .limit(Math.max(0, parseInt(options.pagination.limitStr || "100"))).collation({
+        locale: "en_US", numericOrdering: true
+      });
 
     const entities: Table[] = [];
     while (await cursor.hasNext()) {
