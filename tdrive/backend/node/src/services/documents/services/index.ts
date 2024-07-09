@@ -230,7 +230,7 @@ export class DocumentsService {
 
       pagination = new Pagination(`${pageNumber}`, `${limit}`, false);
     }
-      
+
     let children = isDirectory
       ? (
           await this.repository.find(
