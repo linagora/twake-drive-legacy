@@ -4,6 +4,10 @@ import authMiddleware from '@/middlewares/auth.middleware';
 import requirementsMiddleware from '@/middlewares/requirements.middleware';
 import { Router } from 'express';
 
+/**
+ * When the user previews or edits a file in Twake Drive, their browser is sent to these routes
+ * which return a webpage that instantiates the client side JS Only Office component.
+ */
 class IndexRoute implements Routes {
   public path = '/';
   public router = Router();

@@ -1,5 +1,5 @@
 import { CREDENTIALS_SECRET } from '@/config';
-import loggerService from '@/services/logger.service';
+import logger from '@/lib/logger';
 import userService from '@/services/user.service';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
@@ -25,7 +25,7 @@ export default async (req: Request<{}, {}, {}, RequestQuery>, res: Response, nex
           return;
         }
       } catch (error) {
-        loggerService.error('invalid token', error);
+        logger.error('invalid token', error.stack);
         res.clearCookie('token');
       }
     }

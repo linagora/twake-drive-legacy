@@ -1,6 +1,6 @@
 import { IuserService, UserType } from '@/interfaces/user.interface';
 import apiService from './api.service';
-import loggerService from './logger.service';
+import logger from '../lib/logger';
 
 class UserService implements IuserService {
   public getCurrentUser = async (token: string): Promise<UserType> => {
@@ -12,7 +12,7 @@ class UserService implements IuserService {
 
       return resource;
     } catch (error) {
-      loggerService.error('Failed to fetch the current user', error.message);
+      logger.error('Failed to fetch the current user from Twake Drive', error.stack);
 
       return null;
     }

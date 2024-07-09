@@ -1,12 +1,14 @@
 import { FileRequestParams, FileType, IFileService } from '@/interfaces/file.interface';
 import apiService from './api.service';
-import loggerService from './logger.service';
+import logger from '../lib/logger';
 import { Stream } from 'stream';
 import FormData from 'form-data';
 import * as Utils from '@/utils';
 
+/** Client for Twake Drive's file related APIs, using {@see apiService}
+ * to handle authorization
+ */
 class FileService implements IFileService {
-
   public get = async (params: FileRequestParams): Promise<FileType> => {
     try {
       const { company_id, file_id } = params;
@@ -16,7 +18,7 @@ class FileService implements IFileService {
 
       return resource;
     } catch (error) {
-      loggerService.error('Failed to fetch file metadata: ', error.message);
+      logger.error('Failed to fetch file metadata from Twake Drive: ', error.stack);
 
       return Promise.reject();
     }
@@ -32,7 +34,7 @@ class FileService implements IFileService {
 
       return file;
     } catch (error) {
-      loggerService.error('Failed to download file: ', error.message);
+      logger.error('Failed to download file from Twake Drive: ', error.stack);
     }
   };
 
@@ -66,7 +68,7 @@ class FileService implements IFileService {
         filename,
       });
 
-      loggerService.info('Saving file version: ', filename);
+      logger.info('Saving file version to Twake Drive: ', filename);
 
       return await apiService.post<any, { resource: FileType }>({
         url: create_new
@@ -76,7 +78,7 @@ class FileService implements IFileService {
         headers: form.getHeaders(),
       });
     } catch (error) {
-      loggerService.error('Failed to save file: ', error.message);
+      logger.error('Failed to save file: ', error.stack);
     }
   };
 }

@@ -1,8 +1,10 @@
 import { DriveFileType, IDriveService } from '@/interfaces/drive.interface';
 import apiService from './api.service';
-import loggerService from './logger.service';
+import logger from '../lib/logger';
 
-/** Client for the Twake Drive backend API dealing with `DriveItem`s  */
+/** Client for Twake Drive's APIs dealing with `DriveItem`s, using {@see apiService}
+ * to handle authorization
+ */
 class DriveService implements IDriveService {
   public get = async (params: { company_id: string; drive_file_id: string; user_token?: string }): Promise<DriveFileType> => {
     try {
@@ -14,7 +16,7 @@ class DriveService implements IDriveService {
 
       return resource;
     } catch (error) {
-      loggerService.error('Failed to fetch file metadata: ', error.message);
+      logger.error('Failed to fetch file metadata: ', error.stack);
 
       return Promise.reject();
     }
@@ -41,7 +43,7 @@ class DriveService implements IDriveService {
 
       return resource;
     } catch (error) {
-      loggerService.error('Failed to create version: ', error.message);
+      logger.error('Failed to create version: ', error.stack);
       return Promise.reject();
     }
   };
