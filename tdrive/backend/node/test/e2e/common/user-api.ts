@@ -22,6 +22,7 @@ import { DriveFileAccessLevel, publicAccessLevel } from "../../../src/services/d
 import { UserQuota } from "../../../src/services/user/web/types";
 import { Api } from "../utils.api";
 import { OidcJwtVerifier } from "../../../src/services/console/clients/remote-jwks-verifier";
+import { Response } from "light-my-request";
 
 /** The UserApi is an abstraction for E2E tests that
  * represents the high level actions a user can take
