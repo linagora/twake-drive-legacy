@@ -131,26 +131,43 @@ describe('The PostgresQueryBuilder', () => {
     const entity = newTestDbEntity();
 
     const newValue = "new-tag-value";
-    const [queryText, params] = subj.buildatomicCompareAndSet(entity, "tags", null, newValue);
+    const queries = subj.buildatomicCompareAndSet(entity, "tags", null, newValue);
+    let queryText, params;
 
-    expect(normalizeWhitespace(queryText as string)).toBe(`UPDATE "test_table" SET tags = $1 WHERE company_id = $2 AND id = $3 AND tags = $4 RETURNING tags`);
+    [queryText, params] = queries.updateQuery;
+    expect(normalizeWhitespace(queryText as string)).toBe(`UPDATE "test_table" SET tags = $1 WHERE company_id = $2 AND id = $3 AND tags IS NULL`);
     expect(params[0]).toBe(JSON.stringify(newValue));
     expect(params[1]).toBe(entity.company_id);
     expect(params[2]).toBe(entity.id);
-    expect(params[3]).toBe(null);
+    expect(params.length).toBe(3);
+
+    [queryText, params] = queries.getValueQuery;
+    expect(normalizeWhitespace(queryText as string)).toBe(`SELECT "tags" FROM "test_table" WHERE company_id = $1 AND id = $2`);
+    expect(params[0]).toBe(entity.company_id);
+    expect(params[1]).toBe(entity.id);
+    expect(params.length).toBe(2);
   });
 
   test('buildatomicCompareAndSet to null', async () => {
     const entity = newTestDbEntity();
 
     const previousValue = "new-tag-value";
-    const [queryText, params] = subj.buildatomicCompareAndSet(entity, "tags", previousValue, null);
+    const queries = subj.buildatomicCompareAndSet(entity, "tags", previousValue, null);
+    let queryText, params;
 
-    expect(normalizeWhitespace(queryText as string)).toBe(`UPDATE "test_table" SET tags = $1 WHERE company_id = $2 AND id = $3 AND tags = $4 RETURNING tags`);
+    [queryText, params] = queries.updateQuery;
+    expect(normalizeWhitespace(queryText as string)).toBe(`UPDATE "test_table" SET tags = $1 WHERE company_id = $2 AND id = $3 AND tags = $4`);
     expect(params[0]).toBe(null);
     expect(params[1]).toBe(entity.company_id);
     expect(params[2]).toBe(entity.id);
     expect(params[3]).toBe(JSON.stringify(previousValue));
+    expect(params.length).toBe(4);
+
+    [queryText, params] = queries.getValueQuery;
+    expect(normalizeWhitespace(queryText as string)).toBe(`SELECT "tags" FROM "test_table" WHERE company_id = $1 AND id = $2`);
+    expect(params[0]).toBe(entity.company_id);
+    expect(params[1]).toBe(entity.id);
+    expect(params.length).toBe(2);
   });
 
   const assertInsertQueryParams = (actual: TestDbEntity, expected: any[]) => {

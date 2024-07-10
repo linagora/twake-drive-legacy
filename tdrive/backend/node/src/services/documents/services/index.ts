@@ -59,8 +59,6 @@ import archiver from "archiver";
 import internal from "stream";
 import config from "config";
 import { randomUUID } from "crypto";
-import { MultipartFile } from "@fastify/multipart";
-import { UploadOptions } from "../../files/types";
 
 export class DocumentsService {
   version: "1";
