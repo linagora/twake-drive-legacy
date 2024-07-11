@@ -374,7 +374,7 @@ export const addDriveItemToArchive = async (
         );
       }
       nextPage = items.nextPage?.page_token;
-    } while (nextPage > "");
+    } while (nextPage);
     return;
   }
 };
