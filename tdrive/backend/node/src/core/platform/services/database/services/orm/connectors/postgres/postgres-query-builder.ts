@@ -103,7 +103,7 @@ export class PostgresQueryBuilder {
         limit = Number.parseInt(options.pagination.limitStr);
       }
       if (options.pagination.page_token) {
-        offset = (Number.parseInt(options.pagination.page_token) - 1) * limit;
+        offset = Number.parseInt(options.pagination.page_token) * limit;
       }
     }
     return [query(whereClause, orderByClause, limit, offset), values];

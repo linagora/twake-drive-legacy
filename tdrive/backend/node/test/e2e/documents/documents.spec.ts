@@ -44,7 +44,7 @@ describe("the Drive feature", () => {
     currentUser = await UserApi.getInstance(platform);
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await platform?.tearDown();
     platform = null;
   });

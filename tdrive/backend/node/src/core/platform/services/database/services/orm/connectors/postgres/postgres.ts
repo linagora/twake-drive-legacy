@@ -230,15 +230,20 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
       entities.push(entity);
     });
 
-    const nextPageToken = options?.pagination?.page_token || "0";
-    const limit = parseInt(options?.pagination?.limitStr);
-    const nextToken = entities.length === limit && (parseInt(nextPageToken) + limit).toString(10);
-    const nextPage: Paginable = new Pagination(nextToken, options?.pagination?.limitStr || "100");
+    const nextPage = this.nextPage(options.pagination, entities.length);
     logger.debug(
       `services.database.orm.postgres.find - Query Result (items=${entities.length}): ${query}`,
     );
 
     return new ListResult<EntityType>(entityDefinition.type, entities, nextPage);
+  }
+
+  nextPage(pagination: Pagination, entitiesLength: number) {
+    const nextPageToken = pagination?.page_token || "0";
+    const limit = parseInt(pagination?.limitStr);
+    const nextToken = entitiesLength === limit && (parseInt(nextPageToken) + 1).toString(10);
+    const nextPage: Paginable = new Pagination(nextToken, pagination?.limitStr || "100");
+    return nextPage;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
