@@ -396,7 +396,11 @@ export default memo(
                 <Menu menu={() => onBuildSortContextMenu()} sortData={sortLabel}>
                   {' '}
                   <Button theme="outline" className="ml-4 flex flex-row items-center">
-                  <SortIcon className={`h-4 w-4 mr-2 -ml-1 ${sortLabel.order === 'asc' ? 'transform rotate-180' : ''}`} />
+                    <SortIcon
+                      className={`h-4 w-4 mr-2 -ml-1 ${
+                        sortLabel.order === 'asc' ? 'transform rotate-180' : ''
+                      }`}
+                    />
                     <span>By {sortLabel.by}</span>
                     <ChevronDownIcon className="h-4 w-4 ml-2 -mr-1" />
                   </Button>
@@ -419,6 +423,26 @@ export default memo(
 
               <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
                 <div className="grow overflow-auto" ref={scrollViwer}>
+                  {documents.length === 0 && !loading && (
+                    <div className="mt-4 text-center border-2 border-dashed rounded-md p-8">
+                      <Subtitle className="block mb-2">
+                        {Languages.t('scenes.app.drive.nothing')}
+                      </Subtitle>
+                      {!inTrash && access != 'read' && (
+                        <>
+                          <Base>{Languages.t('scenes.app.drive.drag_and_drop')}</Base>
+                          <br />
+                          <Button
+                            onClick={() => uploadItemModal()}
+                            theme="primary"
+                            className="mt-4"
+                          >
+                            {Languages.t('scenes.app.drive.add_doc')}
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  )}
                   {children.map((child, index) =>
                     child.is_directory ? (
                       <Droppable id={index} key={index}>
