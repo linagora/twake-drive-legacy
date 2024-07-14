@@ -1,4 +1,4 @@
-import { describe, beforeEach, afterEach, it, expect, afterAll } from "@jest/globals";
+import { describe, beforeAll, afterAll, it, expect } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 
@@ -6,7 +6,7 @@ describe("The Documents Browser Window and API", () => {
   let platform: TestPlatform;
   let currentUser: UserApi;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     platform = await init({
       services: [
         "webserver",

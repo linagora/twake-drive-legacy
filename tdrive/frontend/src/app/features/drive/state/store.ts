@@ -20,7 +20,7 @@ export const DriveItemSort = atom<BrowseSort>({
   key: 'DriveItemSort',
   default: {
     by: 'date',
-    order: 'asc',
+    order: 'desc',
   },
 });
 

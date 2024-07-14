@@ -217,7 +217,7 @@ export class DocumentsService {
       size: "size",
     };
     const sortField = {};
-    sortField[sortFieldMapping[sort?.by] || "name"] = sort?.order || "asc";
+    sortField[sortFieldMapping[sort?.by] || "last_modified"] = sort?.order || "desc";
 
     const dbType = await globalResolver.database.getConnector().getType();
 
@@ -254,7 +254,10 @@ export class DocumentsService {
                   }),
             },
             {
-              sort: sortField,
+              sort: {
+                is_directory: "desc",
+                ...sortField,
+              },
               pagination,
             },
             context,
