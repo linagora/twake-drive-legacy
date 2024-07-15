@@ -408,11 +408,12 @@ export class DocumentsController {
   downloadZip = async (
     request: FastifyRequest<{
       Params: RequestParams;
-      Querystring: { token?: string; items: string; public_token?: string };
+      Querystring: { token?: string; items: string; public_token?: string; is_directory?: boolean };
     }>,
     reply: FastifyReply,
   ): Promise<void> => {
     const context = getDriveExecutionContext(request);
+    const isDirectory = request.query.is_directory || false;
     let ids = (request.query.items || "").split(",");
     const token = request.query.token;
 
@@ -425,6 +426,11 @@ export class DocumentsController {
 
     if (ids[0] === "root") {
       const items = await globalResolver.services.documents.documents.get(ids[0], context);
+      ids = items.children.map(item => item.id);
+    }
+
+    if (isDirectory) {
+      const items = await globalResolver.services.documents.documents.get(ids[0], context, true);
       ids = items.children.map(item => item.id);
     }
 

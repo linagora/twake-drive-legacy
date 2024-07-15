@@ -99,9 +99,9 @@ export const useDriveActions = () => {
   );
 
   const downloadZip = useCallback(
-    async (ids: string[]) => {
+    async (ids: string[], isDirectory?: boolean) => {
       try {
-        const url = await DriveApiClient.getDownloadZipUrl(companyId, ids);
+        const url = await DriveApiClient.getDownloadZipUrl(companyId, ids, isDirectory);
         (window as any).open(url, '_blank').focus();
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_download_file'));

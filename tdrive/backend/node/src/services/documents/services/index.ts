@@ -115,7 +115,7 @@ export class DocumentsService {
     } else {
       return {
         nextPage: null,
-        ...(await this.get(id, context, sort, paginate)),
+        ...(await this.get(id, context, false, sort, paginate)),
       };
     }
   };
@@ -157,6 +157,7 @@ export class DocumentsService {
   get = async (
     id: string,
     context: DriveExecutionContext & { public_token?: string },
+    all?: boolean,
     sort?: SortDocumentsBody,
     paginate?: PaginateDocumentBody,
   ): Promise<DriveItemDetails> => {
@@ -216,7 +217,7 @@ export class DocumentsService {
       date: "last_modified",
       size: "size",
     };
-    const sortField = {};
+    let sortField = {};
     sortField[sortFieldMapping[sort?.by] || "last_modified"] = sort?.order || "desc";
 
     const dbType = await globalResolver.database.getConnector().getType();
@@ -253,13 +254,15 @@ export class DocumentsService {
                     is_in_trash: false,
                   }),
             },
-            {
-              sort: {
-                is_directory: "desc",
-                ...sortField,
-              },
-              pagination,
-            },
+            all
+              ? {}
+              : {
+                  sort: {
+                    is_directory: "desc",
+                    ...sortField,
+                  },
+                  pagination,
+                },
             context,
           )
         ).getEntities()

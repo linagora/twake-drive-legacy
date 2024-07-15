@@ -138,11 +138,11 @@ export class DriveApiClient {
     return Api.route(`/internal/services/documents/v1/companies/${companyId}/item/${id}/download`);
   }
 
-  static async getDownloadZipUrl(companyId: string, ids: string[]) {
+  static async getDownloadZipUrl(companyId: string, ids: string[], isDirectory?: boolean) {
     // const { token } = await DriveApiClient.getDownloadToken(companyId, ids);
     return Api.route(
       `/internal/services/documents/v1/companies/${companyId}/item/download/zip` +
-        `?items=${ids.join(',')}`
+        `?items=${ids.join(',')}&is_directory=${isDirectory}`,
     );
   }
 

@@ -301,9 +301,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                   hide: inTrash,
                   onClick: () => {
                     if (parent.children && parent.children.length > 0) {
-                      const idsFromArray = getIdsFromArray(parent.children);
-                      console.log("Download zip file with docs: " + idsFromArray);
-                      downloadZip(idsFromArray);
+                      downloadZip([parent.item!.id]);
                     } else if (parent.item) {
                       console.log("Download folder itself");
                       download(parent.item.id);
