@@ -137,7 +137,7 @@ describe('The PostgresQueryBuilder', () => {
     const query = subj.buildSelect(TestDbEntity, null, options);
 
     //then
-    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" ORDER BY id DESC LIMIT 50 OFFSET 50`);
+    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" ORDER BY id DESC LIMIT 50 OFFSET 100`);
     expect(query[1]).toEqual([]);
   });
 
@@ -150,7 +150,7 @@ describe('The PostgresQueryBuilder', () => {
     const query = subj.buildSelect(TestDbEntity, filter as { [key: string]: any }, options);
 
     //then
-    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" WHERE id = $1 AND company_id = $2 ORDER BY added ASC, id DESC LIMIT 10 OFFSET 20`);
+    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" WHERE id = $1 AND company_id = $2 ORDER BY added ASC, id DESC LIMIT 10 OFFSET 30`);
     expect(query[1]).toEqual([filter.id, filter.company_id]);
   });
 
