@@ -6,8 +6,10 @@ import { renderFile } from 'eta';
 import path from 'path';
 import errorMiddleware from './middlewares/error.middleware';
 import { SERVER_PORT, SERVER_PREFIX } from '@config';
-import loggerService from './services/logger.service';
+import logger from './lib/logger';
 import cookieParser from 'cookie-parser';
+import apiService from './services/api.service';
+import onlyofficeService from './services/onlyoffice.service';
 
 class App {
   public app: express.Application;
@@ -25,8 +27,8 @@ class App {
   }
 
   public listen = () => {
-    this.app.listen(SERVER_PORT, () => {
-      loggerService.info(`🚀 App listening on port ${SERVER_PORT}`);
+    this.app.listen(parseInt(SERVER_PORT, 10), '0.0.0.0', () => {
+      logger.info(`🚀 App listening on port ${SERVER_PORT}`);
     });
   };
 
@@ -34,12 +36,19 @@ class App {
 
   private initRoutes = (routes: Routes[]) => {
     this.app.use((req, res, next) => {
-      console.log('Requested: ', req.method, req.originalUrl);
+      logger.info(`Received request: ${req.method} ${req.originalUrl} from ${req.header('user-agent')} (${req.ip})`);
       next();
     });
 
     routes.forEach(route => {
       this.app.use(SERVER_PREFIX, route.router);
+    });
+
+    this.app.get('/health', (_req, res) => {
+      Promise.all([onlyofficeService.getLatestVersion(), apiService.hasToken()]).then(
+        ([version, twakeDriveToken]) => res.status(version && twakeDriveToken ? 200 : 500).send({ version, twakeDriveToken }),
+        err => res.status(500).send(err),
+      );
     });
 
     this.app.use(

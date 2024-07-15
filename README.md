@@ -1,9 +1,12 @@
+# Twake Drive
 <p align="center">
   <a href="https://github.com/linagora/twake-drive">
-   <img src="https://github.com/linagora/twake-drive/assets/14924963/dbeafa1a-367b-4a88-8d72-b09b753a0415" alt="Logo">
+   <img src="https://github.com/linagora/twake-drive/assets/146178981/01827068-13b8-420a-9159-bf3d97220a12" alt="Logo">
   </a>
 
-  <h3 align="center">twakedrive.app (🚀coming soon)</h3>
+
+
+  
 
   <p align="center">
     <b align="center">The open-source alternative to Google Drive.</b>
@@ -13,7 +16,7 @@
     <br />
     <a href="https://t.me/+HIWCtSkvTpxiNjcy">Telegram</a>
     |
-    <a href="https://twakedrive.app">Website</a>
+    <a href="https://twake-drive.com">Website</a>
     |
     <a href="https://github.com/linagora/twake-drive/issues">Issues</a>
     |

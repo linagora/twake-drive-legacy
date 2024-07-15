@@ -85,7 +85,7 @@ export default class Repository<EntityType> {
     }
 
     if (!options.pagination) {
-      options.pagination = new Pagination("", "100");
+      options.pagination = new Pagination("", "1000");
     }
 
     return await this.connector.find(this.entityType, filters, options);
@@ -101,6 +101,42 @@ export default class Repository<EntityType> {
     }
 
     return (await this.find(filters, options, context)).getEntities()[0] || null;
+  }
+
+  /**
+   * Updates an entity's field `fieldName` to `newValue`, only if its
+   * current value in the DB is `previousValue`. Does so atomically
+   * (for whatever that means for the specific DB type - mostly a
+   * single query, with no special write concern etc.).
+   *
+   * Note that the `currentValue` returned may not be atomic depending
+   * on the DB type.
+   *
+   * Unlike the identical on the `Connector`, the manager is flushed
+   * and reset before the operation is ran.
+   *
+   * A single entity for that primary key must already exist. This is not
+   * always tested, and a return without error should not be interpreted as
+   * such a row existing.
+   *
+   * @param entity Entity to try to update
+   * @param fieldName Name of the field to compare and possibly set (the node.js field name)
+   * @param previousValue Value of that field expected in the DB
+   * @param newValue New value to assign if the existing value matches `previousValue`
+   */
+  async atomicCompareAndSet<FieldValueType>(
+    entity: EntityType,
+    fieldName: keyof EntityType,
+    previousValue: FieldValueType | null,
+    newValue: FieldValueType | null,
+  ): Promise<{
+    didSet: boolean;
+    currentValue: FieldValueType | null;
+  }> {
+    if (previousValue === newValue)
+      throw new Error(`Previous and new values are identical: ${JSON.stringify(previousValue)}`);
+    await this.manager.flush().then(manager => manager.reset());
+    return this.connector.atomicCompareAndSet(entity, fieldName, previousValue, newValue);
   }
 
   async save(entity: EntityType, _context?: ExecutionContext): Promise<void> {

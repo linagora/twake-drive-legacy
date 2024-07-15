@@ -17,6 +17,10 @@ export type ItemRequestParams = RequestParams & {
   id: string;
 };
 
+export type ItemRequestByEditingSessionKeyParams = RequestParams & {
+  editing_session_key: string;
+};
+
 export type DriveItemDetails = {
   path: DriveFile[];
   item?: DriveFile;

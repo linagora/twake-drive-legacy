@@ -7,6 +7,7 @@ import {
 } from "../../../../../../../../../src/core/platform/services/database/services/orm/connectors/postgres/postgres";
 import { getEntityDefinition } from '../../../../../../../../../src/core/platform/services/database/services/orm/utils';
 import { TestDbEntity, normalizeWhitespace, newTestDbEntity } from "./utils";
+import { Pagination } from "../../../../../../../../../src/core/platform/framework/api/crud-service";
 
 describe('The Postgres Connector module', () => {
 
@@ -27,6 +28,28 @@ describe('The Postgres Connector module', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
+
+  test('nextPage successfully iterate starting from null value', () => {
+    //given
+    const pagination = new Pagination(null, "5");
+
+    //when
+    let nextPage = subj.nextPage(pagination, 5);
+
+    //then
+    expect(nextPage.page_token).toEqual("1")
+    expect(nextPage.limitStr).toEqual("5");
+
+    nextPage = subj.nextPage(Pagination.fromPaginable(nextPage), 5);
+    //then
+    expect(nextPage.page_token).toEqual("2")
+    expect(nextPage.limitStr).toEqual("5");
+
+    nextPage = subj.nextPage(Pagination.fromPaginable(nextPage), 1);
+    //then
+    expect(nextPage.page_token).toEqual(false)
+    expect(nextPage.limitStr).toEqual("5");
+  })
 
   test('createTable generates table structure queries', async () => {
     // given

@@ -35,6 +35,10 @@ export type DriveScope = "personal" | "shared";
   globalIndexes: [
     ["company_id", "parent_id"],
     ["company_id", "is_in_trash"],
+
+    // Needs to be globally unique (no `company_id`) because it's the only key that OnlyOffice
+    // will return to us to identify the document being edited. Convenient for other plugins too.
+    ["editing_session_key"],
   ],
   primaryKey: [["company_id"], "id"],
   type: TYPE,
@@ -86,6 +90,15 @@ export class DriveFile {
 
   @Column("access_info", "encoded_json")
   access_info: AccessInformation;
+
+  /**
+   * If this field is non-null, then an editing session is in progress (probably in OnlyOffice).
+   * Should be in the format `timestamp-appid-hexuuid` where `appid` and `timestamp` have no `-`
+   * characters.
+   */
+  @Type(() => String)
+  @Column("editing_session_key", "string")
+  editing_session_key: string;
 
   @Type(() => String)
   @Column("content_keywords", "string")

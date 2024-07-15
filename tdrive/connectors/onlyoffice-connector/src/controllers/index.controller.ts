@@ -6,7 +6,8 @@ import driveService from '@/services/drive.service';
 import { DriveFileType } from '@/interfaces/drive.interface';
 import fileService from '@/services/file.service';
 import { OfficeToken } from '@/interfaces/routes.interface';
-import loggerService from '@/services/logger.service';
+import logger from '@/lib/logger';
+import * as Utils from '@/utils';
 
 interface RequestQuery {
   mode: string;
@@ -23,7 +24,17 @@ interface RequestEditorQuery {
   file_id: string;
 }
 
+/**
+ * These routes are called by Twake Drive frontend. The user's browser opens ( +) `${config.plugin.edition_url}/` (`index`).
+ * The user is redirected from there to open directly the OnlyOffice edition server's web UI, with appropriate preview or not
+ * and rights checks.
+ */
 class IndexController {
+  /**
+   * Opened by the user's browser, proxied through the Twake Drive backend. Checks access to the
+   * file with the backend, then redirects the user to the `editor` method but directly on this
+   * connector, not proxied by Twake Drive's backend anymore.
+   */
   public index = async (req: Request<{}, {}, {}, RequestQuery>, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { file_id, drive_file_id, company_id, preview, token } = req.query;
@@ -79,16 +90,22 @@ class IndexController {
       );
 
       res.redirect(
-        `${SERVER_ORIGIN ?? ''}/${SERVER_PREFIX.replace(
-          /(\/+$|^\/+)/gm,
-          '',
-        )}/editor?office_token=${officeToken}&token=${token}&file_id=${file_id}&company_id=${company_id}&preview=${preview}`,
+        Utils.joinURL([SERVER_ORIGIN ?? '', SERVER_PREFIX, 'editor'], {
+          token,
+          file_id,
+          company_id,
+          preview,
+          office_token: officeToken,
+        }),
       );
     } catch (error) {
       next(error);
     }
   };
 
+  /**
+   * Renders this connector's view to initialise the Docs API client side component.
+   */
   public editor = async (req: Request<{}, {}, {}, RequestEditorQuery>, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { office_token } = req.query;
@@ -113,11 +130,11 @@ class IndexController {
 
       res.render('index', {
         ...initResponse,
-        server: SERVER_ORIGIN.replace(/\/+$/, '') + '/' + SERVER_PREFIX.replace(/(\/+$|^\/+)/, '') || `${req.protocol}://${req.get('host')}/`,
+        server: Utils.joinURL([SERVER_ORIGIN, SERVER_PREFIX]),
         token: inPageToken,
       });
     } catch (error) {
-      loggerService.error(error);
+      logger.error(error);
       next(error);
     }
   };

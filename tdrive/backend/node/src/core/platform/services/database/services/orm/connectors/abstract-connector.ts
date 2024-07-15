@@ -20,6 +20,16 @@ export abstract class AbstractConnector<T extends ConnectionOptions> implements 
 
   abstract upsert(entities: any[], _options: UpsertOptions): Promise<boolean[]>;
 
+  abstract atomicCompareAndSet<Entity, FieldValueType>(
+    entity: Entity,
+    fieldName: keyof Entity,
+    previousValue: FieldValueType,
+    newValue: FieldValueType,
+  ): Promise<{
+    didSet: boolean;
+    currentValue: FieldValueType | null;
+  }>;
+
   abstract remove(entities: any[]): Promise<boolean[]>;
 
   abstract find<EntityType>(

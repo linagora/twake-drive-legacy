@@ -17,6 +17,7 @@ import {
   DriveTdriveTab,
   ItemRequestParams,
   PaginateDocumentBody,
+  ItemRequestByEditingSessionKeyParams,
   RequestParams,
   SearchDocumentsBody,
   SearchDocumentsOptions,
@@ -166,6 +167,26 @@ export class DocumentsController {
     return {
       ...(await globalResolver.services.documents.documents.get(id, context)),
     };
+  };
+
+  /**
+   * Fetches a DriveFile item by its `editing_session_key`.
+   *
+   * @param {FastifyRequest} request
+   * @returns {Promise<DriveItemDetails>}
+   */
+  getByEditingSessionKey = async (
+    request: FastifyRequest<{
+      Params: ItemRequestByEditingSessionKeyParams;
+      Querystring: PaginationQueryParameters & { public_token?: string };
+    }>,
+  ): Promise<DriveFile> => {
+    const context = getDriveExecutionContext(request);
+    const { editing_session_key } = request.params;
+    return await globalResolver.services.documents.documents.getByEditingSessionKey(
+      editing_session_key,
+      context,
+    );
   };
 
   /**
@@ -319,6 +340,35 @@ export class DocumentsController {
     } catch (error) {
       logger.error({ error: `${error}` }, "Failed to create Drive item version");
       CrudException.throwMe(error, new CrudException("Failed to create Drive item version", 500));
+    }
+  };
+
+  /**
+   * Begin an editing session if none exists, or return the existing one
+   * @returns The `editing_session_key` that was either set or already was there
+   */
+  beginEditing = async (
+    request: FastifyRequest<{
+      Params: ItemRequestParams;
+      Body: { editorApplicationId: string };
+    }>,
+  ) => {
+    try {
+      const context = getDriveExecutionContext(request);
+      const { id } = request.params;
+
+      if (!id) throw new CrudException("Missing id", 400);
+      if (!request.body.editorApplicationId)
+        throw new CrudException("Missing editorApplicationId", 400);
+
+      return await globalResolver.services.documents.documents.beginEditing(
+        id,
+        request.body.editorApplicationId,
+        context,
+      );
+    } catch (error) {
+      logger.error({ error: `${error}` }, "Failed to begin editing Drive item");
+      CrudException.throwMe(error, new CrudException("Failed to begin editing Drive item", 500));
     }
   };
 

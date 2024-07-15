@@ -15,7 +15,7 @@ class OnlyOfficeRoute implements Routes {
 
   private initRoutes = () => {
     this.router.get(`${this.path}:mode/read`, requirementsMiddleware, this.onlyOfficeController.read);
-    this.router.post(`${this.path}:mode/save`, requirementsMiddleware, this.onlyOfficeController.save);
+    this.router.post(`${this.path}:mode/save`, requirementsMiddleware, this.onlyOfficeController.ooCallback);
   };
 }
 

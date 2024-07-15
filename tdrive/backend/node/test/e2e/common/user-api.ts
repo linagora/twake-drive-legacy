@@ -22,6 +22,7 @@ import { DriveFileAccessLevel, publicAccessLevel } from "../../../src/services/d
 import { UserQuota } from "../../../src/services/user/web/types";
 import { Api } from "../utils.api";
 import { OidcJwtVerifier } from "../../../src/services/console/clients/remote-jwks-verifier";
+import { Response } from "light-my-request";
 
 /** The UserApi is an abstraction for E2E tests that
  * represents the high level actions a user can take
@@ -396,6 +397,29 @@ export default class UserApi {
       });
   };
 
+  async beginEditingDocument(
+    driveFileId: string,
+    editorApplicationId: string,
+  ): Promise<Response> {
+    return await this.api.post(
+      `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/item/${driveFileId}/editing_session`,
+      { editorApplicationId },
+      {
+        authorization: `Bearer ${this.jwt}`
+      });
+  }
+
+  async beginEditingDocumentExpectOk(
+    driveFileId: string,
+    editorApplicationId: string,
+  ): Promise<string> {
+    const result = await this.beginEditingDocument(driveFileId, editorApplicationId);
+    expect(result.statusCode).toBe(200);
+    const {editingSessionKey} = result.json();
+    expect(editingSessionKey).toBeTruthy();
+    return editingSessionKey;
+  }
+
   async searchDocument(
     payload: Record<string, any>
   ) {
@@ -457,6 +481,16 @@ export default class UserApi {
     const doc = deserialize<DriveItemDetailsMockClass>(DriveItemDetailsMockClass, response.body);
     expect(doc.item?.id).toBe(id);
     return doc;
+  };
+
+  async getDocumentByEditingKey(editing_session_key: string) {
+    return await this.platform.app.inject({
+      method: "GET",
+      url: `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/item/editing_session/${encodeURIComponent(editing_session_key)}`,
+      headers: {
+        authorization: `Bearer ${this.jwt}`
+      }
+    });
   };
 
   async sharedWithMeDocuments(

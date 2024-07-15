@@ -11,7 +11,6 @@ export interface IApiServiceRequestParams<T> {
 export interface IApiService {
   get<T>(params: IApiServiceRequestParams<T>): Promise<T>;
   post<T>(params: IApiServiceRequestParams<T>): Promise<T>;
-  runCommand<T>(c: string, key: string): Promise<void>;
 }
 
 export interface IApiServiceApplicationTokenRequestParams {

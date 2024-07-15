@@ -1,9 +1,13 @@
 import { FileRequestParams, FileType, IFileService } from '@/interfaces/file.interface';
 import apiService from './api.service';
-import loggerService from './logger.service';
+import logger from '../lib/logger';
 import { Stream } from 'stream';
 import FormData from 'form-data';
+import * as Utils from '@/utils';
 
+/** Client for Twake Drive's file related APIs, using {@see apiService}
+ * to handle authorization
+ */
 class FileService implements IFileService {
   public get = async (params: FileRequestParams): Promise<FileType> => {
     try {
@@ -14,7 +18,7 @@ class FileService implements IFileService {
 
       return resource;
     } catch (error) {
-      loggerService.error('Failed to fetch file metadata: ', error.message);
+      logger.error('Failed to fetch file metadata from Twake Drive: ', error.stack);
 
       return Promise.reject();
     }
@@ -30,7 +34,7 @@ class FileService implements IFileService {
 
       return file;
     } catch (error) {
-      loggerService.error('Failed to download file: ', error.message);
+      logger.error('Failed to download file from Twake Drive: ', error.stack);
     }
   };
 
@@ -55,7 +59,7 @@ class FileService implements IFileService {
 
       const form = new FormData();
 
-      const nameSplit = (originalFile.metadata.name || '').split('.');
+      const nameSplit = Utils.splitFilename(originalFile.metadata.name || '');
       const filename =
         nameSplit[0].replace(/-[0-9]{8}-[0-9]{4}$/, '') +
         (!create_new ? '.' : `-${new Date().toISOString().split('.')[0].split(':').slice(0, 2).join('').replace(/-/gm, '').split('T').join('-')}.`) +
@@ -64,7 +68,7 @@ class FileService implements IFileService {
         filename,
       });
 
-      loggerService.info('Saving file version: ', filename);
+      logger.info('Saving file version to Twake Drive: ', filename);
 
       return await apiService.post<any, { resource: FileType }>({
         url: create_new
@@ -74,7 +78,7 @@ class FileService implements IFileService {
         headers: form.getHeaders(),
       });
     } catch (error) {
-      loggerService.error('Failed to save file: ', error.message);
+      logger.error('Failed to save file: ', error.stack);
     }
   };
 }

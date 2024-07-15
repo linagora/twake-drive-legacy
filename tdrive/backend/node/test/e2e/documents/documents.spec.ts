@@ -14,6 +14,7 @@ import {
   DriveFileMockClass,
   DriveItemDetailsMockClass,
 } from "../common/entities/mock_entities";
+import { Open } from "unzipper";
 
 describe("the Drive feature", () => {
   let platform: TestPlatform;
@@ -43,7 +44,7 @@ describe("the Drive feature", () => {
     currentUser = await UserApi.getInstance(platform);
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await platform?.tearDown();
     platform = null;
   });
@@ -98,7 +99,10 @@ describe("the Drive feature", () => {
   it("Download folder as a zip should work fine", async () => {
     //given
     const folder = await currentUser.createDirectory("user_" + currentUser.user.id)
-    await currentUser.uploadRandomFileAndCreateDocument(folder.id);
+    const fileNames = [];
+    for (let i = 0; i < 11; i++) {
+      fileNames.push(folder.name + "/" + (await currentUser.uploadRandomFileAndCreateDocument(folder.id)).name);
+    }
 
     //when
     const zipResponse = await currentUser.zipDocument(folder.id);
@@ -109,6 +113,12 @@ describe("the Drive feature", () => {
 
     //and data is in place
     expect(zipResponse.body.length).toBeGreaterThanOrEqual(100);
+
+    //unzip content and check all the files are
+    const zip = await Open.buffer(zipResponse.rawPayload);
+    //
+    expect(zip.files.length).toEqual(11);
+    expect(zip.files.map(f => f.path).sort()).toEqual(fileNames.sort())
   });
 
   it("did create a version for a drive item", async () => {
