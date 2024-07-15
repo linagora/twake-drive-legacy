@@ -139,9 +139,9 @@ export const useDriveActions = () => {
     async (update: Partial<DriveItem>, id: string, parentId: string) => {
       try {
         await DriveApiClient.update(companyId, id, update);
-        await refresh(id || '');
-        await refresh(parentId || '');
-        if (update?.parent_id !== parentId) await refresh(update?.parent_id || '');
+        await refresh(id || '', true);
+        await refresh(parentId || '', true);
+        if (update?.parent_id !== parentId) await refresh(update?.parent_id || '', true);
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_update_file'));
       }
