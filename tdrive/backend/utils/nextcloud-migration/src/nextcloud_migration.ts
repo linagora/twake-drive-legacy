@@ -6,6 +6,7 @@ import { TwakeDriveClient, TwakeDriveUser } from './twake_client';
 import path from 'path';
 import { logger } from "./logger"
 import { User, UserProvider, UserProviderFactory, UserProviderType } from "./user_privider";
+import { FunctionExecutor } from "./executor";
 
 export interface NextcloudMigrationConfiguration {
   shell: {
@@ -36,6 +37,8 @@ export class NextcloudMigration {
 
   driveClient: TwakeDriveClient;
 
+  executor = new FunctionExecutor();
+
   constructor(config: NextcloudMigrationConfiguration) {
     this.config = config;
     this.userProvider = (new UserProviderFactory()).get(config.userProvider, config[config.userProvider]);
@@ -55,6 +58,9 @@ export class NextcloudMigration {
       if(!dir) await this.download(username, password, dirTmp);
       //upload files to the Twake Drive
       await this.upload(driveUser, dirTmp);
+      this.executor.printStatistics();
+      this.executor.printFailedExecutions();
+      return this.executor.getStats();
     } catch (e) {
       console.error('Error downloading files from next cloud', e);
       throw e;
@@ -169,19 +175,22 @@ export class NextcloudMigration {
       }
     }
 
-
     //upload all files
     logger.debug(`UPLOAD FILES FOR  ${sourceDirPath}`)
     for (const file of filesToUpload) {
       logger.debug(`Upload file ${file}`)
-      await this.driveClient.createFile(file, parentDirId);
+      await this.executor.executeWithRetries(this.driveClient.createFile.bind(this.driveClient), [file, parentDirId], 3)
+      // await this.driveClient.createFile(file, parentDirId);
     }
 
     logger.debug(`UPLOAD DIRS FOR  ${sourceDirPath}`)
     for (const [name, path] of dirsToUpload) {
       logger.info(`Create directory ${name}`);
-      const dir = await this.driveClient.createDirectory(name, parentDirId)
-      await this.upload(user, path, dir.id);
+      const dir = await this.executor.executeWithRetries(this.driveClient.createDirectory.bind(this.driveClient), [name, parentDirId], 3)
+      // const dir = await this.driveClient.createDirectory(name, parentDirId)
+      if (dir) {
+        await this.upload(user, path, dir.id);
+      }
     }
   }
 

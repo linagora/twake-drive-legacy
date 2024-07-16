@@ -60,8 +60,8 @@ app.post("/", async (req: Request, res: Response) => {
     res.status(400).send("Username and password for nextcloud are required");
   }
   try {
-    await nextcloud.migrate(params.username, params.password, params.dir);
-    res.status(200).send("Sync DONE ✅");
+    const stats = await nextcloud.migrate(params.username, params.password, params.dir);
+    res.status(200).send(JSON.stringify(stats));
   } catch (e) {
     console.error(e)
     res.status(500).send("Error during synchronization:: " + e.message)
