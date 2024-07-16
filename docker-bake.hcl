@@ -50,7 +50,7 @@ target "nextcloud-migration" {
   inherits = ["_common"]
   dockerfile = "docker/tdrive-nextcloud-migration/Dockerfile"
   tags = concat(
-    generate_tags("docker.io/twakedrive˚/tdrive-nextcloud-migration", target.docker-metadata-action.tags),
+    generate_tags("docker.io/twakedrive/tdrive-nextcloud-migration", target.docker-metadata-action.tags),
     generate_tags("docker-registry.linagora.com/tdrive/tdrive-nextcloud-migration", target.docker-metadata-action.tags),
   )
 }
