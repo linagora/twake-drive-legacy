@@ -95,7 +95,6 @@ export default class EmailPusherClass
       if (!existsSync(subjectPath)) {
         throw Error(`subject template not found: ${subjectPath}`);
       }
-      console.log("🚀 FILE LINK: ", encodedUrl);
       const html = await Eta.renderFile(templatePath, {
         ...data,
         encodedUrl,

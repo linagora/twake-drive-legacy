@@ -23,7 +23,7 @@ export class DocumentsEngine implements Initializable {
     try {
       const { html, text, subject } = await globalResolver.platformServices.emailPusher.build(
         emailTemplate,
-        receiver.language || "en",
+        receiver.preferences?.language || "en",
         {
           sender,
           receiver,
