@@ -138,7 +138,7 @@ describe("the Drive feature", () => {
     //upload files
     const doc = await oneUser.uploadRandomFileAndCreateDocument();
     const doc2 = await anotherUser.uploadRandomFileAndCreateDocument();
-    await new Promise(r => setTimeout(r, 3000));
+
     // shared the file
     await oneUser.shareWithPermissions(doc, anotherUser.user.id, "read");
 
