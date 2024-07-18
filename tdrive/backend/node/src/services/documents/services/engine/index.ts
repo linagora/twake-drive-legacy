@@ -16,7 +16,7 @@ export class DocumentsEngine implements Initializable {
     const company = await globalResolver.services.companies.getCompany({
       id: e.context.company.id,
     });
-    const langauge = receiver.preferences?.language || "en";
+    const language = receiver.preferences?.language || "en";
     const emailTemplate =
       event === DocumentEvents.DOCUMENT_SAHRED
         ? "notification-document-shared"
@@ -24,7 +24,7 @@ export class DocumentsEngine implements Initializable {
     try {
       const { html, text, subject } = await globalResolver.platformServices.emailPusher.build(
         emailTemplate,
-        langauge,
+        language,
         {
           sender,
           receiver,
