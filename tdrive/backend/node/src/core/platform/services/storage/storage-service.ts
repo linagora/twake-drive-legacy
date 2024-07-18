@@ -1,7 +1,13 @@
 import { createCipheriv, createDecipheriv, Decipher } from "crypto";
 import { Stream, Readable } from "stream";
 import Multistream from "multistream";
-import { Consumes, logger, TdriveService, TdriveServiceConfiguration, TdriveServiceOptions } from "../../framework";
+import {
+  Consumes,
+  logger,
+  TdriveService,
+  TdriveServiceConfiguration,
+  TdriveServiceOptions,
+} from "../../framework";
 import LocalConnectorService, { LocalConfiguration } from "./connectors/local/service";
 import S3ConnectorService from "./connectors/S3/s3-service";
 import StorageAPI, {
