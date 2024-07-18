@@ -139,16 +139,8 @@ describe("the Drive feature", () => {
     const doc = await oneUser.uploadRandomFileAndCreateDocument();
     const doc2 = await anotherUser.uploadRandomFileAndCreateDocument();
     await new Promise(r => setTimeout(r, 3000));
-    //give permissions to the file
-    doc.access_info.entities.push({
-      type: "user",
-      id: anotherUser.user.id,
-      level: "read",
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      grantor: null,
-    });
-    await oneUser.updateDocument(doc.id, doc);
+    // shared the file
+    await oneUser.shareWithPermissions(doc, anotherUser.user.id, "read");
 
     // expect the email to be sent in the receiver's language "fr"
     expect(buildEmailSpy).toHaveBeenCalledWith(
@@ -161,15 +153,7 @@ describe("the Drive feature", () => {
     );
 
     // do the same for the other user
-    doc2.access_info.entities.push({
-      type: "user",
-      id: oneUser.user.id,
-      level: "read",
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      grantor: null,
-    });
-    await anotherUser.updateDocument(doc2.id, doc2);
+    await anotherUser.shareWithPermissions(doc2, oneUser.user.id, "read");
 
     // expect the email to be sent in the receiver's language "en"
     expect(buildEmailSpy).toHaveBeenCalledWith(
