@@ -130,6 +130,7 @@ export class TestDbService {
       cache?: User["cache"];
       identity_provider?: string;
       type?: UserType;
+      preferences?: User["preferences"];
     } = {},
     id: string = uuidv1(),
   ): Promise<User> {
@@ -144,6 +145,10 @@ export class TestDbService {
     user.cache = options.cache || user.cache || { companies: [] };
     user.identity_provider = options.identity_provider || "console";
     user.type = options.type || "regular";
+    user.preferences = options.preferences || {
+      locale: "en",
+      timezone: 0,
+    };
 
     //Fixme this is cheating, we should correctly set the cache in internal mode in the code
     user.cache.companies = [

@@ -133,10 +133,11 @@ describe("the Drive feature", () => {
 
   // Test the email language based on the user's language and the email subject
   it("Did notify the user after sharing a file in the user's language.", async () => {
-    const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-    const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+    const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin", preferences: { language: "en" } });
+    const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin", preferences: { language: "fr" }});
     //upload files
     const doc = await oneUser.uploadRandomFileAndCreateDocument();
+    const doc2 = await anotherUser.uploadRandomFileAndCreateDocument();
     await new Promise(r => setTimeout(r, 3000));
     //give permissions to the file
     doc.access_info.entities.push({
@@ -148,6 +149,29 @@ describe("the Drive feature", () => {
       grantor: null,
     });
     await oneUser.updateDocument(doc.id, doc);
+
+    // expect the email to be sent in the receiver's language "fr"
+    expect(buildEmailSpy).toHaveBeenCalledWith(
+      // ignore the template name
+      expect.any(String),
+      // expect the language to be the receiver's language
+      anotherUser.user.preferences?.language || "fr",
+      // ignore the email context
+      expect.any(Object),
+    );
+
+    // do the same for the other user
+    doc2.access_info.entities.push({
+      type: "user",
+      id: oneUser.user.id,
+      level: "read",
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      grantor: null,
+    });
+    await anotherUser.updateDocument(doc2.id, doc2);
+
+    // expect the email to be sent in the receiver's language "en"
     expect(buildEmailSpy).toHaveBeenCalledWith(
       // ignore the template name
       expect.any(String),
@@ -155,6 +179,6 @@ describe("the Drive feature", () => {
       anotherUser.user.preferences?.language || "en",
       // ignore the email context
       expect.any(Object),
-    )
+    );
   });
 });
