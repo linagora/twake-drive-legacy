@@ -15,6 +15,7 @@ import {FileServiceImpl} from "../../../src/services/files/services";
 import StorageAPI from "../../../src/core/platform/services/storage/provider";
 import {SearchServiceAPI} from "../../../src/core/platform/services/search/api";
 import Session from "../../../src/services/console/entities/session";
+import EmailPusherAPI from "../../../src/core/platform/services/email-pusher/provider";
 
 type TokenPayload = {
   sub: string;
@@ -30,6 +31,9 @@ export type User = {
   id: string;
   first_name?: string;
   isWorkspaceModerator?: boolean;
+  preferences?: {
+    language?: string;
+  };
 };
 
 export interface TestPlatform {
@@ -40,6 +44,7 @@ export interface TestPlatform {
   app: FastifyInstance;
   database: DatabaseServiceAPI;
   storage: StorageAPI;
+  emailPusher: EmailPusherAPI;
   messageQueue: MessageQueueServiceAPI;
   authService: AuthServiceAPI;
   filesService: FileServiceImpl;
@@ -83,6 +88,7 @@ export async function init(
     const auth = platform.getProvider<AuthServiceAPI>("auth");
     const storage: StorageAPI = platform.getProvider<StorageAPI>("storage");
     const search: SearchServiceAPI = platform.getProvider<SearchServiceAPI>("search");
+    const emailPusher: EmailPusherAPI = platform.getProvider<EmailPusherAPI>("email-pusher");
 
     testPlatform = {
       platform,
@@ -90,6 +96,7 @@ export async function init(
       messageQueue,
       database,
       storage,
+      emailPusher,
       workspace: { company_id: "", workspace_id: "" },
       currentUser: { id: "" },
       currentSession: uuidv1(),

@@ -2,6 +2,7 @@ import { describe, beforeEach, it, expect, afterAll, jest } from "@jest/globals"
 import { init, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 import { DocumentsEngine } from "../../../src/services/documents/services/engine";
+import EmailPusherClass from "../../../src/core/platform/services/email-pusher";
 import { deserialize } from "class-transformer";
 import { File } from "../../../src/services/files/entities/file";
 import { ResourceUpdateResponse } from "../../../src/utils/types";
@@ -14,6 +15,8 @@ describe("the Drive feature", () => {
     DocumentsEngine.prototype,
     "notifyDocumentVersionUpdated",
   );
+  const DispatchDocumentEvent = jest.spyOn(DocumentsEngine.prototype, "DispatchDocumentEvent");
+  const buildEmailSpy = jest.spyOn(EmailPusherClass.prototype, "build");
   let currentUser: UserApi;
 
   beforeEach(async () => {
@@ -35,6 +38,7 @@ describe("the Drive feature", () => {
         "statistics",
         "platform-services",
         "documents",
+        "email-pusher"
       ],
     });
     currentUser = await UserApi.getInstance(platform);
@@ -125,5 +129,32 @@ describe("the Drive feature", () => {
         notificationReceiver: thridUser.user.id,
       }),
     );
+  });
+
+  // Test the email language based on the user's language and the email subject
+  it("Did notify the user after sharing a file in the user's language.", async () => {
+    const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+    const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+    //upload files
+    const doc = await oneUser.uploadRandomFileAndCreateDocument();
+    await new Promise(r => setTimeout(r, 3000));
+    //give permissions to the file
+    doc.access_info.entities.push({
+      type: "user",
+      id: anotherUser.user.id,
+      level: "read",
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      grantor: null,
+    });
+    await oneUser.updateDocument(doc.id, doc);
+    expect(buildEmailSpy).toHaveBeenCalledWith(
+      // ignore the template name
+      expect.any(String),
+      // expect the language to be the receiver's language
+      anotherUser.user.preferences?.language || "en",
+      // ignore the email context
+      expect.any(Object),
+    )
   });
 });

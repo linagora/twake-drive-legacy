@@ -218,7 +218,7 @@ export class DocumentsService {
       date: "last_modified",
       size: "size",
     };
-    let sortField = {};
+    const sortField = {};
     sortField[sortFieldMapping[sort?.by] || "last_modified"] = sort?.order || "desc";
 
     const dbType = await globalResolver.database.getConnector().getType();
