@@ -1,7 +1,6 @@
 import { describe, expect, test } from "@jest/globals";
 import { FunctionExecutor } from "../src/executor";
 
-//FOR LOCAL DEBUG PURPOSE ONLY, ITS NOT A TEST
 describe('Function Executor tests', () => {
 
   const subj = new FunctionExecutor();
