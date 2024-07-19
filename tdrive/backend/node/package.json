@@ -138,7 +138,6 @@
     "eta": "^2.2.0",
     "fastify": "^4.27.0",
     "fastify-cors": "^4.1.0",
-    "fastify-jwt": "^2.2.0",
     "fastify-plugin": "^4.5.1",
     "fastify-socket.io": "^5.0.0",
     "fluent-ffmpeg": "^2.1.2",
