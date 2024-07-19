@@ -9,50 +9,46 @@ import WorkspaceUser, { getInstance } from "../../../../../../../src/services/wo
 
 describe('EntityManager', () => {
 
-  const subj: EntityManager<TestDbEntity> = new EntityManager<TestDbEntity>({ } as Connector);
+  let connector = { upsert: () => void 0};
+  const subj: EntityManager<TestDbEntity> = new EntityManager<TestDbEntity>(connector as unknown as Connector);
+  let upsert;
 
   beforeEach(async () => {
+    upsert = jest.spyOn((subj as any).connector, "upsert");
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    subj.reset();
   });
 
   test ("persist should store entity to insert if all fields for pk is empty", () => {
     //when
-    subj.persist(new TestDbEntity());
+    let entity = new TestDbEntity();
+    subj.persist(entity);
 
     //then
-    expect((subj as any).toInsert.length).toEqual(1);
-    expect((subj as any).toUpdate.length).toEqual(0);
-    expect((subj as any).toRemove.length).toEqual(0);
-    expect((subj as any).toInsert[0].id).toBeDefined();
-    expect((subj as any).toInsert[0].company_id).toBeDefined();
+    expect(upsert).toBeCalledTimes(1);
+    expect(upsert).toBeCalledWith([entity], {"action": "INSERT"})
   });
 
   test ("persist should store entity to insert if id is set", () => {
     //when
-    subj.persist(new TestDbEntity({id: randomUUID()}));
+    let entity = new TestDbEntity({id: randomUUID()});
+    subj.persist(entity);
 
     //then
-    expect((subj as any).toInsert.length).toEqual(1);
-    expect((subj as any).toUpdate.length).toEqual(0);
-    expect((subj as any).toRemove.length).toEqual(0);
-    expect((subj as any).toInsert[0].id).toBeDefined();
-    expect((subj as any).toInsert[0].company_id).toBeDefined();
+    expect(upsert).toBeCalledTimes(1);
+    expect(upsert).toBeCalledWith([entity], {"action": "INSERT"})
   });
 
   test ("persist should store entity to insert if company_id is set", () => {
     //when
-    subj.persist(new TestDbEntity({company_id: randomUUID()}));
+    let entity = new TestDbEntity({company_id: randomUUID()});
+    subj.persist(entity);
 
     //then
-    expect((subj as any).toInsert.length).toEqual(1);
-    expect((subj as any).toUpdate.length).toEqual(0);
-    expect((subj as any).toRemove.length).toEqual(0);
-    expect((subj as any).toInsert[0].id).toBeDefined();
-    expect((subj as any).toInsert[0].company_id).toBeDefined();
+    expect(upsert).toBeCalledTimes(1);
+    expect(upsert).toBeCalledWith([entity], {"action": "INSERT"})
   });
 
   test ("persist should store entity to update if all pk fields are set", () => {
@@ -61,10 +57,8 @@ describe('EntityManager', () => {
     subj.persist(entity);
 
     //then
-    expect((subj as any).toUpdate.length).toEqual(1);
-    expect((subj as any).toInsert.length).toEqual(0);
-    expect((subj as any).toRemove.length).toEqual(0);
-    expect((subj as any).toUpdate[0]).toEqual(entity)
+    expect(upsert).toBeCalledTimes(1);
+    expect(upsert).toBeCalledWith([entity], {"action": "UPDATE"})
   });
 
   test ("persist should store entity to update if all pk fields are set and column name is different from field name", () => {
@@ -73,10 +67,8 @@ describe('EntityManager', () => {
     subj.persist(entity);
 
     //then
-    expect((subj as any).toUpdate.length).toEqual(1);
-    expect((subj as any).toInsert.length).toEqual(0);
-    expect((subj as any).toRemove.length).toEqual(0);
-    expect((subj as any).toUpdate[0]).toEqual(entity)
+    expect(upsert).toBeCalledTimes(1)
+    expect(upsert).toBeCalledWith([entity], {"action": "UPDATE"})
   });
 
   test ("persist should store entity to insert if not all pk fields are set and column name is different from field name", () => {
@@ -85,11 +77,7 @@ describe('EntityManager', () => {
     subj.persist(entity);
 
     //then
-    expect((subj as any).toUpdate.length).toEqual(0);
-    expect((subj as any).toInsert.length).toEqual(1);
-    expect((subj as any).toRemove.length).toEqual(0);
-    expect((subj as any).toInsert[0]).toEqual(entity);
-    expect(entity.userId).toBeDefined();
+    expect(upsert).toBeCalledWith([entity], {"action": "INSERT"})
   });
 
 });

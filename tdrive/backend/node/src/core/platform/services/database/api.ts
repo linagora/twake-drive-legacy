@@ -11,7 +11,7 @@ export interface DatabaseServiceAPI extends TdriveServiceProvider {
   getConnector(): Connector;
 
   /**
-   * Get entities manager (TODO: Find a better name...)
+   * Get entities manager
    */
   getManager(): Manager<unknown>;
 

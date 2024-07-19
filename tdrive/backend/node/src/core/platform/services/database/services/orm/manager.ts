@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import _ from "lodash";
 import { Connector } from "./connectors";
 import { getEntityDefinition, unwrapPrimarykey } from "./utils";
@@ -9,13 +8,9 @@ import { DatabaseEntitiesRemovedEvent, DatabaseEntitiesSavedEvent } from "./type
 import { localEventBus } from "../../../../framework/event-bus";
 
 export default class EntityManager<EntityType extends Record<string, any>> {
-  private toInsert: EntityType[] = [];
-  private toUpdate: EntityType[] = [];
-  private toRemove: EntityType[] = [];
-
   constructor(readonly connector: Connector) {}
 
-  public persist(entity: any): this {
+  public async persist(entity: any): Promise<this> {
     logger.trace(
       `services.database.orm.entity-manager.persist - entity: ${JSON.stringify(entity)}`,
     );
@@ -62,18 +57,20 @@ export default class EntityManager<EntityType extends Record<string, any>> {
       }
     });
 
+    entity = _.cloneDeep(entity);
     if (emptyPkFields.length > 0) {
-      this.toInsert = this.toInsert.filter(e => e !== entity);
-      this.toInsert.push(_.cloneDeep(entity));
+      await this.connector.upsert([entity], { action: "INSERT" });
     } else {
-      this.toUpdate = this.toUpdate.filter(e => e !== entity);
-      this.toUpdate.push(_.cloneDeep(entity));
+      await this.connector.upsert([entity], { action: "UPDATE" });
     }
+    localEventBus.publish("database:entities:saved", {
+      entities: [entity],
+    } as DatabaseEntitiesSavedEvent);
 
     return this;
   }
 
-  public remove(entity: EntityType, entityType?: EntityType): this {
+  public async remove(entity: EntityType, entityType?: EntityType): Promise<this> {
     if (entityType) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       entity = _.merge(new (entityType as any)(), entity);
@@ -81,45 +78,13 @@ export default class EntityManager<EntityType extends Record<string, any>> {
     if (!entity.constructor.prototype._entity || !entity.constructor.prototype._columns) {
       throw Error("Cannot remove this object: it is not an entity.");
     }
-    this.toRemove = this.toRemove.filter(e => e !== entity);
-    this.toRemove.push(_.cloneDeep(entity));
 
-    return this;
-  }
-
-  public async flush(): Promise<this> {
-    this.toInsert = _.uniqWith(this.toInsert, _.isEqual);
-    this.toUpdate = _.uniqWith(this.toUpdate, _.isEqual);
-    this.toRemove = _.uniqWith(this.toRemove, _.isEqual);
+    await this.connector.remove([entity]);
 
     localEventBus.publish("database:entities:saved", {
-      entities: this.toInsert.map(e => _.cloneDeep(e)),
-    } as DatabaseEntitiesSavedEvent);
-
-    localEventBus.publish("database:entities:saved", {
-      entities: this.toUpdate.map(e => _.cloneDeep(e)),
-    } as DatabaseEntitiesSavedEvent);
-
-    localEventBus.publish("database:entities:saved", {
-      entities: this.toRemove.map(e => _.cloneDeep(e)),
+      entities: [entity],
     } as DatabaseEntitiesRemovedEvent);
 
-    if (this.toInsert.length > 0) {
-      await this.connector.upsert(this.toInsert, { action: "INSERT" });
-    }
-    if (this.toUpdate.length > 0) {
-      await this.connector.upsert(this.toUpdate, { action: "UPDATE" });
-    }
-    if (this.toRemove.length > 0) {
-      await this.connector.remove(this.toRemove);
-    }
-
     return this;
-  }
-
-  public reset(): void {
-    this.toInsert = [];
-    this.toUpdate = [];
-    this.toRemove = [];
   }
 }
