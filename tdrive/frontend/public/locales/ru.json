@@ -277,7 +277,7 @@
     "general.user.deactivated": "Пользователь больше не состоит в этой компании",
     "components.side_menu.trash": "Корзина",
     "components.side_menu.home": "Общий диск",
-    "components.side_menu.shared_with_me": "Shared with me",
+    "components.side_menu.shared_with_me": "Доступные мне",
     "components.side_menu.my_drive": "Мой диск",
     "components.side_menu.buttons.upload": "Загрузить",
     "components.side_menu.buttons.create": "Создать",
