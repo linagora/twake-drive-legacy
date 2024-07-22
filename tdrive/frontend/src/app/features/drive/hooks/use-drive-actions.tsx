@@ -99,7 +99,7 @@ export const useDriveActions = () => {
   );
 
   const downloadZip = useCallback(
-    async (ids: string[], isDirectory?: boolean) => {
+    async (ids: string[], isDirectory = false) => {
       try {
         const url = await DriveApiClient.getDownloadZipUrl(companyId, ids, isDirectory);
         (window as any).open(url, '_blank').focus();

@@ -479,7 +479,7 @@ export class DocumentsController {
       ids = items.children.map(item => item.id);
     }
 
-    if (isDirectory) {
+    if (isDirectory === true) {
       const items = await globalResolver.services.documents.documents.get(ids[0], context, true);
       ids = items.children.map(item => item.id);
     }
