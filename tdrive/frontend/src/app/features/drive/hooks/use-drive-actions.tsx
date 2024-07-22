@@ -114,7 +114,7 @@ export const useDriveActions = () => {
     async (id: string, parentId: string) => {
       try {
         await DriveApiClient.remove(companyId, id);
-        await refresh(parentId || '');
+        await refresh(parentId || '', true);
         await getQuota();
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_remove_file'));
@@ -127,7 +127,7 @@ export const useDriveActions = () => {
     async (id: string, parentId: string) => {
       try {
         await DriveApiClient.restore(companyId, id);
-        await refresh(parentId || '');
+        await refresh(parentId || '', true);
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_restore_file'));
       }
@@ -158,7 +158,7 @@ export const useDriveActions = () => {
           level: level,
         };
         await DriveApiClient.updateLevel(companyId, id, updateBody);
-        await refresh(id || '');
+        await refresh(id || '', true);
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_update_file'));
       }
