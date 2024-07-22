@@ -118,7 +118,7 @@ export const ExpiryEditorRow = (props: {
             <Input
               inputRef={inputRef}
               disabled={disabled}
-              className="max-w-xs mr-4 mt-1"
+              className="max-w-xs mr-4 mt-1 py-0"
               type="date"
               size='sm'
               min={moment().add(1, 'days').toISOString().split('T')[0]}
