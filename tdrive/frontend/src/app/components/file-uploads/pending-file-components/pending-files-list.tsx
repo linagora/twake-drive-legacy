@@ -42,7 +42,7 @@ export default ({ pendingFilesState, visible }: PropsType) => {
     const momentTimeRemaining = moment(new Date().getTime() + timeRemainingInMs).fromNow();
 
     if (momentTimeRemaining !== 'Invalid date') {
-      return Languages.t('components.pending_file_list.estimation.end') + `Will end ${momentTimeRemaining}...`;
+      return Languages.t('components.pending_file_list.estimation.end') + ` ${momentTimeRemaining}...`;
     } else {
       return Languages.t('components.pending_file_list.estimation.approximations');
     }
