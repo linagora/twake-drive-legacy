@@ -486,6 +486,7 @@ export class DocumentsController {
 
     try {
       const archive = await globalResolver.services.documents.documents.createZip(ids, context);
+      reply.raw.setHeader("content-disposition", 'attachment; filename="twake_drive.zip"');
 
       archive.on("finish", () => {
         reply.status(200);
