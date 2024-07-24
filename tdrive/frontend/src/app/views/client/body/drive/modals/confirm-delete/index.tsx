@@ -41,7 +41,7 @@ const ConfirmDeleteModalContent = ({ items }: { items: DriveItem[] }) => {
   const [loading, setLoading] = useState(false);
   const [state, setState] = useRecoilState(ConfirmDeleteModalAtom);
   const [, setSelected] = useRecoilState(DriveItemSelectedList);
-  const { viewId } = RouterServices.getStateFromRoute();
+  const { dirId, viewId } = RouterServices.getStateFromRoute();
 
   useEffect(() => {
     refresh(items[0].id);
@@ -65,9 +65,8 @@ const ConfirmDeleteModalContent = ({ items }: { items: DriveItem[] }) => {
         loading={loading}
         onClick={async () => {
           setLoading(true);
-          for (const item of items) {
-            await remove(item.id, viewId || "");
-          }
+          const ids = items.map((item) => item.id);
+          await remove(ids, dirId || viewId || "");
           setLoading(false);
           setSelected({});
           setState({ ...state, open: false });

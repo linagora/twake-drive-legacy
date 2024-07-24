@@ -111,9 +111,11 @@ export const useDriveActions = () => {
   );
 
   const remove = useCallback(
-    async (id: string, parentId: string) => {
+    async (id: string | string[], parentId: string) => {
       try {
-        await DriveApiClient.remove(companyId, id);
+        if (Array.isArray(id)) {
+          await Promise.all(id.map(i => DriveApiClient.remove(companyId, i)));
+        } else await DriveApiClient.remove(companyId, id);
         await refresh(parentId || '', true);
         await getQuota();
       } catch (e) {
