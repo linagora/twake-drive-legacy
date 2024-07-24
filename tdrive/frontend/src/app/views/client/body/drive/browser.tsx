@@ -423,7 +423,7 @@ export default memo(
 
               <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
                 <div className="grow overflow-auto" ref={scrollViwer}>
-                  {documents.length === 0 && !loading && (
+                  {children.length === 0 && !loading && (
                     <div className="mt-4 text-center border-2 border-dashed rounded-md p-8">
                       <Subtitle className="block mb-2">
                         {Languages.t('scenes.app.drive.nothing')}
