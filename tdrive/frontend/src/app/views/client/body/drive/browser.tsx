@@ -149,14 +149,14 @@ export default memo(
       if (item?.id) setUploadModalState({ open: true, parent_id: item.id });
     }, [item?.id, setUploadModalState]);
 
-    const documents = (
-      item?.is_directory === false
+    const items = item?.is_directory === false
         ? //We use this hack for public shared single file
           item
           ? [item]
           : []
         : children
-    ).filter(i => !i.is_directory);
+
+    const documents = items.filter(i => !i.is_directory);
 
     const selectedCount = Object.values(checked).filter(v => v).length;
 
@@ -307,7 +307,7 @@ export default memo(
             <div
               className={
                 'flex flex-col grow h-full overflow-hidden ' +
-                (loading && (!children?.length || loadingParentChange) ? 'opacity-50 ' : '')
+                (loading && (!items?.length || loadingParentChange) ? 'opacity-50 ' : '')
               }
             >
               <div className="flex flex-row shrink-0 items-center mb-4">
@@ -423,7 +423,7 @@ export default memo(
 
               <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
                 <div className="grow overflow-auto" ref={scrollViwer}>
-                  {children.length === 0 && !loading && (
+                  {items.length === 0 && !loading && (
                     <div className="mt-4 text-center border-2 border-dashed rounded-md p-8">
                       <Subtitle className="block mb-2">
                         {Languages.t('scenes.app.drive.nothing')}
@@ -443,14 +443,14 @@ export default memo(
                       )}
                     </div>
                   )}
-                  {children.map((child, index) =>
+                  {items.map((child, index) =>
                     child.is_directory ? (
                       <Droppable id={index} key={index}>
                         <FolderRow
                           key={index}
                           className={
                             (index === 0 ? 'rounded-t-md ' : '') +
-                            (index === children.length - 1 ? 'rounded-b-md ' : '')
+                            (index === items.length - 1 ? 'rounded-b-md ' : '')
                           }
                           item={child}
                           onClick={() => {
@@ -476,7 +476,7 @@ export default memo(
                       <DocumentRowOverlay
                         className={
                           (activeIndex === 0 ? 'rounded-t-md ' : '') +
-                          (activeIndex === children.length - 1 ? 'rounded-b-md ' : '')
+                          (activeIndex === items.length - 1 ? 'rounded-b-md ' : '')
                         }
                         item={activeChild}
                       ></DocumentRowOverlay>
