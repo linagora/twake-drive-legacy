@@ -125,7 +125,9 @@ export class NextcloudMigration {
     const parent = await this.driveClient.getDocument(parentDirId);
 
     const exists = (filename: string) => {
-      return parent.children.filter(i => i.name.startsWith(path.parse(filename).name)).length > 0;
+      let parsedPath = path.parse(filename);
+      let name = `${parsedPath.name}${parsedPath.ext > '' ? parsedPath.ext : ''}`;
+      return parent.children.filter(i => i.name == name).length > 0;
     }
 
     logger.debug(`Reading content of the directory ${sourceDirPath} ...`)
@@ -150,8 +152,9 @@ export class NextcloudMigration {
     //check existing files
     for (const fPath of existingFiles) {
       logger.debug(`Check existing file ${fPath}`)
-      let name = path.parse(fPath).name;
-      let candidatesWithTheSameName = parent.children.filter(i => i.name.startsWith(name));
+      let parsedPath = path.parse(fPath);
+      let name = parsedPath.name + (parsedPath.ext > '' ? parsedPath.ext : '');
+      let candidatesWithTheSameName = parent.children.filter(i => i.name === name);
       if (candidatesWithTheSameName.length > 1) {
         logger.warn("WE HAVE MORE MORE THAN ONE FILE WITH NAME: " + name);
       } else {
