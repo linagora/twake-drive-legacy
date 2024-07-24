@@ -102,6 +102,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                 }
               }
             },
+            /*TODO: fix loading of preview in new window and uncomment. See https://github.com/linagora/twake-drive/issues/603 .
             {
               type: 'menu',
               icon: 'eye',
@@ -112,7 +113,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                 const route = RouterServices.generateRouteFromState({ companyId: company, viewId, itemId });
                 window.open(route, '_blank');
               }
-            },
+            }, // */
             { type: 'separator' },
             {
               type: 'menu',
