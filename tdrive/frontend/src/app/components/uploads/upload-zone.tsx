@@ -46,6 +46,12 @@ export default class UploadZone extends React.Component<PropsType, StateType> {
       this.file_input.multiple = this.props.multiple ? true : false;
       this.file_input.directory = this.props.directory ? true : false;
       this.file_input.webkitdirectory = this.props.directory ? true : false;
+      /* The following seems redundant with the previous, but is required for
+       * Opera support, as for historic reasons, the properties on the
+       * DOMElement don't exactly match up 1 to 1 with the attributes.
+       */
+      if (this.props.directory)
+        this.file_input.setAttribute('webkitdirectory', '');
 
       this.setCallback();
 
