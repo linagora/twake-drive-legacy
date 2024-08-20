@@ -112,7 +112,7 @@ export class DocumentsService {
     context: DriveExecutionContext & { public_token?: string },
   ): Promise<BrowseDetails> => {
     if (isSharedWithMeFolder(id)) {
-      return this.sharedWithMe(options, context);
+      return this.sharedWithMe(options, context, sort, paginate);
     } else {
       return {
         nextPage: null,
@@ -124,18 +124,27 @@ export class DocumentsService {
   sharedWithMe = async (
     options: SearchDocumentsOptions,
     context: DriveExecutionContext & { public_token?: string },
+    sort?: SortDocumentsBody,
+    paginate?: PaginateDocumentBody,
   ): Promise<BrowseDetails> => {
-    const result = [];
-    let fileList: ListResult<DriveFile>;
-    do {
-      fileList = await this.search(options, context);
-      result.push(...fileList.getEntities());
-      options.pagination = fileList.nextPage;
-    } while (fileList.nextPage?.page_token);
+    if (paginate) {
+      options.pagination = {
+        page_token: paginate.page.toString(),
+        limitStr: paginate.limit.toString(),
+      };
+    }
+
+    if (sort) {
+      options.sort = this.getSortFieldMapping(sort);
+    }
+
+    const fileList: ListResult<DriveFile> = await this.search(options, context);
+    const result = fileList.getEntities();
+
     return {
       access: "read",
       children: result,
-      nextPage: null,
+      nextPage: fileList.nextPage,
       path: [] as Array<DriveFile>,
     };
   };
@@ -213,14 +222,10 @@ export class DocumentsService {
           )
         ).getEntities();
 
-    const sortFieldMapping = {
-      name: "name",
-      date: "last_modified",
-      size: "size",
-    };
-    const sortField = {};
-    sortField[sortFieldMapping[sort?.by] || "last_modified"] = sort?.order || "desc";
-
+    let sortField = {};
+    if (sort) {
+      sortField = this.getSortFieldMapping(sort);
+    }
     const dbType = await globalResolver.database.getConnector().getType();
 
     // Initialize pagination
@@ -1316,5 +1321,17 @@ export class DocumentsService {
       await globalResolver.services.files.delete(fileId, context);
       throw new CrudException(`Not enough space: ${size}, ${leftQuota}.`, 403);
     }
+  };
+
+  getSortFieldMapping = (sort: SortDocumentsBody) => {
+    const sortFieldMapping = {
+      name: "name",
+      date: "last_modified",
+      size: "size",
+    };
+
+    const sortField = {};
+    sortField[sortFieldMapping[sort?.by] || "last_modified"] = sort?.order || "desc";
+    return sortField;
   };
 }
