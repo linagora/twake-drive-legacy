@@ -46,11 +46,11 @@ jobs:
       - name: Prettier code style check
         run: |
           cd tdrive
-          docker-compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn node npm run lint:prettier
+          docker compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn node npm run lint:prettier
       - name: Lint
         run: |
           cd tdrive
-          docker-compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn node npm run lint
+          docker compose -f docker-compose.tests.yml run -e NODE_OPTIONS=--unhandled-rejections=warn node npm run lint
 
   test-backend:
     runs-on: ubuntu-latest
@@ -62,16 +62,16 @@ jobs:
       - name: e2e-mongo-s3-test
         run: |
           cd tdrive
-          docker-compose -f docker-compose.tests.yml run --rm -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb -e PUBSUB_TYPE=local node npm run test:all
-          docker-compose -f docker-compose.tests.yml down
+          docker compose -f docker-compose.tests.yml run --rm -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb -e PUBSUB_TYPE=local node npm run test:all
+          docker compose -f docker-compose.tests.yml down
       - name: e2e-opensearch-test
         run: |
           cd tdrive
-          docker-compose -f docker-compose.dev.tests.opensearch.yml up -d --force-recreate opensearch-node1 postgres node
+          docker compose -f docker-compose.dev.tests.opensearch.yml up -d --force-recreate opensearch-node1 postgres node
           sleep 60
-          docker-compose -f docker-compose.dev.tests.opensearch.yml logs
-          docker-compose -f docker-compose.dev.tests.opensearch.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=opensearch -e DB_DRIVER=postgres -e PUBSUB_TYPE=local node npm run test:all
-          docker-compose -f docker-compose.dev.tests.opensearch.yml down
+          docker compose -f docker-compose.dev.tests.opensearch.yml logs
+          docker compose -f docker-compose.dev.tests.opensearch.yml run -e NODE_OPTIONS=--unhandled-rejections=warn -e SEARCH_DRIVER=opensearch -e DB_DRIVER=postgres -e PUBSUB_TYPE=local node npm run test:all
+          docker compose -f docker-compose.dev.tests.opensearch.yml down
       - name: coverage
         uses: adRise/jest-cov-reporter@e13d7638888cad7788298f4022b203b31a10c7c8
         with:
