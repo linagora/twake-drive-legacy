@@ -1,7 +1,6 @@
 import { describe, beforeAll, afterAll, it, expect } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
-import { async } from "rxjs";
 
 describe("The Documents Browser Window and API", () => {
   let platform: TestPlatform;
@@ -160,25 +159,25 @@ describe("The Documents Browser Window and API", () => {
       const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
       let files = await oneUser.uploadAllFilesOneByOne();
       for (const file of files) {
-        await anotherUser.shareWithPermissions(file, oneUser.user.id, "read");
+        await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
       }
       let page = 1;
       const limit = 2;
-      let docs = await currentUser.browseDocuments(sharedWIthMeFolder, {
+      let docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
         paginate: { page, limit },
       });
       expect(docs).toBeDefined();
       expect(docs.children).toHaveLength(limit);
 
       page = 2;
-      docs = await currentUser.browseDocuments(sharedWIthMeFolder, {
+      docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
         paginate: { page, limit },
       });
       expect(docs).toBeDefined();
       expect(docs.children).toHaveLength(limit);
 
       page = 3;
-      docs = await currentUser.browseDocuments(sharedWIthMeFolder, {
+      docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
         paginate: { page, limit },
       });
       expect(docs).toBeDefined();
@@ -191,16 +190,35 @@ describe("The Documents Browser Window and API", () => {
       const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
       let files = await oneUser.uploadAllFilesOneByOne();
       for (const file of files) {
-        await anotherUser.shareWithPermissions(file, oneUser.user.id, "read");
+        await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
       }
       const sortBy = "name";
       const sortOrder = "asc";
-      const docs = await currentUser.browseDocuments(sharedWIthMeFolder, {
+      const docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
         sort: { by: sortBy, order: sortOrder },
       });
       expect(docs).toBeDefined();
 
       const isSorted = docs.children.every((item, i, arr) => !i || arr[i - 1].name <= item.name);
+      expect(isSorted).toBe(true);
+    });
+
+    it("Should sort shared with me by name in descending order", async () => {
+      const sharedWIthMeFolder = "shared_with_me";
+      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+      const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+      let files = await oneUser.uploadAllFilesOneByOne();
+      for (const file of files) {
+        await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
+      }
+      const sortBy = "name";
+      const sortOrder = "desc";
+      const docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
+        sort: { by: sortBy, order: sortOrder },
+      });
+      expect(docs).toBeDefined();
+
+      const isSorted = docs.children.every((item, i, arr) => !i || arr[i - 1].name >= item.name);
       expect(isSorted).toBe(true);
     });
   });
