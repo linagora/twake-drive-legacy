@@ -1,6 +1,7 @@
 import { describe, beforeAll, afterAll, it, expect } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
+import { async } from "rxjs";
 
 describe("The Documents Browser Window and API", () => {
   let platform: TestPlatform;
@@ -150,6 +151,56 @@ describe("The Documents Browser Window and API", () => {
       expect(docs).toBeDefined();
 
       const isSorted = docs.children.every((item, i, arr) => !i || arr[i - 1].size >= item.size);
+      expect(isSorted).toBe(true);
+    });
+
+    it("Should paginate shared with me ", async () => {
+      const sharedWIthMeFolder = "shared_with_me";
+      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+      const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+      let files = await oneUser.uploadAllFilesOneByOne();
+      for (const file of files) {
+        await anotherUser.shareWithPermissions(file, oneUser.user.id, "read");
+      }
+      let page = 1;
+      const limit = 2;
+      let docs = await currentUser.browseDocuments(sharedWIthMeFolder, {
+        paginate: { page, limit },
+      });
+      expect(docs).toBeDefined();
+      expect(docs.children).toHaveLength(limit);
+
+      page = 2;
+      docs = await currentUser.browseDocuments(sharedWIthMeFolder, {
+        paginate: { page, limit },
+      });
+      expect(docs).toBeDefined();
+      expect(docs.children).toHaveLength(limit);
+
+      page = 3;
+      docs = await currentUser.browseDocuments(sharedWIthMeFolder, {
+        paginate: { page, limit },
+      });
+      expect(docs).toBeDefined();
+      expect(docs.children.length).toBeLessThanOrEqual(limit);
+    });
+
+    it("Should sort shared with me by name in ascending order", async () => {
+      const sharedWIthMeFolder = "shared_with_me";
+      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+      const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+      let files = await oneUser.uploadAllFilesOneByOne();
+      for (const file of files) {
+        await anotherUser.shareWithPermissions(file, oneUser.user.id, "read");
+      }
+      const sortBy = "name";
+      const sortOrder = "asc";
+      const docs = await currentUser.browseDocuments(sharedWIthMeFolder, {
+        sort: { by: sortBy, order: sortOrder },
+      });
+      expect(docs).toBeDefined();
+
+      const isSorted = docs.children.every((item, i, arr) => !i || arr[i - 1].name <= item.name);
       expect(isSorted).toBe(true);
     });
   });
