@@ -206,11 +206,23 @@ export default class MongoSearch extends SearchAdapter implements SearchAdapterI
 
     const collection = this.mongodb.collection(`${searchPrefix}${index}`);
 
-    const { query, sort, project } = buildSearchQuery<EntityType>(entityType, filters, options);
+    const {
+      query,
+      sort: sortFields,
+      project,
+    } = buildSearchQuery<EntityType>(entityType, filters, options);
 
     logger.info(`Search query: ${JSON.stringify(query)}`);
     console.log(query);
 
+    const sort: any = sortFields
+      ? Object.fromEntries(
+          Object.entries(sortFields).map(([field, direction]) => [
+            field,
+            direction === "asc" ? 1 : -1,
+          ]),
+        )
+      : {};
     let cursor = collection.find(query).sort(sort);
     if (project) {
       cursor = cursor.project(project);

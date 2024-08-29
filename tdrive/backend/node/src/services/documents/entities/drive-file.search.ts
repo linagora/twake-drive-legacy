@@ -14,6 +14,7 @@ export default {
     access_entities: entity.access_info?.entities?.filter(e => e.level != "none").map(e => e.id),
     last_modified: entity.last_modified,
     mime_type: entity.last_version_cache?.file_metadata?.mime,
+    size: entity.last_version_cache?.file_metadata?.size,
   }),
   mongoMapping: {
     text: {
