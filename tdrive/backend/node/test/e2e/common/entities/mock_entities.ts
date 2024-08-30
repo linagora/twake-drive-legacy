@@ -37,10 +37,15 @@ export class DriveFileMockClass {
 }
 
 export class DriveItemDetailsMockClass {
-    path: string[];
-    item: DriveFileMockClass;
-    children: DriveFileMockClass[];
-    versions: Record<string, unknown>[];
+  path: string[];
+  item: DriveFileMockClass;
+  children: DriveFileMockClass[];
+  versions: Record<string, unknown>[];
+  nextPage?: {
+    page_token: string;
+    limitStr: string;
+    reversed: boolean;
+  };
 }
 
 export class SearchResultMockClass {

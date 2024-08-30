@@ -127,11 +127,12 @@ export class DocumentsService {
     sort?: SortDocumentsBody,
     paginate?: PaginateDocumentBody,
   ): Promise<BrowseDetails> => {
+
     if (paginate) {
       options.pagination = {
-        page_token: paginate.page.toString(),
         limitStr: paginate.limit.toString(),
       };
+      if (paginate.page != "1") options.pagination["page_token"] = paginate.page;
     }
 
     if (sort) {
@@ -233,7 +234,7 @@ export class DocumentsService {
 
     if (paginate) {
       const { page, limit } = paginate;
-      const pageNumber = dbType === "mongodb" ? page : page / limit + 1;
+      const pageNumber = dbType === "mongodb" ? parseInt(page) : parseInt(page) / limit + 1;
 
       pagination = new Pagination(`${pageNumber}`, `${limit}`, false);
     }

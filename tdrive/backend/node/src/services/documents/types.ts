@@ -85,7 +85,7 @@ export type SortDocumentsBody = {
 };
 
 export type PaginateDocumentBody = {
-  page: number;
+  page?: string;
   limit: number;
 };
 

@@ -32,6 +32,7 @@ describe("The Documents Browser Window and API", () => {
   });
 
   describe("Pagination and Sorting", () => {
+    
     it("Should paginate documents correctly", async () => {
       const myDriveId = "user_" + currentUser.user.id;
       await currentUser.uploadAllFilesOneByOne(myDriveId);
@@ -161,25 +162,28 @@ describe("The Documents Browser Window and API", () => {
       for (const file of files) {
         await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
       }
-      let page = 1;
+      let page : any = "1";
       const limit = 2;
       let docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
         paginate: { page, limit },
       });
+      console.log("🚀🚀 DOCS::1:: ", docs);
       expect(docs).toBeDefined();
       expect(docs.children).toHaveLength(limit);
 
-      page = 2;
+      page = docs.nextPage?.page_token || "2";
       docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
         paginate: { page, limit },
       });
+      console.log("🚀🚀 DOCS::2:: ", docs);
       expect(docs).toBeDefined();
       expect(docs.children).toHaveLength(limit);
 
-      page = 3;
+      page = docs.nextPage?.page_token || "3";
       docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
         paginate: { page, limit },
       });
+      console.log("🚀🚀 DOCS::3:: ", docs);
       expect(docs).toBeDefined();
       expect(docs.children.length).toBeLessThanOrEqual(limit);
     });
