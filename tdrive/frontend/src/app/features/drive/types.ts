@@ -1,7 +1,10 @@
 export type BrowseQuery = {
   filter: BrowseFilter;
   sort: BrowseSort;
-  paginate: BrowsePaginate;
+  paginate: {
+    page_token: string;
+    limitStr: string;
+  };
 }
 
 export type BrowseFilter = {

@@ -29,10 +29,8 @@ import {
   DriveFileAccessLevel,
   DriveItemDetails,
   DriveTdriveTab,
-  PaginateDocumentBody,
   RootType,
   SearchDocumentsOptions,
-  SortDocumentsBody,
   TrashType,
 } from "../types";
 import {
@@ -61,6 +59,7 @@ import archiver from "archiver";
 import internal from "stream";
 import config from "config";
 import { randomUUID } from "crypto";
+import { SortType } from "src/core/platform/services/search/api";
 
 export class DocumentsService {
   version: "1";
@@ -107,16 +106,14 @@ export class DocumentsService {
   browse = async (
     id: string,
     options: SearchDocumentsOptions,
-    sort: SortDocumentsBody,
-    paginate: PaginateDocumentBody,
     context: DriveExecutionContext & { public_token?: string },
   ): Promise<BrowseDetails> => {
     if (isSharedWithMeFolder(id)) {
-      return this.sharedWithMe(options, context, sort, paginate);
+      return this.sharedWithMe(options, context);
     } else {
       return {
         nextPage: null,
-        ...(await this.get(id, context, false, sort, paginate)),
+        ...(await this.get(id, options, context, false)),
       };
     }
   };
@@ -124,19 +121,15 @@ export class DocumentsService {
   sharedWithMe = async (
     options: SearchDocumentsOptions,
     context: DriveExecutionContext & { public_token?: string },
-    sort?: SortDocumentsBody,
-    paginate?: PaginateDocumentBody,
   ): Promise<BrowseDetails> => {
-
-    if (paginate) {
-      options.pagination = {
-        limitStr: paginate.limit.toString(),
-      };
-      if (paginate.page != "1") options.pagination["page_token"] = paginate.page;
+    if (options.pagination) {
+      if (options.pagination.page_token == "1") {
+        delete options.pagination.page_token;
+      }
     }
 
-    if (sort) {
-      options.sort = this.getSortFieldMapping(sort);
+    if (options.sort) {
+      options.sort = this.getSortFieldMapping(options.sort);
     }
 
     const fileList: ListResult<DriveFile> = await this.search(options, context);
@@ -167,10 +160,9 @@ export class DocumentsService {
    */
   get = async (
     id: string,
+    options: SearchDocumentsOptions,
     context: DriveExecutionContext & { public_token?: string },
     all?: boolean,
-    sort?: SortDocumentsBody,
-    paginate?: PaginateDocumentBody,
   ): Promise<DriveItemDetails> => {
     if (!context) {
       this.logger.error("invalid context");
@@ -224,19 +216,20 @@ export class DocumentsService {
         ).getEntities();
 
     let sortField = {};
-    if (sort) {
-      sortField = this.getSortFieldMapping(sort);
+    if (options.sort) {
+      sortField = this.getSortFieldMapping(options.sort);
     }
     const dbType = await globalResolver.database.getConnector().getType();
 
     // Initialize pagination
     let pagination;
 
-    if (paginate) {
-      const { page, limit } = paginate;
-      const pageNumber = dbType === "mongodb" ? parseInt(page) : parseInt(page) / limit + 1;
+    if (options.pagination) {
+      const { page_token, limitStr } = options.pagination;
+      const pageNumber =
+        dbType === "mongodb" ? parseInt(page_token) : parseInt(page_token) / parseInt(limitStr) + 1;
 
-      pagination = new Pagination(`${pageNumber}`, `${limit}`, false);
+      pagination = new Pagination(`${pageNumber}`, `${limitStr}`, false);
     }
 
     let children = isDirectory
@@ -1037,7 +1030,7 @@ export class DocumentsService {
     context: DriveExecutionContext,
   ): Promise<string> => {
     for (const id of ids) {
-      const item = await this.get(id, context);
+      const item = await this.get(id, null, context);
       if (!item) {
         throw new CrudException("Drive item not found", 404);
       }
@@ -1091,7 +1084,7 @@ export class DocumentsService {
       size: number;
     };
   }> => {
-    const item = await this.get(id, context);
+    const item = await this.get(id, null, context);
 
     if (item.item.is_directory) {
       return { archive: await this.createZip([id], context) };
@@ -1324,7 +1317,7 @@ export class DocumentsService {
     }
   };
 
-  getSortFieldMapping = (sort: SortDocumentsBody) => {
+  getSortFieldMapping = (sort: SortType) => {
     const sortFieldMapping = {
       name: "name",
       date: "last_modified",

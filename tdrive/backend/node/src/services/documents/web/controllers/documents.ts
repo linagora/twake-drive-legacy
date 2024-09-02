@@ -16,12 +16,10 @@ import {
   DriveItemDetails,
   DriveTdriveTab,
   ItemRequestParams,
-  PaginateDocumentBody,
   ItemRequestByEditingSessionKeyParams,
   RequestParams,
   SearchDocumentsBody,
   SearchDocumentsOptions,
-  SortDocumentsBody,
 } from "../../types";
 import { DriveFileDTO } from "../dto/drive-file-dto";
 import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
@@ -146,7 +144,7 @@ export class DocumentsController {
   ): Promise<DriveItemDetails> => {
     const context = getDriveExecutionContext(request);
 
-    return await globalResolver.services.documents.documents.get(null, context);
+    return await globalResolver.services.documents.documents.get(null, null, context);
   };
 
   /**
@@ -165,7 +163,7 @@ export class DocumentsController {
     const { id } = request.params;
 
     return {
-      ...(await globalResolver.services.documents.documents.get(id, context)),
+      ...(await globalResolver.services.documents.documents.get(id, null, context)),
     };
   };
 
@@ -212,19 +210,12 @@ export class DocumentsController {
       view: DriveFileDTOBuilder.VIEW_SHARED_WITH_ME,
       onlyDirectlyShared: true,
       onlyUploadedNotByMe: true,
+      sort: request.body.sort,
+      pagination: request.body.paginate,
     };
 
-    const sortOptions: SortDocumentsBody = request.body.sort;
-    const paginateOptions: PaginateDocumentBody = request.body.paginate;
-
     return {
-      ...(await globalResolver.services.documents.documents.browse(
-        id,
-        options,
-        sortOptions,
-        paginateOptions,
-        context,
-      )),
+      ...(await globalResolver.services.documents.documents.browse(id, options, context)),
     };
   };
 
@@ -475,12 +466,17 @@ export class DocumentsController {
     );
 
     if (ids[0] === "root") {
-      const items = await globalResolver.services.documents.documents.get(ids[0], context);
+      const items = await globalResolver.services.documents.documents.get(ids[0], null, context);
       ids = items.children.map(item => item.id);
     }
 
     if (isDirectory === true) {
-      const items = await globalResolver.services.documents.documents.get(ids[0], context, true);
+      const items = await globalResolver.services.documents.documents.get(
+        ids[0],
+        null,
+        context,
+        true,
+      );
       ids = items.children.map(item => item.id);
     }
 
@@ -594,11 +590,16 @@ export class DocumentsController {
       type: string;
     };
   }> {
-    const document = await globalResolver.services.documents.documents.get(req.body.document_id, {
-      public_token: req.body.token + (req.body.token_password ? "+" + req.body.token_password : ""),
-      user: null,
-      company: { id: req.body.company_id },
-    });
+    const document = await globalResolver.services.documents.documents.get(
+      req.body.document_id,
+      null,
+      {
+        public_token:
+          req.body.token + (req.body.token_password ? "+" + req.body.token_password : ""),
+        user: null,
+        company: { id: req.body.company_id },
+      },
+    );
 
     if (!document || !document.access || document.access === "none")
       throw new CrudException("You don't have access to this document", 401);

@@ -76,7 +76,10 @@ export class DriveApiClient {
       {
         filter,
         sort,
-        paginate
+        paginate: {
+          page_token: paginate.page.toString(),
+          limitStr: paginate.limit.toString(),
+        }
       },
     );
   }
