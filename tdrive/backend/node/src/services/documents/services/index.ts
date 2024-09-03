@@ -216,7 +216,7 @@ export class DocumentsService {
         ).getEntities();
 
     let sortField = {};
-    if (options.sort) {
+    if (options?.sort) {
       sortField = this.getSortFieldMapping(options.sort);
     }
     const dbType = await globalResolver.database.getConnector().getType();
@@ -224,7 +224,7 @@ export class DocumentsService {
     // Initialize pagination
     let pagination;
 
-    if (options.pagination) {
+    if (options?.pagination) {
       const { page_token, limitStr } = options.pagination;
       const pageNumber =
         dbType === "mongodb" ? parseInt(page_token) : parseInt(page_token) / parseInt(limitStr) + 1;
