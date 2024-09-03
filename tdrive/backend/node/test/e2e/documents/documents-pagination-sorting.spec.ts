@@ -36,27 +36,27 @@ describe("The Documents Browser Window and API", () => {
       const myDriveId = "user_" + currentUser.user.id;
       await currentUser.uploadAllFilesOneByOne(myDriveId);
 
-      let page = 1;
-      const limit = 2;
+      let page_token = "1";
+      const limitStr = "2";
       let docs = await currentUser.browseDocuments(myDriveId, {
-        paginate: { page, limit },
+        paginate: { page_token, limitStr },
       });
       expect(docs).toBeDefined();
-      expect(docs.children).toHaveLength(limit);
+      expect(docs.children).toHaveLength(parseInt(limitStr));
 
-      page = 2;
+      page_token = "2";
       docs = await currentUser.browseDocuments(myDriveId, {
-        paginate: { page, limit },
+        paginate: { page_token, limitStr },
       });
       expect(docs).toBeDefined();
-      expect(docs.children).toHaveLength(limit);
+      expect(docs.children).toHaveLength(parseInt(limitStr));
 
-      page = 3;
+      page_token = "3";
       docs = await currentUser.browseDocuments(myDriveId, {
-        paginate: { page, limit },
+        paginate: { page_token, limitStr },
       });
       expect(docs).toBeDefined();
-      expect(docs.children.length).toBeLessThanOrEqual(limit);
+      expect(docs.children.length).toBeLessThanOrEqual(parseInt(limitStr));
     });
 
     it("Should sort documents by name in ascending order", async () => {
