@@ -161,6 +161,10 @@ describe("The Documents Browser Window and API", () => {
       for (const file of files) {
         await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
       }
+
+      // wait for files to be indexed
+      await new Promise(r => setTimeout(r, 5000));
+
       let page_token: any = "1";
       const limitStr = "2";
       let docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
