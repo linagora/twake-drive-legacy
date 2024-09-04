@@ -153,7 +153,7 @@ describe("The Documents Browser Window and API", () => {
       expect(isSorted).toBe(true);
     });
 
-    it.skip("Should paginate shared with me ", async () => {
+    it("Should paginate shared with me ", async () => {
       const sharedWIthMeFolder = "shared_with_me";
       const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
       const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
@@ -161,27 +161,27 @@ describe("The Documents Browser Window and API", () => {
       for (const file of files) {
         await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
       }
-      let page: any = "1";
-      const limit = 2;
+      let page_token: any = "1";
+      const limitStr = "2";
       let docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
-        paginate: { page, limit },
+        paginate: { page_token, limitStr },
       });
       expect(docs).toBeDefined();
-      expect(docs.children).toHaveLength(limit);
+      expect(docs.children).toHaveLength(parseInt(limitStr));
 
-      page = docs.nextPage?.page_token || "2";
+      page_token = docs.nextPage?.page_token || "2";
       docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
-        paginate: { page, limit },
+        paginate: { page_token, limitStr },
       });
       expect(docs).toBeDefined();
-      expect(docs.children).toHaveLength(limit);
+      expect(docs.children).toHaveLength(parseInt(limitStr));
 
-      page = docs.nextPage?.page_token || "3";
+      page_token = docs.nextPage?.page_token || "3";
       docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
-        paginate: { page, limit },
+        paginate: { page_token, limitStr },
       });
       expect(docs).toBeDefined();
-      expect(docs.children.length).toBeLessThanOrEqual(limit);
+      expect(docs.children.length).toBeLessThanOrEqual(parseInt(limitStr));
     });
 
     it("Should sort shared with me by name in ascending order", async () => {
