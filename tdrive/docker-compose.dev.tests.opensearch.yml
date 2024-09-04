@@ -41,6 +41,7 @@ services:
       - "5432:5432"
 
   node:
+    # Use the build context in the current directory
     build:
       context: .
       dockerfile: docker/tdrive-node/Dockerfile
