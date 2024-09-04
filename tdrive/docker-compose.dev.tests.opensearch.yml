@@ -41,7 +41,6 @@ services:
       - "5432:5432"
 
   node:
-    image: tdrive/tdrive-node:test
     build:
       context: .
       dockerfile: docker/tdrive-node/Dockerfile
