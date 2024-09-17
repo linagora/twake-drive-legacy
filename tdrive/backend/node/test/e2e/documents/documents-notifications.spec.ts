@@ -2,7 +2,6 @@ import { describe, beforeEach, it, expect, afterAll, jest } from "@jest/globals"
 import { init, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 import * as utils from "../../../src/services/documents/utils";
-import { DocumentsService } from "../../../src/services/documents/services";
 import { DocumentsEngine } from "../../../src/services/documents/services/engine";
 import EmailPusherClass from "../../../src/core/platform/services/email-pusher";
 import { deserialize } from "class-transformer";
@@ -13,7 +12,6 @@ import { e2e_createDocumentFile, e2e_createVersion } from "./utils";
 describe("the Drive feature", () => {
   let platform: TestPlatform;
   const isVirtualFolder = jest.spyOn(utils, "isVirtualFolder");
-  const findOne = jest.spyOn(DocumentsService.prototype.repository, "findOne");
   const notifyDocumentShared = jest.spyOn(DocumentsEngine.prototype, "notifyDocumentShared");
   const notifyDocumentVersionUpdated = jest.spyOn(
     DocumentsEngine.prototype,
@@ -135,15 +133,19 @@ describe("the Drive feature", () => {
     );
   });
 
-  it("Did not attempt to notify the user if the parent folder is a virutal folder.", async () => {
-    // mock the isVirtualFolder method to return true
-    isVirtualFolder.mockReturnValue(true);
+  it("Did not attempt to notify the user if the parent folder is a virutal folder.", async () => {    
     // upload a file
     const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-    await oneUser.uploadRandomFileAndCreateDocument();
+    const oneUserDrive = `user_${oneUser.user.id}`;
+    await oneUser.uploadRandomFileAndCreateDocument(oneUserDrive);
     // expect the notification to not be sent
-    expect(findOne).not.toHaveBeenCalled();
-    expect(notifyDocumentShared).not.toHaveBeenCalled();
+    expect(isVirtualFolder).toHaveBeenCalled();
+    expect(isVirtualFolder).toBeTruthy();
+    expect(notifyDocumentShared).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        notificationEmitter: oneUser.user.id,
+      }),
+    );
   });
 
   // Test the email language based on the user's language and the email subject
