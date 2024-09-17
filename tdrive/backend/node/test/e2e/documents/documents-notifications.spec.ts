@@ -1,6 +1,8 @@
 import { describe, beforeEach, it, expect, afterAll, jest } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
+import * as utils from "../../../src/services/documents/utils";
+import { DocumentsService } from "../../../src/services/documents/services";
 import { DocumentsEngine } from "../../../src/services/documents/services/engine";
 import EmailPusherClass from "../../../src/core/platform/services/email-pusher";
 import { deserialize } from "class-transformer";
@@ -10,6 +12,8 @@ import { e2e_createDocumentFile, e2e_createVersion } from "./utils";
 
 describe("the Drive feature", () => {
   let platform: TestPlatform;
+  const isVirtualFolder = jest.spyOn(utils, "isVirtualFolder");
+  const findOne = jest.spyOn(DocumentsService.prototype.repository, "findOne");
   const notifyDocumentShared = jest.spyOn(DocumentsEngine.prototype, "notifyDocumentShared");
   const notifyDocumentVersionUpdated = jest.spyOn(
     DocumentsEngine.prototype,
@@ -38,7 +42,7 @@ describe("the Drive feature", () => {
         "statistics",
         "platform-services",
         "documents",
-        "email-pusher"
+        "email-pusher",
       ],
     });
     currentUser = await UserApi.getInstance(platform);
@@ -131,10 +135,27 @@ describe("the Drive feature", () => {
     );
   });
 
+  it("Did not attempt to notify the user if the parent folder is a virutal folder.", async () => {
+    // mock the isVirtualFolder method to return true
+    isVirtualFolder.mockReturnValue(true);
+    // upload a file
+    const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+    await oneUser.uploadRandomFileAndCreateDocument();
+    // expect the notification to not be sent
+    expect(findOne).not.toHaveBeenCalled();
+    expect(notifyDocumentShared).not.toHaveBeenCalled();
+  });
+
   // Test the email language based on the user's language and the email subject
   it("Did notify the user after sharing a file in the user's language.", async () => {
-    const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin", preferences: { language: "en" } });
-    const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin", preferences: { language: "fr" }});
+    const oneUser = await UserApi.getInstance(platform, true, {
+      companyRole: "admin",
+      preferences: { language: "en" },
+    });
+    const anotherUser = await UserApi.getInstance(platform, true, {
+      companyRole: "admin",
+      preferences: { language: "fr" },
+    });
     //upload files
     const doc = await oneUser.uploadRandomFileAndCreateDocument();
     const doc2 = await anotherUser.uploadRandomFileAndCreateDocument();
