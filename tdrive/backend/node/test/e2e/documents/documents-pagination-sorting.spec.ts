@@ -56,7 +56,7 @@ describe("The Documents Browser Window and API", () => {
         paginate: { page_token, limitStr },
       });
       expect(docs).toBeDefined();
-      expect(docs.children.length).toBeLessThanOrEqual(parseInt(limitStr));
+      expect(docs.children.length).toHaveLength(parseInt(limitStr));
     });
 
     it("Should sort documents by name in ascending order", async () => {
