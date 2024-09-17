@@ -140,7 +140,7 @@ describe("the Drive feature", () => {
     await oneUser.uploadRandomFileAndCreateDocument(oneUserDrive);
     // expect the notification to not be sent
     expect(isVirtualFolder).toHaveBeenCalled();
-    expect(isVirtualFolder).toBeTruthy();
+    expect(isVirtualFolder).toHaveReturnedWith(true);
     expect(notifyDocumentShared).not.toHaveBeenCalledWith(
       expect.objectContaining({
         notificationEmitter: oneUser.user.id,
