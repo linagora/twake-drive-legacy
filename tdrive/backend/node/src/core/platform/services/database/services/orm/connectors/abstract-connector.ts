@@ -3,7 +3,7 @@ import { Connector, UpsertOptions } from ".";
 import { ConnectionOptions, DatabaseType } from "../..";
 import { FindOptions } from "../repository/repository";
 import { ColumnDefinition, EntityDefinition } from "../types";
-import { ListResult } from "../../../../../framework/api/crud-service";
+import { ListResult, Paginable, Pagination } from "../../../../../framework/api/crud-service";
 
 export abstract class AbstractConnector<T extends ConnectionOptions> implements Connector {
   constructor(protected type: DatabaseType, protected options: T, protected secret: string) {}
@@ -37,6 +37,8 @@ export abstract class AbstractConnector<T extends ConnectionOptions> implements 
     filters: any,
     options: FindOptions,
   ): Promise<ListResult<EntityType>>;
+
+  abstract getOffsetPagination(options: Paginable): Pagination;
 
   getOptions(): T {
     return this.options;

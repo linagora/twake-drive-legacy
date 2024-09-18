@@ -3,7 +3,7 @@ import { DatabaseType } from "../..";
 import { MongoConnectionOptions } from "./mongodb/mongodb";
 import { ColumnDefinition, EntityDefinition } from "../types";
 import { FindOptions } from "../repository/repository";
-import { ListResult } from "../../../../../framework/api/crud-service";
+import { ListResult, Paginable, Pagination } from "../../../../../framework/api/crud-service";
 import { PostgresConnectionOptions } from "./postgres/postgres";
 
 export * from "./mongodb/mongodb";
@@ -92,6 +92,13 @@ export interface Connector extends Initializable {
     filters: any,
     options: FindOptions,
   ): Promise<ListResult<EntityType>>;
+
+  /**
+   * Get the pagination for the given options where the pagination is offset based
+   * @param options Paginable
+   * @returns Pagination
+   */
+  getOffsetPagination(options: Paginable): Pagination;
 }
 
 export declare type ConnectionOptions = MongoConnectionOptions | PostgresConnectionOptions;

@@ -358,6 +358,12 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
       throw err;
     }
   }
+
+  getOffsetPagination(options: Paginable): Pagination {
+    const { page_token, limitStr } = options;
+    const pageNumber = parseInt(page_token) / parseInt(limitStr);
+    return new Pagination(`${pageNumber}`, `${limitStr}`, options.reversed);
+  }
 }
 
 export type TableRowInfo = {

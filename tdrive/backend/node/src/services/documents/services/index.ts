@@ -219,18 +219,12 @@ export class DocumentsService {
     if (options?.sort) {
       sortField = this.getSortFieldMapping(options.sort);
     }
-    const dbType = await globalResolver.database.getConnector().getType();
 
     // Initialize pagination
     let pagination;
 
-    if (options?.pagination) {
-      const { page_token, limitStr } = options.pagination;
-      const pageNumber =
-        dbType === "mongodb" ? parseInt(page_token) : parseInt(page_token) / parseInt(limitStr);
-
-      pagination = new Pagination(`${pageNumber}`, `${limitStr}`, false);
-    }
+    if (options?.pagination)
+      pagination = globalResolver.database.getConnector().getOffsetPagination(options.pagination);
 
     let children = isDirectory
       ? (

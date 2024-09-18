@@ -316,4 +316,9 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions> {
     const nextPage: Paginable = new Pagination(nextToken, options.pagination.limitStr || "100");
     return new ListResult<Table>(entityDefinition.type, entities, nextPage);
   }
+
+  getOffsetPagination(options: Paginable): Pagination {
+    const { page_token, limitStr } = options;
+    return new Pagination(`${page_token}`, `${limitStr}`, options.reversed);
+  }
 }
