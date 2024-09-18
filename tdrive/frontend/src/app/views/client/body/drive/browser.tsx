@@ -402,7 +402,7 @@ export default memo(
                         sortLabel.order === 'asc' ? 'transform rotate-180' : ''
                       }`}
                     />
-                    <span>By {sortLabel.by}</span>
+                    <span>{Languages.t('components.item_context_menu.sorting.selected.' + sortLabel.by)}</span>
                     <ChevronDownIcon className="h-4 w-4 ml-2 -mr-1" />
                   </Button>
                 </Menu>

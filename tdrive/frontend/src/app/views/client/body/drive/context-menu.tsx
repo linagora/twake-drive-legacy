@@ -525,7 +525,7 @@ export const useOnBuildSortContextMenu = () => {
     const menuItems = [
       {
         type: 'menu',
-        text: 'Date',
+        text: Languages.t('components.item_context_menu.sorting.by.date'),
         icon: sortItem.by === 'date' ? 'check' : 'sort-check',
         onClick: () => {
           // keep the old value for sortItem and change the by value
@@ -540,7 +540,7 @@ export const useOnBuildSortContextMenu = () => {
       },
       {
         type: 'menu',
-        text: 'Name',
+        text: Languages.t('components.item_context_menu.sorting.by.name'),
         icon: sortItem.by === 'name' ? 'check' : 'sort-check',
         onClick: () => {
           setSortItem(prevSortItem => {
@@ -554,7 +554,7 @@ export const useOnBuildSortContextMenu = () => {
       },
       {
         type: 'menu',
-        text: 'Size',
+        text: Languages.t('components.item_context_menu.sorting.by.size'),
         icon: sortItem.by === 'size' ? 'check' : 'sort-check',
         onClick: () => {
           setSortItem(prevSortItem => {
@@ -569,7 +569,7 @@ export const useOnBuildSortContextMenu = () => {
       {type:"separator"},
       {
         type: 'menu',
-        text: 'Ascending',
+        text: Languages.t('components.item_context_menu.sorting.order.asc'),
         icon: sortItem.order === 'asc' ? 'check' : 'sort-check',
         onClick: () => {
           setSortItem(prevSortItem => {
@@ -583,7 +583,7 @@ export const useOnBuildSortContextMenu = () => {
       },
       {
         type: 'menu',
-        text: 'Descending',
+        text: Languages.t('components.item_context_menu.sorting.order.desc'),
         icon: sortItem.order === 'desc' ? 'check' : 'sort-check',
         onClick: () => {
           setSortItem(prevSortItem => {
