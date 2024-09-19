@@ -135,47 +135,47 @@ export default class StorageService extends TdriveService<StorageAPI> implements
 
   async read(path: string, options?: ReadOptions): Promise<Readable> {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
       const chunks = options?.totalChunks || 1;
       let count = 1;
-  
+
       // Check if the first chunk or file exists
       await self._read(options?.totalChunks ? `${path}/chunk${count}` : path);
-  
+
       async function factory(callback: (err?: Error, stream?: Stream) => unknown) {
         if (count > chunks) {
           callback();
           return;
         }
-  
+
         let decipher: Decipher | undefined;
         if (options?.encryptionKey) {
           const [key, iv] = options.encryptionKey.split(".");
           decipher = createDecipheriv(options.encryptionAlgo || this.algorithm, key, iv);
         }
-  
+
         const chunk = options?.totalChunks ? `${path}/chunk${count}` : path;
         count += 1;
-  
+
         try {
-          let stream = await self._read(chunk);  // Read the chunk
+          let stream = await self._read(chunk); // Read the chunk
           if (decipher) {
-            stream = stream.pipe(decipher);  // Apply decipher if necessary
+            stream = stream.pipe(decipher); // Apply decipher if necessary
           }
-          callback(null, stream);  // Return the stream only once
+          callback(null, stream); // Return the stream only once
         } catch (err) {
           logger.error(err);
-          callback(err, null);  // Return error in case of failure
+          callback(err, null);
         }
       }
-  
+
       return new Multistream(factory);
     } catch (err) {
       logger.error(err);
       throw err;
     }
   }
-  
 
   async _read(path: string): Promise<Readable> {
     let stream = await this.getConnector().read(path);
