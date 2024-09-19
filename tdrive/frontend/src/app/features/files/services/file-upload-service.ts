@@ -303,7 +303,7 @@ class FileUploadService {
     return new Resumable({
       target,
       headers,
-      chunkSize: chunkSize || 50000000,
+      chunkSize: chunkSize || 5000000,
       testChunks: testChunks || false,
       simultaneousUploads: simultaneousUploads || 5,
       maxChunkRetries: maxChunkRetries || 2,
