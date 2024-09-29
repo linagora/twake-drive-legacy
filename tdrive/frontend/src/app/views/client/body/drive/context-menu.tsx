@@ -88,7 +88,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
               hide: access === 'read' || getPublicLinkToken() || inTrash,
               onClick: () => setAccessModalState({ open: true, id: item.id }),
             },
-            { type: 'separator' },
+            { type: 'separator', hide: inTrash },
             {
               type: 'menu',
               icon: 'download-alt',
@@ -100,7 +100,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
                 } else {
                   download(item.id);
                 }
-              }
+              },
             },
             /*TODO: fix loading of preview in new window and uncomment. See https://github.com/linagora/twake-drive/issues/603 .
             {
@@ -150,7 +150,10 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
               type: 'menu',
               icon: 'link',
               text: Languages.t('components.item_context_menu.copy_link'),
-              hide: !item.access_info.public?.level || item.access_info.public?.level === 'none' || inTrash,
+              hide:
+                !item.access_info.public?.level ||
+                item.access_info.public?.level === 'none' ||
+                inTrash,
               onClick: () => {
                 copyToClipboard(getPublicLink(item || parent?.item));
                 ToasterService.success(
@@ -165,7 +168,7 @@ export const useOnBuildContextMenu = (children: DriveItem[], initialParentId?: s
               hide: item.is_directory || inTrash,
               onClick: () => setVersionModal({ open: true, id: item.id }),
             },
-            { type: 'separator', hide: access !== 'manage' || inTrash, },
+            { type: 'separator', hide: access !== 'manage' || inTrash },
             {
               type: 'menu',
               icon: 'trash',
