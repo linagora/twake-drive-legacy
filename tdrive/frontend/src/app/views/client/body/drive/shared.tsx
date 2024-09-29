@@ -82,7 +82,7 @@ export default () => {
       </div>
       <div className="h-full main-view public p-4 pb-16">
         <AccessChecker folderId={documentId} token={token}>
-          <Drive initialParentId={documentId} inPublicSharing />
+          <Drive initialParentId={documentId} inPublicSharing={true} />
         </AccessChecker>
       </div>
       <MenusBodyLayer />

@@ -13,7 +13,7 @@ import { useUserQuota } from 'features/users/hooks/use-user-quota';
  * Returns the children of a drive item
  * @returns
  */
-export const useDriveActions = () => {
+export const useDriveActions = (inPublicSharing?: boolean) => {
   const companyId = useRouterCompany();
   const sharedFilter = useRecoilValue(SharedWithMeFilterState);
   const sortItem = useRecoilValue(DriveItemSort);
@@ -142,7 +142,7 @@ export const useDriveActions = () => {
       try {
         await DriveApiClient.update(companyId, id, update);
         await refresh(id || '', true);
-        await refresh(parentId || '', true);
+        if (!inPublicSharing) await refresh(parentId || '', true);
         if (update?.parent_id !== parentId) await refresh(update?.parent_id || '', true);
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_update_file'));

@@ -11,6 +11,7 @@ import Languages from '@features/global/services/languages-service';
 export type PropertiesModalType = {
   open: boolean;
   id: string;
+  inPublicSharing?: boolean;
 };
 
 export const PropertiesModalAtom = atom<PropertiesModalType>({
@@ -18,6 +19,7 @@ export const PropertiesModalAtom = atom<PropertiesModalType>({
   default: {
     open: false,
     id: '',
+    inPublicSharing: false,
   },
 });
 
@@ -27,15 +29,19 @@ export const PropertiesModal = () => {
   return (
     <Modal open={state.open} onClose={() => setState({ ...state, open: false })}>
       {!!state.id && (
-        <PropertiesModalContent id={state.id} onClose={() => setState({ ...state, open: false })} />
+        <PropertiesModalContent
+          id={state.id}
+          onClose={() => setState({ ...state, open: false })}
+          inPublicSharing={state.inPublicSharing}
+        />
       )}
     </Modal>
   );
 };
 
-const PropertiesModalContent = ({ id, onClose }: { id: string; onClose: () => void }) => {
+const PropertiesModalContent = ({ id, onClose, inPublicSharing }: { id: string; onClose: () => void, inPublicSharing?: boolean }) => {
   const { item, refresh } = useDriveItem(id);
-  const { update } = useDriveActions();
+  const { update } = useDriveActions(inPublicSharing);
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState('');
 

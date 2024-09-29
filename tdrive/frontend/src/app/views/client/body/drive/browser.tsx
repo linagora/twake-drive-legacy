@@ -160,7 +160,7 @@ export default memo(
 
     const selectedCount = Object.values(checked).filter(v => v).length;
 
-    const onBuildContextMenu = useOnBuildContextMenu(children, initialParentId);
+    const onBuildContextMenu = useOnBuildContextMenu(children, initialParentId, inPublicSharing);
     const onBuildSortContextMenu = useOnBuildSortContextMenu();
 
     const handleDragOver = (event: { preventDefault: () => void }) => {
