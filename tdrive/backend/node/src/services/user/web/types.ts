@@ -87,6 +87,7 @@ export enum CompanyFeaturesEnum {
   COMPANY_SHARED_DRIVE = "company:shared_drive",
   COMPANY_DISPLAY_EMAIL = "company:display_email",
   COMPANY_USER_QUOTA = "company:user_quota",
+  COMPANY_SHARED_WITH_ME = "company:shared_with_me",
 }
 
 export type CompanyFeaturesObject = {
@@ -100,6 +101,7 @@ export type CompanyFeaturesObject = {
   [CompanyFeaturesEnum.COMPANY_SHARED_DRIVE]?: boolean;
   [CompanyFeaturesEnum.COMPANY_DISPLAY_EMAIL]?: boolean;
   [CompanyFeaturesEnum.COMPANY_USER_QUOTA]?: boolean;
+  [CompanyFeaturesEnum.COMPANY_SHARED_WITH_ME]?: boolean;
 };
 
 export type CompanyLimitsObject = {

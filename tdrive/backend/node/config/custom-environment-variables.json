@@ -130,6 +130,7 @@
     "defaultUserQuota": "DRIVE_DEFAULT_USER_QUOTA",
     "featureSearchUsers": "ENABLE_FEATURE_SEARCH_USERS",
     "featureDisplayEmail": "ENABLE_FEATURE_DISPLAY_EMAIL",
-    "featureUserQuota": "ENABLE_FEATURE_USER_QUOTA"
+    "featureUserQuota": "ENABLE_FEATURE_USER_QUOTA",
+    "featureSharedWithMe": "ENABLE_FEATURE_SHARED_WITH_ME"
   }
 }

@@ -67,6 +67,9 @@ export function formatCompany(
       [CompanyFeaturesEnum.COMPANY_USER_QUOTA]: JSON.parse(
         config.get("drive.featureUserQuota") || "false",
       ),
+      [CompanyFeaturesEnum.COMPANY_SHARED_WITH_ME]: JSON.parse(
+        config.get("drive.featureSharedWithMe") || "true",
+      ),
     },
     {
       ...(res.plan?.features || {}),
@@ -75,8 +78,6 @@ export function formatCompany(
         res.stats.total_members < res.plan?.limits[CompanyLimitsEnum.COMPANY_MEMBERS_LIMIT],
     },
   );
-
-  console.log("🚀🚀 res.plan.features: ", res.plan.features);
 
   return res;
 }

@@ -68,7 +68,7 @@
     "mongodb": {
       "uri": "mongodb://mongo:27017",
       "database": "tdrive"
-    },
+    }
   },
   "message-queue": {
     "// possible 'type' values are": "'amqp' or 'local'",
@@ -117,6 +117,7 @@
     "featureSearchUsers": true,
     "featureDisplayEmail": true,
     "featureUserQuota": false,
+    "featureSharedWithMe": true,
     "defaultCompany": "00000000-0000-4000-0000-000000000000",
     "defaultUserQuota": 200000000
   },
