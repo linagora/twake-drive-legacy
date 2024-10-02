@@ -429,7 +429,11 @@ export class DocumentsController {
         const data = archiveOrFile.file;
         const filename = encodeURIComponent(data.name.replace(/[^\p{L}0-9 _.-]/gu, ""));
 
-        response.header("Content-disposition", `attachment; filename="${filename}"`);
+        response.header(
+          "Content-Disposition",
+          `attachment; filename="${filename}"; filename*=UTF-8''${filename}`,
+        );
+
         if (data.size) response.header("Content-Length", data.size);
         response.type(data.mime);
         return response.send(data.file);
