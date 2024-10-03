@@ -22,3 +22,12 @@ export const fileIsMedia = (file: Partial<File>): boolean => {
     file.metadata?.mime?.startsWith("image/")
   );
 };
+
+/**
+ * Generate RFC 5987 UTF-8 encoding compliant header value for `Content-Disposition`
+ * to make a browser download a reponse to a file with the provided name
+ */
+export const formatAttachmentContentDispositionHeader = (filename: string) => {
+  const encoded = encodeURIComponent(filename.replace(/[^\p{L}0-9 _.-]/gu, ""));
+  return `attachment; filename="${encoded}"; filename*=UTF-8''${encoded}`;
+};

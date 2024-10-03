@@ -5,6 +5,7 @@ import { CompanyExecutionContext } from "../types";
 import { UploadOptions } from "../../types";
 import { PublicFile } from "../../entities/file";
 import gr from "../../../global-resolver";
+import { formatAttachmentContentDispositionHeader } from "../../utils";
 
 export class FileController {
   async save(
@@ -47,12 +48,7 @@ export class FileController {
     const params = request.params;
     try {
       const data = await gr.services.files.download(params.id, context);
-      const filename = data.name.replace(/[^a-zA-Z0-9 -_.]/g, "");
-
-      response.header(
-        "Content-Disposition",
-        `attachment; filename="${filename}"; filename*=UTF-8''${filename}`,
-      );
+      response.header("Content-Disposition", formatAttachmentContentDispositionHeader(data.name));
 
       if (data.size) response.header("Content-Length", data.size);
       response.type(data.mime);
