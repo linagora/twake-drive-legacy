@@ -83,11 +83,10 @@ export enum CompanyFeaturesEnum {
   CHAT_EDIT_FILES = "chat:edit_files",
   CHAT_UNLIMITED_STORAGE = "chat:unlimited_storage",
   COMPANY_INVITE_MEMBER = "company:invite_member",
-  COMPANY_SEARCH_USERS = "company:search_users",
   COMPANY_SHARED_DRIVE = "company:shared_drive",
   COMPANY_DISPLAY_EMAIL = "company:display_email",
   COMPANY_USER_QUOTA = "company:user_quota",
-  COMPANY_SHARED_WITH_ME = "company:shared_with_me",
+  COMPANY_MANAGE_ACCESS = "company:managed_access",
 }
 
 export type CompanyFeaturesObject = {
@@ -97,11 +96,10 @@ export type CompanyFeaturesObject = {
   [CompanyFeaturesEnum.CHAT_EDIT_FILES]?: boolean;
   [CompanyFeaturesEnum.CHAT_UNLIMITED_STORAGE]?: boolean;
   [CompanyFeaturesEnum.COMPANY_INVITE_MEMBER]?: boolean;
-  [CompanyFeaturesEnum.COMPANY_SEARCH_USERS]?: boolean;
   [CompanyFeaturesEnum.COMPANY_SHARED_DRIVE]?: boolean;
   [CompanyFeaturesEnum.COMPANY_DISPLAY_EMAIL]?: boolean;
   [CompanyFeaturesEnum.COMPANY_USER_QUOTA]?: boolean;
-  [CompanyFeaturesEnum.COMPANY_SHARED_WITH_ME]?: boolean;
+  [CompanyFeaturesEnum.COMPANY_MANAGE_ACCESS]?: boolean;
 };
 
 export type CompanyLimitsObject = {

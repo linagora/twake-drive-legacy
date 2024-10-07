@@ -27,6 +27,9 @@ import useRouterCompany from '@features/router/hooks/use-router-company';
 import _, { set } from 'lodash';
 import Languages from 'features/global/services/languages-service';
 import { hasAnyPublicLinkAccess } from '@features/files/utils/access-info-helpers';
+import FeatureTogglesService, {
+  FeatureNames,
+} from '@features/global/services/feature-toggles-service';
 
 /**
  * This will build the context menu in different contexts
@@ -89,7 +92,11 @@ export const useOnBuildContextMenu = (
               type: 'menu',
               icon: 'users-alt',
               text: Languages.t('components.item_context_menu.manage_access'),
-              hide: access === 'read' || getPublicLinkToken() || inTrash,
+              hide:
+                access === 'read' ||
+                getPublicLinkToken() ||
+                inTrash ||
+                !FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_MANAGE_ACCESS),
               onClick: () => setAccessModalState({ open: true, id: item.id }),
             },
             { type: 'separator', hide: inTrash },

@@ -8,11 +8,10 @@ export enum FeatureNames {
   EDIT_FILES = 'chat:edit_files',
   UNLIMITED_STORAGE = 'chat:unlimited_storage', //Currently inactive
   COMPANY_INVITE_MEMBER = 'company:invite_member',
-  COMPANY_SEARCH_USERS = 'company:search_users',
   COMPANY_SHARED_DRIVE = 'company:shared_drive',
   COMPANY_DISPLAY_EMAIL = 'company:display_email',
   COMPANY_USER_QUOTA = 'company:user_quota',
-  COMPANY_SHARED_WITH_ME = 'company:shared_with_me',
+  COMPANY_MANAGE_ACCESS = 'company:managed_access',
 }
 
 export type FeatureValueType = boolean | number;
@@ -28,11 +27,10 @@ availableFeaturesWithDefaults.set(FeatureNames.EDIT_FILES, true);
 availableFeaturesWithDefaults.set(FeatureNames.UNLIMITED_STORAGE, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_INVITE_MEMBER, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_INVITE_MEMBER, true);
-availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SEARCH_USERS, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SHARED_DRIVE, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_DISPLAY_EMAIL, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_USER_QUOTA, false);
-availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SHARED_WITH_ME, true);
+availableFeaturesWithDefaults.set(FeatureNames.COMPANY_MANAGE_ACCESS, true);
 
 /**
  * ChannelServiceImpl that allow you to manage feature flipping in Tdrive using react feature toggles

@@ -76,6 +76,9 @@ export class DocumentsService {
   defaultQuota: number = config.has("drive.defaultUserQuota")
     ? config.get("drive.defaultUserQuota")
     : 0;
+  manageAccessEnabled: boolean = config.has("drive.featureManageAccess")
+    ? config.get("drive.featureManageAccess")
+    : false;
   logger: TdriveLogger = getLogger("Documents Service");
 
   async init(): Promise<this> {
@@ -559,6 +562,11 @@ export class DocumentsService {
             oldParent = item.parent_id;
           }
           if (key === "access_info") {
+            // if manage access is disabled, we don't allow changing access level
+            if (!this.manageAccessEnabled) {
+              delete content.access_info;
+            }
+
             const sharedWith = content.access_info.entities.filter(
               info =>
                 info.type === "user" &&

@@ -58,7 +58,7 @@ const AccessModalContent = (props: {
         }
       >
       <div className={loading ? 'opacity-50' : ''}>
-        {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_SEARCH_USERS) && (
+        {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_MANAGE_ACCESS) && (
           <InternalUsersAccessManager id={id} disabled={access !== 'manage'} onCloseModal={props.onCloseModal} />
         )}
       </div>
