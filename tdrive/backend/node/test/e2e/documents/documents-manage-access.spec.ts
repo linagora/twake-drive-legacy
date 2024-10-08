@@ -56,22 +56,23 @@ describe("The Drive feature", () => {
     platform = null;
   });
 
-  it.skip("Shared with me should not contain files when manage access is off", async () => {
-    const uploaderUser = await UserApi.getInstance(platform, true);
-    const recipientUser = await UserApi.getInstance(platform, true);
+  it("Shared with me should not contain files when manage access is off", async () => {
+    const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+    const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
 
     // Upload files by the uploader user
-    const files = await uploaderUser.uploadAllFilesOneByOne();
+    const files = await oneUser.uploadAllFilesOneByOne();
+
     // Wait for file processing
     await new Promise(r => setTimeout(r, 5000));
 
     // Share the file with recipient user
-    await uploaderUser.shareWithPermissions(files[1], recipientUser.user.id, "read");
+    await anotherUser.shareWithPermissions(files[1], anotherUser.user.id, "read");
     await new Promise(r => setTimeout(r, 3000)); // Wait for sharing process
 
     // Check if the shared file appears in recipient's "shared with me" section
-    const sharedDocs = await recipientUser.browseDocuments("shared_with_me");
-    
+    const sharedDocs = await anotherUser.browseDocuments("shared_with_me");
+
     // Validate that there are no shared files due to manage access being off
     expect(sharedDocs.children.length).toBe(0);
   });
