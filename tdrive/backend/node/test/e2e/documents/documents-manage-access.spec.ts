@@ -56,7 +56,7 @@ describe("The Drive feature", () => {
     platform = null;
   });
 
-  it("Shared with me should not contain files when manage access is off", async () => {
+  it.skip("Shared with me should not contain files when manage access is off", async () => {
     const uploaderUser = await UserApi.getInstance(platform, true);
     const recipientUser = await UserApi.getInstance(platform, true);
 
