@@ -7,21 +7,25 @@ services:
   #     - 5672:5672
   #     - 15672:15672
 
-  mongo:
-    container_name: mongo
-    image: mongo
-    ports:
-      - 27017:27017
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+  # mongo:
+  #   container_name: mongo
+  #   image: mongo
+  #   ports:
+  #     - 27017:27017
+  #   healthcheck:
+  #     test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
 
-  redis:
-    image: "redis:alpine"
-    command: redis-server --requirepass some_password
-    ports:
-      - "6379:6379"
+  postgres:
+    image: postgres
+    restart: always
     environment:
-      - REDIS_REPLICATION_MODE=master
+      POSTGRES_DB: tdrive
+      POSTGRES_PASSWORD: tdrive_secret
+      POSTGRES_USER: tdrive_user
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: pg_isready -d tdrive
 
   minio:
     image: minio/minio
@@ -62,10 +66,11 @@ services:
       - LOG_LEVEL=error
       - NODE_ENV=test
       # - ACCOUNTS_TYPE=remote
-      - SEARCH_DRIVER=mongodb
-      - DB_DRIVER=mongodb
+      # - SEARCH_DRIVER=mongodb
+      # - DB_DRIVER=mongodb
       - PUBSUB_TYPE=local
       # - PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
+      - SEARCH_DRIVER=elasticsearch
       - SEARCH_ES_ENDPOINT=http://elasticsearch:9200
       - SEARCH_ES_FLUSHINTERVAL=1
       - STORAGE_DRIVER=S3
@@ -74,10 +79,18 @@ services:
       - STORAGE_S3_ENDPOINT=minio
       - STORAGE_S3_ACCESS_KEY=admin
       - STORAGE_S3_SECRET_KEY=adminminio
+      - DB_DRIVER=postgres
+      - DB_POSTGRES_DBNAME=tdrive
+      - DB_POSTGRES_HOST=postgres
+      - DB_POSTGRES_USERNAME=tdrive_user
+      - DB_POSTGRES_PASSWORD=tdrive_secret
+      - DB_POSTGRES_PORT=5432
     depends_on:
       minio:
         condition: service_healthy
-      mongo:
+      # mongo:
+      #   condition: service_healthy
+      postgres:
         condition: service_healthy
       # rabbitmq:
       #   condition: service_started
@@ -85,8 +98,8 @@ services:
         condition: service_healthy
       createbucket:
         condition: service_completed_successfully
-    links:
-      - mongo
+    # links:
+      # - mongo
       # - rabbitmq
 
   elasticsearch:
@@ -105,13 +118,13 @@ services:
     ports:
       - 9200:9200
 
-  nginx:
-    image: tdrive/tdrive-frontend
-    ports:
-      - 8000:80
-    volumes:
-      - ./docker-data/logs/nginx/:/var/log/nginx
-      - ./docker-data/letsencrypt/:/etc/letsencrypt/
-      - ./frontend/:/tdrive-react/
-    healthcheck:
-      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:80/.well-known/
+  # nginx:
+  #   image: tdrive/tdrive-frontend
+  #   ports:
+  #     - 8000:80
+  #   volumes:
+  #     - ./docker-data/logs/nginx/:/var/log/nginx
+  #     - ./docker-data/letsencrypt/:/etc/letsencrypt/
+  #     - ./frontend/:/tdrive-react/
+  #   healthcheck:
+  #     test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:80/.well-known/

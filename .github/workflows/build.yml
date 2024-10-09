@@ -59,7 +59,7 @@ jobs:
       - setup
     steps:
       - uses: actions/checkout@v4
-      - name: e2e-mongo-s3-test
+      - name: e2e-postgres-s3-test
         run: |
           cd tdrive
           docker compose -f docker-compose.tests.yml run --rm -e NODE_OPTIONS=--unhandled-rejections=warn node npm run test:all
