@@ -94,6 +94,8 @@ async function report(platform: TdrivePlatform, args: ListArguments) {
         `    - ${formatTS(version.date_added)} by ${await formatUser(version.creator_id)}`,
       );
       console.error(`        - id:          ${version.id}`);
+      console.error(`        - filename:    ${version.filename}`);
+      console.error(`        - meta.name:   ${version.file_metadata.name}`);
       console.error(
         `        - size:        ${version.file_metadata.size} (${
           version.file_metadata.size > previousSize ? "+" : ""
