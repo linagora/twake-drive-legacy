@@ -1,6 +1,6 @@
 {
-  "hello": "Hello",
-  "virtual-folder.shared-drive": "Shared Drive",
-  "virtual-folder.my-drive": "My Drive",
-  "virtual-folder.trash": "Trash"
+    "hello": "Hello",
+    "virtual-folder.my-drive": "My Drive",
+    "virtual-folder.shared-drive": "Shared Drive",
+    "virtual-folder.trash": "Trash"
 }

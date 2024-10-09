@@ -10,7 +10,7 @@ class EditorService implements IEditorService {
     file_version_id: string,
     user: UserType,
     preview: boolean,
-    file_id: string,
+    drive_file_id: string,
   ): Promise<EditConfigInitResult> => {
     const { color, mode: fileMode } = this.getFileMode(file_name);
     let [, extension] = Utils.splitFilename(file_name);
@@ -18,7 +18,7 @@ class EditorService implements IEditorService {
     extension = extension.toLocaleLowerCase();
     return {
       color,
-      file_id,
+      drive_file_id,
       file_version_id,
       file_type: extension,
       filename: file_name,

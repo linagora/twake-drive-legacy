@@ -34,6 +34,21 @@ export default async (req: Request<{}, {}, {}, RequestQuery>, res: Response, nex
       return res.status(401).send({ message: 'invalid token' });
     }
 
+    const authHeaderToken = req.header('authorization');
+    try {
+      if (authHeaderToken) {
+        const fromTwakeDriveToken = jwt.verify(authHeaderToken, CREDENTIALS_SECRET) as Record<string, string>;
+        // The following constant comes from tdrive/backend/node/src/services/applications-api/index.ts
+        // This is in the case when Twake Drive backend makes requests from the connector,
+        // but not on the behalf of a specific user, eg. when checking stale only office keys
+        if (fromTwakeDriveToken['type'] != 'tdriveToApplication') throw new Error(`Bad type in token ${JSON.stringify(fromTwakeDriveToken)}`);
+        return next();
+      }
+    } catch (e) {
+      logger.error(`Invalid token in Authorization header from Twake Drive backend`, e);
+      return res.status(401).json({ message: 'invalid token' });
+    }
+
     const user = await userService.getCurrentUser(token);
 
     if (!user || !user.id) {

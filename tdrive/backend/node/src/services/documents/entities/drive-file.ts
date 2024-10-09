@@ -1,8 +1,10 @@
 import { Type } from "class-transformer";
+import { randomUUID } from "crypto";
 import { Column, Entity } from "../../../core/platform/services/database/services/orm/decorators";
 import { DriveFileAccessLevel, publicAccessLevel } from "../types";
 import { FileVersion } from "./file-version";
 import search from "./drive-file.search";
+import * as UUIDTools from "../../../utils/uuid";
 
 export const TYPE = "drive_files";
 export type DriveScope = "personal" | "shared";
@@ -93,8 +95,10 @@ export class DriveFile {
 
   /**
    * If this field is non-null, then an editing session is in progress (probably in OnlyOffice).
-   * Should be in the format `timestamp-appid-hexuuid` where `appid` and `timestamp` have no `-`
-   * characters.
+   * Use {@see EditingSessionKeyFormat} to generate and interpret it.
+   * Values should ensure that sorting lexicographically is chronological (assuming perfect clocks everywhere),
+   * and that the application, company and user that started the edit session are retrievable.
+   * It is not encrypted.
    */
   @Type(() => String)
   @Column("editing_session_key", "string")
@@ -119,6 +123,105 @@ export class DriveFile {
   @Column("scope", "string")
   scope: DriveScope;
 }
+
+const OnlyOfficeSafeDocKeyBase64 = {
+  // base64 uses `+/`, but base64url uses `-_` instead. Both use `=` as padding,
+  // which conflicts with EditingSessionKeyFormat so using `.` instead.
+  fromBuffer(buffer: Buffer) {
+    return buffer.toString("base64url").replace(/=/g, ".");
+  },
+  toBuffer(base64: string) {
+    return Buffer.from(base64.replace(/\./g, "="), "base64url");
+  },
+};
+
+function checkFieldValue(field: string, value: string, required: boolean = true) {
+  if (!required && !value) return;
+  if (!/^[0-9a-zA-Z_-]+$/m.test(value))
+    throw new Error(
+      `Invalid ${field} value (${JSON.stringify(
+        value,
+      )}). Must be short and only alpha numeric or '_' and '-'`,
+    );
+}
+/**
+ * Reference implementation for generating then parsing the {@link DriveFile.editing_session_key} field.
+ *
+ * Fields should be explicit, `instanceId` is for the case when we have multiple
+ * clients
+ */
+export const EditingSessionKeyFormat = {
+  // OnlyOffice key limits: 128 chars, [0-9a-zA-Z.=_-]
+  // See https://api.onlyoffice.com/editors/config/document#key
+  // This is specific to it, but the constraint seems strict enough
+  // that any other system needing such a unique identifier would find
+  // this compatible. This value must be ensured to be the strictest
+  // common denominator to all plugin/interop systems. Plugins that
+  // require something even stricter have the option of maintaining
+  // a look up table to an acceptable value.
+  generate(
+    applicationId: string,
+    instanceId: string,
+    companyId: string,
+    userId: string,
+    overrideTimeStamp?: Date,
+  ) {
+    checkFieldValue("applicationId", applicationId);
+    checkFieldValue("instanceId", instanceId, false);
+    const isoUTCDateNoSpecialCharsNoMS = (overrideTimeStamp ?? new Date())
+      .toISOString()
+      .replace(/\..+$/, "")
+      .replace(/[ZT:-]/g, "");
+    const userIdBuffer = UUIDTools.bufferFromUUIDString(userId) as unknown as Uint8Array;
+    const companyIdBuffer = UUIDTools.bufferFromUUIDString(companyId) as unknown as Uint8Array;
+    const entropyBuffer = UUIDTools.bufferFromUUIDString(randomUUID()) as unknown as Uint8Array;
+    const idsString = OnlyOfficeSafeDocKeyBase64.fromBuffer(
+      Buffer.concat([companyIdBuffer, userIdBuffer, entropyBuffer]),
+    );
+    const newKey = [isoUTCDateNoSpecialCharsNoMS, applicationId, instanceId, idsString].join("=");
+    if (newKey.length > 128 || !/^[0-9a-zA-Z=_-]+$/m.test(newKey))
+      throw new Error(
+        `Invalid generated editingSessionKey (${JSON.stringify(
+          newKey,
+        )}) string. Must be <128 chars, and only contain [0-9a-zA-z=_-]`,
+      );
+    return newKey;
+  },
+
+  parse(editingSessionKey: string) {
+    const parts = editingSessionKey.split("=");
+    const expectedParts = 4;
+    if (parts.length !== expectedParts)
+      throw new Error(
+        `Invalid editingSessionKey (${JSON.stringify(
+          editingSessionKey,
+        )}). Expected ${expectedParts} parts`,
+      );
+    const [timestampStr, applicationId, instanceId, idsOOBase64String] = parts;
+    const timestampMatch = timestampStr.match(
+      /^(?<year>\d{4})(?<month>\d\d)(?<day>\d\d)(?<hour>\d\d)(?<minute>\d\d)(?<second>\d\d)$/,
+    );
+    if (!timestampMatch)
+      throw new Error(
+        `Invalid editingSessionKey (${JSON.stringify(
+          editingSessionKey,
+        )}). Didn't start with valid timestamp`,
+      );
+    const { year, month, day, hour, minute, second } = timestampMatch.groups!;
+    const idsBuffer = OnlyOfficeSafeDocKeyBase64.toBuffer(idsOOBase64String);
+    const companyId = UUIDTools.formattedUUIDInBufferArray(idsBuffer, 0);
+    const userId = UUIDTools.formattedUUIDInBufferArray(idsBuffer, 1);
+    return {
+      timestamp: new Date(
+        Date.parse(`${[year, month, day].join("-")}T${[hour, minute, second].join(":")}Z`),
+      ),
+      applicationId,
+      instanceId,
+      companyId,
+      userId,
+    };
+  },
+};
 
 export type AccessInformation = {
   public?: {

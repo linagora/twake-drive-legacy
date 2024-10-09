@@ -1,3 +1,20 @@
+# Twake Drive v1.0.4
+
+## Features
+
+- Added translation for context menu
+- Removed cumulative queries to the database First step to the transactions in PostgreSQL
+- Ignore errors during nextcloud migration to be able to import files partially
+- OnlyOffice rework
+
+## Fixes and Improvements
+
+- Fix big file (with multiple chunks) download
+- Fix bug with postgres support when uploading files
+- Fix infinite scroll for shared with me
+- Fix OpenSearch e2e test
+- Fix build CI
+
 # Twake Drive v1.0.3
 
 ## Features

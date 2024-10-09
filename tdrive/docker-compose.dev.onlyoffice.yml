@@ -1,0 +1,62 @@
+version: "3.4"
+
+services:
+
+  onlyoffice-rabbitmq:
+    image: rabbitmq:management
+    hostname: onlyoffice-rabbitmq
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - tdrive_network
+
+  onlyoffice-postgresql:
+    image: postgres:13
+    hostname: onlyoffice-postgresql
+    environment:
+      - POSTGRES_DB=onlyoffice
+      - POSTGRES_USER=onlyoffice
+      - POSTGRES_PASSWORD=onlyoffice
+    ports:
+      - 5432:5432
+    volumes:
+      - ./onlyoffice_postgres_data:/var/lib/postgresql/data
+    networks:
+      - tdrive_network
+
+  onlyoffice:
+    image: docker.io/onlyoffice/documentserver
+    hostname: onlyoffice
+    ports:
+      - 8090:80
+    networks:
+      - tdrive_network
+    environment:
+      - AMQP_URI=amqp://guest:guest@onlyoffice-rabbitmq
+      - DB_HOST=onlyoffice-postgresql
+      - DB_NAME=onlyoffice
+      - DB_PORT=5432
+      - DB_TYPE=postgres
+      - DB_USER=onlyoffice
+      - JWT_ENABLED=false
+      - ALLOW_META_IP_ADDRESS=true
+      - ALLOW_PRIVATE_IP_ADDRESS=true
+    depends_on:
+      - onlyoffice-rabbitmq
+      - onlyoffice-postgresql
+    volumes:
+      - ./onlyoffice_data:/var/www/onlyoffice/Data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  tdrive_network:
+    driver: bridge

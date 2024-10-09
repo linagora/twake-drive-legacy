@@ -63,6 +63,8 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
   }, []);
 
   useEffect(() => {
+    if (items.length < 2)
+      return () => {};
     addShortcut({ shortcut: 'Right', handler: handleSwitchRight });
     addShortcut({ shortcut: 'Left', handler: handleSwitchLeft });
 
@@ -146,22 +148,26 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
           </div>
           <div className="whitespace-nowrap flex items-center">
             <Controls type={type} />
-            <Button
-              iconSize="lg"
-              className="ml-4 !rounded-full"
-              theme="dark"
-              size="lg"
-              icon={ArrowLeftIcon}
-              onClick={ handleSwitchLeft }
-            />
-            <Button
-              iconSize="lg"
-              className="ml-4 !rounded-full"
-              theme="dark"
-              size="lg"
-              icon={ArrowRightIcon}
-              onClick={ handleSwitchRight }
-            />
+            {items.length > 1 &&
+              <>
+                <Button
+                  iconSize="lg"
+                  className="ml-4 !rounded-full"
+                  theme="dark"
+                  size="lg"
+                  icon={ArrowLeftIcon}
+                  onClick={ handleSwitchLeft }
+                />
+                <Button
+                  iconSize="lg"
+                  className="ml-4 !rounded-full"
+                  theme="dark"
+                  size="lg"
+                  icon={ArrowRightIcon}
+                  onClick={ handleSwitchRight }
+                />
+              </>
+            }
             <Button
               iconSize="lg"
               className="ml-4 !rounded-full"

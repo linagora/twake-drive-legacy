@@ -5,6 +5,7 @@ import { createDocumentSchema, createVersionSchema, beginEditingSchema } from ".
 
 const baseUrl = "/companies/:company_id";
 const serviceUrl = `${baseUrl}/item`;
+const editingSessionBase = "/editing_session/:editing_session_key";
 
 const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next) => {
   const documentsController = new DocumentsController();
@@ -89,9 +90,23 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
 
   fastify.route({
     method: "GET",
-    url: `${serviceUrl}/editing_session/:editing_session_key`,
+    url: editingSessionBase, //TODO NONONO check authenticate*Optional*
     preValidation: [fastify.authenticateOptional],
     handler: documentsController.getByEditingSessionKey.bind(documentsController),
+  });
+
+  fastify.route({
+    method: "POST",
+    url: editingSessionBase,
+    preValidation: [fastify.authenticateOptional],
+    handler: documentsController.updateEditing.bind(documentsController),
+  });
+
+  fastify.route({
+    method: "DELETE",
+    url: editingSessionBase,
+    preValidation: [fastify.authenticateOptional],
+    handler: documentsController.cancelEditing.bind(documentsController),
   });
 
   fastify.route({

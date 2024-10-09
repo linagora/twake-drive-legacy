@@ -17,7 +17,7 @@ export type EditConfigInitResult = {
   onlyoffice_server: string;
   color: string;
   company_id: string;
-  file_id: string;
+  drive_file_id: string;
   file_version_id: string;
   filename: string;
   file_type: string;
@@ -33,6 +33,7 @@ export interface IEditorService {
     user: UserType,
     preview: boolean,
     file_id: string,
+    drive_file_id: string,
   ) => Promise<EditConfigInitResult>;
 }
 

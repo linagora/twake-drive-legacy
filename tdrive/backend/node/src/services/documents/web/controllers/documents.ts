@@ -24,6 +24,7 @@ import {
 import { DriveFileDTO } from "../dto/drive-file-dto";
 import { DriveFileDTOBuilder } from "../../services/drive-file-dto-builder";
 import config from "config";
+import { formatAttachmentContentDispositionHeader } from "../../../files/utils";
 
 export class DocumentsController {
   private driveFileDTOBuilder = new DriveFileDTOBuilder();
@@ -341,10 +342,12 @@ export class DocumentsController {
   beginEditing = async (
     request: FastifyRequest<{
       Params: ItemRequestParams;
-      Body: { editorApplicationId: string };
+      //TODO application id should be received from the token that we have during the login
+      Body: { editorApplicationId: string; instanceId: string };
     }>,
   ) => {
     try {
+      //TODO create application execution context with the application identifier inside
       const context = getDriveExecutionContext(request);
       const { id } = request.params;
 
@@ -355,11 +358,92 @@ export class DocumentsController {
       return await globalResolver.services.documents.documents.beginEditing(
         id,
         request.body.editorApplicationId,
+        request.body.instanceId || "",
         context,
       );
     } catch (error) {
       logger.error({ error: `${error}` }, "Failed to begin editing Drive item");
       CrudException.throwMe(error, new CrudException("Failed to begin editing Drive item", 500));
+    }
+  };
+
+  /**
+   * Finish an editing session by cancelling it.
+   */
+  cancelEditing = async (
+    request: FastifyRequest<{
+      Params: ItemRequestByEditingSessionKeyParams;
+      Body: { editorApplicationId: string };
+    }>,
+  ) => {
+    try {
+      const context = getDriveExecutionContext(request);
+      const { editing_session_key } = request.params;
+
+      if (!editing_session_key) throw new CrudException("Missing editing_session_key", 400);
+
+      return await globalResolver.services.documents.documents.updateEditing(
+        editing_session_key,
+        null,
+        null,
+        false,
+        null,
+        context,
+      );
+    } catch (error) {
+      logger.error({ error: `${error}` }, "Failed to begin editing Drive item");
+      CrudException.throwMe(error, new CrudException("Failed to begin editing Drive item", 500));
+    }
+  };
+  //TODO: will need a save under session key, but without ending the edit (for force saves)
+  /**
+   * Finish an editing session for a given `editing_session_key` by uploading the new version of the File.
+   * Unless the `keepEditing` query param is `true`, then just save and stay in editing mode.
+   */
+  updateEditing = async (
+    request: FastifyRequest<{
+      Params: ItemRequestByEditingSessionKeyParams;
+      Querystring: { keepEditing?: string; userId?: string };
+      Body: {
+        item: Partial<DriveFile>;
+        version: Partial<FileVersion>;
+      };
+    }>,
+  ) => {
+    const { editing_session_key } = request.params;
+    if (!editing_session_key) throw new CrudException("Editing session key must be set", 400);
+
+    const context = getDriveExecutionContext(request);
+
+    if (request.isMultipart()) {
+      const file = await request.file();
+      const q: Record<string, string> = request.query;
+      const options: UploadOptions = {
+        totalChunks: parseInt(q.resumableTotalChunks || q.total_chunks) || 1,
+        totalSize: parseInt(q.resumableTotalSize || q.total_size) || 0,
+        chunkNumber: parseInt(q.resumableChunkNumber || q.chunk_number) || 1,
+        filename: q.resumableFilename || q.filename || file?.filename || undefined,
+        type: q.resumableType || q.type || file?.mimetype || undefined,
+        waitForThumbnail: !!q.thumbnail_sync,
+        ignoreThumbnails: false,
+      };
+      return await globalResolver.services.documents.documents.updateEditing(
+        editing_session_key,
+        file,
+        options,
+        request.query.keepEditing == "true",
+        request.query.userId,
+        context,
+      );
+    } else {
+      return await globalResolver.services.documents.documents.updateEditing(
+        editing_session_key,
+        null,
+        null,
+        true,
+        request.query.userId,
+        context,
+      );
     }
   };
 
@@ -427,9 +511,9 @@ export class DocumentsController {
         return response;
       } else if (archiveOrFile.file) {
         const data = archiveOrFile.file;
-        const filename = encodeURIComponent(data.name.replace(/[^\p{L}0-9 _.-]/gu, ""));
 
-        response.header("Content-disposition", `attachment; filename="${filename}"`);
+        response.header("Content-Disposition", formatAttachmentContentDispositionHeader(data.name));
+
         if (data.size) response.header("Content-Length", data.size);
         response.type(data.mime);
         return response.send(data.file);
@@ -482,7 +566,10 @@ export class DocumentsController {
 
     try {
       const archive = await globalResolver.services.documents.documents.createZip(ids, context);
-      reply.raw.setHeader("content-disposition", 'attachment; filename="twake_drive.zip"');
+      reply.raw.setHeader(
+        "content-disposition",
+        formatAttachmentContentDispositionHeader("twake_drive.zip"),
+      );
 
       archive.on("finish", () => {
         reply.status(200);

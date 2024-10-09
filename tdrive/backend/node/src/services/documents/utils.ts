@@ -344,6 +344,7 @@ export const addDriveItemToArchive = async (
   if (item.is_in_trash) return;
 
   if (!item.is_directory) {
+    // random comment
     const file_id = item.last_version_cache.file_metadata.external_id;
     const file = await gr.services.files.download(file_id, context);
 

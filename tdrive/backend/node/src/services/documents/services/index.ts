@@ -6,6 +6,7 @@ import {
   Pagination,
 } from "../../../core/platform/framework/api/crud-service";
 import Repository, {
+  AtomicCompareAndSetResult,
   comparisonType,
   inType,
 } from "../../../core/platform/services/database/services/orm/repository/repository";
@@ -13,7 +14,7 @@ import { PublicFile } from "../../../services/files/entities/file";
 import globalResolver from "../../../services/global-resolver";
 import { hasCompanyAdminLevel } from "../../../utils/company";
 import gr from "../../global-resolver";
-import { DriveFile, TYPE } from "../entities/drive-file";
+import { DriveFile, EditingSessionKeyFormat, TYPE } from "../entities/drive-file";
 import { FileVersion, TYPE as FileVersionType } from "../entities/file-version";
 import User, { TYPE as UserType } from "../../user/entities/user";
 
@@ -58,8 +59,10 @@ import {
 import archiver from "archiver";
 import internal from "stream";
 import config from "config";
-import { randomUUID } from "crypto";
+import { MultipartFile } from "@fastify/multipart";
+import { UploadOptions } from "src/services/files/types";
 import { SortType } from "src/core/platform/services/search/api";
+import ApplicationsApiService, { ApplicationEditingKeyStatus } from "../../applications-api";
 
 export class DocumentsService {
   version: "1";
@@ -549,7 +552,7 @@ export class DocumentsService {
       }
 
       const updatable = ["access_info", "name", "tags", "parent_id", "description", "is_in_trash"];
-
+      let renamedTo: string | undefined;
       for (const key of updatable) {
         if ((content as any)[key]) {
           if (
@@ -595,7 +598,7 @@ export class DocumentsService {
               }
             });
           } else if (key === "name") {
-            item.name = await getItemName(
+            renamedTo = item.name = await getItemName(
               content.parent_id || item.parent_id,
               item.id,
               content.name,
@@ -626,7 +629,17 @@ export class DocumentsService {
 
         await updateItemSize(oldParent, this.repository, context);
       }
-
+      if (renamedTo && item.editing_session_key)
+        ApplicationsApiService.getDefault()
+          .renameEditingKeyFilename(item.editing_session_key, renamedTo)
+          .catch(err => {
+            logger.error("Error rename editing session to new name", {
+              err,
+              editing_session_key: item.editing_session_key,
+              renamedTo,
+            });
+            /* Ignore errors, just throw it out there... */
+          });
       if (item.parent_id === this.TRASH) {
         //When moving to trash we recompute the access level to make them flat
         item.access_info = await makeStandaloneAccessLevel(
@@ -923,6 +936,7 @@ export class DocumentsService {
 
       item.last_version_cache = driveItemVersion;
       item.size = driveItemVersion.file_size;
+      item.last_modified = driveItemVersion.date_added;
 
       await this.repository.save(item);
 
@@ -966,6 +980,9 @@ export class DocumentsService {
    * with only that key provided.
    * @param id DriveFile ID of the document to begin editing
    * @param editorApplicationId Editor/Application/Plugin specific identifier
+   * @param appInstanceId For that `editorApplicationId` a unique identifier
+   *   when multiple instances are running. Unused today - would need a mapping
+   *   from `appInstanceId` to server host.
    * @param context
    * @returns An object in the format `{}` with the unique identifier for the
    *   editing session
@@ -973,34 +990,62 @@ export class DocumentsService {
   beginEditing = async (
     id: string,
     editorApplicationId: string,
+    appInstanceId: string,
     context: DriveExecutionContext,
   ) => {
-    const isoUTCDateNoSpecialCharsNoMS = new Date()
-      .toISOString()
-      .replace(/\..+$/, "")
-      .replace(/[ZT:-]/g, "");
-    const newKey = [
-      isoUTCDateNoSpecialCharsNoMS,
-      editorApplicationId,
-      randomUUID().replace(/-+/g, ""),
-    ].join("-");
-    // OnlyOffice key limits: 128 chars, [0-9a-zA-z=_-]
-    // This is specific to it, but the constraint seems strict enough
-    // that any other system needing such a unique identifier would find
-    // this compatible. This value must be ensured to be the strictest
-    // common denominator to all plugin/interop systems. Plugins that
-    // require something even stricter have the option of maintaining
-    // a look up table to an acceptable value.
-    if (newKey.length > 128 || !/^[0-9a-zA-Z=_]+$/m.test(editorApplicationId))
-      CrudException.throwMe(
-        new Error('Invalid "editorApplicationId" string. Must be short and only alpha numeric'),
-        new CrudException("Invalid editorApplicationId", 400),
-      );
-
     if (!context) {
       this.logger.error("invalid execution context");
       return null;
     }
+    if (
+      !editorApplicationId ||
+      !ApplicationsApiService.getDefault().getApplicationConfig(editorApplicationId)
+    ) {
+      logger.error(`Missing or invalid application ID: ${JSON.stringify(editorApplicationId)}`);
+      CrudException.throwMe(
+        new Error("Unknown appId"),
+        new CrudException("Missing or invalid application ID", 400),
+      );
+    }
+    const spinLoopUntilEditable = async (
+      provider: {
+        generateKey: () => string;
+        atomicSet: (
+          key: string | null,
+          previous: string | null,
+        ) => Promise<AtomicCompareAndSetResult<string>>;
+        getPluginKeyStatus: (key: string) => Promise<ApplicationEditingKeyStatus>;
+      },
+      attemptCount = 8,
+      tarpitS = 1,
+      tarpitWorsenCoeff = 1.2,
+    ) => {
+      while (attemptCount-- > 0) {
+        const newKey = provider.generateKey();
+        const swapResult = await provider.atomicSet(newKey, null);
+        logger.debug(`Begin edit try ${newKey}, got: ${JSON.stringify(swapResult)}`);
+        if (swapResult.didSet) return newKey;
+        if (!swapResult.currentValue) continue; // glitch in the matrix but ok because atomicCompareAndSet is not actually completely atomic
+        const existingStatus = await provider.getPluginKeyStatus(swapResult.currentValue);
+        logger.debug(`Begin edit get status of ${newKey}: ${JSON.stringify(existingStatus)}`);
+        switch (existingStatus) {
+          case ApplicationEditingKeyStatus.unknown:
+          case ApplicationEditingKeyStatus.live:
+            return swapResult.currentValue;
+          case ApplicationEditingKeyStatus.updated:
+          case ApplicationEditingKeyStatus.expired:
+            logger.debug(`Begin edit emptying previous ${swapResult.currentValue}`);
+            await provider.atomicSet(null, swapResult.currentValue);
+            break;
+          default:
+            throw new Error(
+              `Unexpected ApplicationEditingKeyStatus: ${JSON.stringify(existingStatus)}`,
+            );
+        }
+        await new Promise(resolve => setTimeout(resolve, tarpitS * 1000));
+        tarpitS *= tarpitWorsenCoeff;
+      }
+    };
 
     const hasAccess = await checkAccess(id, null, "write", this.repository, context);
     if (!hasAccess) {
@@ -1020,18 +1065,139 @@ export class DocumentsService {
         {},
         context,
       );
-      const result = await this.repository.atomicCompareAndSet(
-        driveFile,
-        "editing_session_key",
-        null,
-        newKey,
-      );
-      return { editingSessionKey: result.currentValue };
+      const editingSessionKey = await spinLoopUntilEditable({
+        atomicSet: (key, previous) =>
+          this.repository.atomicCompareAndSet(driveFile, "editing_session_key", previous, key),
+        generateKey: () =>
+          EditingSessionKeyFormat.generate(
+            editorApplicationId,
+            appInstanceId,
+            context.company.id,
+            context.user.id,
+          ),
+        getPluginKeyStatus: key =>
+          ApplicationsApiService.getDefault().checkPendingEditingStatus(key),
+      });
+      return { editingSessionKey };
     } catch (error) {
       logger.error({ error: `${error}` }, "Failed to begin editing Drive item");
       CrudException.throwMe(error, new CrudException("Failed to begin editing Drive item", 500));
     }
   };
+
+  /**
+   * End editing session either by providing a URL to a new file to create a version,
+   * or not, to just cancel the session.
+   * @param editing_session_key Editing key of the DriveFile
+   * @param file Multipart files from the incoming http request
+   * @param options Optional upload information from the request
+   * @param keepEditing If `true`, the file will be saved as a new version,
+   *  and the DriveFile will keep its editing_session_key. If `true`, a file is required.
+   * @param userId When authentified by the root token of an application, this user
+   *  will override the creator of this version
+   * @param context
+   */
+  updateEditing = async (
+    editing_session_key: string,
+    file: MultipartFile,
+    options: UploadOptions,
+    keepEditing: boolean,
+    userId: string | null,
+    context: CompanyExecutionContext,
+  ) => {
+    //TODO rethink the locking stuff shouldn't be just forgotten
+    //TODO Make this accept even if missing and act ok about it,
+    // store to dump folder or such
+    if (!context) {
+      this.logger.error("invalid execution context");
+      return null;
+    }
+    if (!editing_session_key) {
+      this.logger.error("Invalid editing_session_key: " + JSON.stringify(editing_session_key));
+      throw new CrudException("Invalid editing_session_key", 400);
+    }
+    try {
+      const parsedKey = EditingSessionKeyFormat.parse(editing_session_key);
+      context = {
+        ...context,
+        company: { id: parsedKey.companyId },
+      };
+
+      if (context.user.id === context.user.application_id && context.user.application_id) {
+        context = {
+          ...context,
+          user: {
+            ...context.user,
+            id: userId || parsedKey.userId,
+          },
+        };
+      }
+    } catch (e) {
+      this.logger.error(
+        "Invalid editing_session_key value: " + JSON.stringify(editing_session_key),
+        e,
+      );
+      throw new CrudException("Invalid editing_session_key", 400);
+    }
+
+    const driveFile = await this.repository.findOne({ editing_session_key }, {}, context);
+    if (!driveFile) {
+      this.logger.error("Drive item not found by editing session key");
+      throw new CrudException("Item not found by editing session key", 404);
+    }
+
+    const hasAccess = await checkAccess(driveFile.id, driveFile, "write", this.repository, context);
+    if (!hasAccess) {
+      logger.error("user does not have access drive item " + driveFile.id);
+      CrudException.throwMe(
+        new Error("user does not have access to the drive item"),
+        new CrudException("user does not have access drive item", 401),
+      );
+    }
+
+    if (file) {
+      const fileEntity = await globalResolver.services.files.save(null, file, options, context);
+
+      await globalResolver.services.documents.documents.createVersion(
+        driveFile.id,
+        {
+          drive_item_id: driveFile.id,
+          provider: "internal",
+          file_metadata: {
+            external_id: fileEntity.id,
+            source: "internal",
+          },
+        },
+        context,
+      );
+    } else if (keepEditing) {
+      this.logger.error("Inconsistent endEditing call");
+      throw new CrudException("Inconsistent endEditing call", 500);
+    }
+
+    if (!keepEditing) {
+      try {
+        const result = await this.repository.atomicCompareAndSet(
+          driveFile,
+          "editing_session_key",
+          editing_session_key,
+          null,
+        );
+        if (!result.didSet)
+          throw new Error(
+            `Couldn't set editing_session_key ${JSON.stringify(
+              editing_session_key,
+            )} on DriveFile ${JSON.stringify(driveFile.id)} because it is ${JSON.stringify(
+              result.currentValue,
+            )}`,
+          );
+      } catch (error) {
+        logger.error({ error: `${error}` }, "Failed to cancel editing Drive item");
+        CrudException.throwMe(error, new CrudException("Failed to cancel editing Drive item", 500));
+      }
+    }
+  };
+
   downloadGetToken = async (
     ids: string[],
     versionId: string | null,

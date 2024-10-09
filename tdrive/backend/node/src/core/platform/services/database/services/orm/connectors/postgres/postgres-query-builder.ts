@@ -47,9 +47,18 @@ export class PostgresQueryBuilder {
               values.push(...inClause);
             }
           } else {
-            const value = `${this.dataTransformer.toDbString(filter, columnsDefinition[key].type)}`;
-            whereClause += `${key} = $${idx++} AND `;
-            values.push(value);
+            const isANotEqualFilter = filter && Object.keys(filter).join("!") === "$ne";
+            if (filter === null || (isANotEqualFilter && filter["$ne"] === null)) {
+              whereClause += `${key} IS${filter === null ? "" : " NOT"} NULL`;
+            } else {
+              const filterValue = isANotEqualFilter ? filter["$ne"] : filter;
+              const value = `${this.dataTransformer.toDbString(
+                filterValue,
+                columnsDefinition[key].type,
+              )}`;
+              whereClause += `${key} ${isANotEqualFilter ? "!=" : "="} $${idx++} AND `;
+              values.push(value);
+            }
           }
         });
     }

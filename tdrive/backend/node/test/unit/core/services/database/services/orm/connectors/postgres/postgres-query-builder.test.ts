@@ -105,6 +105,42 @@ describe('The PostgresQueryBuilder', () => {
     expect(query[1]).toEqual(options.$like.map(e=> `%${e[1]}%`));
   });
 
+  test('buildSelect query with IS NULL filter', async () => {
+    //given
+    const filters = { companu_id: null };
+
+    //when
+    const query = subj.buildSelect(TestDbEntity, filters, {});
+
+    //then
+    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM \"test_table\" WHERE companu_id IS NULL ORDER BY id DESC LIMIT 100 OFFSET 0`);
+    expect(query[1]).toEqual([]);
+  });
+
+  test('buildSelect query with not equal filter', async () => {
+    //given
+    const filters = { company_id: { $ne: '123' } };
+
+    //when
+    const query = subj.buildSelect(TestDbEntity, filters, {});
+
+    //then
+    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" WHERE company_id != $1 ORDER BY id DESC LIMIT 100 OFFSET 0`);
+    expect(query[1]).toEqual([ '123' ]);
+  });
+
+  test('buildSelect query with IS NOT NULL filter', async () => {
+    //given
+    const filters = { company_id: { $ne: null } };
+
+    //when
+    const query = subj.buildSelect(TestDbEntity, filters, {});
+
+    //then
+    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" WHERE company_id IS NOT NULL ORDER BY id DESC LIMIT 100 OFFSET 0`);
+    expect(query[1]).toEqual([]);
+  });
+
   test('buildDelete query', async () => {
     //given
     const entity = newTestDbEntity();

@@ -43,6 +43,11 @@ export type FindOptions = {
   sort?: SortOption;
 };
 
+export type AtomicCompareAndSetResult<FieldValueType> = {
+  didSet: boolean;
+  currentValue: FieldValueType | null;
+};
+
 /**
  * Repository to work with entities. Each entity type has its own repository instance.
  */
@@ -129,10 +134,7 @@ export default class Repository<EntityType> {
     fieldName: keyof EntityType,
     previousValue: FieldValueType | null,
     newValue: FieldValueType | null,
-  ): Promise<{
-    didSet: boolean;
-    currentValue: FieldValueType | null;
-  }> {
+  ): Promise<AtomicCompareAndSetResult<FieldValueType>> {
     if (previousValue === newValue)
       throw new Error(`Previous and new values are identical: ${JSON.stringify(previousValue)}`);
     return this.connector.atomicCompareAndSet(entity, fieldName, previousValue, newValue);

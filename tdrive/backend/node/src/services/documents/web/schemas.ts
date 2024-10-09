@@ -115,6 +115,7 @@ export const beginEditingSchema = {
     type: "object",
     properties: {
       editorApplicationId: { type: "string" },
+      appInstanceId: { type: "string" },
     },
     required: ["editorApplicationId"],
   },

@@ -5,28 +5,34 @@ import {
   IApiServiceApplicationTokenResponse,
 } from '@/interfaces/api.interface';
 import axios, { Axios, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { CREDENTIALS_ENDPOINT, CREDENTIALS_ID, CREDENTIALS_SECRET } from '@config';
+import { CREDENTIALS_ENDPOINT, CREDENTIALS_ID, CREDENTIALS_SECRET, twakeDriveTokenRefrehPeriodMS } from '@config';
 import logger from '../lib/logger';
 import * as Utils from '@/utils';
 import { PolledThingieValue } from '@/lib/polled-thingie-value';
+import { IHealthProvider, registerHealthProvider } from './health-providers.service';
 
 /**
  * Client for the Twake Drive backend API on behalf of the plugin (or provided token in parameters).
  * Periodically updates authorization and adds to requests.
  */
-class ApiService implements IApiService {
-  private readonly poller: PolledThingieValue<Axios>;
+class ApiService implements IApiService, IHealthProvider {
+  private readonly tokenPoller: PolledThingieValue<Axios>;
 
   constructor() {
-    this.poller = new PolledThingieValue('Refresh Twake Drive token', async () => this.refreshToken(), 1000 * 60); //TODO: should be Every 10 minutes
+    this.tokenPoller = new PolledThingieValue('Refresh Twake Drive token', async () => await this.refreshToken(), twakeDriveTokenRefrehPeriodMS);
+    registerHealthProvider(this);
   }
 
   public async hasToken() {
-    return (await this.poller.latestValueWithTry()) !== undefined;
+    return (await this.tokenPoller.latestValueWithTry()) !== undefined;
+  }
+
+  async getHealthData() {
+    return { TwakeDriveApi: { tokenAgeS: this.tokenPoller.latest()?.ageS ?? -1 } };
   }
 
   private requireAxios() {
-    return this.poller.requireLatestValueWithTry('Token Kind 538 not ready');
+    return this.tokenPoller.requireLatestValueWithTry('No Twake Drive app token.');
   }
 
   public get = async <T>(params: IApiServiceRequestParams<T>): Promise<T> => {
@@ -49,20 +55,43 @@ class ApiService implements IApiService {
     return await axiosWithToken.get(url, config);
   };
 
-  public post = async <T, R>(params: IApiServiceRequestParams<T>): Promise<R> => {
-    const { url, payload, headers } = params;
+  public delete = async <T>(params: IApiServiceRequestParams<T>): Promise<T> => {
+    const { url, token, responseType, headers } = params;
 
     const axiosWithToken = await this.requireAxios();
 
+    const config: AxiosRequestConfig = {};
+
+    if (token) {
+      config['headers'] = {
+        Authorization: `Bearer ${token}`,
+        ...headers,
+      };
+    }
+
+    if (responseType) {
+      config['responseType'] = responseType;
+    }
+    return await axiosWithToken.delete(url, config);
+  };
+
+  public post = async <T, R>(params: IApiServiceRequestParams<T>): Promise<R> => {
+    const { url, token, payload, headers } = params;
+
+    const axiosWithToken = await this.requireAxios();
+
+    logger.info(`POST to Twake Drive ${url} - payload: ${payload}`);
     try {
       return await axiosWithToken.post(url, payload, {
         headers: {
           ...headers,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
     } catch (error) {
-      logger.error('Failed to post to Twake drive: ', error.stack);
+      logger.error('Failed to post to Twake Drive: ', { error: error.stack });
       this.refreshToken();
+      throw error;
     }
   };
 

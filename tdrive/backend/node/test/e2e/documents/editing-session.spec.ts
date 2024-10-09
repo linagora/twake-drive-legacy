@@ -1,9 +1,12 @@
-import { describe, beforeAll, beforeEach, it, expect, afterAll } from "@jest/globals";
+import { describe, beforeAll, beforeEach, it, expect, afterAll, jest } from "@jest/globals";
 
 import { init, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 
 import { DriveFile, TYPE as DriveFileType } from "../../../src/services/documents/entities/drive-file";
+import ApplicationsApiService, { ApplicationEditingKeyStatus } from "../../../src/services/applications-api";
+import { afterEach } from "node:test";
+import Application from "../../../src/services/applications/entities/application";
 
 describe("the Drive's documents' editing session kind-of-lock", () => {
   let platform: TestPlatform | null;
@@ -48,6 +51,12 @@ describe("the Drive's documents' editing session kind-of-lock", () => {
       parent_id: currentUserRoot,
       scope: "personal",
     });
+    jest.spyOn(ApplicationsApiService.getDefault(), 'getApplicationConfig').mockImplementation((id) => id === "e2e_testing" ? {} as Application : undefined);
+    jest.spyOn(ApplicationsApiService.getDefault(), 'checkPendingEditingStatus').mockImplementation(async () => ApplicationEditingKeyStatus.unknown);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("atomicCompareAndSet allows a single value at a time", async () => {
@@ -110,8 +119,28 @@ describe("the Drive's documents' editing session kind-of-lock", () => {
     expect(temporaryDocument.id).toBe(foundDocumentResult.json().id);
   });
 
-  it('can end an editing session on a document only once with the right key', async () => {
+  it('can cancel an editing session on a document only once with the right key', async () => {
+    //given
     const editingSessionKey = await currentUser.beginEditingDocumentExpectOk(temporaryDocument.id, 'e2e_testing');
-
+    //when
+    const response = await currentUser.cancelEditingDocument(editingSessionKey);
+    //then
+    expect(response.statusCode).toBe(200);
+    const newSessionKey = await currentUser.beginEditingDocumentExpectOk(temporaryDocument.id, 'e2e_testing');
+    expect(newSessionKey).not.toEqual(editingSessionKey);
   });
+
+  it('can end editing with a new version of document', async () => {
+    //given
+    const editingSessionKey = await currentUser.beginEditingDocumentExpectOk(temporaryDocument.id, 'e2e_testing');
+    //when
+    const response = await currentUser.updateEditingDocument(editingSessionKey);
+
+    //then
+    expect(response.statusCode).toBe(200);
+    const document = await currentUser.getDocumentOKCheck(temporaryDocument.id);
+    expect(document.versions.length).toEqual(2);
+  });
+
+
 });

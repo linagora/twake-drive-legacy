@@ -1,6 +1,6 @@
 {
-  "hello": "Привет",
-  "virtual-folder.shared-drive": "Общий Диск",
-  "virtual-folder.my-drive": "Мой Диск",
-  "virtual-folder.trash": "Корзина"
+    "hello": "Привет",
+    "virtual-folder.my-drive": "Мой Диск",
+    "virtual-folder.shared-drive": "Общий Диск",
+    "virtual-folder.trash": "Корзина"
 }

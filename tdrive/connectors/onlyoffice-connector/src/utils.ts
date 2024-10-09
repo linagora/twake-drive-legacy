@@ -16,7 +16,7 @@ export type QueryParams = { [key: string]: string | number };
 export function joinURL(path: string[], params?: QueryParams) {
   let joinedPath = path.map(x => x.replace(/(?:^\/+)+|(?:\/+$)/g, '')).join('/');
   if (path[path.length - 1].endsWith('/')) joinedPath += '/';
-  const paramEntries = Object.entries(params || {});
+  const paramEntries = Object.entries(params || {}).filter(([, value]) => value !== undefined && value !== null);
   if (paramEntries.length === 0) return joinedPath;
   const query = paramEntries.map(p => p.map(encodeURIComponent).join('=')).join('&');
   return joinedPath + (joinedPath.indexOf('?') > -1 ? '&' : '?') + query;
@@ -43,4 +43,15 @@ export function splitFilename(filename: string): [string, string] {
   if (parts.length < 2 || (parts.length == 2 && parts[0] === '')) return [filename, ''];
   const extension = parts.pop();
   return [parts.join('.'), extension];
+}
+
+/** Shuffle an array in place, returns its parameter for convenience */
+export function fisherYattesShuffleInPlace<T>(list: T[]): T[] {
+  let index = list.length;
+  while (index) {
+    const randomIndex = Math.floor(Math.random() * index);
+    index--;
+    [list[index], list[randomIndex]] = [list[randomIndex], list[index]];
+  }
+  return list;
 }

@@ -1,13 +1,13 @@
 import editorService from '@/services/editor.service';
 import { NextFunction, Request, Response } from 'express';
-import { CREDENTIALS_SECRET, SERVER_ORIGIN, SERVER_PREFIX } from '@config';
+import { CREDENTIALS_SECRET } from '@config';
 import jwt from 'jsonwebtoken';
 import driveService from '@/services/drive.service';
 import { DriveFileType } from '@/interfaces/drive.interface';
 import fileService from '@/services/file.service';
-import { OfficeToken } from '@/interfaces/routes.interface';
+import { OfficeToken } from '@/interfaces/office-token.interface';
 import logger from '@/lib/logger';
-import * as Utils from '@/utils';
+import { makeURLTo } from '@/routes';
 
 interface RequestQuery {
   mode: string;
@@ -22,6 +22,7 @@ interface RequestEditorQuery {
   office_token: string;
   company_id: string;
   file_id: string;
+  drive_file_id: string;
 }
 
 /**
@@ -29,7 +30,7 @@ interface RequestEditorQuery {
  * The user is redirected from there to open directly the OnlyOffice edition server's web UI, with appropriate preview or not
  * and rights checks.
  */
-class IndexController {
+class BrowserEditorController {
   /**
    * Opened by the user's browser, proxied through the Twake Drive backend. Checks access to the
    * file with the backend, then redirects the user to the `editor` method but directly on this
@@ -74,25 +75,36 @@ class IndexController {
         throw new Error('You do not have access to this file');
       }
 
+      let editingSessionKey = null;
+      if (!preview) {
+        editingSessionKey = await driveService.beginEditingSession(company_id, drive_file_id, token);
+        //TODO catch error and display to the user when we can't stopped editing
+
+        //TODO Log error with format to be able to set up grafana alert fir such king of errors
+      }
+
       const officeToken = jwt.sign(
         {
           user_id: user.id, //To verify that link is opened by the same user
           company_id,
           drive_file_id,
+          editing_session_key: editingSessionKey,
           file_id: file.id,
-          file_name: file.filename || file?.metadata?.name || '',
+          file_name: driveFile?.item?.name || file.filename || file.metadata?.name || '',
           preview: !!preview,
         } as OfficeToken,
         CREDENTIALS_SECRET,
         {
+          //one month, never expiring token
           expiresIn: 60 * 60 * 24 * 30,
         },
       );
-
       res.redirect(
-        Utils.joinURL([SERVER_ORIGIN ?? '', SERVER_PREFIX, 'editor'], {
+        makeURLTo.editorAbsolute({
           token,
           file_id,
+          drive_file_id,
+          editing_session_key: editingSessionKey,
           company_id,
           preview,
           office_token: officeToken,
@@ -112,13 +124,16 @@ class IndexController {
       const { user } = req;
 
       const officeTokenPayload = jwt.verify(office_token, CREDENTIALS_SECRET) as OfficeToken;
-      const { preview, user_id, company_id, file_name, file_id, drive_file_id } = officeTokenPayload;
+      const { preview, user_id, company_id, file_name, file_id, drive_file_id, editing_session_key } = officeTokenPayload;
 
       if (user_id !== user.id) {
         throw new Error('You do not have access to this link');
       }
+      if (!preview && !editing_session_key) {
+        throw new Error('Cant start editing without "editing session key"');
+      }
 
-      const initResponse = await editorService.init(company_id, file_name, file_id, user, preview, drive_file_id || file_id);
+      const initResponse = await editorService.init(company_id, file_name, file_id, user, preview, drive_file_id);
 
       const inPageToken = jwt.sign(
         {
@@ -130,7 +145,8 @@ class IndexController {
 
       res.render('index', {
         ...initResponse,
-        server: Utils.joinURL([SERVER_ORIGIN, SERVER_PREFIX]),
+        docId: preview ? file_id : editing_session_key,
+        server: makeURLTo.rootAbsolute(),
         token: inPageToken,
       });
     } catch (error) {
@@ -140,4 +156,4 @@ class IndexController {
   };
 }
 
-export default IndexController;
+export default BrowserEditorController;

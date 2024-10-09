@@ -19,8 +19,8 @@ export class PolledThingieValue<ValueType> {
     private readonly getTheThingieValue: () => Promise<NotUndefined<ValueType>>,
     private readonly intervalMs: number,
   ) {
-    this.run();
-    setInterval(() => this.run(), this.intervalMs);
+    this.runIgnoringRejection();
+    setInterval(() => this.runIgnoringRejection(), this.intervalMs);
   }
 
   protected setResult(value: undefined, error?: NotUndefined<ValueType>, ts?: number);
@@ -50,6 +50,12 @@ export class PolledThingieValue<ValueType> {
         },
       );
     }));
+  }
+
+  private runIgnoringRejection() {
+    return this.run().catch(() => {
+      /* active ignoring going on here */
+    });
   }
 
   public lastFailed() {

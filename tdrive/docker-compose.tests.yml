@@ -1,22 +1,20 @@
 version: "2"
 
 services:
-  scylladb:
-    image: scylladb/scylla:4.1.0
-    command: --seeds=scylladb --smp 1 --memory 400M --overprovisioned 1 --api-address 0.0.0.0
-  scylladb2:
-    image: scylladb/scylla:4.1.0
-    command: --seeds=scylladb --smp 1 --memory 400M --overprovisioned 1 --api-address 0.0.0.0
-  rabbitmq:
-    image: rabbitmq:3
-    ports:
-      - 5672:5672
-      - 15672:15672
+  # rabbitmq:
+  #   image: rabbitmq:3
+  #   ports:
+  #     - 5672:5672
+  #     - 15672:15672
+
   mongo:
     container_name: mongo
     image: mongo
     ports:
       - 27017:27017
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+
   redis:
     image: "redis:alpine"
     command: redis-server --requirepass some_password
@@ -24,6 +22,7 @@ services:
       - "6379:6379"
     environment:
       - REDIS_REPLICATION_MODE=master
+
   minio:
     image: minio/minio
     ports:
@@ -35,11 +34,14 @@ services:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=adminminio
     command: server /export
+    healthcheck:
+      test: MC_HOST_custom=http://localhost:9000 mc ready local
 
   createbucket:
     image: minio/mc
     depends_on:
-      - minio
+      minio:
+        condition: service_healthy
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc config host add myminio http://minio:9000 admin adminminio;
@@ -47,6 +49,7 @@ services:
       /usr/bin/mc mb myminio/drive;
       exit 0;
       "
+
   node:
     image: tdrive/tdrive-node:test
     build:
@@ -58,8 +61,11 @@ services:
     environment:
       - LOG_LEVEL=error
       - NODE_ENV=test
-      - DB_DRIVER
-      - PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
+      # - ACCOUNTS_TYPE=remote
+      - SEARCH_DRIVER=mongodb
+      - DB_DRIVER=mongodb
+      - PUBSUB_TYPE=local
+      # - PUBSUB_URLS=amqp://guest:guest@rabbitmq:5672
       - SEARCH_ES_ENDPOINT=http://elasticsearch:9200
       - SEARCH_ES_FLUSHINTERVAL=1
       - STORAGE_DRIVER=S3
@@ -69,15 +75,19 @@ services:
       - STORAGE_S3_ACCESS_KEY=admin
       - STORAGE_S3_SECRET_KEY=adminminio
     depends_on:
-      - mongo
-      - scylladb
-      - rabbitmq
-      - elasticsearch
-      - createbucket
+      minio:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      # rabbitmq:
+      #   condition: service_started
+      elasticsearch:
+        condition: service_healthy
+      createbucket:
+        condition: service_completed_successfully
     links:
       - mongo
-      - scylladb
-      - rabbitmq
+      # - rabbitmq
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.4
@@ -86,6 +96,8 @@ services:
       - bootstrap.memory_lock=true
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    healthcheck:
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:9200/
     ulimits:
       memlock:
         soft: -1
@@ -101,3 +113,5 @@ services:
       - ./docker-data/logs/nginx/:/var/log/nginx
       - ./docker-data/letsencrypt/:/etc/letsencrypt/
       - ./frontend/:/tdrive-react/
+    healthcheck:
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:80/.well-known/
