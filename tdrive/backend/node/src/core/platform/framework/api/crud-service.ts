@@ -160,6 +160,17 @@ export class CrudException extends Error {
 }
 
 export interface Paginable {
+  /**
+   * In page token can be different type of data depending of the source.
+   * For ES it will be exactly page token, identifier of the next page.
+   * For PostgreSQL it will be number of the next page.
+   * For MongoDB it will be offset.
+   * This information is relevant for the Service/Repository level, in the controller
+   * we have only offset there for every type of source because in the "browse" controller
+   * we do not pass "next_page_token" to frontend and hence we are calculating
+   * offset on the frontend side and then passing offset to DocumentService.
+   *
+   */
   page_token?: string;
   limitStr?: string;
   reversed?: boolean;
