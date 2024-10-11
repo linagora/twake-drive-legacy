@@ -18,10 +18,10 @@ export const Badge = (props: BadgeProps) => {
   if (props.theme === 'danger') className = 'text-white bg-rose-500 border-transparent ';
 
   if (props.theme === 'default')
-    className = 'text-black dark:text-white bg-white dark:bg-zinc-800 border-gray-300';
+    className = 'text-black dark:text-white bg-white dark:bg-zinc-900 border-gray-300';
 
   if (props.theme === 'outline')
-    className = 'text-blue-500 bg-white dark:bg-zinc-800 border-blue-500';
+    className = 'text-blue-500 bg-white dark:bg-zinc-900 border-blue-500';
 
   if (props.size === 'lg') className = className + ' text-lg h-11';
   else if (props.size === 'sm') className = className + ' text-sm h-7 px-3';

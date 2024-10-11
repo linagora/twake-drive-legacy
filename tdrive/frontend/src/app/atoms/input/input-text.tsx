@@ -27,10 +27,10 @@ const baseTextClassName = ' dark:text-white text-black ';
 
 export const defaultInputClassName = (theme: ThemeName = 'plain') => {
   const themeClasses = {
-    'plain': 'bg-zinc-100 border-zinc-100 dark:bg-zinc-800 dark:border-zinc-800' + baseTextClassName,
-    'blue': 'bg-zinc-100 border-zinc-100 dark:bg-zinc-800 dark:border-zinc-800 text-blue-700 dark:text-blue-500',
+    'plain': 'bg-zinc-100 border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800' + baseTextClassName,
+    'blue': 'bg-zinc-100 border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800 text-blue-700 dark:text-blue-500',
     'rose': 'text-rose-500 bg-rose-100 dark:text-rose-300 dark:bg-rose-900 border-rose-500',
-    'outline': 'bg-zinc-50 border-zinc-300 dark:bg-zinc-800 dark:border-zinc-700' + baseTextClassName,
+    'outline': 'bg-zinc-50 border-zinc-300 dark:bg-zinc-900 dark:border-zinc-700' + baseTextClassName,
   };
   return (
     baseInputClassName +

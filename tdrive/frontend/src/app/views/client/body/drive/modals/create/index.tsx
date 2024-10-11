@@ -175,7 +175,7 @@ const CreateModalOption = (props: { icon: ReactNode; text: string; onClick: () =
   return (
     <div
       onClick={props.onClick}
-      className="flex flex-row p-4 dark:bg-zinc-800 dark:text-white bg-zinc-100 hover:bg-opacity-75 cursor-pointer rounded-md m-2"
+      className="flex flex-row p-4 dark:bg-zinc-900 dark:text-white bg-zinc-100 hover:bg-opacity-75 cursor-pointer rounded-md m-2"
     >
       <div className="flex items-center justify-center">{props.icon}</div>
       <div className="grow flex items-center ml-2">

@@ -59,7 +59,7 @@ export const EndOfInputBox = {
       <div className="shrink-0">
         <AccessLevelDropdown
           {...props}
-          className="rounded-l-none !p-0 leading-tight text-end !pr-8 border-none bg-zinc-100 dark:bg-zinc-800"
+          className="rounded-l-none !p-0 leading-tight text-end !pr-8 border-none bg-zinc-100 dark:bg-zinc-900"
           size="md"
           />
       </div>

@@ -22,7 +22,7 @@ export default () => {
   }
 
   return (
-    <div className="full_page_error dark:bg-zinc-700 dark:text-white">
+    <div className="full_page_error dark:bg-zinc-800 dark:text-white">
       <div className="error_message skew_in_top_nobounce">
         <div className="title">
           <Emojione type="👨‍🚀" size={32} />{' '}

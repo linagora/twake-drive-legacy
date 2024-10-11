@@ -35,7 +35,7 @@ const DiskUsage = () => {
   return (
     <>
       {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_USER_QUOTA) && (
-        <div className="bg-zinc-500 dark:bg-zinc-800 bg-opacity-10 rounded-md p-4 w-auto max-w-md">
+        <div className="bg-zinc-500 dark:bg-zinc-900 bg-opacity-10 rounded-md p-4 w-auto max-w-md">
           <div className="w-full">
             <div className="overflow-hidden h-4 mb-4 text-xs flex rounded bg-emerald-200">
               {used > 90 && (
@@ -62,7 +62,7 @@ const DiskUsage = () => {
         </div>
       )}
       {!FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_USER_QUOTA) && (
-        <div className="bg-zinc-500 dark:bg-zinc-800 bg-opacity-10 rounded-md p-4 w-auto max-w-md">
+        <div className="bg-zinc-500 dark:bg-zinc-900 bg-opacity-10 rounded-md p-4 w-auto max-w-md">
           <div className="w-full">
             <Base>
               {formatBytesToInt(usedBytes)}

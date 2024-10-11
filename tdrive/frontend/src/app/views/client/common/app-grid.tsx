@@ -27,10 +27,13 @@ export default ({ className }: { className?: string }): JSX.Element => {
                     target="_blank"
                     rel="noreferrer"
                     href={app.url}
-                    className="inline-block flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-md p-2 pb-1"
+                    className="inline-block flex flex-col items-center justify-center cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md p-2 pb-1"
                   >
-                    <img src={app.logo} className="w-10 h-10 mb-1" />
-                    <Base>{app.name}</Base>
+                    <img src={app.logo} className="w-11 h-11 mb-1" />
+                    <Base style={{
+                      fontSize: '0.75rem',
+                      lineHeight: '1.4rem',
+                    }}>{app.name}</Base>
                   </a>
                 );
               })}

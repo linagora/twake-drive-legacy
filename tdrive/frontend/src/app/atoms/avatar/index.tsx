@@ -47,7 +47,7 @@ export default function Avatar(props: AvatarProps) {
 
   className +=
     ' border border-gray flex items-center justify-center bg-center bg-cover ' +
-    (props.nogradient ? ' bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white ' : '');
+    (props.nogradient ? ' bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white ' : '');
 
   const spl_title = avatarTitle.split(' ');
 

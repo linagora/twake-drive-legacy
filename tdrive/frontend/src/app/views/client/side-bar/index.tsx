@@ -37,7 +37,7 @@ export default () => {
   );
   const active = false;
   const { sharedWithMe, inTrash, path } = useDriveItem(parentId);
-  const activeClass = 'bg-zinc-50 dark:bg-zinc-800 !text-blue-500';
+  const activeClass = 'bg-zinc-50 dark:bg-zinc-900 !text-blue-500';
   let folderType = 'home';
   if ((path || [])[0]?.id === 'user_' + user?.id) folderType = 'personal';
   if (inTrash) folderType = 'trash';

@@ -141,7 +141,7 @@ const AccessChecker = ({
     return (
       <div className="text-center">
         <div style={{ height: '20vh' }} />
-        <div className="inline-block text-left max-w-sm margin-auto bg-zinc-50 dark:bg-zinc-800 rounded-md p-4">
+        <div className="inline-block text-left max-w-sm margin-auto bg-zinc-50 dark:bg-zinc-900 rounded-md p-4">
           <Title>You don't have access to this document or folder.</Title>
           <br />
           <Base>The public link you are using may be invalid or expired.</Base>

@@ -119,7 +119,7 @@ export const InternalUsersAccessManager = ({
           </div>
           <div className="shrink-0">
             <AccessLevelDropdown
-              className="rounded-l-none !p-0 leading-tight text-end !pr-8 !pl-2 border-none bg-zinc-100 dark:bg-zinc-800"
+              className="rounded-l-none !p-0 leading-tight text-end !pr-8 !pl-2 border-none bg-zinc-100 dark:bg-zinc-900"
               noRedWhenLevelNone={true}
               disabled={loading || disabled}
               hiddenLevels={['remove']}
@@ -146,7 +146,7 @@ export const InternalUsersAccessManager = ({
                     />
                 )}
                 {!loading && resultFooterText && <>
-                  <div className={(result.length == 0 ? 'rounded-md' : 'rounded-b-md') + ' grow text-center text-zinc-700 dark:text-white dark:opacity-75 py-2 dark:border-zinc-700 border-t bg-zinc-100 dark:bg-zinc-800'}>
+                  <div className={(result.length == 0 ? 'rounded-md' : 'rounded-b-md') + ' grow text-center text-zinc-700 dark:text-white dark:opacity-75 py-2 dark:border-zinc-700 border-t bg-zinc-100 dark:bg-zinc-900'}>
                     {resultFooterText}
                   </div>
                 </>}
