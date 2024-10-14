@@ -188,8 +188,8 @@ export default class MenusBodyLayer extends React.Component {
                     zIndex: 1050,
                     position: 'absolute',
                     transform: item.positionType === 'bottom' ? '' : 'translateY(-50%)',
-                    left: item.position.x,
-                    top: item.position.y,
+                    left: item.position.x - 140,
+                    top: item.position.y + 2,
                     marginTop: item.position.marginTop,
                     marginLeft: item.position.marginLeft,
                   }}
