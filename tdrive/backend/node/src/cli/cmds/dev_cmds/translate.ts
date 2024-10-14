@@ -4,18 +4,15 @@ import parseYargsCommaSeparatedStringArray from "../../utils/yargs-comma-array";
 import { NonPlatformCommandYargsBuilder } from "../../utils/non-plaform-command-yargs-builder";
 import { openWithSystemViewer } from "../../../utils/exec";
 
-const CORE_LANGUAGES = "en fr ru vn".split(" ");
-
-// const iso639ToTwakeDriveISO = set1 => (set1 === "vi" ? "vn" : set1);
-const twakeDriveISOToISO639 = twakeLang => (twakeLang === "vn" ? "vi" : twakeLang);
+const CORE_LANGUAGES = "en fr ru vi".split(" ");
 
 const TEMPLATE_VAR_NAME = "TDCLI_TRANSLATOR_URL";
 const urlToTranslate = (text: string, to: string, from?: string) => {
   const template = process.env[TEMPLATE_VAR_NAME];
   if (!template) throw new Error(`${TEMPLATE_VAR_NAME} environment variable must be set.`);
   const variables = {
-    to: twakeDriveISOToISO639(to),
-    from: from ? twakeDriveISOToISO639(from) : from,
+    to,
+    from,
     text,
   };
   return template.replace(/%\{([^}:]+)(?::([^}]+))?\}/g, (_, varName, absentValue) => {

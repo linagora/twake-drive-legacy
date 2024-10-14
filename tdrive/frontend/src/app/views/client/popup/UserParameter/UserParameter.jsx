@@ -75,6 +75,7 @@ export default class UserParameter extends Component {
                       <option value="en">English</option>
                       <option value="fr">Français</option>
                       <option value="ru">Русский</option>
+                      <option value="vi">Tiếng Việt</option>
                     </select>
                   </div>
                 </Attribute>
