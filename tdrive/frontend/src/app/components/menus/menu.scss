@@ -45,7 +45,11 @@
     font-size: 12px;
     font-weight: 500;
     margin: 8px 16px;
-    color: var(--grey-dark);
+    display: flex;
+
+    .icon {
+      color: var(--grey-dark);
+    }
   }
 
   .menu-custom {

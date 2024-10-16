@@ -81,7 +81,12 @@ export default class MenuComponent extends React.Component {
                     this.hoverMenu(item.ref, item);
                   }}
                 >
-                  {item.text}
+                  {item.icon && (
+                    <div className="icon">
+                      {typeof item.icon === 'string' ? <Icon type={item.icon} /> : item.icon}
+                    </div>
+                  )}
+                  <div className="text">{item.text}</div>
                 </div>
               );
             } else if (item.type == 'react-element') {

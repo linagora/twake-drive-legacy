@@ -27,7 +27,7 @@ export default ({ openSideMenu }: { openSideMenu: () => void }) => {
             alt="Tdrive"
           />
         </div>
-        <div className="sm:inline-grid">
+        <div className="sm:inline-grid pl-3">
           <Info className="font-bold overflow-hidden text-ellipsis whitespace-nowrap w-full block -mb-1">
             &nbsp;v{version.version}
           </Info>
