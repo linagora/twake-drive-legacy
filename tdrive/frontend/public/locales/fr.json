@@ -190,6 +190,7 @@
     "hooks.use-drive-actions.unable_remove_file": "Impossible de supprimer ce fichier",
     "hooks.use-drive-actions.unable_restore_file": "Impossible de restaurer cet élément.",
     "hooks.use-drive-actions.unable_update_file": "Impossible de mettre à jour ce fichier",
+    "hooks.use-drive-actions.update_caused_a_rename": "Renommé en '{{$2}}'.",
     "login.create_account": "Créer un compte",
     "login.login_error": "Erreur lors de la connexion",
     "molecules.download_banner.download_button": "Télécharger l'application de bureau",

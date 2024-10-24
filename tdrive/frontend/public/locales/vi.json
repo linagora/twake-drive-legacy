@@ -179,6 +179,7 @@
     "hooks.use-drive-actions.unable_remove_file": "Không thể xóa tệp này.",
     "hooks.use-drive-actions.unable_restore_file": "Không thể khôi phục mục này.",
     "hooks.use-drive-actions.unable_update_file": "Không thể cập nhật tệp này.",
+    "hooks.use-drive-actions.update_caused_a_rename": "Mục đã được đổi tên thành '{{$2}}'.",
     "login.create_account": "Tạo tài khoản",
     "login.login_error": "Lỗi trong khi đăng nhập",
     "molecules.download_banner.download_button": "Tải xuống ứng dụng dành cho máy tính",
