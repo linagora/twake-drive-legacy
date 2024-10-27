@@ -63,6 +63,10 @@ export const transformValueToDbString = (
     return +v;
   }
 
+  if (type === "number") {
+    if (v === 0) return v;
+  }
+
   return v || "";
 };
 
