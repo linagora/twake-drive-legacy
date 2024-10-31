@@ -38,7 +38,7 @@ export default class StorageService extends TdriveService<StorageAPI> implements
    * But for the local storage it's a default value
    * @private
    */
-  private homeDir = "/tdrive";
+  private homeDir = "tdrive";
 
   constructor(protected options?: TdriveServiceOptions<TdriveServiceConfiguration>) {
     super(options);
@@ -277,6 +277,9 @@ export default class StorageService extends TdriveService<StorageAPI> implements
         this.logger.error("For S3 connector home directory MUST NOT start with '/'");
         throw new Error("For S3 connector home directory MUST NOT start with '/'");
       }
+    } else {
+      this.logger.info("For 'local' connector setting home directory to '/tdrive'");
+      this.homeDir = "/tdrive";
     }
   }
 }
