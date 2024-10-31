@@ -12,6 +12,14 @@ import { logger } from "../../../platform/framework";
  * OneOfStorageStrategy is responsible for managing multiple storage backends.
  * It writes to, reads from, removes, and checks for the existence of files
  * across multiple storage systems.
+ *
+ * WARNING: Be careful using this strategy. There is a very big probability that
+ * all storages won't be synchronized. You need to use external synchronization
+ * tools like rclone to keep them in sync.
+ * As far as all the objects in a storage are immutable you won't have inconsistent
+ * state of the object except it could've been deleted, and it's still exists in one
+ * of the storages. So you will need to have external procedures to clean up storages
+ * and make "garbage" collection.
  */
 export class OneOfStorageStrategy implements StorageConnectorAPI {
   constructor(private readonly storages: StorageConnectorAPI[]) {}
