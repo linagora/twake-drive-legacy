@@ -470,7 +470,7 @@ export class DocumentsService {
           }
         }
       } catch (error) {
-        console.error("🚀🚀 error:", error);
+        logger.error(error, "🚀🚀 error:");
       }
 
       await this.repository.save(driveItem);

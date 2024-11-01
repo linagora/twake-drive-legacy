@@ -7,6 +7,7 @@ import {
   CompanyStatsObject,
   CompanyUserObject,
 } from "./web/types";
+import { logger } from "../../core/platform/framework";
 
 export function formatCompany(
   companyEntity: Company,
@@ -74,6 +75,8 @@ export function formatCompany(
         res.stats.total_members < res.plan?.limits[CompanyLimitsEnum.COMPANY_MEMBERS_LIMIT],
     },
   );
+
+  logger.info("🚀🚀 res.plan.features: ", res.plan.features);
 
   return res;
 }

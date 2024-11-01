@@ -1,6 +1,7 @@
 import { buildSelectQuery } from "../../../database/services/orm/connectors/mongodb/query-builder";
 import { EntityTarget, FindFilter, FindOptions, getEntityDefinition } from "../../api";
 import { asciiFold } from "../utils";
+import { logger } from "../../../../framework";
 
 export function buildSearchQuery<Entity>(
   entityType: EntityTarget<Entity>,
@@ -15,7 +16,7 @@ export function buildSearchQuery<Entity>(
   try {
     query = buildSelectQuery(entityType, filters, options);
   } catch (e) {
-    console.log(e);
+    logger.info(e);
   }
   let sort: any = {};
 

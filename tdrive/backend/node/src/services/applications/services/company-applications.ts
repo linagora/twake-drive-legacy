@@ -1,4 +1,4 @@
-import { Initializable, TdriveServiceProvider } from "../../../core/platform/framework";
+import { Initializable, logger, TdriveServiceProvider } from "../../../core/platform/framework";
 import { ListResult, Paginable } from "../../../core/platform/framework/api/crud-service";
 import gr from "../../global-resolver";
 import {
@@ -39,7 +39,7 @@ export class CompanyApplicationServiceImpl implements TdriveServiceProvider, Ini
       app.application.api = null;
       return app;
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       return null;
     }
   }

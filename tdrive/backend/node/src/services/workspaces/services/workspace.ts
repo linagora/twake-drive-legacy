@@ -490,7 +490,7 @@ export class WorkspaceServiceImpl implements TdriveServiceProvider, Initializabl
               }
             }
           } catch (err) {
-            console.log(err);
+            logger.warn(err);
           }
         }
       }

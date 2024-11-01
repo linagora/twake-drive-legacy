@@ -1,6 +1,7 @@
 import { mkdirSync, existsSync, promises as fsPromise, createWriteStream, readFileSync } from "fs";
 import { Readable } from "stream";
 import { v4 as uuidv4 } from "uuid";
+import { logger } from "../core/platform/framework";
 
 const { unlink } = fsPromise;
 
@@ -50,7 +51,7 @@ export const writeToTemporaryFile = async (input: Readable, extension: string): 
 
     return temporaryFilePath;
   } catch (error) {
-    console.debug(error);
+    logger.debug(error);
 
     throw Error(error);
   }

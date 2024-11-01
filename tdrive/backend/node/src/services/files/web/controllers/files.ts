@@ -6,6 +6,7 @@ import { UploadOptions } from "../../types";
 import { PublicFile } from "../../entities/file";
 import gr from "../../../global-resolver";
 import { formatAttachmentContentDispositionHeader } from "../../utils";
+import { logger } from "../../../../core/platform/framework";
 
 export class FileController {
   async save(
@@ -54,7 +55,7 @@ export class FileController {
       response.type(data.mime);
       return response.send(data.file);
     } catch (e) {
-      console.log("!!!" + e);
+      logger.info(e);
       throw e;
     }
   }
@@ -80,7 +81,7 @@ export class FileController {
       response.send(data.file);
       return response;
     } catch (err) {
-      console.log(err);
+      logger.error(err);
       response.statusCode = 500;
       response.send("");
     }

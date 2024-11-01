@@ -209,7 +209,7 @@ export default class MongoSearch extends SearchAdapter implements SearchAdapterI
     const { query, sort, project } = buildSearchQuery<EntityType>(entityType, filters, options);
 
     logger.info(`Search query: ${JSON.stringify(query)}`);
-    console.log(query);
+    logger.info(query);
 
     const sortMapped: any = sort
       ? Object.fromEntries(
