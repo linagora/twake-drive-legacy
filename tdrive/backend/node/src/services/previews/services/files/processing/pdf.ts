@@ -36,7 +36,9 @@ export async function convertFromPdf(
       //Just no more page to convert
     }
   } catch (error) {
-    const pdfConversionError = new PDFConversionError("Can't convert file with pdf-image.", { cause: error });
+    const pdfConversionError = new PDFConversionError("Can't convert file with pdf-image.", {
+      cause: error,
+    });
     logger.error(pdfConversionError);
     for (const file of pages) {
       cleanFiles([file]);

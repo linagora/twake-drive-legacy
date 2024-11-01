@@ -20,6 +20,7 @@ import StorageAPI, {
 
 import { OneOfStorageStrategy } from "./oneof-storage-strategy";
 import { DefaultStorageStrategy } from "./default-storage-strategy";
+import { FileNotFountException } from "./exceptions";
 
 type EncryptionConfiguration = {
   secret: string | null;
@@ -101,14 +102,14 @@ export default class StorageService extends TdriveService<StorageAPI> implements
   }
 
   async read(path: string, options?: ReadOptions): Promise<Readable> {
+    if (!(await this.exists(path, options))) {
+      throw new FileNotFountException();
+    }
     try {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
       const chunks = options?.totalChunks || 1;
       let count = 1;
-
-      // Check if the first chunk or file exists
-      await self._read(options?.totalChunks ? `${path}/chunk${count}` : path);
 
       async function factory(callback: (err?: Error, stream?: Stream) => unknown) {
         if (count > chunks) {
@@ -281,6 +282,10 @@ export default class StorageService extends TdriveService<StorageAPI> implements
       this.logger.info("For 'local' connector setting home directory to '/tdrive'");
       this.homeDir = "/tdrive";
     }
+  }
+
+  getId() {
+    return this.connector.getId();
   }
 }
 

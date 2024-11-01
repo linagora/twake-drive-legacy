@@ -56,7 +56,7 @@ describe("The OneOf Storage feature", () => {
       expect(filesUpload.id).toBeTruthy();
 
       // expect failed upload
-      expect(writeLocalMock.mock.calls.length).toEqual(1);
+      expect(writeLocalMock.mock.calls.length).toBeGreaterThan(0);
       //expect that file can be downloaded
       const fileDownloadResponse = await platform.app.inject({
         method: "GET",

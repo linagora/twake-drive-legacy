@@ -7,6 +7,7 @@ import {
   WriteOptions,
 } from "../storage/provider";
 import { logger } from "../../../platform/framework";
+import { FileNotFountException, WriteFileException } from "./exceptions";
 
 /**
  * OneOfStorageStrategy is responsible for managing multiple storage backends.
@@ -22,7 +23,16 @@ import { logger } from "../../../platform/framework";
  * and make "garbage" collection.
  */
 export class OneOfStorageStrategy implements StorageConnectorAPI {
+  id: string;
+
   constructor(private readonly storages: StorageConnectorAPI[]) {}
+
+  getId() {
+    if (!this.id) {
+      this.id = this.storages.map(s => s.getId()).join("_");
+    }
+    return this.id;
+  }
 
   /**
    * Writes a file to all configured storages.
@@ -38,7 +48,7 @@ export class OneOfStorageStrategy implements StorageConnectorAPI {
 
     // destroy all streams if there is an error in the input stream
     stream.on("error", err => {
-      logger.error("Error in input stream, destroying all write streams:", err);
+      logger.error(err, "Error in input stream, destroying all write streams");
       passThroughStreams.forEach(stream => stream.destroy(err));
     });
 
@@ -54,19 +64,25 @@ export class OneOfStorageStrategy implements StorageConnectorAPI {
 
     // Write to all storages with error handling
     const writeResults = await Promise.allSettled(
-      this.storages.map(
-        (storage, index) => storage.write(path, passThroughStreams[index]),
-        options,
+      this.storages.map((storage, index) =>
+        storage.write(path, passThroughStreams[index], options),
       ),
     );
 
     // Log all errors and throw if all write operations fail
     const errors = writeResults.filter(result => result.status === "rejected");
     errors.forEach((error, index) => {
-      logger.error(`Error writing to storage ${index}:`, (error as PromiseRejectedResult).reason);
+      const storageId = this.storages[index].getId();
+      logger.error(
+        new OneOfStorageWriteOneFailedException(
+          storageId,
+          `Error writing to storage ${storageId}`,
+          (error as PromiseRejectedResult).reason,
+        ),
+      );
     });
     if (errors.length === this.storages.length) {
-      throw new Error("Write operation failed for all storages");
+      throw new WriteFileException(`Write ${path} failed for all storages`);
     }
 
     const successResult = writeResults.filter(
@@ -89,10 +105,16 @@ export class OneOfStorageStrategy implements StorageConnectorAPI {
           return await storage.read(path, options);
         }
       } catch (err) {
-        logger.error("Fallback storage read failed:", err);
+        logger.error(
+          new OneOfStorageReadOneFailedException(
+            storage.getId(),
+            `Reading ${path} from storage ${storage} failed.`,
+            err,
+          ),
+        );
       }
     }
-    throw new Error(`Error reading ${path} in all the storages.`);
+    throw new FileNotFountException(`Error reading ${path}`);
   };
 
   /**
@@ -121,3 +143,21 @@ export class OneOfStorageStrategy implements StorageConnectorAPI {
     });
   };
 }
+
+/**
+ * Throw when read from one of the storages is filed.
+ */
+class StorageException extends Error {
+  constructor(readonly storageId: string, details: string, error: Error) {
+    super(details, error);
+  }
+}
+
+/**
+ * Throw when read from one of the storages is filed.
+ */
+class OneOfStorageReadOneFailedException extends StorageException {}
+/**
+ * Thrown when write operation to one of the storages is failed.
+ */
+class OneOfStorageWriteOneFailedException extends StorageException {}
