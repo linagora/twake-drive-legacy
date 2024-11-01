@@ -14,7 +14,8 @@ function mockStorage(size: number) {
     write: jest.fn().mockResolvedValue({ size: size }),
     read: jest.fn(),
     exists: jest.fn(),
-    remove: jest.fn().mockResolvedValue(true)
+    remove: jest.fn().mockResolvedValue(true),
+    getId: jest.fn().mockResolvedValue("Mock Storage ID")
   } as unknown as StorageConnectorAPI;
 }
 
@@ -56,7 +57,7 @@ describe('OneOfStorageStrategy', () => {
 
       const path = 'test/path';
       const stream = mockStream();
-      await expect(oneOfStorageStrategy.write(path, stream)).rejects.toThrow('Write operation failed for all storages');
+      await expect(oneOfStorageStrategy.write(path, stream)).rejects.toThrow('Write test/path failed for all storages');
     });
 
     it('should succeed if one storage write fails but the other succeeds', async () => {
