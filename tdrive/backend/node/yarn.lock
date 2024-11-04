@@ -2365,6 +2365,11 @@ cjs-module-lexer@^1.0.0:
   resolved "https://registry.npmjs.org/cjs-module-lexer/-/cjs-module-lexer-1.3.1.tgz"
   integrity sha512-a3KdPAANPbNE4ZUv9h6LckSl9zLsYOP4MBmhIPkRaeyybt+r4UghLvq+xw/YwUcC1gqylCkL4rdVs3Lwupjm4Q==
 
+clamscan@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.npmjs.org/clamscan/-/clamscan-2.4.0.tgz"
+  integrity sha512-XBOxUiGOcQGuKmCn5qaM5rIK153fGCwsvJMbjVtcnNJ+j/YHrSj2gKNjyP65yr/E8JsKTTDtKYFG++p7Lzigyw==
+
 class-transformer@^0.3.1:
   version "0.3.1"
   resolved "https://registry.npmjs.org/class-transformer/-/class-transformer-0.3.1.tgz"
