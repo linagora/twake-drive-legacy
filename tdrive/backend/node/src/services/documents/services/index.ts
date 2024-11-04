@@ -105,11 +105,11 @@ export class DocumentsService {
           removeInfected: false, // Do not remove infected files
           quarantineInfected: false, // Do not quarantine, just alert
           scanLog: null, // No log file for this test
-          debugMode: true, // Enable debug messages
+          debugMode: getConfigOrDefault("av.debugMode", false), // Enable debug messages
           clamdscan: {
-            host: "127.0.0.1", // ClamAV server address
-            port: 3310, // ClamAV server port
-            timeout: 2000, // Timeout for scans
+            host: getConfigOrDefault("av.host", "localhost"), // IP of the server
+            port: getConfigOrDefault("av.port", 3310)  as number, // ClamAV server port
+            timeout: getConfigOrDefault("av.timeout", 2000), // Timeout for scans
             localFallback: true, // Use local clamscan if needed
           },
         });

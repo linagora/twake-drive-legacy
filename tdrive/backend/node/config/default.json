@@ -121,6 +121,12 @@
     "defaultUserQuota": 200000000,
     "featureAntivirus": false
   },
+  "av": {
+    "host": "av",
+    "port": 3310,
+    "debugMode": false,
+    "timeout": 2000
+  },
   "applications": {
     "grid": [
       {
