@@ -12,6 +12,7 @@ export enum FeatureNames {
   COMPANY_DISPLAY_EMAIL = 'company:display_email',
   COMPANY_USER_QUOTA = 'company:user_quota',
   COMPANY_MANAGE_ACCESS = 'company:managed_access',
+  COMPANY_AV_ENABLED = 'company:av_enabled',
 }
 
 export type FeatureValueType = boolean | number;
@@ -31,6 +32,7 @@ availableFeaturesWithDefaults.set(FeatureNames.COMPANY_SHARED_DRIVE, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_DISPLAY_EMAIL, true);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_USER_QUOTA, false);
 availableFeaturesWithDefaults.set(FeatureNames.COMPANY_MANAGE_ACCESS, true);
+availableFeaturesWithDefaults.set(FeatureNames.COMPANY_AV_ENABLED, false);
 
 /**
  * ChannelServiceImpl that allow you to manage feature flipping in Tdrive using react feature toggles

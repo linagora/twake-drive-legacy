@@ -1,4 +1,4 @@
-import { DotsHorizontalIcon } from '@heroicons/react/outline';
+import { DotsHorizontalIcon, ShieldCheckIcon, ShieldExclamationIcon } from '@heroicons/react/outline';
 import { Button } from '@atoms/button/button';
 import { Base, BaseSmall } from '@atoms/text';
 import Menu from '@components/menus/menu';
@@ -15,6 +15,9 @@ import useRouteState from 'app/features/router/hooks/use-route-state';
 import { DocumentIcon } from './document-icon';
 import { hasAnyPublicLinkAccess } from '@features/files/utils/access-info-helpers';
 import { formatDateShort } from 'app/features/global/utils/Numbers';
+import FeatureTogglesService, {
+  FeatureNames,
+} from '@features/global/services/feature-toggles-service';
 
 export const DocumentRow = ({
   item,
@@ -78,6 +81,19 @@ export const DocumentRow = ({
       <div className="shrink-0 ml-4 text-right lg:w-24 sm:w-20 ">
         <BaseSmall>{formatBytes(item.size)}</BaseSmall>
       </div>
+      {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_AV_ENABLED) && (
+        <div className="shrink-0 ml-4 text-right lg:w-24 sm:w-20 ">
+          <BaseSmall title={item?.status}>
+            {item?.status === 'safe' && <ShieldCheckIcon className="w-5 text-teal-400" />}
+            {item?.status === 'scanning' && (
+              <ShieldExclamationIcon className="w-5 text-yellow-400" />
+            )}
+            {item?.status === 'malicious' && (
+              <ShieldExclamationIcon className="w-5 text-rose-400" />
+            )}
+          </BaseSmall>
+        </div>
+      )}
       <div className="shrink-0 ml-4">
         <Menu menu={onBuildContextMenu}>
           <Button
