@@ -460,6 +460,10 @@ export class FileServiceImpl {
       return { success: false };
     }
   }
+
+  getEncryptionAlgorithm(): string {
+    return this.algorithm;
+  }
 }
 export const getFilePath = (entity: File): string => {
   return `${gr.platformServices.storage.getHomeDir()}/files/${entity.company_id}/${

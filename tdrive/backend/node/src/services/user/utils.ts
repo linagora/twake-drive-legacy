@@ -66,6 +66,9 @@ export function formatCompany(
       [CompanyFeaturesEnum.COMPANY_MANAGE_ACCESS]: JSON.parse(
         config.get("drive.featureManageAccess") || "true",
       ),
+      [CompanyFeaturesEnum.COMPANY_AV_ENABLED]: JSON.parse(
+        config.get("drive.featureAntivirus") || "false",
+      ),
     },
     {
       ...(res.plan?.features || {}),

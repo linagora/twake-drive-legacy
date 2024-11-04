@@ -118,7 +118,8 @@
     "featureUserQuota": false,
     "featureManageAccess": true,
     "defaultCompany": "00000000-0000-4000-0000-000000000000",
-    "defaultUserQuota": 200000000
+    "defaultUserQuota": 200000000,
+    "featureAntivirus": false
   },
   "applications": {
     "grid": [

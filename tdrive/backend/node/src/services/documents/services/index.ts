@@ -48,6 +48,7 @@ import {
   isVirtualFolder,
   updateItemSize,
   isInTrash,
+  getConfigOrDefault,
 } from "../utils";
 import {
   checkAccess,
@@ -56,6 +57,7 @@ import {
   makeStandaloneAccessLevel,
   getItemScope,
 } from "./access-check";
+import { getFilePath } from "../../files/services";
 import archiver from "archiver";
 import internal from "stream";
 import config from "config";
@@ -63,6 +65,7 @@ import { MultipartFile } from "@fastify/multipart";
 import { UploadOptions } from "src/services/files/types";
 import { SortType } from "src/core/platform/services/search/api";
 import ApplicationsApiService, { ApplicationEditingKeyStatus } from "../../applications-api";
+import NodeClam from "clamscan";
 
 export class DocumentsService {
   version: "1";
@@ -73,15 +76,11 @@ export class DocumentsService {
   userRepository: Repository<User>;
   ROOT: RootType = "root";
   TRASH: TrashType = "trash";
-  quotaEnabled: boolean = config.has("drive.featureUserQuota")
-    ? config.get("drive.featureUserQuota")
-    : false;
-  defaultQuota: number = config.has("drive.defaultUserQuota")
-    ? config.get("drive.defaultUserQuota")
-    : 0;
-  manageAccessEnabled: boolean = config.has("drive.featureManageAccess")
-    ? config.get("drive.featureManageAccess")
-    : false;
+  quotaEnabled: boolean = getConfigOrDefault("drive.featureUserQuota", false);
+  defaultQuota: number = getConfigOrDefault("drive.defaultUserQuota", 0);
+  manageAccessEnabled: boolean = getConfigOrDefault("drive.featureManageAccess", false);
+  avEnabled = getConfigOrDefault("drive.featureAntivirus", false);
+  av: NodeClam = null;
   logger: TdriveLogger = getLogger("Documents Service");
 
   async init(): Promise<this> {
@@ -101,6 +100,20 @@ export class DocumentsService {
           DriveTdriveTabEntity,
         );
       this.userRepository = await globalResolver.database.getRepository<User>(UserType, User);
+      if (this.avEnabled) {
+        this.av = await new NodeClam().init({
+          removeInfected: false, // Do not remove infected files
+          quarantineInfected: false, // Do not quarantine, just alert
+          scanLog: null, // No log file for this test
+          debugMode: true, // Enable debug messages
+          clamdscan: {
+            host: "127.0.0.1", // ClamAV server address
+            port: 3310, // ClamAV server port
+            timeout: 2000, // Timeout for scans
+            localFallback: true, // Use local clamscan if needed
+          },
+        });
+      }
     } catch (error) {
       logger.error({ error: `${error}` }, "Error while initializing Documents Service");
       throw error;
@@ -480,6 +493,57 @@ export class DocumentsService {
       driveItem.last_version_cache = driveItemVersion;
 
       await this.repository.save(driveItem);
+
+      // If AV feature is enabled, scan the file
+      if (this.avEnabled && version) {
+        try {
+          // get the file from the storage
+          const file = await globalResolver.services.files.get(
+            version.file_metadata.external_id,
+            context,
+          );
+
+          // read the file from the storage
+          const readableStream = await globalResolver.platformServices.storage.read(
+            getFilePath(file),
+            {
+              totalChunks: file.upload_data.chunks,
+              encryptionAlgo: globalResolver.services.files.getEncryptionAlgorithm(),
+              encryptionKey: file.encryption_key,
+            },
+          );
+
+          // update the status of the drive item
+          driveItem.status = "scanning";
+          await this.repository.save(driveItem);
+
+          // scan the file
+          this.av.scanStream(readableStream, async (err, { isInfected, viruses }) => {
+            if (err) {
+              driveItem.status = "scan_failed";
+              this.logger.info(`Scan failed for item ${driveItem.id} due to error: ${err.message}`);
+            } else if (isInfected) {
+              driveItem.status = "malicious";
+              this.logger.info(
+                `Item ${driveItem.id} is malicious. Viruses found: ${viruses.join(", ")}`,
+              );
+            } else {
+              driveItem.status = "safe";
+              this.logger.info(`Item ${driveItem.id} is safe with no viruses detected.`);
+            }
+
+            // Save status to the repository and log completion
+            await this.repository.save(driveItem);
+            this.logger.info(
+              `Completed scan for item ${driveItem.id} with final status: ${driveItem.status}`,
+            );
+          });
+        } catch (error) {
+          this.logger.error(`Error scanning file ${driveItemVersion.file_metadata.external_id}`);
+          driveItem.status = "scan_failed";
+          await this.repository.save(driveItem);
+        }
+      }
 
       //TODO[ASH] update item size only for files, there is not need to do during direcotry creation
       await updateItemSize(driveItem.parent_id, this.repository, context);

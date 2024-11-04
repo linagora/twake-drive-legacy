@@ -1,3 +1,4 @@
+import config from "config";
 import { spawnCheckingExitCode } from "../../utils/exec";
 import archiver from "archiver";
 import { merge } from "lodash";
@@ -82,6 +83,7 @@ export const getDefaultDriveItem = (
     parent_id: item.parent_id || "root",
     content_keywords: item.content_keywords || "",
     scope: "personal",
+    status: "uploaded",
     description: item.description || "",
     access_info: item.access_info || {
       entities: [
@@ -671,4 +673,8 @@ export const getKeywordsOfFile = async (
     content_strings = await officeFileToString(file, extension);
   }
   return extractKeywords(content_strings);
+};
+
+export const getConfigOrDefault = (key: string, defaultValue: any) => {
+  return config.has(key) ? config.get(key) : defaultValue;
 };

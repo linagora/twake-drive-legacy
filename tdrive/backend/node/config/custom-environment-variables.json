@@ -130,6 +130,7 @@
     "defaultUserQuota": "DRIVE_DEFAULT_USER_QUOTA",
     "featureDisplayEmail": "ENABLE_FEATURE_DISPLAY_EMAIL",
     "featureUserQuota": "ENABLE_FEATURE_USER_QUOTA",
-    "featureManageAccess": "ENABLE_FEATURE_MANAGE_ACCESS"
+    "featureManageAccess": "ENABLE_FEATURE_MANAGE_ACCESS",
+    "featureAntivirus": "ENABLE_FEATURE_ANTIVIRUS"
   }
 }

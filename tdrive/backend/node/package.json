@@ -130,6 +130,7 @@
     "archiver": "^5.3.1",
     "axios": "^1.6.8",
     "bcrypt": "^5.0.1",
+    "clamscan": "^2.4.0",
     "class-transformer": "^0.3.1",
     "cli-table": "^0.3.6",
     "config": "^3.3.2",
