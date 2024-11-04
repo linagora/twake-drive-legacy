@@ -183,7 +183,6 @@
     "unzipper": "^0.11.6",
     "uuid": "^8.3.2",
     "uuid-time": "^1.0.0",
-    "v8-profiler-next": "^1.10.0",
     "yargs": "^16.2.0"
   }
 }

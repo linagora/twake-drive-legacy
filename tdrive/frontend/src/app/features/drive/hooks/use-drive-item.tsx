@@ -122,13 +122,13 @@ export const useDriveItem = (id: string) => {
             }));
           }
           // set children and remove duplicates
-          setChildren(prev => [
-            ...prev,
-            ...details.children.filter(
-              (item, index, self) =>
-                index === self.findIndex(t => t.id === item.id),
-            ),
-          ]);
+          setChildren(prev => {
+            // Create a Map for existing IDs for fast lookups
+            const existingIds = new Map(prev.map(item => [item.id, true]));
+
+            // Filter children while adding them to the state
+            return [...prev, ...details.children.filter(item => !existingIds.has(item.id))];
+          });
         } catch (e) {
           // set pagination end to true
           set(DriveItemPagination, prev => ({
@@ -140,7 +140,7 @@ export const useDriveItem = (id: string) => {
         } finally {
           set(DriveItemPagination, prev => ({
             ...prev,
-            page: (prev.page + prev.limit),
+            page: prev.page + prev.limit,
           }));
         }
         setLoading(false);

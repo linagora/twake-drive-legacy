@@ -18,6 +18,9 @@
 ## Hotfixes
   - `v1.0.4-hf1`:
     - Fix typo in French translation
+  - `v1.0.4-hf3`:
+    - Add collation fix.
+    - Cli db seed tool
 
 # Twake Drive v1.0.3
 

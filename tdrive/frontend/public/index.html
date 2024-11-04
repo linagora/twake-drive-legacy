@@ -54,13 +54,13 @@
         left: calc(50% - 25px);
         position: absolute;
         top: calc(50% - 25px);
-        width: 50px; 
+        width: 50px;
       }
 
       .path {
         stroke-dasharray: 1,200;
         stroke-dashoffset: 0;
-        animation: 
+        animation:
         dash 1.5s ease-in-out infinite,
         color 6s ease-in-out infinite
         ;
@@ -134,23 +134,6 @@
           electron.remote.getCurrentWindow().center();
         }
         document.getElementById('body').className = 'electron';
-      }
-    </script>
-    <script async src="https://cdn.headwayapp.co/widget.js"></script>
-    <script>
-      if(location.origin.indexOf("tdrive.app") >= 0){
-        !function(){var analytics=window.analytics=window.analytics||[];if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&console.error("Segment snippet included twice.");else{analytics.invoked=!0;analytics.methods=["trackSubmit","trackClick","trackLink","trackForm","pageview","identify","reset","group","track","ready","alias","debug","page","once","off","on","addSourceMiddleware","addIntegrationMiddleware","setAnonymousId","addDestinationMiddleware"];analytics.factory=function(e){return function(){var t=Array.prototype.slice.call(arguments);t.unshift(e);analytics.push(t);return analytics}};for(var e=0;e<analytics.methods.length;e++){var key=analytics.methods[e];analytics[key]=analytics.factory(key)}analytics.load=function(key,e){var t=document.createElement("script");t.type="text/javascript";t.async=!0;t.src="https://cdn.segment.com/analytics.js/v1/" + key + "/analytics.min.js";var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n);analytics._loadOptions=e};analytics.SNIPPET_VERSION="4.13.1";
-        analytics.load("Vl5xpgcpGRe4BmSYp9xPlAeQdqLP5lLe");
-        analytics.page();
-        }}();
-      }
-    </script>
-    <script>
-      if(location.origin.indexOf("canary.tdrive.app") >= 0){
-        const canaryTag = document.createElement("div");
-        canaryTag.id = "canary_tag";
-        document.body.appendChild(canaryTag);
-        window.canary = true;
       }
     </script>
   </body>

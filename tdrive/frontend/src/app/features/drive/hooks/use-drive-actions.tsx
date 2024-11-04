@@ -138,9 +138,11 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
   );
 
   const update = useCallback(
-    async (update: Partial<DriveItem>, id: string, parentId: string) => {
+    async (update: Partial<DriveItem>, id: string, parentId: string, previousName?: string) => {
       try {
-        await DriveApiClient.update(companyId, id, update);
+        const newItem = await DriveApiClient.update(companyId, id, update);
+        if (previousName && previousName !== newItem.name && !update.name)
+          ToasterService.warn(Languages.t('hooks.use-drive-actions.update_caused_a_rename', [previousName, newItem.name]));
         await refresh(id || '', true);
         if (!inPublicSharing) await refresh(parentId || '', true);
         if (update?.parent_id !== parentId) await refresh(update?.parent_id || '', true);

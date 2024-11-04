@@ -47,4 +47,7 @@ export abstract class AbstractConnector<T extends ConnectionOptions> implements 
   getType(): DatabaseType {
     return this.type;
   }
+  getClient() {
+    return this.getClient();
+  }
 }

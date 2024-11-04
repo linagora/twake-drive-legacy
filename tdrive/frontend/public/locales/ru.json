@@ -197,6 +197,7 @@
     "hooks.use-drive-actions.unable_remove_file": "Невозможно удалить эти файлы.",
     "hooks.use-drive-actions.unable_restore_file": "Невозможно восстановить эти файлы.",
     "hooks.use-drive-actions.unable_update_file": "Невозможно обновить эти файлы.",
+    "hooks.use-drive-actions.update_caused_a_rename": "Элемент был переименован в «{{$2}}».",
     "login.create_account": "Создать учетную запись",
     "login.login_error": "Ошибка при входе в систему",
     "molecules.download_banner.download_button": "Скачать настольное приложение",

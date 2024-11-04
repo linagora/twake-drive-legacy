@@ -61,25 +61,22 @@ export default class UserParameter extends Component {
     if (this.state.page === 1) {
       return (
         <form className="" autoComplete="off">
-          <div className="title">{this.state.i18n.t('scenes.apps.account.title')}</div>
-              <div className="group_section">
-                <Attribute
-                  label={this.state.i18n.t('scenes.apps.account.languages.menu_title')}
-                  description={this.state.i18n.t('scenes.apps.account.languages.text')}
-                >
-                  <div className="parameters_form">
-                    <select
-                      value={this.state.i18n.language}
-                      onChange={ev => currentUserService.updateLanguage(ev.target.value)}
-                    >
-                      <option value="en">English</option>
-                      <option value="fr">Français</option>
-                      <option value="ru">Русский</option>
-                      <option value="vi">Tiếng Việt</option>
-                    </select>
-                  </div>
-                </Attribute>
-              </div>
+          <Attribute
+            label={this.state.i18n.t('scenes.apps.account.languages.menu_title')}
+            description={this.state.i18n.t('scenes.apps.account.languages.text')}
+          >
+            <div className="parameters_form">
+              <select
+                value={this.state.i18n.language}
+                onChange={ev => currentUserService.updateLanguage(ev.target.value)}
+              >
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="ru">Русский</option>
+                <option value="vi">Tiếng Việt</option>
+              </select>
+            </div>
+          </Attribute>
         </form>
       );
     }

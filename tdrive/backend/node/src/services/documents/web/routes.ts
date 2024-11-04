@@ -1,7 +1,6 @@
 import { FastifyInstance, FastifyPluginCallback } from "fastify";
 import { DocumentsController } from "./controllers";
 import { createDocumentSchema, createVersionSchema, beginEditingSchema } from "./schemas";
-// import profilerPlugin from "../../../utils/profiler";
 
 const baseUrl = "/companies/:company_id";
 const serviceUrl = `${baseUrl}/item`;
@@ -9,11 +8,6 @@ const editingSessionBase = "/editing_session/:editing_session_key";
 
 const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next) => {
   const documentsController = new DocumentsController();
-
-  // fastify.register(profilerPlugin, {
-  //   active: documentsController.profilingEnabled,
-  //   outputDir: "profiles",
-  // });
 
   fastify.route({
     method: "GET",

@@ -99,6 +99,11 @@ export interface Connector extends Initializable {
    * @returns Pagination
    */
   getOffsetPagination(options: Paginable): Pagination;
+
+  /**
+   * Get the db client
+   */
+  getClient(): any;
 }
 
 export declare type ConnectionOptions = MongoConnectionOptions | PostgresConnectionOptions;
