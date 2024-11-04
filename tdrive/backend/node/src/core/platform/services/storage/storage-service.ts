@@ -69,7 +69,8 @@ export default class StorageService extends TdriveService<StorageAPI> implements
   }
 
   exists(path: string, options?: ReadOptions): Promise<boolean> {
-    return this.getConnector().exists(path, options);
+    //TODO[ASH] check for all the file chunks
+    return this.getConnector().exists(path + "/chunk1", options);
   }
 
   async write(path: string, stream: Stream, options?: WriteOptions): Promise<WriteMetadata> {

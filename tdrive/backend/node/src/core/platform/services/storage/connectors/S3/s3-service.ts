@@ -113,7 +113,7 @@ export default class S3ConnectorService implements StorageConnectorAPI {
           break;
         }
       } catch (e) {
-        logger.error("Error getting information from S3", e);
+        logger.error(e, `Error getting information from S3 for path: ${path}`);
       }
 
       if (i === tries) {
