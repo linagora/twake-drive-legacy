@@ -108,7 +108,7 @@ export class DocumentsService {
           debugMode: getConfigOrDefault("av.debugMode", false), // Enable debug messages
           clamdscan: {
             host: getConfigOrDefault("av.host", "localhost"), // IP of the server
-            port: getConfigOrDefault("av.port", 3310)  as number, // ClamAV server port
+            port: getConfigOrDefault("av.port", 3310) as number, // ClamAV server port
             timeout: getConfigOrDefault("av.timeout", 2000), // Timeout for scans
             localFallback: true, // Use local clamscan if needed
           },
