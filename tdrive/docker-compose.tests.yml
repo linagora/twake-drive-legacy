@@ -14,6 +14,11 @@ services:
       - 27017:27017
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+  av:
+    image: clamav/clamav:latest
+    container_name: av
+    ports:
+      - 3310:3310
 
   redis:
     image: "redis:alpine"
