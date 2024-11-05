@@ -2,6 +2,7 @@ import {
   DotsHorizontalIcon,
   ShieldCheckIcon,
   ShieldExclamationIcon,
+  BanIcon
 } from '@heroicons/react/outline';
 import { Button } from '@atoms/button/button';
 import { Base, BaseSmall } from '@atoms/text';
@@ -95,6 +96,7 @@ export const DocumentRow = ({
             {item?.av_status === 'malicious' && (
               <ShieldExclamationIcon className="w-5 text-rose-400" />
             )}
+            {item?.av_status === 'skipped' && <BanIcon className="w-5 text-gray-400" />}
           </BaseSmall>
         </div>
       )}

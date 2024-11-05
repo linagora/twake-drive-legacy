@@ -6,6 +6,7 @@
     "host": "av",
     "port": 3310,
     "debugMode": false,
-    "timeout": 2000
+    "timeout": 2000,
+    "maxFileSize": 26214400
   }
 }

@@ -13,6 +13,7 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
   av: NodeClam = null;
   logger: TdriveLogger = getLogger("Antivirus Service");
   avEnabled = getConfigOrDefault("drive.featureAntivirus", false);
+  private MAX_FILE_SIZE = getConfigOrDefault("av.maxFileSize", 26214400); // 25 MB
 
   async init(): Promise<this> {
     try {
@@ -57,6 +58,16 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
         version.file_metadata.external_id,
         context,
       );
+
+      // check if the file is too large
+      if (driveItem.size > this.MAX_FILE_SIZE) {
+        this.logger.info(
+          `File ${file.id} is too large (${driveItem.size} bytes) to be scanned. Skipping...`,
+        );
+        driveItem.av_status = "skipped";
+        await repo.save(driveItem);
+        return;
+      }
 
       // read the file from the storage
       const readableStream = await globalResolver.platformServices.storage.read(getFilePath(file), {

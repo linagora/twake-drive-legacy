@@ -137,6 +137,7 @@
     "host": "AV_HOST",
     "port": "AV_PORT",
     "debugMode": "AV_DEBUG_MODE",
-    "timeout": "AV_TIMEOUT"
+    "timeout": "AV_TIMEOUT",
+    "maxFileSize": "AV_MAX_FILE_SIZE"
   }
 }
