@@ -3,7 +3,6 @@ version: "3.4"
 # docker-compose -f docker-compose.dev.tests.mongo.yml stop mongo; rm -R docker-data/mongo/; docker-compose -f docker-compose.dev.tests.mongo.yml run -e SEARCH_DRIVER=mongodb -e DB_DRIVER=mongodb node npm run test:e2e
 
 services:
-
   opensearch-node1:
     image: opensearchproject/opensearch:2.11.0 # Specifying the latest available image - modify if you want a specific version
     container_name: opensearch-node1
@@ -13,7 +12,7 @@ services:
       - discovery.seed_hosts=opensearch-node1 # Nodes to look for when discovering the cluster
       - cluster.initial_cluster_manager_nodes=opensearch-node1 # Nodes eligible to serve as cluster manager
       - bootstrap.memory_lock=true # Disable JVM heap memory swapping
-#      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=admin
+      #      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=admin
       - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
     ulimits:
       memlock:
@@ -22,13 +21,13 @@ services:
       nofile:
         soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
         hard: 65536
-#    volumes:
-#      - opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
+    #    volumes:
+    #      - opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
     ports:
       - 9200:9200 # REST API
-#      - 9600:9600 # Performance Analyzer
-#   networks:
- #     - opensearch-net # All of the containers will join the same Docker bridge network
+  #      - 9600:9600 # Performance Analyzer
+  #   networks:
+  #     - opensearch-net # All of the containers will join the same Docker bridge network
 
   postgres:
     image: postgres
@@ -39,6 +38,12 @@ services:
       POSTGRES_USER: tdrive_user
     ports:
       - "5432:5432"
+
+  av:
+    image: clamav/clamav:latest
+    container_name: av
+    ports:
+      - 3310:3310
 
   node:
     # Use the build context in the current directory
@@ -66,6 +71,8 @@ services:
     depends_on:
       - postgres
       - opensearch-node1
+      - av
     links:
       - postgres
       - opensearch-node1
+      - av

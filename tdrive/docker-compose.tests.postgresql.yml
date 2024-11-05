@@ -10,9 +10,3 @@ services:
       POSTGRES_USER: tdrive_user
     ports:
       - "5432:5432"
-
-  av:
-    image: clamav/clamav:latest
-    container_name: av
-    ports:
-      - 3310:3310
