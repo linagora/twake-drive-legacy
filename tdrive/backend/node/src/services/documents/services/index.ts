@@ -76,7 +76,6 @@ export class DocumentsService {
   quotaEnabled: boolean = getConfigOrDefault("drive.featureUserQuota", false);
   defaultQuota: number = getConfigOrDefault("drive.defaultUserQuota", 0);
   manageAccessEnabled: boolean = getConfigOrDefault("drive.featureManageAccess", false);
-  avEnabled = getConfigOrDefault("drive.featureAntivirus", false);
   logger: TdriveLogger = getLogger("Documents Service");
 
   async init(): Promise<this> {
@@ -477,7 +476,7 @@ export class DocumentsService {
       await this.repository.save(driveItem);
 
       // If AV feature is enabled, scan the file
-      if (this.avEnabled && version) {
+      if (globalResolver.services.av.avEnabled && version) {
         try {
           await globalResolver.services.av.scanDocument(driveItem, driveItemVersion, context);
         } catch (error) {

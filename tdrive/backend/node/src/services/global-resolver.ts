@@ -68,7 +68,7 @@ type TdriveServices = {
     documents: DocumentsService;
     engine: DocumentsEngine;
   };
-  av?: AVServiceImpl;
+  av: AVServiceImpl;
   tags: TagsService;
   i18n: I18nService;
 };
