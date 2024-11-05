@@ -32,6 +32,7 @@ export class DriveFileMockClass {
     creator: string;
     is_directory: boolean;
     scope: "personal" | "shared";
+    av_status: string;
     created_by: Record<string, any>;
     shared_by: Record<string, any>;
 }

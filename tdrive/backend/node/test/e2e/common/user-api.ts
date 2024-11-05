@@ -29,7 +29,6 @@ import { Response } from "light-my-request";
  * in the application.
  */
 export default class UserApi {
-
   private static readonly DOC_URL = "/internal/services/documents/v1";
 
   static readonly ALL_FILES = [
@@ -38,7 +37,7 @@ export default class UserApi {
     "sample.pdf",
     "sample.doc",
     "sample.zip",
-    "sample.mp4"
+    "sample.mp4",
   ];
 
   platform: TestPlatform;
@@ -51,9 +50,7 @@ export default class UserApi {
   api: Api;
   session: string;
 
-  private constructor(
-    platform: TestPlatform
-  ) {
+  private constructor(platform: TestPlatform) {
     this.platform = platform;
   }
 
@@ -66,12 +63,14 @@ export default class UserApi {
         company_id: this.workspace.company_id,
       };
       this.user = await this.dbService.createUser([workspacePK], options, uuidv1());
-      this.anonymous = await this.dbService.createUser([workspacePK],
+      this.anonymous = await this.dbService.createUser(
+        [workspacePK],
         {
           ...options,
           identity_provider: "anonymous",
         },
-        uuidv1());
+        uuidv1(),
+      );
     } else {
       this.user = this.platform.currentUser;
     }
@@ -128,7 +127,7 @@ export default class UserApi {
         events: {
           "http://schemas.openid.net/event/backchannel-logout": {},
         },
-      }
+      },
     };
     const verifierMock = jest.spyOn(OidcJwtVerifier.prototype, "verifyLogoutToken");
     verifierMock.mockImplementation(() => {
@@ -140,28 +139,32 @@ export default class UserApi {
     });
   }
 
-
-  public static async getInstance(platform: TestPlatform, newUser = false, options?: {}): Promise<UserApi> {
+  public static async getInstance(
+    platform: TestPlatform,
+    newUser = false,
+    options?: {},
+  ): Promise<UserApi> {
     const helpers = new UserApi(platform);
     await helpers.init(newUser, options);
     return helpers;
   }
 
   async uploadRandomFile() {
-    return await this.uploadFile(UserApi.ALL_FILES[Math.floor((Math.random() * UserApi.ALL_FILES.length))]);
+    return await this.uploadFile(
+      UserApi.ALL_FILES[Math.floor(Math.random() * UserApi.ALL_FILES.length)],
+    );
   }
 
-  private async injectUploadRequest(readable: Readable | string) {
-    if (typeof readable === "string")
-      readable = Readable.from(readable);
+  private async injectUploadRequest(readable: Readable | string, fileame?: string) {
+    if (typeof readable === "string") readable = Readable.from(readable);
     const url = "/internal/services/files/v1";
     const form = formAutoContent({ file: readable });
     form.headers["authorization"] = `Bearer ${this.jwt}`;
 
     return await this.platform.app.inject({
       method: "POST",
-      url: `${url}/companies/${this.platform.workspace.company_id}/files?thumbnail_sync=0`,
-      ...form
+      url: `${url}/companies/${this.platform.workspace.company_id}/files?thumbnail_sync=0&filename=${fileame}`,
+      ...form,
     });
   }
 
@@ -173,38 +176,65 @@ export default class UserApi {
     if (filesUploadRaw.statusCode == 200) {
       const filesUpload: ResourceUpdateResponse<File> = deserialize<ResourceUpdateResponse<File>>(
         ResourceUpdateResponse,
-        filesUploadRaw.body
+        filesUploadRaw.body,
       );
       return filesUpload.resource;
     } else this.throwServerError(filesUploadRaw.statusCode);
   }
 
   private throwServerError(code: number) {
-    throw new Error("Error code: " + code)
+    throw new Error("Error code: " + code);
   }
 
   public getJWTTokenForUser(userId: string): string {
     const payload = {
       sub: userId,
-      role: ""
+      role: "",
     };
     return this.platform.authService.sign(payload);
   }
 
-  async uploadFileAndCreateDocument(
-    filename: string,
-    parent_id = "root"
-  ) {
+  async uploadEicarTestFile(filename: string) {
+    // EICAR test file content
+    const eicarContent = 'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*';
+    // Create a readable stream from the EICAR content
+    const eicarStream = new Readable();
+    eicarStream.push(eicarContent);
+    eicarStream.push(null); // End of the stream
+
+    // Upload using the stream
+    const filesUploadRaw = await this.injectUploadRequest(eicarStream, filename);
+
+
+    if (filesUploadRaw.statusCode === 200) {
+      const filesUpload = deserialize<ResourceUpdateResponse<File>>(
+        ResourceUpdateResponse,
+        filesUploadRaw.body,
+      );
+      console.log("UPLOADED FILE IS: ", filesUpload.resource);
+      return filesUpload.resource;
+    } else {
+      this.throwServerError(filesUploadRaw.statusCode);
+    }
+  }
+
+  async uploadFileAndCreateDocument(filename: string, parent_id = "root") {
     return this.uploadFile(filename).then(f => this.createDocumentFromFile(f, parent_id));
-  };
+  }
+
+  async uploadTestMalAndCreateDocument(filename: string, parent_id = "root") {
+    return this.uploadEicarTestFile(filename).then(f => this.createDocumentFromFile(f, parent_id));
+  }
 
   async uploadRandomFileAndCreateDocument(parent_id = "root") {
     return this.uploadRandomFile().then(f => this.createDocumentFromFile(f, parent_id));
-  };
+  }
 
   async uploadAllFilesAndCreateDocuments(parent_id = "root") {
-    return await Promise.all(UserApi.ALL_FILES.map(f => this.uploadFileAndCreateDocument(f, parent_id)));
-  };
+    return await Promise.all(
+      UserApi.ALL_FILES.map(f => this.uploadFileAndCreateDocument(f, parent_id)),
+    );
+  }
 
   async uploadAllFilesOneByOne(parent_id = "root") {
     const files: Array<DriveFile> = [];
@@ -214,16 +244,19 @@ export default class UserApi {
       files.push(doc);
     }
     return files;
-  };
+  }
 
   async createDirectory(parent = "root", overrides?: Partial<DriveFile>) {
-    const directory = await this.createDocument({
-      company_id: this.platform.workspace.company_id,
-      name: "Test Folder Name",
-      parent_id: parent,
-      is_directory: true,
-      ...overrides
-    }, {});
+    const directory = await this.createDocument(
+      {
+        company_id: this.platform.workspace.company_id,
+        name: "Test Folder Name",
+        parent_id: parent,
+        is_directory: true,
+        ...overrides,
+      },
+      {},
+    );
     expect(directory).toBeDefined();
     expect(directory).not.toBeNull();
     expect(directory.id).toBeDefined();
@@ -245,25 +278,28 @@ export default class UserApi {
   }
 
   /** Gets the public link access token then `impersonateWithJWT` as an anonymous user with that link */
-  async impersonatePublicLinkAccessOf<T>(item: Partial<DriveFile> & { id: string }, cb: () => Promise<T>): Promise<T> {
+  async impersonatePublicLinkAccessOf<T>(
+    item: Partial<DriveFile> & { id: string },
+    cb: () => Promise<T>,
+  ): Promise<T> {
     const publicToken = await this.getPublicLinkAccessToken(item);
     expect(publicToken?.value?.length ?? "").toBeGreaterThan(0);
     return this.impersonateWithJWT(publicToken?.value, cb);
   }
 
-  async createDocument(
-    item: Partial<DriveFile>,
-    version: Partial<FileVersion>
-  ) {
-    const response = await this.api.post(`${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/item`,
+  async createDocument(item: Partial<DriveFile>, version: Partial<FileVersion>) {
+    const response = await this.api.post(
+      `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/item`,
       {
         item,
-        version
-      }, {
-        authorization: `Bearer ${this.jwt}`
-      });
+        version,
+      },
+      {
+        authorization: `Bearer ${this.jwt}`,
+      },
+    );
     return deserialize<DriveFile>(DriveFile, response.body);
-  };
+  }
 
   async createDefaultDocument(overrides?: Partial<DriveFile>): Promise<DriveFile> {
     const scope: "personal" | "shared" = "shared";
@@ -276,28 +312,38 @@ export default class UserApi {
     };
 
     return await this.createDocument(item, {});
-  };
+  }
 
-  async shareWithPublicLink(doc: Partial<DriveFile> & { id: string }, accessLevel: publicAccessLevel) {
+  async shareWithPublicLink(
+    doc: Partial<DriveFile> & { id: string },
+    accessLevel: publicAccessLevel,
+  ) {
     return await this.updateDocument(doc.id, {
       ...doc,
       access_info: {
         ...doc.access_info!,
         public: {
           ...doc.access_info?.public!,
-          level: accessLevel
-        }
-      }
+          level: accessLevel,
+        },
+      },
     });
   }
 
-  async shareWithPublicLinkWithOkCheck(doc: Partial<DriveFile> & { id: string }, accessLevel: publicAccessLevel) {
-    const shareResponse =  await this.shareWithPublicLink(doc, accessLevel);
+  async shareWithPublicLinkWithOkCheck(
+    doc: Partial<DriveFile> & { id: string },
+    accessLevel: publicAccessLevel,
+  ) {
+    const shareResponse = await this.shareWithPublicLink(doc, accessLevel);
     expect(shareResponse.statusCode).toBe(200);
     return deserialize<DriveFile>(DriveFile, shareResponse.body);
   }
 
-  async shareWithPermissions(doc: Partial<DriveFile> & { id: string }, toUserId: string, permissions: DriveFileAccessLevel) {
+  async shareWithPermissions(
+    doc: Partial<DriveFile> & { id: string },
+    toUserId: string,
+    permissions: DriveFileAccessLevel,
+  ) {
     doc.access_info.entities.push({
       type: "user",
       id: toUserId,
@@ -316,21 +362,19 @@ export default class UserApi {
       payload: {
         company_id: doc.company_id,
         document_id: doc.id,
-        token: doc.access_info.public?.token
-      }
+        token: doc.access_info.public?.token,
+      },
     });
     const { access_token } = deserialize<AccessTokenMockClass>(
       AccessTokenMockClass,
-      accessRes.body
+      accessRes.body,
     );
     expect(access_token).toBeDefined();
 
     return access_token;
   }
 
-  async createRandomDocument(
-    parent_id = "root"
-  ) {
+  async createRandomDocument(parent_id = "root") {
     const file = await this.uploadRandomFile();
 
     const doc = await this.createDocumentFromFile(file, parent_id);
@@ -340,7 +384,7 @@ export default class UserApi {
     expect(doc.parent_id).toEqual(parent_id);
 
     return doc;
-  };
+  }
 
   async createDocumentFromFilename(
     file_name:
@@ -361,16 +405,13 @@ export default class UserApi {
     expect(doc.parent_id).toEqual(parent_id);
 
     return doc;
-  };
+  }
 
-  async createDocumentFromFile(
-    file: File,
-    parent_id = "root"
-  ) {
+  async createDocumentFromFile(file: File, parent_id = "root") {
     const item = {
       name: file.metadata.name,
       parent_id: parent_id,
-      company_id: file.company_id
+      company_id: file.company_id,
     };
 
     const version = {
@@ -378,35 +419,31 @@ export default class UserApi {
         name: file.metadata.name,
         size: file.upload_data?.size,
         thumbnails: [],
-        external_id: file.id
-      }
+        external_id: file.id,
+      },
     };
 
     return await this.createDocument(item, version);
-  };
+  }
 
-  async updateDocument(
-    id: string | "root" | "trash" | "shared_with_me",
-    item: Partial<DriveFile>
-  ) {
+  async updateDocument(id: string | "root" | "trash" | "shared_with_me", item: Partial<DriveFile>) {
     return await this.api.post(
       `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/item/${id}`,
       item,
       {
-        authorization: `Bearer ${this.jwt}`
-      });
-  };
+        authorization: `Bearer ${this.jwt}`,
+      },
+    );
+  }
 
-  async beginEditingDocument(
-    driveFileId: string,
-    editorApplicationId: string,
-  ): Promise<Response> {
+  async beginEditingDocument(driveFileId: string, editorApplicationId: string): Promise<Response> {
     return await this.api.post(
       `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/item/${driveFileId}/editing_session`,
       { editorApplicationId },
       {
-        authorization: `Bearer ${this.jwt}`
-      });
+        authorization: `Bearer ${this.jwt}`,
+      },
+    );
   }
 
   async updateEditingDocument(
@@ -415,7 +452,7 @@ export default class UserApi {
     userId: string | null = null,
   ): Promise<Response> {
     const fullPath = `${__dirname}/assets/${UserApi.ALL_FILES[0]}`;
-    const readable= Readable.from(fs.createReadStream(fullPath));
+    const readable = Readable.from(fs.createReadStream(fullPath));
     const form = formAutoContent({ file: readable });
     form.headers["authorization"] = `Bearer ${this.jwt}`;
     let queryString = keepEditing ? "keepEditing=true" : "";
@@ -423,23 +460,23 @@ export default class UserApi {
       queryString += `${queryString.length ? "&" : ""}userId=${encodeURIComponent(userId)}`;
     return await this.platform.app.inject({
       method: "POST",
-      url: `${UserApi.DOC_URL}/editing_session/${encodeURIComponent(editingSessionKey)}${queryString ? "?" : ""}${queryString}`,
+      url: `${UserApi.DOC_URL}/editing_session/${encodeURIComponent(editingSessionKey)}${
+        queryString ? "?" : ""
+      }${queryString}`,
       headers: {
-        authorization: `Bearer ${this.jwt}`
+        authorization: `Bearer ${this.jwt}`,
       },
       ...form,
     });
   }
 
-  async cancelEditingDocument(
-    editingSessionKey: string,
-  ): Promise<Response> {
+  async cancelEditingDocument(editingSessionKey: string): Promise<Response> {
     return await this.platform.app.inject({
       method: "DELETE",
       url: `${UserApi.DOC_URL}/editing_session/${editingSessionKey}`,
       headers: {
-        authorization: `Bearer ${this.jwt}`
-      }
+        authorization: `Bearer ${this.jwt}`,
+      },
     });
   }
 
@@ -449,65 +486,56 @@ export default class UserApi {
   ): Promise<string> {
     const result = await this.beginEditingDocument(driveFileId, editorApplicationId);
     expect(result.statusCode).toBe(200);
-    const {editingSessionKey} = result.json();
+    const { editingSessionKey } = result.json();
     expect(editingSessionKey).toBeTruthy();
     return editingSessionKey;
   }
 
-  async searchDocument(
-    payload: Record<string, any>
-  ) {
+  async searchDocument(payload: Record<string, any>) {
     const response = await this.platform.app.inject({
       method: "POST",
       url: `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/search`,
       headers: {
-        authorization: `Bearer ${this.jwt}`
+        authorization: `Bearer ${this.jwt}`,
       },
-      payload
+      payload,
     });
 
-    return deserialize<SearchResultMockClass>(
-      SearchResultMockClass,
-      response.body);
-  };
+    return deserialize<SearchResultMockClass>(SearchResultMockClass, response.body);
+  }
 
-  async browseDocuments(
-    id: string,
-    payload: Record<string, any> = {}
-  ) {
+  async browseDocuments(id: string, payload: Record<string, any> = {}) {
     const response = await this.platform.app.inject({
       method: "POST",
       url: `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/browse/${id}`,
       headers: {
-        authorization: `Bearer ${this.jwt}`
+        authorization: `Bearer ${this.jwt}`,
       },
-      payload
+      payload,
     });
 
-    return deserialize<DriveItemDetailsMockClass>(
-      DriveItemDetailsMockClass,
-      response.body);
-  };
+    return deserialize<DriveItemDetailsMockClass>(DriveItemDetailsMockClass, response.body);
+  }
 
   async getDocument(id: string | "root" | "trash" | "shared_with_me") {
     return await this.platform.app.inject({
       method: "GET",
       url: `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/item/${id}`,
       headers: {
-        authorization: `Bearer ${this.jwt}`
-      }
+        authorization: `Bearer ${this.jwt}`,
+      },
     });
-  };
+  }
 
   async zipDocument(id: string | "root" | "trash" | "shared_with_me") {
     return await this.platform.app.inject({
       method: "GET",
       url: `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/item/download/zip?items=${id}`,
       headers: {
-        authorization: `Bearer ${this.jwt}`
-      }
+        authorization: `Bearer ${this.jwt}`,
+      },
     });
-  };
+  }
 
   async getDocumentOKCheck(id: string | "root" | "trash" | "shared_with_me") {
     const response = await this.getDocument(id);
@@ -515,42 +543,38 @@ export default class UserApi {
     const doc = deserialize<DriveItemDetailsMockClass>(DriveItemDetailsMockClass, response.body);
     expect(doc.item?.id).toBe(id);
     return doc;
-  };
+  }
 
   async getDocumentByEditingKey(editing_session_key: string) {
     return await this.platform.app.inject({
       method: "GET",
       url: `${UserApi.DOC_URL}/editing_session/${encodeURIComponent(editing_session_key)}`,
       headers: {
-        authorization: `Bearer ${this.jwt}`
-      }
+        authorization: `Bearer ${this.jwt}`,
+      },
     });
-  };
+  }
 
-  async sharedWithMeDocuments(
-    payload: Record<string, any>
-  ) {
+  async sharedWithMeDocuments(payload: Record<string, any>) {
     const response = await this.platform.app.inject({
       method: "POST",
       url: `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/browse/shared_with_me`,
       headers: {
-        authorization: `Bearer ${this.jwt}`
+        authorization: `Bearer ${this.jwt}`,
       },
-      payload
+      payload,
     });
 
-    return deserialize<DriveItemDetailsMockClass>(
-      DriveItemDetailsMockClass,
-      response.body);
-  };
+    return deserialize<DriveItemDetailsMockClass>(DriveItemDetailsMockClass, response.body);
+  }
 
   async quota() {
     const url = "/internal/services/users/v1/users";
 
     const response = await this.platform.app.inject({
       method: "GET",
-      headers: { "authorization": `Bearer ${this.jwt}` },
-      url: `${url}/${this.user.id}/quota?companyId=${this.platform.workspace.company_id}`
+      headers: { authorization: `Bearer ${this.jwt}` },
+      url: `${url}/${this.user.id}/quota?companyId=${this.platform.workspace.company_id}`,
     });
 
     return deserialize<UserQuota>(UserQuotaMockClass, response.body);
@@ -560,7 +584,7 @@ export default class UserApi {
     return await this.platform.app.inject({
       method: "DELETE",
       url: `${UserApi.DOC_URL}/companies/${this.platform.workspace.company_id}/item/${id}`,
-      headers: { "authorization": `Bearer ${this.jwt}` },
+      headers: { authorization: `Bearer ${this.jwt}` },
     });
   }
 }

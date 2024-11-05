@@ -30,6 +30,7 @@ import { CompanyServiceImpl } from "./user/services/companies";
 import { UserExternalLinksServiceImpl } from "./user/services/external_links";
 import { UserServiceImpl } from "./user/services/users/service";
 import { WorkspaceServiceImpl } from "./workspaces/services/workspace";
+import { AVServiceImpl } from "./av/service";
 
 import { PreviewEngine } from "./previews/services/files/engine";
 import { I18nService } from "./i18n";
@@ -67,6 +68,7 @@ type TdriveServices = {
     documents: DocumentsService;
     engine: DocumentsEngine;
   };
+  av?: AVServiceImpl;
   tags: TagsService;
   i18n: I18nService;
 };
@@ -128,6 +130,7 @@ class GlobalResolver {
         documents: await new DocumentsService().init(),
         engine: await new DocumentsEngine().init(),
       },
+      av: await new AVServiceImpl().init(),
       tags: await new TagsService().init(),
       i18n: await new I18nService().init(),
     };

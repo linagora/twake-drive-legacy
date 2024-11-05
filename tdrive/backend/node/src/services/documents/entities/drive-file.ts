@@ -8,7 +8,7 @@ import * as UUIDTools from "../../../utils/uuid";
 
 export const TYPE = "drive_files";
 export type DriveScope = "personal" | "shared";
-export type Status = "uploaded" | "scanning" | "scan_failed" | "safe" | "malicious" | "skipped";
+export type AVStatus = "uploaded" | "scanning" | "scan_failed" | "safe" | "malicious" | "skipped";
 
 /**
  * This represents an item in the file hierarchy.
@@ -135,8 +135,8 @@ export class DriveFile {
   scope: DriveScope;
 
   @Type(() => String)
-  @Column("status", "string")
-  status: Status;
+  @Column("av_status", "string")
+  av_status: AVStatus;
 }
 
 const OnlyOfficeSafeDocKeyBase64 = {

@@ -84,6 +84,7 @@ const documentSchema = {
     attachements: { type: "array" },
     last_version_cache: fileVersionSchema,
     scope: { type: "string" },
+    av_status: { type: "string" },
   },
 };
 
