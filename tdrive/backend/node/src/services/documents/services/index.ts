@@ -478,7 +478,11 @@ export class DocumentsService {
       // If AV feature is enabled, scan the file
       if (globalResolver.services.av.avEnabled && version) {
         try {
-          await globalResolver.services.av.scanDocument(driveItem, driveItemVersion, context);
+          driveItem.av_status = await globalResolver.services.av.scanDocument(
+            driveItem,
+            driveItemVersion,
+            context,
+          );
         } catch (error) {
           this.logger.error(`Error scanning file ${driveItemVersion.file_metadata.external_id}`);
         }

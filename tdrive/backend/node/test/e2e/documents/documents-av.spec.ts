@@ -38,7 +38,7 @@ describe("The documents antivirus", () => {
   describe("On document create", () => {
     it("should scan the document and detect it as safe", async () => {
       const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      const document = await oneUser.uploadRandomFileAndCreateDocument();
+      const document = await oneUser.uploadFileAndCreateDocument("../../common/assets/sample.doc");
 
       expect(document).toBeDefined();
       expect(document.av_status).toBe("scanning");
@@ -59,6 +59,16 @@ describe("The documents antivirus", () => {
 
       expect(document).toBeDefined();
       expect(document.av_status).toBe("scanning");
+    });
+
+    it("should skip the scan if the document is too large", async () => {
+      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+
+      // 2.8 MB file > 1 MB limit
+      const document = await oneUser.uploadFileAndCreateDocument("../../common/assets/sample.mp4");
+
+      expect(document).toBeDefined();
+      expect(document.av_status).toBe("skipped");
     });
   });
 });

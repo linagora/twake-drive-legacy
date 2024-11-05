@@ -1,7 +1,7 @@
 import { Initializable, TdriveServiceProvider } from "../../../core/platform/framework";
 import { getLogger, logger, TdriveLogger } from "../../../core/platform/framework";
 import NodeClam from "clamscan";
-import { DriveFile } from "src/services/documents/entities/drive-file";
+import { AVStatus, DriveFile } from "src/services/documents/entities/drive-file";
 import { FileVersion } from "src/services/documents/entities/file-version";
 import { DriveExecutionContext } from "src/services/documents/types";
 import globalResolver from "../../../services/global-resolver";
@@ -42,7 +42,7 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
     item: Partial<DriveFile>,
     version: Partial<FileVersion>,
     context: DriveExecutionContext,
-  ): Promise<void> {
+  ): Promise<AVStatus> {
     const repo = globalResolver.services.documents.documents.repository;
     const driveItem = await repo.findOne(
       {
@@ -58,15 +58,14 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
         version.file_metadata.external_id,
         context,
       );
-
       // check if the file is too large
-      if (driveItem.size > this.MAX_FILE_SIZE) {
+      if (driveItem.last_version_cache.file_size > this.MAX_FILE_SIZE) {
         this.logger.info(
           `File ${file.id} is too large (${driveItem.size} bytes) to be scanned. Skipping...`,
         );
         driveItem.av_status = "skipped";
         await repo.save(driveItem);
-        return;
+        return "skipped";
       }
 
       // read the file from the storage
@@ -101,12 +100,15 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
           `Completed scan for item ${driveItem.id} with final status: ${driveItem.av_status}`,
         );
       });
+
+      return "scanning";
     } catch (error) {
       this.logger.error(
         `Error scanning file ${driveItem.last_version_cache.file_metadata.external_id}`,
       );
       driveItem.av_status = "scan_failed";
       await repo.save(driveItem);
+      return "scan_failed";
     }
   }
 }
