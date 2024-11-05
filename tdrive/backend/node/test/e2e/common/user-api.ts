@@ -155,7 +155,7 @@ export default class UserApi {
     );
   }
 
-  private async injectUploadRequest(readable: Readable | string, fileame?: string) {
+  private async injectUploadRequest(readable: Readable | string, filename?: string) {
     if (typeof readable === "string") readable = Readable.from(readable);
     const url = "/internal/services/files/v1";
     const form = formAutoContent({ file: readable });
@@ -163,7 +163,9 @@ export default class UserApi {
 
     return await this.platform.app.inject({
       method: "POST",
-      url: `${url}/companies/${this.platform.workspace.company_id}/files?thumbnail_sync=0&filename=${fileame}`,
+      url: `${url}/companies/${this.platform.workspace.company_id}/files?thumbnail_sync=0${
+        filename ? `&filename=${filename}` : ""
+      }`,
       ...form,
     });
   }
@@ -196,7 +198,7 @@ export default class UserApi {
 
   async uploadEicarTestFile(filename: string) {
     // EICAR test file content
-    const eicarContent = 'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*';
+    const eicarContent = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
     // Create a readable stream from the EICAR content
     const eicarStream = new Readable();
     eicarStream.push(eicarContent);
@@ -204,7 +206,6 @@ export default class UserApi {
 
     // Upload using the stream
     const filesUploadRaw = await this.injectUploadRequest(eicarStream, filename);
-
 
     if (filesUploadRaw.statusCode === 200) {
       const filesUpload = deserialize<ResourceUpdateResponse<File>>(
