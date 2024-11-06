@@ -5,6 +5,9 @@ import { init, TestPlatform } from "../setup";
 import { deserialize } from "class-transformer";
 import UserApi from "../common/user-api";
 import { DriveItemDetailsMockClass } from "../common/entities/mock_entities";
+import { e2e_createDocumentFile, e2e_createVersion } from "./utils";
+import { ResourceUpdateResponse } from "../../../src/utils/types";
+import { File } from "../../../src/services/files/entities/file";
 
 describe("The documents antivirus", () => {
   let platform: TestPlatform;
@@ -36,13 +39,13 @@ describe("The documents antivirus", () => {
   });
 
   describe("On document create", () => {
-    it("should scan the document and detect it as safe", async () => {
+    it("Should scan the document and detect it as safe", async () => {
       const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
       const document = await oneUser.uploadFileAndCreateDocument("../../common/assets/sample.doc");
 
       expect(document).toBeDefined();
       expect(document.av_status).toBe("scanning");
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
       const documentResponse = await oneUser.getDocument(document.id);
       const deserializedDocument = deserialize<DriveItemDetailsMockClass>(
@@ -53,7 +56,7 @@ describe("The documents antivirus", () => {
       expect(deserializedDocument.item.av_status).toBe("safe");
     });
 
-    it.skip("should scan the document and detect it as malicious", async () => {
+    it.skip("Should scan the document and detect it as malicious", async () => {
       const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
       const document = await oneUser.uploadTestMalAndCreateDocument("test-malware.txt");
 
@@ -61,7 +64,7 @@ describe("The documents antivirus", () => {
       expect(document.av_status).toBe("scanning");
     });
 
-    it("should skip the scan if the document is too large", async () => {
+    it("Should skip the scan if the document is too large", async () => {
       const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
 
       // 2.8 MB file > 1 MB limit
@@ -69,6 +72,33 @@ describe("The documents antivirus", () => {
 
       expect(document).toBeDefined();
       expect(document.av_status).toBe("skipped");
+    });
+  });
+
+  describe("On version create", () => {
+    it("Should scan the document and detect it as safe.", async () => {
+      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+      const item = await oneUser.createDefaultDocument();
+      const oneUserJWT = await platform.auth.getJWTToken({ sub: oneUser.user.id });
+      const fileUploadResponse = await e2e_createDocumentFile(platform);
+      const fileUploadResult = deserialize<ResourceUpdateResponse<File>>(
+        ResourceUpdateResponse,
+        fileUploadResponse.body,
+      );
+
+      const file_metadata = { external_id: fileUploadResult.resource.id };
+
+      const documentVersioncResponse = await e2e_createVersion(
+        platform,
+        item.id,
+        { filename: "file2", file_metadata },
+        oneUserJWT,
+      );
+      const documentVersioncResult = deserialize<DriveItemDetailsMockClass>(
+        DriveItemDetailsMockClass,
+        documentVersioncResponse.body,
+      );
+      expect(documentVersioncResult).toBeDefined();
     });
   });
 });

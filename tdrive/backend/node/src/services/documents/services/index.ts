@@ -475,6 +475,9 @@ export class DocumentsService {
 
       await this.repository.save(driveItem);
 
+      //TODO[ASH] update item size only for files, there is not need to do during direcotry creation
+      await updateItemSize(driveItem.parent_id, this.repository, context);
+
       // If AV feature is enabled, scan the file
       if (globalResolver.services.av.avEnabled && version) {
         try {
@@ -487,9 +490,6 @@ export class DocumentsService {
           this.logger.error(`Error scanning file ${driveItemVersion.file_metadata.external_id}`);
         }
       }
-
-      //TODO[ASH] update item size only for files, there is not need to do during direcotry creation
-      await updateItemSize(driveItem.parent_id, this.repository, context);
 
       await globalResolver.platformServices.messageQueue.publish<DocumentsMessageQueueRequest>(
         "services:documents:process",
@@ -966,6 +966,19 @@ export class DocumentsService {
       }
 
       await updateItemSize(item.parent_id, this.repository, context);
+
+      // If AV feature is enabled, scan the file
+      if (globalResolver.services.av.avEnabled && version) {
+        try {
+          item.av_status = await globalResolver.services.av.scanDocument(
+            item,
+            driveItemVersion,
+            context,
+          );
+        } catch (error) {
+          this.logger.error(`Error scanning file ${driveItemVersion.file_metadata.external_id}`);
+        }
+      }
 
       await globalResolver.platformServices.messageQueue.publish<DocumentsMessageQueueRequest>(
         "services:documents:process",
