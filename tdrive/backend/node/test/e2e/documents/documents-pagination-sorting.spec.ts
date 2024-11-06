@@ -3,8 +3,12 @@ import { init, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 
 describe("The Documents Browser Window and API", () => {
+  let sharedWIthMeFolder: string;
   let platform: TestPlatform;
   let currentUser: UserApi;
+  let anotherUser: UserApi;
+  let myDriveId: string;
+  let files: any;
 
   beforeAll(async () => {
     platform = await init({
@@ -23,19 +27,24 @@ describe("The Documents Browser Window and API", () => {
         "documents",
       ],
     });
-    currentUser = await UserApi.getInstance(platform);
+    currentUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+    anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
+    myDriveId = "user_" + currentUser.user.id;
+    sharedWIthMeFolder = "shared_with_me";
+    files = await currentUser.uploadAllFilesOneByOne(myDriveId);
+    for (const file of files) {
+      await currentUser.shareWithPermissions(file, anotherUser.user.id, "read");
+    }
   });
 
   afterAll(async () => {
     await platform?.tearDown();
+    // @ts-ignore
     platform = null;
   });
 
   describe("Pagination and Sorting", () => {
     it("Should paginate documents correctly", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
       let page_token = "1";
       const limitStr = "2";
       let docs = await currentUser.browseDocuments(myDriveId, {
@@ -60,9 +69,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort documents by name in ascending order", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
       const sortBy = "name";
       const sortOrder = "asc";
       const docs = await currentUser.browseDocuments(myDriveId, {
@@ -75,9 +81,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort documents by name in descending order", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
       const sortBy = "name";
       const sortOrder = "desc";
       const docs = await currentUser.browseDocuments(myDriveId, {
@@ -90,9 +93,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort documents by date in ascending order", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
       const sortBy = "date";
       const sortOrder = "asc";
       const docs = await currentUser.browseDocuments(myDriveId, {
@@ -107,9 +107,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort documents by date in descending order", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
       const sortBy = "date";
       const sortOrder = "desc";
       const docs = await currentUser.browseDocuments(myDriveId, {
@@ -124,9 +121,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort documents by size in ascending order", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
       const sortBy = "size";
       const sortOrder = "asc";
       const docs = await currentUser.browseDocuments(myDriveId, {
@@ -139,9 +133,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort documents by size in descending order", async () => {
-      const myDriveId = "user_" + currentUser.user.id;
-      await currentUser.uploadAllFilesOneByOne(myDriveId);
-
       const sortBy = "size";
       const sortOrder = "desc";
       const docs = await currentUser.browseDocuments(myDriveId, {
@@ -154,17 +145,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should paginate shared with me ", async () => {
-      const sharedWIthMeFolder = "shared_with_me";
-      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      let files = await oneUser.uploadAllFilesOneByOne();
-      for (const file of files) {
-        await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
-      }
-
-      // wait for files to be indexed
-      await new Promise(r => setTimeout(r, 5000));
-
       let page_token: any = "1";
       const limitStr = "2";
       let docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
@@ -189,13 +169,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort shared with me by name in ascending order", async () => {
-      const sharedWIthMeFolder = "shared_with_me";
-      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      let files = await oneUser.uploadAllFilesOneByOne();
-      for (const file of files) {
-        await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
-      }
       const sortBy = "name";
       const sortOrder = "asc";
       const docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
@@ -208,13 +181,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort shared with me by name in descending order", async () => {
-      const sharedWIthMeFolder = "shared_with_me";
-      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      let files = await oneUser.uploadAllFilesOneByOne();
-      for (const file of files) {
-        await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
-      }
       const sortBy = "name";
       const sortOrder = "desc";
       const docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
@@ -227,13 +193,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort shared with me by size in ascending order", async () => {
-      const sharedWIthMeFolder = "shared_with_me";
-      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      let files = await oneUser.uploadAllFilesOneByOne();
-      for (const file of files) {
-        await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
-      }
       const sortBy = "size";
       const sortOrder = "asc";
       const docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
@@ -246,13 +205,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort shared with me by size in descending order", async () => {
-      const sharedWIthMeFolder = "shared_with_me";
-      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      let files = await oneUser.uploadAllFilesOneByOne();
-      for (const file of files) {
-        await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
-      }
       const sortBy = "size";
       const sortOrder = "desc";
       const docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
@@ -265,13 +217,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort shared with me by date in ascending order", async () => {
-      const sharedWIthMeFolder = "shared_with_me";
-      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      let files = await oneUser.uploadAllFilesOneByOne();
-      for (const file of files) {
-        await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
-      }
       const sortBy = "date";
       const sortOrder = "asc";
       const docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
@@ -286,13 +231,6 @@ describe("The Documents Browser Window and API", () => {
     });
 
     it("Should sort shared with me by date in descending order", async () => {
-      const sharedWIthMeFolder = "shared_with_me";
-      const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-      let files = await oneUser.uploadAllFilesOneByOne();
-      for (const file of files) {
-        await oneUser.shareWithPermissions(file, anotherUser.user.id, "read");
-      }
       const sortBy = "date";
       const sortOrder = "desc";
       const docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {

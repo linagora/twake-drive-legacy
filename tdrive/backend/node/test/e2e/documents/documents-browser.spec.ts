@@ -53,7 +53,7 @@ describe("The Documents Browser Window and API", () => {
       const myDriveId = "user_" + currentUser.user.id;
       const anotherUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
       await currentUser.uploadAllFilesOneByOne(myDriveId);
-      await new Promise(r => setTimeout(r, 5000));
+      await new Promise(r => setTimeout(r, 3000));
 
       const docs = await currentUser.browseDocuments(myDriveId, {});
       expect(docs).toBeDefined();
@@ -89,7 +89,7 @@ describe("The Documents Browser Window and API", () => {
     it("Shouldn't contain user personal files", async () => {
       const sharedWIthMeFolder = "shared_with_me";
       await currentUser.uploadAllFilesOneByOne("user_" + currentUser.user.id);
-      await new Promise(r => setTimeout(r, 5000));
+      await new Promise(r => setTimeout(r, 3000));
 
       let docs = await currentUser.browseDocuments(sharedWIthMeFolder, {});
       expect(docs).toBeDefined();
@@ -107,7 +107,7 @@ describe("The Documents Browser Window and API", () => {
       const oneUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
       const anotherUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
       let files = await oneUser.uploadAllFilesOneByOne();
-      await new Promise(r => setTimeout(r, 5000));
+      await new Promise(r => setTimeout(r, 3000));
 
       //then:: files are not searchable for user without permissions
       expect((await anotherUser.browseDocuments("shared_with_me", {})).children).toHaveLength(0);
@@ -133,7 +133,7 @@ describe("The Documents Browser Window and API", () => {
       let files = await oneUser.uploadAllFilesOneByOne();
 
       await anotherUser.uploadAllFilesOneByOne();
-      await new Promise(r => setTimeout(r, 5000));
+      await new Promise(r => setTimeout(r, 3000));
 
       //give permissions to the file
       files[2].access_info.entities.push({
@@ -154,7 +154,7 @@ describe("The Documents Browser Window and API", () => {
       const anotherUser = await UserApi.getInstance(platform, true, {companyRole: "admin"});
 
       let files = await oneUser.uploadAllFilesOneByOne("user_" + oneUser.user.id);
-      await new Promise(r => setTimeout(r, 5000));
+      await new Promise(r => setTimeout(r, 3000));
 
       let toDeleteDoc = files[2];
       toDeleteDoc.access_info.entities.push({
@@ -179,7 +179,7 @@ describe("The Documents Browser Window and API", () => {
       await oneUser.uploadAllFilesOneByOne(level2Dir.id);
       await oneUser.uploadAllFilesOneByOne(level2Dir2.id);
       await oneUser.uploadAllFilesOneByOne(dir.id);
-      await new Promise(r => setTimeout(r, 5000));
+      await new Promise(r => setTimeout(r, 3000));
 
       dir.access_info.entities.push({
         type: "user",

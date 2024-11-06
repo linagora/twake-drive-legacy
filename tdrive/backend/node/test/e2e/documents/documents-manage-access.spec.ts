@@ -64,7 +64,7 @@ describe("The Drive feature", () => {
     const files = await oneUser.uploadAllFilesOneByOne();
 
     // Wait for file processing
-    await new Promise(r => setTimeout(r, 5000));
+    await new Promise(r => setTimeout(r, 3000));
 
     // Share the file with recipient user
     await anotherUser.shareWithPermissions(files[1], anotherUser.user.id, "read");
