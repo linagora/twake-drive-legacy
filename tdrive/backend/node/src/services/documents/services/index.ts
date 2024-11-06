@@ -552,6 +552,12 @@ export class DocumentsService {
         throw Error("content mismatch");
       }
 
+      // Check if AV feature is enabled and file is malicious
+      if (globalResolver.services.av.avEnabled && item.av_status === "malicious") {
+        this.logger.error("Cannot update a malicious file");
+        throw new CrudException("Cannot update a malicious file", 403);
+      }
+
       const updatable = ["access_info", "name", "tags", "parent_id", "description", "is_in_trash"];
       let renamedTo: string | undefined;
       for (const key of updatable) {
@@ -869,6 +875,12 @@ export class DocumentsService {
     } catch (error) {
       this.logger.error({ error: `${error}` }, "Failed to grant access to the drive item");
       throw new CrudException("User does not have access to this item or its children", 401);
+    }
+
+    // Check if AV feature is enabled and file is malicious
+    if (globalResolver.services.av.avEnabled && item.av_status === "malicious") {
+      this.logger.error("Cannot update a malicious file");
+      throw new CrudException("Cannot update a malicious file", 403);
     }
 
     if (await isInTrash(item, this.repository, context)) {
