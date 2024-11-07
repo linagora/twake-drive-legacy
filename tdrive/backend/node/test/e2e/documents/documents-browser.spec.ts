@@ -8,7 +8,7 @@ describe("The Documents Browser Window and API", () => {
   let currentUser: UserApi;
   let sharedWIthMeFolder: string;
   let myDriveId: string;
-  let result: any;
+  let files: any;
 
   beforeEach(async () => {
     platform = await init({
@@ -30,7 +30,11 @@ describe("The Documents Browser Window and API", () => {
     currentUser = await UserApi.getInstance(platform);
     sharedWIthMeFolder = "shared_with_me";
     myDriveId = "user_" + currentUser.user.id;
-    result = await currentUser.uploadAllFilesOneByOne(myDriveId);
+    files = await currentUser.uploadAllFilesOneByOne(myDriveId);
+
+    expect(files).toBeDefined();
+    expect(files.entries()).toBeDefined();
+    expect(Array.from(files.entries())).toHaveLength(UserApi.ALL_FILES.length);
   });
 
   afterAll(async () => {
@@ -41,10 +45,6 @@ describe("The Documents Browser Window and API", () => {
 
   describe("My Drive", () => {
     it("Should successfully upload filed to the 'My Drive' and browse them", async () => {
-      expect(result).toBeDefined();
-      expect(result.entries()).toBeDefined();
-      expect(Array.from(result.entries())).toHaveLength(UserApi.ALL_FILES.length);
-
       const docs = await currentUser.browseDocuments(myDriveId, {});
       expect(docs).toBeDefined();
       expect(docs.children).toBeDefined();
@@ -100,13 +100,13 @@ describe("The Documents Browser Window and API", () => {
       expect((await anotherUser.browseDocuments("shared_with_me", {})).children).toHaveLength(0);
 
       //give permissions to the file
-      result[0].access_info.entities.push({
+      files[0].access_info.entities.push({
         type: "user",
         id: anotherUser.user.id,
         level: "read",
         grantor: null,
       });
-      await currentUser.updateDocument(result[0].id, result[0]);
+      await currentUser.updateDocument(files[0].id, files[0]);
       await new Promise(r => setTimeout(r, 3000));
 
       //then file become searchable
@@ -119,14 +119,14 @@ describe("The Documents Browser Window and API", () => {
       const anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
 
       //give permissions to the file
-      result[2].access_info.entities.push({
+      files[2].access_info.entities.push({
         type: "user",
         id: anotherUser.user.id,
         level: "read",
         // @ts-ignore
         grantor: null,
       });
-      await currentUser.updateDocument(result[2].id, result[2]);
+      await currentUser.updateDocument(files[2].id, files[2]);
       await new Promise(r => setTimeout(r, 3000));
 
       //then file become searchable
