@@ -29,7 +29,7 @@
     "test:unit:watch": "npm run test:unit -- --watchAll --verbose false | pino-pretty",
     "test:merge:json": "npx istanbul report --dir coverage/merged --include 'coverage/**/coverage-final.json' json-summary",
     "test:merge:text": "npx istanbul report --dir coverage/merged --include 'coverage/**/coverage-final.json' text > coverage/merged/coverage-report.txt",
-    "test:all": "jest test --forceExit --coverage --detectOpenHandles --testTimeout=600000 --verbose false --runInBand",
+    "test:all": "jest test --forceExit --coverage --detectOpenHandles --testTimeout=600000 --verbose false",
     "kill": "kill $(lsof -t -i:3000) | exit 0"
   },
   "jest": {
