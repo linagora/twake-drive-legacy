@@ -31,6 +31,7 @@ module.exports = {
     '@typescript-eslint/no-this-alias': 'warn',
     'react/prop-types': 'warn',
     'no-useless-escape': 'warn',
+    '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/no-empty-function': 'warn',
     '@typescript-eslint/ban-types': 'warn',
     '@typescript-eslint/ban-ts-comment': 'warn',
