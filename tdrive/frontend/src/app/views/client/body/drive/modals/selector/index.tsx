@@ -15,7 +15,7 @@ export type SelectorModalType = {
   parent_id: string;
   mode: 'move' | 'select-file' | 'select-files';
   title: string;
-  onSelected: (ids: string[]) => Promise<void>;
+  onSelected?: (ids: string[]) => Promise<void>;
 };
 
 export const SelectorModalAtom = atom<SelectorModalType>({
@@ -25,7 +25,6 @@ export const SelectorModalAtom = atom<SelectorModalType>({
     parent_id: '',
     mode: 'move',
     title: '',
-    onSelected: async () => {},
   },
 });
 
@@ -135,7 +134,7 @@ const SelectorModalContent = (key: any) => {
         className="float-right"
         onClick={async () => {
           setLoading(true);
-          await state.onSelected(selected.map(i => i.id));
+          state.onSelected && await state.onSelected(selected.map(i => i.id));
           setState({ ...state, open: false });
           setLoading(false);
         }}

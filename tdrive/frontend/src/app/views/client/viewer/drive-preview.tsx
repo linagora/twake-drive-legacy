@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { Transition } from '@headlessui/react';
 import { fadeTransition } from 'src/utils/transitions';
@@ -24,7 +25,6 @@ import Controls from './controls';
 interface DrivePreviewProps {
   items: DriveItem[];
 }
-
 export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
   const history = useHistory();
   const company = useRouterCompany();
@@ -64,6 +64,7 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
 
   useEffect(() => {
     if (items.length < 2)
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       return () => {};
     addShortcut({ shortcut: 'Right', handler: handleSwitchRight });
     addShortcut({ shortcut: 'Left', handler: handleSwitchLeft });
@@ -184,3 +185,6 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
     </Modal>
   );
 };
+DrivePreview.propTypes = {
+  items: PropTypes.any.isRequired,
+}

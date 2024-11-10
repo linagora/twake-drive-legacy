@@ -11,7 +11,7 @@ export type ConfirmModalType = {
   parent_id: string;
   mode: 'move' | 'select-file' | 'select-files';
   title: string;
-  onSelected: (ids: string[]) => Promise<void>;
+  onSelected?: (ids: string[]) => Promise<void>;
 };
 
 export const ConfirmModalAtom = atom<ConfirmModalType>({
@@ -21,7 +21,6 @@ export const ConfirmModalAtom = atom<ConfirmModalType>({
     parent_id: '',
     mode: 'move',
     title: '',
-    onSelected: async () => {},
   },
 });
 
@@ -40,7 +39,7 @@ const ConfirmModalContent = () => {
 
   const handleClose = async () => {
     setLoading(true);
-    await state.onSelected(selected.map((i) => i.id));
+    state.onSelected && await state.onSelected(selected.map((i) => i.id));
     setState({ ...state, open: false });
     setLoading(false);
   };

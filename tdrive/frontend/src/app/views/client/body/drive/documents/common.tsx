@@ -15,7 +15,6 @@ export type DriveItemOverlayProps = {
   item: DriveItem|null;
   className: string;
 };
-export const menuBuilder = async () => {};
 
 export const CheckableIcon = ({
   show,
