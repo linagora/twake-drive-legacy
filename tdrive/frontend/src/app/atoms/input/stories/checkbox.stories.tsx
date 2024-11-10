@@ -36,7 +36,7 @@ const Template: ComponentStory<any> = (props: { label: string; disabled: boolean
       <Title className='my-5'>CheckboxSlider</Title>
 
       <CheckboxSlider
-        onClick={e => setChecked(!checked)}
+        onClick={() => setChecked(!checked)}
         checked={checked}
         disabled={props.disabled}
         />
