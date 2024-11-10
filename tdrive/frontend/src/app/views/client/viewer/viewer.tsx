@@ -12,7 +12,6 @@ import { Modal } from '@atoms/modal';
 import * as Text from '@atoms/text';
 import { addShortcut, removeShortcut } from '@features/global/services/shortcut-service';
 import { formatSize } from '@features/global/utils/format-file-size';
-import useRouterWorkspace from '@features/router/hooks/use-router-workspace';
 import currentUserService from '@features/users/services/current-user-service';
 import { UserType } from '@features/users/types/user';
 import {
@@ -125,13 +124,12 @@ const Navigation = () => {
 };
 
 const Footer = () => {
-  const { status, close } = useFileViewer();
+  const { status } = useFileViewer();
   const { download } = useViewerDisplayData();
   const { type = '' } = useViewerDisplayData();
   const user = status?.details?.user as UserType;
   const name = status.details?.metadata?.name;
   const extension = name?.split('.').pop();
-  const workspaceId = useRouterWorkspace();
 
   return (
     <>

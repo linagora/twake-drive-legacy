@@ -53,7 +53,7 @@ export default () => {
         <div className="sm:hidden block mb-2">
           <div className="flex flex-row space-between w-full">
             <div className="grow">
-              <Account sidebar />
+              <Account />
             </div>
             <AppGrid />
           </div>

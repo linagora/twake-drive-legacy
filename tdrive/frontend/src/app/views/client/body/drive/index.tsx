@@ -1,4 +1,3 @@
-import { useCompanyApplications } from 'app/features/applications/hooks/use-company-applications';
 import Browser from './browser';
 import { SelectorModal } from './modals/selector';
 

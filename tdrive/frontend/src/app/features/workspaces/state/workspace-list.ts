@@ -4,8 +4,6 @@ import { atomFamily, selectorFamily, useSetRecoilState } from 'recoil';
 import { WorkspaceType } from '@features/workspaces/types/workspace';
 import WorkspaceAPIClient from '@features/workspaces/api/workspace-api-client';
 import Logger from '@features/global/framework/logger-service';
-import _ from 'lodash';
-import Collections from '@deprecated/CollectionsV1/Collections/Collections';
 
 const logger = Logger.getLogger('WorkspaceListState');
 

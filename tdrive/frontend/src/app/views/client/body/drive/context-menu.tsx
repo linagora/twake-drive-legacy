@@ -22,9 +22,7 @@ import { copyToClipboard } from '@features/global/utils/CopyClipboard';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
 import { getCurrentUserList } from '@features/users/hooks/use-user-list';
 import useRouteState from 'app/features/router/hooks/use-route-state';
-import RouterServices from '@features/router/services/router-service';
-import useRouterCompany from '@features/router/hooks/use-router-company';
-import _, { set } from 'lodash';
+import _ from 'lodash';
 import Languages from 'features/global/services/languages-service';
 import { hasAnyPublicLinkAccess } from '@features/files/utils/access-info-helpers';
 import FeatureTogglesService, {
@@ -42,7 +40,7 @@ export const useOnBuildContextMenu = (
   const [checkedIds, setChecked] = useRecoilState(DriveItemSelectedList);
   const checked = children.filter(c => checkedIds[c.id]);
 
-  const [_, setParentId] = useRecoilState(
+  const [setParentId] = useRecoilState(
     DriveCurrentFolderAtom({ initialFolderId: initialParentId || 'root' }),
   );
 
@@ -59,11 +57,6 @@ export const useOnBuildContextMenu = (
   const setUsersModalState = useSetRecoilState(UsersModalAtom);
   const { open: preview } = useDrivePreview();
   const { viewId } = useRouteState();
-  const company = useRouterCompany();
-
-  function getIdsFromArray(arr: DriveItem[]): string[] {
-    return arr.map(obj => obj.id);
-  }
 
   return useCallback(
     async (parent?: Partial<DriveItemDetails> | null, item?: DriveItem) => {
@@ -378,7 +371,7 @@ export const useOnBuildContextMenu = (
 };
 
 export const useOnBuildFileTypeContextMenu = () => {
-  const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
+  const [, setFilter] = useRecoilState(SharedWithMeFilterState);
   const mimeTypes = [
     { key: Languages.t('components.item_context_menu.all'), value: '' },
     { key: 'CSV', value: 'text/csv' },
@@ -414,8 +407,8 @@ export const useOnBuildFileTypeContextMenu = () => {
 };
 
 export const useOnBuildPeopleContextMenu = () => {
-  const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
-  const [_userList, setUserList] = useState(getCurrentUserList());
+  const [, setFilter] = useRecoilState(SharedWithMeFilterState);
+  const [_userList] = useState(getCurrentUserList());
   let userList = _userList;
   userList = _.uniqBy(userList, 'id');
   return useCallback(() => {
@@ -439,7 +432,7 @@ export const useOnBuildPeopleContextMenu = () => {
 };
 
 export const useOnBuildDateContextMenu = () => {
-  const [filter, setFilter] = useRecoilState(SharedWithMeFilterState);
+  const [, setFilter] = useRecoilState(SharedWithMeFilterState);
   return useCallback(() => {
     const menuItems = [
       {

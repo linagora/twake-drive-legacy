@@ -9,7 +9,6 @@ export type DriveItemProps = {
   checked: boolean;
   onClick?: () => void;
   onBuildContextMenu: () => Promise<any[]>;
-  inPublicSharing?: boolean;
 };
 
 export type DriveItemOverlayProps = {

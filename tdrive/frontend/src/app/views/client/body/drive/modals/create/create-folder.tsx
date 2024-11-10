@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import { CreateModalAtom, CreateModalAtomType } from '.';
+import { CreateModalAtom } from '.';
 import { Button } from '@atoms/button/button';
 import { Input } from '@atoms/input/input-text';
 import { Info } from '@atoms/text';
@@ -9,7 +9,7 @@ import Languages from "features/global/services/languages-service";
 
 export const CreateFolder = () => {
   const [name, setName] = useState<string>('');
-  const [loading, _] = useState<boolean>(false);
+  const [loading] = useState<boolean>(false);
   const [state, setState] = useRecoilState(CreateModalAtom);
   const { create } = useDriveActions();
   const inputRef = useRef<HTMLDivElement>(null);

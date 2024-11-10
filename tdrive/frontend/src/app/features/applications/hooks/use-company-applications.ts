@@ -8,7 +8,6 @@ import {
   onChangeCompanyApplications,
 } from '../state/company-applications';
 import CompanyApplicationsAPIClient from 'app/features/applications/api/company-applications-api-client';
-import { useCurrentCompany } from '../../companies/hooks/use-companies';
 import { Application } from 'app/features/applications/types/application';
 import { LoadingState } from 'app/features/global/state/atoms/Loading';
 import useRouterWorkspace from 'app/features/router/hooks/use-router-workspace';

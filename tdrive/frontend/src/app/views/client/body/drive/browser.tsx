@@ -10,9 +10,9 @@ import { useDriveUpload } from '@features/drive/hooks/use-drive-upload';
 import { DriveItemSelectedList, DriveItemSort } from '@features/drive/state/store';
 import { formatBytes } from '@features/drive/utils';
 import useRouterCompany from '@features/router/hooks/use-router-company';
-import _, { set } from 'lodash';
+import _ from 'lodash';
 import { memo, Suspense, useCallback, useEffect, useRef, useState } from 'react';
-import { atomFamily, useRecoilState, useSetRecoilState, useRecoilValue } from 'recoil';
+import { atomFamily, useRecoilState, useSetRecoilState } from 'recoil';
 import { DrivePreview } from '../../viewer/drive-preview';
 import {
   useOnBuildContextMenu,
@@ -40,7 +40,7 @@ import useRouteState from 'app/features/router/hooks/use-route-state';
 import { SharedWithMeFilterState } from '@features/drive/state/shared-with-me-filter';
 import MenusManager from '@components/menus/menus-manager.jsx';
 import Languages from 'features/global/services/languages-service';
-import {DndContext, useSensors, useSensor, PointerSensor, DragOverlay} from '@dnd-kit/core';
+import { DndContext, useSensors, useSensor, PointerSensor, DragOverlay } from '@dnd-kit/core';
 import { Droppable } from 'app/features/dragndrop/hook/droppable';
 import { Draggable } from 'app/features/dragndrop/hook/draggable';
 import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
@@ -49,7 +49,6 @@ import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 import { ConfirmModal } from './modals/confirm-move';
 import { useHistory } from 'react-router-dom';
 import { SortIcon } from 'app/atoms/icons-agnostic';
-import { useDrivePreview, useDrivePreviewLoading } from 'app/features/drive/hooks/use-drive-preview';
 
 export const DriveCurrentFolderAtom = atomFamily<
     string,
@@ -78,12 +77,9 @@ export default memo(
       ? (user?.companies || []).find(company => company?.company.id === companyId)?.role
       : 'member';
     setTdriveTabToken(tdriveTabContextToken || null);
-    const [filter, __] = useRecoilState(SharedWithMeFilterState);
-    const { viewId, dirId, itemId } = useRouteState();
-    const { status } = useDrivePreview();
-    const { openWithId, close } = useDrivePreview();
+    const [ filter ] = useRecoilState(SharedWithMeFilterState);
+    const { viewId, dirId } = useRouteState();
     const [sortLabel] = useRecoilState(DriveItemSort)
-    const { loading: isModalLoading } = useDrivePreviewLoading();
     const [parentId, _setParentId] = useRecoilState(
       DriveCurrentFolderAtom({
         context: context,

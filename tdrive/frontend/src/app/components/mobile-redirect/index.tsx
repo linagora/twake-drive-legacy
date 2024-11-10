@@ -1,5 +1,4 @@
 import React, { ReactNode } from 'react';
-import { getDevice } from '../../features/global/utils/device';
 import configuration from '../../environment/environment';
 import { Smartphone, X } from 'react-feather';
 import './style.scss';

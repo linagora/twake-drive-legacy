@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import LoginService from '@features/auth/login-service';
-import UserAPIClient from '@features/users/api/user-api-client';
 import { useRecoilState } from 'recoil';
 import { CurrentUserState } from '../state/atoms/current-user';
 import Languages from '@features/global/services/languages-service';

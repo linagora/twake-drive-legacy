@@ -10,7 +10,7 @@ import FeatureTogglesService, {
   FeatureNames,
 } from '@features/global/services/feature-toggles-service';
 
-export default ({ sidebar }: { sidebar?: boolean }): JSX.Element => {
+export default (): JSX.Element => {
   const { user } = useCurrentUser();
 
   if (!user) return <></>;

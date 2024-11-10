@@ -1,16 +1,11 @@
-import Avatar from '@atoms/avatar';
 import A from '@atoms/link';
 import { Modal, ModalContent } from '@atoms/modal';
 import { Base } from '@atoms/text';
-import { useCompanyApplications } from '@features/applications/hooks/use-company-applications';
-import { Application } from '@features/applications/types/application';
 import { Transition } from '@headlessui/react';
 import {
   ChevronLeftIcon,
   DocumentDownloadIcon,
-  FolderAddIcon,
   FolderDownloadIcon,
-  LinkIcon,
 } from '@heroicons/react/outline';
 import { ReactNode } from 'react';
 import { atom, useRecoilState } from 'recoil';
@@ -34,14 +29,12 @@ export const UploadModelAtom = atom<UploadModalAtomType>({
 export const UploadModal = ({
   selectFromDevice,
   selectFolderFromDevice,
-  addFromUrl,
 }: {
   selectFromDevice: () => void;
   selectFolderFromDevice: () => void;
   addFromUrl: (url: string, name: string) => void;
 }) => {
   const [state, setState] = useRecoilState(UploadModelAtom);
-  const { applications } = useCompanyApplications();
 
   return (
     <Modal

@@ -41,7 +41,7 @@ const AccessModalContent = (props: {
   onCloseModal: () => void,
 }) => {
   const { id } = props;
-  const { item, access, loading, update, refresh } = useDriveItem(id);
+  const { item, access, loading, refresh } = useDriveItem(id);
   const { refresh: refreshCompany } = useCurrentCompany();
   useEffect(() => {
     refresh(id);

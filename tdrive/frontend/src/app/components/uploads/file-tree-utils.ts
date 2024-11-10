@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 type TreeItem = { [key: string]: File | TreeItem };
 
 export type FileTreeObject = {

@@ -5,14 +5,12 @@ import Languages from 'features/global/services/languages-service';
 export const AccessLevel = ({
   level,
   onChange,
-  canRemove,
   hiddenLevels,
   className,
 }: {
   disabled?: boolean;
   level: DriveFileAccessLevel | null;
   onChange: (level: DriveFileAccessLevel & 'remove') => void;
-  canRemove?: boolean;
   className?: string;
   hiddenLevels?: string[];
 }) => {

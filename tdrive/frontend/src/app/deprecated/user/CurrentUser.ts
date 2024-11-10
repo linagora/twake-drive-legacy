@@ -10,7 +10,6 @@ import AlertManager from '@features/global/services/alert-manager-service';
 import Languages from '@features/global/services/languages-service';
 import JWTStorage from '@features/auth/jwt-storage-service';
 import Globals from '@features/global/services/globals-tdrive-app-service';
-import { useCurrentUser } from '@features/users/hooks/use-current-user';
 import UserAPIClient from '../../features/users/api/user-api-client';
 import { getUser } from '@features/users/hooks/use-user-list';
 
@@ -68,6 +67,7 @@ class CurrentUser extends Observable {
     const data = {
       status: user.tutorial_status,
     };
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     Api.post('/ajax/users/account/set_tutorial_status', data, () => {});
   }
 

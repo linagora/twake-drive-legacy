@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 import {useDraggable} from '@dnd-kit/core';
 
 type DraggableProps={
@@ -7,7 +7,7 @@ type DraggableProps={
 }
 
 export function Draggable(props:DraggableProps) {
-  const {attributes, listeners, setNodeRef, transform} = useDraggable({
+  const { attributes, listeners, setNodeRef } = useDraggable({
     id: `draggable-${props.id+1}`,
     data: {
       child: props.children

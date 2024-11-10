@@ -1,6 +1,5 @@
 import { Button } from '@atoms/button/button';
 import { Input } from '@atoms/input/input-text';
-import { Info } from '@atoms/text';
 import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
 import { useState } from 'react';
 import { useRecoilState } from 'recoil';

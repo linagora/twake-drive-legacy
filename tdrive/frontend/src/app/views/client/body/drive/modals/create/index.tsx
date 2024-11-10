@@ -7,9 +7,7 @@ import { Application } from '@features/applications/types/application';
 import { Transition } from '@headlessui/react';
 import {
   ChevronLeftIcon,
-  DocumentDownloadIcon,
   FolderAddIcon,
-  FolderDownloadIcon,
   LinkIcon,
 } from '@heroicons/react/outline';
 import { ReactNode } from 'react';
@@ -35,8 +33,6 @@ export const CreateModalAtom = atom<CreateModalAtomType>({
 });
 
 export const CreateModal = ({
-  selectFromDevice,
-  selectFolderFromDevice,
   addFromUrl,
 }: {
   selectFromDevice: () => void;

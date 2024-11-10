@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import './connection-indicator.scss';
 import ErrorOutlinedIcon from '@material-ui/icons/ErrorOutlined';
 import HourglassEmpty from '@material-ui/icons/HourglassEmpty';
@@ -9,7 +9,7 @@ import { useRecoilState } from 'recoil';
 // import WebSocket, { WebsocketEvents } from '@features/global/types/websocket-types';
 
 export default () => {
-  const [{ connected, reconnecting }, setState] = useRecoilState(ConnectedState);
+  const [{ connected, reconnecting }] = useRecoilState(ConnectedState);
 
   return (
     <div className={'connection_indicator ' + (connected === false ? 'visible' : '')}>

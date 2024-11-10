@@ -39,7 +39,7 @@ export const SelectorModal = () => {
   );
 };
 
-const SelectorModalContent = (key:any,showfiles:boolean) => {
+const SelectorModalContent = (key: any) => {
   const [state, setState] = useRecoilState(SelectorModalAtom);
   const [selected, setSelected] = useState<DriveItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -91,8 +91,8 @@ const SelectorModalContent = (key:any,showfiles:boolean) => {
             </div>
           </div>
         ))}
-        
-        {key.showfiles && ( 
+
+        {key.showfiles && (
         <>
         {files.map(file => (
           <div

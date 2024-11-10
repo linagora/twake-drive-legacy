@@ -29,7 +29,7 @@ export default class PopupComponent extends React.Component {
         {this.state.popupManager.canClose() && (
           <div className="header">
             <div className="close" onClick={() => this.state.popupManager.close()}>
-              <CloseIcon class="m-icon" />
+              <CloseIcon className="m-icon" />
             </div>
           </div>
         )}

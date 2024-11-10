@@ -5,7 +5,6 @@ import Languages from '@features/global/services/languages-service';
 import { ToasterService as Toaster } from '@features/global/services/toaster-service';
 import { ConsoleMemberRole } from '@features/console/types/types';
 import Logger from '@features/global/framework/logger-service';
-import { JWTDataType } from '@features/auth/jwt-storage-service';
 
 class ConsoleService {
   logger: Logger.Logger;
