@@ -8,6 +8,7 @@ import CurrentUser from '../../../deprecated/user/CurrentUser';
 import { setUserList } from '../hooks/use-user-list';
 import Logger from 'features/global/framework/logger-service';
 import { UserQuota } from "features/users/types/user-quota";
+import version from '../../../environment/version';
 
 export type SearchContextType = {
   scope: 'company' | 'workspace' | 'all';
@@ -142,6 +143,30 @@ class UserAPIClientService {
     });
   }
 
+  /** Send log entry to the server's logs. Try to include a `message` property please */
+  async reportLog(body: any | { message: string, error?: Error, err?: Error, e?: Error, }): Promise<void> {
+    const actualBody = {
+      version: version.version_detail || version.version,
+      ...body,
+    } as any;
+    for (const [key, val] of Object.entries(actualBody)) {
+      const error = val as Error;
+      if ((error as Error).stack) {
+        actualBody[key] = {
+          message: error.message,
+          stack: error.stack,
+          error,
+        };
+        if (!actualBody.message) actualBody.message = "Error: " + error.message;
+      }
+    }
+    if (!actualBody.message) actualBody.message = "(missing message property in UserAPIClient.reportLog)";
+    return Api.post<object, {}>(
+      '/internal/services/users/v1/users/me/reportLog',
+      actualBody,
+    ).then(result => undefined);
+  }
+
   async getQuota(companyId: string, userId: string): Promise<UserQuota> {
     return Api.get<UserQuota>(
       `/internal/services/users/v1/users/${userId}/quota?companyId=${companyId}`,
@@ -255,4 +280,10 @@ class UserAPIClientService {
   }
 }
 const UserAPIClient = new UserAPIClientService();
+
+window.onerror = (message, url, line, col, error) => {
+  UserAPIClient.reportLog({ message, url, line, col, error });
+  return false; // don't suppress normal alert
+}
+
 export default UserAPIClient;

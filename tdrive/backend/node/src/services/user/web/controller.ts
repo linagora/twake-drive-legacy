@@ -36,6 +36,7 @@ import { formatCompany, getCompanyStats } from "../utils";
 import { formatUser } from "../../../utils/users";
 import gr from "../../global-resolver";
 import config from "config";
+import { getLogger } from "../../../core/platform/framework";
 
 export class UsersCrudController
   implements
@@ -91,6 +92,30 @@ export class UsersCrudController
     return {
       resource: await formatUser(user),
     };
+  }
+
+  /** This allows a logged in user to upload log entries */
+  async reportClientLog(
+    request: FastifyRequest<{ Body: { [key: string]: string } }>,
+  ): Promise<object> {
+    const headers = { ...request.headers };
+    const boringOrSecretHeaders =
+      "cookie authorization cache-control connection pragma content-length content-type accept accept-encoding accept-language".split(
+        /\s+/g,
+      );
+    boringOrSecretHeaders.forEach(header => delete headers[header]);
+    const message =
+      request.body.message ||
+      "(missing message property in UsersCrudController.reportClientLog request body)";
+    delete request.body.message;
+    getLogger("FromBrowser").error(
+      {
+        headers,
+        ...request.body,
+      },
+      message,
+    );
+    return {};
   }
 
   async setPreferences(

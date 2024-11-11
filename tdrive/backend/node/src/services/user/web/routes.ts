@@ -9,6 +9,7 @@ import {
   getUserSchema,
   getUsersSchema,
   postDevicesSchema,
+  sendUserClientReportSchema,
   setUserPreferencesSchema,
 } from "./schemas";
 
@@ -50,6 +51,15 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     preValidation: [fastify.authenticate],
     schema: setUserPreferencesSchema,
     handler: usersController.setPreferences.bind(usersController),
+  });
+
+  fastify.route({
+    method: "POST",
+    url: `${usersUrl}/me/reportLog`,
+    preHandler: accessControl,
+    preValidation: [fastify.authenticate],
+    schema: sendUserClientReportSchema,
+    handler: usersController.reportClientLog.bind(usersController),
   });
 
   fastify.route({
