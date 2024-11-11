@@ -10,7 +10,8 @@ export const logger = pino({
   name: "TdriveApp",
   level: config.get("level", "info") || "info",
   mixin() {
-    return executionStorage.getStore() ? executionStorage.getStore() : {};
+    const store = executionStorage.getStore();
+    return store ? { ...store } : {};
   },
   formatters: {
     level(label: string) {
