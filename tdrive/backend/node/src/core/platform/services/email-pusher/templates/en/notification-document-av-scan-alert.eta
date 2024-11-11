@@ -1,0 +1,48 @@
+<% layout('./_structure') %>
+<% it.title = 'Twake Drive Antivirus Alert' %>
+
+<%~ includeFile("../common/_body.eta", {
+  paragraphs: [
+  `
+  <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%" >
+      <tbody>
+          <tr>
+              <td align="center" style="font-size:0px;padding:0 0 8px;word-break:break-word;">
+                  <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:24px;font-weight:800;line-height:29px;text-align:center;color:#FF0000;">
+                    Important: Antivirus Alert on Your Twake Drive
+                  </div>
+              </td>
+          </tr>
+      </tbody>
+  </table>
+  `,
+  `
+  <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%" >
+      <tbody>
+          <tr>
+              <td align="center" style="font-size:0px;padding:0 0 16px;word-break:break-word;" >
+                  <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
+                    <span style="font-weight: 500">Antivirus scan for a file on your Twake Drive has flagged an issue.</span>
+                  </div>
+                  <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
+                    <span style="font-weight: 500">
+                      File: ${it.notifications[0].item.name}
+                    </span>
+                  </div>
+                  <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
+                    <span style="color: #FF0000; font-weight: 600;">
+                      Issue: ${ it.notifications[0].item.av_status === "scan_failed" ? "Scan Failed 🔍" : it.notifications[0].item.av_status === "malicious" ? "Malicious Content Detected ⚠️" : "Fichier trop volumineux pour être analysé 🚫" }
+                    </span>
+                  </div>
+              </td>
+          </tr>
+      </tbody>
+  </table>
+  <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;">
+    <a class="main-button" href="${it.encodedUrl}">
+      View File Details
+    </a>
+  </div>
+  `
+  ]
+}) %>

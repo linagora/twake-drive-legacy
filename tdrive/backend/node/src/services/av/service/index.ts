@@ -7,6 +7,7 @@ import { DriveExecutionContext } from "src/services/documents/types";
 import globalResolver from "../../../services/global-resolver";
 import { getFilePath } from "../../files/services";
 import { getConfigOrDefault } from "../../../utils/get-config";
+import { AVException } from "./av-exception";
 
 export class AVServiceImpl implements TdriveServiceProvider, Initializable {
   version: "1";
@@ -33,7 +34,7 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
       }
     } catch (error) {
       logger.error({ error: `${error}` }, "Error while initializing Antivirus Service");
-      throw error;
+      throw AVException.initializationFailed("Failed to initialize Antivirus service");
     }
     return this;
   }
@@ -41,17 +42,9 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
   async scanDocument(
     item: Partial<DriveFile>,
     version: Partial<FileVersion>,
+    onScanComplete: (status: AVStatus) => Promise<void>,
     context: DriveExecutionContext,
   ): Promise<AVStatus> {
-    const repo = globalResolver.services.documents.documents.repository;
-    const driveItem = await repo.findOne(
-      {
-        id: item.id,
-        company_id: context.company.id,
-      },
-      {},
-      context,
-    );
     try {
       // get the file from the storage
       const file = await globalResolver.services.files.get(
@@ -59,12 +52,10 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
         context,
       );
       // check if the file is too large
-      if (driveItem.last_version_cache.file_size > this.MAX_FILE_SIZE) {
+      if (file.upload_data.size > this.MAX_FILE_SIZE) {
         this.logger.info(
-          `File ${file.id} is too large (${driveItem.size} bytes) to be scanned. Skipping...`,
+          `File ${file.id} is too large (${file.upload_data.size} bytes) to be scanned. Skipping...`,
         );
-        driveItem.av_status = "skipped";
-        await repo.save(driveItem);
         return "skipped";
       }
 
@@ -75,40 +66,28 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
         encryptionKey: file.encryption_key,
       });
 
-      // update the status of the drive item
-      item.av_status = "scanning";
-      await repo.save(driveItem);
-
       // scan the file
       this.av.scanStream(readableStream, async (err, { isInfected, viruses }) => {
         if (err) {
-          driveItem.av_status = "scan_failed";
-          this.logger.info(`Scan failed for item ${driveItem.id} due to error: ${err.message}`);
+          await onScanComplete("scan_failed");
+          this.logger.info(`Scan failed for item ${item.id} due to error: ${err.message}`);
         } else if (isInfected) {
-          driveItem.av_status = "malicious";
-          this.logger.info(
-            `Item ${driveItem.id} is malicious. Viruses found: ${viruses.join(", ")}`,
-          );
+          await onScanComplete("malicious");
+          this.logger.info(`Item ${item.id} is malicious. Viruses found: ${viruses.join(", ")}`);
         } else {
-          driveItem.av_status = "safe";
-          this.logger.info(`Item ${driveItem.id} is safe with no viruses detected.`);
+          await onScanComplete("safe");
+          this.logger.info(`Item ${item.id} is safe with no viruses detected.`);
         }
-
-        // Save status to the repository and log completion
-        await repo.save(driveItem);
-        this.logger.info(
-          `Completed scan for item ${driveItem.id} with final status: ${driveItem.av_status}`,
-        );
       });
 
       return "scanning";
     } catch (error) {
-      this.logger.error(
-        `Error scanning file ${driveItem.last_version_cache.file_metadata.external_id}`,
-      );
-      driveItem.av_status = "scan_failed";
-      await repo.save(driveItem);
-      return "scan_failed";
+      // mark the file as failed to scan
+      await onScanComplete("scan_failed");
+
+      // log the error
+      this.logger.error(`Error scanning file ${item.last_version_cache.file_metadata.external_id}`);
+      throw AVException.scanFailed("Document scanning encountered an error");
     }
   }
 }

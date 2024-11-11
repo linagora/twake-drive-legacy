@@ -1,10 +1,11 @@
 import "./load_test_config";
 import "reflect-metadata";
-import { afterAll, beforeEach, describe, expect, it } from "@jest/globals";
+import { afterAll, beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
 import { deserialize } from "class-transformer";
 import UserApi from "../common/user-api";
 import { DriveItemDetailsMockClass } from "../common/entities/mock_entities";
+import { DocumentsEngine } from "../../../src/services/documents/services/engine";
 import { e2e_createDocumentFile, e2e_createVersion } from "../documents/utils";
 import { ResourceUpdateResponse } from "../../../src/utils/types";
 import { File } from "../../../src/services/files/entities/file";
@@ -12,7 +13,10 @@ import { FileVersion } from "../../../src/services/documents/entities/file-versi
 
 describe("The documents antivirus", () => {
   let platform: TestPlatform;
-  let helpers: UserApi;
+  const notifyDocumentAVScanAlert = jest.spyOn(
+    DocumentsEngine.prototype,
+    "notifyDocumentAVScanAlert",
+  );
 
   beforeEach(async () => {
     platform = await init({
@@ -76,6 +80,7 @@ describe("The documents antivirus", () => {
 
       expect(document).toBeDefined();
       expect(document.av_status).toBe("skipped");
+      expect(notifyDocumentAVScanAlert).toHaveBeenCalled();
     });
   });
 
@@ -83,37 +88,37 @@ describe("The documents antivirus", () => {
     it("Should scan the document and detect it as safe.", async () => {
       // Create an admin user
       const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
-  
+
       // Create a default document for the user
       const document = await oneUser.createDefaultDocument();
-  
+
       // Upload a file and deserialize the response
       const fileUploadResponse = await e2e_createDocumentFile(platform);
       const fileUploadResult = deserialize<ResourceUpdateResponse<File>>(
         ResourceUpdateResponse,
-        fileUploadResponse.body
+        fileUploadResponse.body,
       );
-  
+
       // Prepare metadata with the uploaded file's ID
       const fileMetadata = { external_id: fileUploadResult.resource.id };
-  
+
       // Create a new version of the document with the uploaded file metadata
       const versionResponse = await e2e_createVersion(
         platform,
         document.id,
         { filename: "file2", file_metadata: fileMetadata },
-        oneUser.jwt
+        oneUser.jwt,
       );
       const versionResult = deserialize<FileVersion>(FileVersion, versionResponse.body);
       expect(versionResult).toBeDefined();
-  
+
       // Retrieve the document and verify the antivirus status
       const documentResponse = await oneUser.getDocument(versionResult.drive_item_id);
       const deserializedDocument = deserialize<DriveItemDetailsMockClass>(
         DriveItemDetailsMockClass,
-        documentResponse.body
+        documentResponse.body,
       );
-      
+
       // Ensure the document has been scanned and is no longer marked as "uploaded"
       expect(deserializedDocument.item.av_status).not.toBe("uploaded");
     });

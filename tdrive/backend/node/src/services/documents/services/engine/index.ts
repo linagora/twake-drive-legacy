@@ -2,7 +2,7 @@ import globalResolver from "../../../global-resolver";
 import { logger } from "../../../../core/platform/framework";
 import { localEventBus } from "../../../../core/platform/framework/event-bus";
 import { Initializable } from "../../../../core/platform/framework";
-import { DocumentEvents, NotificationPayloadType } from "../../types";
+import { DocumentEvents, NotificationPayloadType, eventToTemplateMap } from "../../types";
 import { DocumentsProcessor } from "./extract-keywords";
 import Repository from "../../../../core/platform/services/database/services/orm/repository/repository";
 import { DriveFile, TYPE } from "../../entities/drive-file";
@@ -17,10 +17,14 @@ export class DocumentsEngine implements Initializable {
       id: e.context.company.id,
     });
     const language = receiver.preferences?.language || "en";
-    const emailTemplate =
-      event === DocumentEvents.DOCUMENT_SAHRED
-        ? "notification-document-shared"
-        : "notification-document-version-updated";
+
+    const emailTemplate = eventToTemplateMap[event];
+
+    if (!emailTemplate) {
+      logger.error(`Unknown event type: ${event}`);
+      return; // Early return on unknown event type
+    }
+
     try {
       const { html, text, subject } = await globalResolver.platformServices.emailPusher.build(
         emailTemplate,
@@ -67,6 +71,13 @@ export class DocumentsEngine implements Initializable {
       },
     );
 
+    localEventBus.subscribe(
+      DocumentEvents.DOCUEMNT_AV_SCAN_ALERT,
+      async (e: NotificationPayloadType) => {
+        await this.DispatchDocumentEvent(e, DocumentEvents.DOCUEMNT_AV_SCAN_ALERT);
+      },
+    );
+
     return this;
   }
 
@@ -76,5 +87,9 @@ export class DocumentsEngine implements Initializable {
 
   notifyDocumentVersionUpdated(notificationPayload: NotificationPayloadType) {
     localEventBus.publish(DocumentEvents.DOCUMENT_VERSION_UPDATED, notificationPayload);
+  }
+
+  notifyDocumentAVScanAlert(notificationPayload: NotificationPayloadType) {
+    localEventBus.publish(DocumentEvents.DOCUEMNT_AV_SCAN_ALERT, notificationPayload);
   }
 }

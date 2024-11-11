@@ -116,7 +116,14 @@ export type DriveTdriveTab = {
 export enum DocumentEvents {
   DOCUMENT_SAHRED = "document_shared",
   DOCUMENT_VERSION_UPDATED = "document_version_updated",
+  DOCUEMNT_AV_SCAN_ALERT = "document_av_scan_alert",
 }
+
+export const eventToTemplateMap: Record<string, any> = {
+  [DocumentEvents.DOCUEMNT_AV_SCAN_ALERT]: "notification-document-av-scan-alert",
+  [DocumentEvents.DOCUMENT_VERSION_UPDATED]: "notification-document-version-updated",
+  [DocumentEvents.DOCUMENT_SAHRED]: "notification-document-shared",
+};
 
 export type NotificationPayloadType = {
   context: CompanyExecutionContext;

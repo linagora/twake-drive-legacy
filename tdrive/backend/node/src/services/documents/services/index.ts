@@ -14,7 +14,7 @@ import { PublicFile } from "../../../services/files/entities/file";
 import globalResolver from "../../../services/global-resolver";
 import { hasCompanyAdminLevel } from "../../../utils/company";
 import gr from "../../global-resolver";
-import { DriveFile, EditingSessionKeyFormat, TYPE } from "../entities/drive-file";
+import { AVStatus, DriveFile, EditingSessionKeyFormat, TYPE } from "../entities/drive-file";
 import { FileVersion, TYPE as FileVersionType } from "../entities/file-version";
 import User, { TYPE as UserType } from "../../user/entities/user";
 
@@ -479,13 +479,21 @@ export class DocumentsService {
       await updateItemSize(driveItem.parent_id, this.repository, context);
 
       // If AV feature is enabled, scan the file
-      if (globalResolver.services.av.avEnabled && version) {
+      if (globalResolver.services.av?.avEnabled && version) {
         try {
           driveItem.av_status = await globalResolver.services.av.scanDocument(
             driveItem,
             driveItemVersion,
+            async (av_status: AVStatus) => {
+              // Update the AV status of the file
+              await this.handleAVStatusUpdate(driveItem, av_status, context);
+            },
             context,
           );
+          if (driveItem.av_status === "skipped") {
+            // Notify the user that the document has been skipped
+            await this.notifyAVScanAlert(driveItem, context);
+          }
         } catch (error) {
           this.logger.error(`Error scanning file ${driveItemVersion.file_metadata.external_id}`);
         }
@@ -553,7 +561,7 @@ export class DocumentsService {
       }
 
       // Check if AV feature is enabled and file is malicious
-      if (globalResolver.services.av.avEnabled && item.av_status === "malicious") {
+      if (globalResolver.services.av?.avEnabled && item.av_status === "malicious") {
         this.logger.error("Cannot update a malicious file");
         throw new CrudException("Cannot update a malicious file", 403);
       }
@@ -878,7 +886,7 @@ export class DocumentsService {
     }
 
     // Check if AV feature is enabled and file is malicious
-    if (globalResolver.services.av.avEnabled && item.av_status === "malicious") {
+    if (globalResolver.services.av?.avEnabled && item.av_status === "malicious") {
       this.logger.error("Cannot update a malicious file");
       throw new CrudException("Cannot update a malicious file", 403);
     }
@@ -980,13 +988,21 @@ export class DocumentsService {
       await updateItemSize(item.parent_id, this.repository, context);
 
       // If AV feature is enabled, scan the file
-      if (globalResolver.services.av.avEnabled && version) {
+      if (globalResolver.services.av?.avEnabled && version) {
         try {
           item.av_status = await globalResolver.services.av.scanDocument(
             item,
             driveItemVersion,
+            async (av_status: AVStatus) => {
+              // Update the AV status of the file
+              await this.handleAVStatusUpdate(item, av_status, context);
+            },
             context,
           );
+          if (item.av_status === "skipped") {
+            // Notify the user that the document has been skipped
+            await this.notifyAVScanAlert(item, context);
+          }
         } catch (error) {
           this.logger.error(`Error scanning file ${driveItemVersion.file_metadata.external_id}`);
         }
@@ -1552,5 +1568,29 @@ export class DocumentsService {
     const sortField = {};
     sortField[sortFieldMapping[sort?.by] || "last_modified"] = sort?.order || "desc";
     return sortField;
+  };
+
+  // Helper function to notify user about AV scan alert
+  notifyAVScanAlert = async (item: DriveFile, context: DriveExecutionContext) => {
+    await gr.services.documents.engine.notifyDocumentAVScanAlert({
+      context,
+      item,
+      notificationEmitter: context.user.id,
+      notificationReceiver: context.user.id,
+    });
+  };
+
+  // Helper function to update AV status and save the drive item
+  handleAVStatusUpdate = async (
+    item: DriveFile,
+    status: AVStatus,
+    context: DriveExecutionContext,
+  ) => {
+    item.av_status = status;
+    await this.repository.save(item);
+
+    if (["malicious", "scan_failed"].includes(status)) {
+      await this.notifyAVScanAlert(item, context);
+    }
   };
 }
