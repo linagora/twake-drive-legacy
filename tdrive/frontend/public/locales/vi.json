@@ -77,6 +77,7 @@
     "components.item_context_menu.move.modal_header": "Di chuyển",
     "components.item_context_menu.move_multiple": "Di chuyển các mục đã chọn",
     "components.item_context_menu.move_multiple.modal_header": "Di chuyển các mục đã chọn",
+    "components.item_context_menu.rescan_document": "Quét lại để tìm virus",
     "components.item_context_menu.move_to_trash": "Xóa",
     "components.item_context_menu.open_new_window": "Mở trong cửa sổ mới",
     "components.item_context_menu.preview": "Xem trước",

@@ -80,6 +80,7 @@
     "components.item_context_menu.move.modal_header": "Déplacer",
     "components.item_context_menu.move_multiple": "Déplacer",
     "components.item_context_menu.move_multiple.modal_header": "Déplacer les éléments sélectionnés",
+    "components.item_context_menu.rescan_document": "Re-scanner pour les virus",
     "components.item_context_menu.move_to_trash": "Supprimer",
     "components.item_context_menu.open_new_window": "Ouvrir dans une nouvelle fenêtre",
     "components.item_context_menu.preview": "Aperçu",

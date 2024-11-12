@@ -80,6 +80,7 @@
     "components.item_context_menu.move.modal_header": "Переместить",
     "components.item_context_menu.move_multiple": "Переместить все",
     "components.item_context_menu.move_multiple.modal_header": "Переместить выбранные елементы",
+    "components.item_context_menu.rescan_document": "Повторное сканирование на вирусы",
     "components.item_context_menu.move_to_trash": "Удалить",
     "components.item_context_menu.open_new_window": "Открыть в новом окне",
     "components.item_context_menu.preview": "Просмотр",

@@ -80,6 +80,7 @@
     "components.item_context_menu.move.modal_header": "Move",
     "components.item_context_menu.move_multiple": "Move selected items",
     "components.item_context_menu.move_multiple.modal_header": "Move selected items",
+    "components.item_context_menu.rescan_document": "Re-scan for viruses",
     "components.item_context_menu.move_to_trash": "Delete",
     "components.item_context_menu.open_new_window": "Open in new window",
     "components.item_context_menu.preview": "Preview",

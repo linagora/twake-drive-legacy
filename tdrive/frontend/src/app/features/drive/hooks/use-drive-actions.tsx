@@ -3,7 +3,12 @@ import useRouterCompany from '@features/router/hooks/use-router-company';
 import { useCallback } from 'react';
 import { useRecoilValue, useRecoilCallback, useRecoilState } from 'recoil';
 import { DriveApiClient } from '../api-client/api-client';
-import { DriveItemAtom, DriveItemChildrenAtom, DriveItemPagination, DriveItemSort } from '../state/store';
+import {
+  DriveItemAtom,
+  DriveItemChildrenAtom,
+  DriveItemPagination,
+  DriveItemSort,
+} from '../state/store';
 import { BrowseFilter, DriveItem, DriveItemVersion } from '../types';
 import { SharedWithMeFilterState } from '../state/shared-with-me-filter';
 import Languages from 'features/global/services/languages-service';
@@ -35,7 +40,13 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
             set(DriveItemPagination, pagination);
           }
           try {
-            const details = await DriveApiClient.browse(companyId, parentId, filter, sortItem, pagination);
+            const details = await DriveApiClient.browse(
+              companyId,
+              parentId,
+              filter,
+              sortItem,
+              pagination,
+            );
             set(DriveItemChildrenAtom(parentId), details.children);
             set(DriveItemAtom(parentId), details);
             for (const child of details.children) {
@@ -142,7 +153,12 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
       try {
         const newItem = await DriveApiClient.update(companyId, id, update);
         if (previousName && previousName !== newItem.name && !update.name)
-          ToasterService.warn(Languages.t('hooks.use-drive-actions.update_caused_a_rename', [previousName, newItem.name]));
+          ToasterService.warn(
+            Languages.t('hooks.use-drive-actions.update_caused_a_rename', [
+              previousName,
+              newItem.name,
+            ]),
+          );
         await refresh(id || '', true);
         if (!inPublicSharing) await refresh(parentId || '', true);
         if (update?.parent_id !== parentId) await refresh(update?.parent_id || '', true);
@@ -183,12 +199,35 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
           parentId,
           filter,
           sortItem,
-          pagination
+          pagination,
         );
         return details;
       },
     [paginateItem, refresh],
   );
 
-  return { create, refresh, download, downloadZip, remove, restore, update, updateLevel, nextPage };
+  const reScan = useCallback(
+    async (item: Partial<DriveItem>) => {
+      try {
+        await DriveApiClient.reScan(companyId, item.id || '');
+        await refresh(item.parent_id || '', true);
+      } catch (e) {
+        ToasterService.error(Languages.t('hooks.use-drive-actions.unable_rescan_file'));
+      }
+    },
+    [refresh],
+  );
+
+  return {
+    create,
+    refresh,
+    download,
+    downloadZip,
+    remove,
+    restore,
+    update,
+    updateLevel,
+    reScan,
+    nextPage,
+  };
 };

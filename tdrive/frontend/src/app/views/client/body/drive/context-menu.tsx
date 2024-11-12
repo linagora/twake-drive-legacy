@@ -46,7 +46,7 @@ export const useOnBuildContextMenu = (
     DriveCurrentFolderAtom({ initialFolderId: initialParentId || 'root' }),
   );
 
-  const { download, downloadZip, update, restore } = useDriveActions();
+  const { download, downloadZip, update, restore, reScan } = useDriveActions();
   const setCreationModalState = useSetRecoilState(CreateModalAtom);
   const setUploadModalState = useSetRecoilState(UploadModelAtom);
   const setSelectorModalState = useSetRecoilState(SelectorModalAtom);
@@ -102,7 +102,22 @@ export const useOnBuildContextMenu = (
               hide: hideManageAccessItem || notSafe,
               onClick: () => setAccessModalState({ open: true, id: item.id }),
             },
-            { type: 'separator', hide: inTrash || (hideShareItem && hideManageAccessItem) || notSafe },
+            {
+              type: 'menu',
+              icon: 'shield-check',
+              text: Languages.t('components.item_context_menu.rescan_document'),
+              hide: !(item.av_status === 'scan_failed'),
+              onClick: () => {
+                reScan(item);
+              },
+            },
+            {
+              type: 'separator',
+              hide:
+                inTrash ||
+                (hideShareItem && hideManageAccessItem) ||
+                (notSafe && !(item.av_status === 'scan_failed')),
+            },
             {
               type: 'menu',
               icon: 'download-alt',
@@ -185,7 +200,7 @@ export const useOnBuildContextMenu = (
               hide: item.is_directory || inTrash || notSafe,
               onClick: () => setVersionModal({ open: true, id: item.id }),
             },
-            { type: 'separator', hide: (access !== 'manage') || inTrash || notSafe },
+            { type: 'separator', hide: access !== 'manage' || inTrash || notSafe },
             {
               type: 'menu',
               icon: 'trash',
@@ -256,7 +271,7 @@ export const useOnBuildContextMenu = (
               text: Languages.t('components.item_context_menu.clear_selection'),
               onClick: () => setChecked({}),
             },
-            { type: 'separator', hide: (parent.access === 'read') || notSafe },
+            { type: 'separator', hide: parent.access === 'read' || notSafe },
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.delete_multiple'),

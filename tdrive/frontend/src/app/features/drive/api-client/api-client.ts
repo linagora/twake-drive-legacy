@@ -135,6 +135,13 @@ export class DriveApiClient {
     );
   }
 
+  static async reScan(companyId: string, id: string) {
+    return await Api.post<any, DriveItem>(
+      `/internal/services/documents/v1/companies/${companyId}/item/${id}/rescan${appendTdriveToken()}`,
+      {},
+    );
+  }
+
   static getDownloadUrl(companyId: string, id: string, versionId?: string) {
     if (versionId)
       return Api.route(`/internal/services/documents/v1/companies/${companyId}/item/${id}/download?version_id=${versionId}`);

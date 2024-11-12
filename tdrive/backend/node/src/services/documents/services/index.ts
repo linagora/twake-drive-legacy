@@ -1029,6 +1029,73 @@ export class DocumentsService {
   };
 
   /**
+   * Triggers an AV Rescan for the document.
+   *
+   * @param {string} id - the Drive item id to rescan.
+   * @param {DriveExecutionContext} context - the company execution context
+   * @returns {Promise<DriveFile>} - the DriveFile after the rescan has been triggered
+   */
+  reScan = async (id: string, context: DriveExecutionContext): Promise<DriveFile> => {
+    if (!context) {
+      this.logger.error("invalid execution context");
+      return null;
+    }
+
+    try {
+      const hasAccess = await checkAccess(id, null, "write", this.repository, context);
+      if (!hasAccess) {
+        this.logger.error("user does not have access drive item ", id);
+        throw Error("user does not have access to this item");
+      }
+
+      const item = await this.repository.findOne(
+        {
+          id,
+          company_id: context.company.id,
+        },
+        {},
+        context,
+      );
+
+      if (!item) {
+        throw Error("Drive item not found");
+      }
+
+      if (item.is_directory) {
+        throw Error("cannot create version for a directory");
+      }
+
+      // If AV feature is enabled, scan the file
+      if (globalResolver.services.av?.avEnabled) {
+        try {
+          item.av_status = await globalResolver.services.av.scanDocument(
+            item,
+            item.last_version_cache,
+            async (av_status: AVStatus) => {
+              // Update the AV status of the file
+              await this.handleAVStatusUpdate(item, av_status, context);
+            },
+            context,
+          );
+          await this.repository.save(item);
+          if (item.av_status === "skipped") {
+            // Notify the user that the document has been skipped
+            await this.notifyAVScanAlert(item, context);
+          }
+        } catch (error) {
+          this.logger.error(
+            `Error scanning file ${item.last_version_cache.file_metadata.external_id}`,
+          );
+        }
+      }
+      return item;
+    } catch (error) {
+      logger.error({ error: `${error}` }, "Failed to create Drive item version");
+      CrudException.throwMe(error, new CrudException("Failed to create Drive item version", 500));
+    }
+  };
+
+  /**
    * If not already in an editing session, uses the `editing_session_key` of the
    * `DriveFile` entity to store a unique new value to expect an update later
    * with only that key provided.
