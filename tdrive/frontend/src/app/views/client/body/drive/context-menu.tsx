@@ -73,6 +73,7 @@ export const useOnBuildContextMenu = (
         const inTrash = parent.path?.[0]?.id.includes('trash') || viewId?.includes('trash');
         const isPersonal = item?.scope === 'personal';
         const selectedCount = checked.length;
+        const notSafe = !['uploaded', 'safe'].includes(item?.av_status || '');
 
         let menu: any[] = [];
 
@@ -82,29 +83,30 @@ export const useOnBuildContextMenu = (
           const access = upToDateItem.access || 'none';
           const hideShareItem = access === 'read' || getPublicLinkToken() || inTrash;
           const hideManageAccessItem =
-            access === 'read'
-            || getPublicLinkToken()
-            || inTrash
-            || !FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_MANAGE_ACCESS);
+            access === 'read' ||
+            getPublicLinkToken() ||
+            inTrash ||
+            !FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_MANAGE_ACCESS);
           const newMenuActions = [
             {
               type: 'menu',
               icon: 'share-alt',
               text: Languages.t('components.item_context_menu.share'),
-              hide: hideShareItem,
+              hide: hideShareItem || notSafe,
               onClick: () => setPublicLinkModalState({ open: true, id: item.id }),
             },
             {
               type: 'menu',
               icon: 'users-alt',
               text: Languages.t('components.item_context_menu.manage_access'),
-              hide: hideManageAccessItem,
+              hide: hideManageAccessItem || notSafe,
               onClick: () => setAccessModalState({ open: true, id: item.id }),
             },
-            { type: 'separator', hide: inTrash || (hideShareItem && hideManageAccessItem) },
+            { type: 'separator', hide: inTrash || (hideShareItem && hideManageAccessItem) || notSafe },
             {
               type: 'menu',
               icon: 'download-alt',
+              hide: notSafe,
               text: Languages.t('components.item_context_menu.download'),
               onClick: () => {
                 if (item && item.is_directory) {
@@ -127,12 +129,12 @@ export const useOnBuildContextMenu = (
                 window.open(route, '_blank');
               }
             }, // */
-            { type: 'separator' },
+            { type: 'separator', hide: notSafe },
             {
               type: 'menu',
               icon: 'folder-question',
               text: Languages.t('components.item_context_menu.move'),
-              hide: access === 'read' || inTrash || inPublicSharing,
+              hide: access === 'read' || inTrash || inPublicSharing || notSafe,
               onClick: () =>
                 setSelectorModalState({
                   open: true,
@@ -157,7 +159,7 @@ export const useOnBuildContextMenu = (
               type: 'menu',
               icon: 'file-edit-alt',
               text: Languages.t('components.item_context_menu.rename'),
-              hide: access === 'read' || inTrash,
+              hide: access === 'read' || inTrash || notSafe,
               onClick: () => setPropertiesModalState({ open: true, id: item.id, inPublicSharing }),
             },
             {
@@ -167,7 +169,8 @@ export const useOnBuildContextMenu = (
               hide:
                 !item.access_info.public?.level ||
                 item.access_info.public?.level === 'none' ||
-                inTrash,
+                inTrash ||
+                notSafe,
               onClick: () => {
                 copyToClipboard(getPublicLink(item || parent?.item));
                 ToasterService.success(
@@ -179,10 +182,10 @@ export const useOnBuildContextMenu = (
               type: 'menu',
               icon: 'history',
               text: Languages.t('components.item_context_menu.versions'),
-              hide: item.is_directory || inTrash,
+              hide: item.is_directory || inTrash || notSafe,
               onClick: () => setVersionModal({ open: true, id: item.id }),
             },
-            { type: 'separator', hide: access !== 'manage' || inTrash },
+            { type: 'separator', hide: (access !== 'manage') || inTrash || notSafe },
             {
               type: 'menu',
               icon: 'trash',
@@ -253,7 +256,7 @@ export const useOnBuildContextMenu = (
               text: Languages.t('components.item_context_menu.clear_selection'),
               onClick: () => setChecked({}),
             },
-            { type: 'separator', hide: parent.access === 'read' },
+            { type: 'separator', hide: (parent.access === 'read') || notSafe },
             {
               type: 'menu',
               text: Languages.t('components.item_context_menu.delete_multiple'),

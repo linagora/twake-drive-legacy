@@ -490,6 +490,7 @@ export class DocumentsService {
             },
             context,
           );
+          await this.repository.save(driveItem);
           if (driveItem.av_status === "skipped") {
             // Notify the user that the document has been skipped
             await this.notifyAVScanAlert(driveItem, context);
@@ -999,6 +1000,7 @@ export class DocumentsService {
             },
             context,
           );
+          await this.repository.save(item);
           if (item.av_status === "skipped") {
             // Notify the user that the document has been skipped
             await this.notifyAVScanAlert(item, context);
