@@ -37,6 +37,7 @@ export const DocumentRow = ({
   const [hover, setHover] = useState(false);
   const { open, close, isOpen } = useDrivePreview();
   const company = useRouterCompany();
+  const notSafe = ['malicious', 'skipped', 'scan_failed'].includes(item.av_status);
 
   const preview = () => {
     open(item);
@@ -49,7 +50,7 @@ export const DocumentRow = ({
       className={
         'flex flex-row items-center border border-zinc-200 dark:border-zinc-800 px-4 py-3 cursor-pointer ' +
         (checked
-          ? 'bg-blue-500 bg-opacity-10 hover:bg-opacity-25  '
+          ? (notSafe ? 'bg-rose-500' : 'bg-blue-500') + ' bg-opacity-10 hover:bg-opacity-25'
           : 'hover:bg-zinc-500 hover:bg-opacity-10 ') +
         (className || '')
       }
@@ -58,7 +59,9 @@ export const DocumentRow = ({
       onClick={e => {
         if (e.shiftKey || e.ctrlKey) onCheck(!checked);
         else if (onClick) onClick();
-        else preview();
+        else {
+          if (!notSafe) preview();
+        }
       }}
     >
       <div
