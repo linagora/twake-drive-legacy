@@ -494,9 +494,11 @@ export class DocumentsService {
                   },
                   context,
                 );
-                driveItemVersion.file_metadata.thumbnails = file.thumbnails;
-                await this.fileVersionRepository.save(driveItemVersion);
-                driveItem.last_version_cache = driveItemVersion;
+                if (file) {
+                  driveItemVersion.file_metadata.thumbnails = file?.thumbnails;
+                  await this.fileVersionRepository.save(driveItemVersion);
+                  driveItem.last_version_cache = driveItemVersion;
+                }
               }
               // Update the AV status of the file
               await this.handleAVStatusUpdate(driveItem, av_status, context);
@@ -1025,9 +1027,11 @@ export class DocumentsService {
                   },
                   context,
                 );
-                driveItemVersion.file_metadata.thumbnails = file.thumbnails;
-                await this.fileVersionRepository.save(driveItemVersion);
-                item.last_version_cache = driveItemVersion;
+                if (file) {
+                  driveItemVersion.file_metadata.thumbnails = file?.thumbnails;
+                  await this.fileVersionRepository.save(driveItemVersion);
+                  item.last_version_cache = driveItemVersion;
+                }
               }
               // Update the AV status of the file
               await this.handleAVStatusUpdate(item, av_status, context);
