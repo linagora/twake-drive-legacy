@@ -47,7 +47,7 @@ export class DocumentsProcessor
       );
       content_keywords = await getKeywordsOfFile(storedFile.mime, storedFile.name, storedFile.file);
     } catch (error) {
-      console.debug(error);
+      logger.debug(error);
       logger.error({ error: `${error}` }, "Failed to generate content keywords");
     }
     return { content_keywords, item: message.item };

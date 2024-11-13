@@ -93,6 +93,7 @@
   "storage": {
     "secret": "0ea28a329df23220fa814e005bfb671c",
     "iv": "1234abcd00000000",
+    "strategy": "local",
     "type": "local",
     "S3": {
       "endPoint": "play.min.io",

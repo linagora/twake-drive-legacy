@@ -9,7 +9,7 @@ import {
   TdriveServiceOptions,
 } from "../../framework";
 import LocalConnectorService, { LocalConfiguration } from "./connectors/local/service";
-import S3ConnectorService from "./connectors/S3/s3-service";
+import S3ConnectorService, { S3Configuration } from "./connectors/S3/s3-service";
 import StorageAPI, {
   DeleteOptions,
   ReadOptions,
@@ -17,6 +17,10 @@ import StorageAPI, {
   WriteMetadata,
   WriteOptions,
 } from "./provider";
+
+import { OneOfStorageStrategy } from "./oneof-storage-strategy";
+import { DefaultStorageStrategy } from "./default-storage-strategy";
+import { FileNotFountException } from "./exceptions";
 
 type EncryptionConfiguration = {
   secret: string | null;
@@ -35,26 +39,14 @@ export default class StorageService extends TdriveService<StorageAPI> implements
    * But for the local storage it's a default value
    * @private
    */
-  private homeDir = "/tdrive";
+  private homeDir = "tdrive";
 
   constructor(protected options?: TdriveServiceOptions<TdriveServiceConfiguration>) {
     super(options);
-    const type = this.getConnectorType();
-    if (type === "S3") {
-      logger.info("Using 'S3' connector for storage.");
-      try {
-        this.homeDir = this.configuration.get<string>("S3.homeDirectory");
-      } catch (e) {
-        this.logger.warn("Home directory is not set, using S3.bucket instead");
-      }
-      if (!this.homeDir) {
-        this.homeDir = this.configuration.get<string>("S3.bucket");
-      }
-      if (this.homeDir && this.homeDir.startsWith("/")) {
-        this.logger.error("For S3 connector home directory MUST NOT start with '/'");
-        throw new Error("For S3 connector home directory MUST NOT start with '/'");
-      }
-    }
+    //init home directory variable
+    this.initHomeDirectory();
+    //init connector to storage
+    this.getConnector();
   }
 
   api(): StorageAPI {
@@ -67,31 +59,7 @@ export default class StorageService extends TdriveService<StorageAPI> implements
 
   getConnector(): StorageConnectorAPI {
     if (!this.connector) {
-      const type = this.getConnectorType();
-      if (type === "S3") {
-        logger.info("Using 'S3' connector for storage.");
-        this.connector = new S3ConnectorService({
-          bucket: this.configuration.get<string>("S3.bucket"),
-          region: this.configuration.get<string>("S3.region"),
-          endPoint: this.configuration.get<string>("S3.endPoint"),
-          port: Number(this.configuration.get<number>("S3.port")),
-          useSSL: Boolean(this.configuration.get<boolean>("S3.useSSL")),
-          accessKey: this.configuration.get<string>("S3.accessKey"),
-          secretKey: this.configuration.get<string>("S3.secretKey"),
-          disableRemove: this.configuration.get<boolean>("S3.disableRemove"),
-        });
-      } else {
-        logger.info(
-          `Using 'local' connector for storage${
-            type === "local" ? "" : " (no other connector recognized from configuration type: '%s')"
-          }.`,
-          type,
-        );
-        logger.trace(`Home directory for the storage: ${this.homeDir}`);
-        this.connector = new LocalConnectorService(
-          this.configuration.get<LocalConfiguration>("local"),
-        );
-      }
+      this.connector = this.getStorageStrategy();
     }
     return this.connector;
   }
@@ -101,7 +69,8 @@ export default class StorageService extends TdriveService<StorageAPI> implements
   }
 
   exists(path: string, options?: ReadOptions): Promise<boolean> {
-    return this.getConnector().exists(path, options);
+    //TODO[ASH] check for all the file chunks
+    return this.getConnector().exists(path + "/chunk1", options);
   }
 
   async write(path: string, stream: Stream, options?: WriteOptions): Promise<WriteMetadata> {
@@ -134,14 +103,14 @@ export default class StorageService extends TdriveService<StorageAPI> implements
   }
 
   async read(path: string, options?: ReadOptions): Promise<Readable> {
+    if (!(await this.exists(path, options))) {
+      throw new FileNotFountException();
+    }
     try {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
       const self = this;
       const chunks = options?.totalChunks || 1;
       let count = 1;
-
-      // Check if the first chunk or file exists
-      await self._read(options?.totalChunks ? `${path}/chunk${count}` : path);
 
       async function factory(callback: (err?: Error, stream?: Stream) => unknown) {
         if (count > chunks) {
@@ -216,4 +185,113 @@ export default class StorageService extends TdriveService<StorageAPI> implements
 
     return this;
   }
+
+  /**
+   * Instantiates storage strategy with configuration.
+   * "storage": {
+   *     "secret": "",
+   *     "iv": "",
+   *     "strategy": "oneof",
+   *     "type": "local",
+   *     "S3": {
+   *       "endPoint": "play.min.io",
+   *       "port": 9000,
+   *       "useSSL": false,
+   *       "accessKey": "ABCD",
+   *       "secretKey": "x1yz",
+   *       "disableRemove": false
+   *     },
+   *     "local": {
+   *       "path": "/tdrive"
+   *     },
+   *     "oneof": [
+   *       {
+   *         "type": "S3",
+   *         "S3": {}
+   *       },
+   *       {
+   *         "type": "local",
+   *         "local": {}
+   *     }]
+   *   },
+   */
+  getStorageStrategy(): StorageConnectorAPI {
+    const strategy = this.configuration.get<string>("strategy");
+    if (strategy == "oneof") {
+      logger.info("Creating storage with 'oneof' strategy");
+      const connectors = this.configuration
+        .get<Array<StorageConfiguration>>("oneof")
+        .map(c => this.createConnector(c));
+      return new OneOfStorageStrategy(connectors);
+    } else {
+      logger.info("Creating storage with 'default' strategy");
+      return new DefaultStorageStrategy(this.createConnectorFromConfiguration(this.configuration));
+    }
+  }
+
+  createConnector(config: StorageConfiguration) {
+    const type = config.type;
+    if (type === "S3") {
+      return this.newS3Connector(config.S3);
+    } else {
+      return this.newLocalConnector(config.local, type);
+    }
+  }
+
+  createConnectorFromConfiguration(config: TdriveServiceConfiguration) {
+    const type = config.get<string>("type");
+    if (type === "S3") {
+      return this.newS3Connector(config.get("S3"));
+    } else {
+      return this.newLocalConnector(this.configuration.get<LocalConfiguration>("local"), type);
+    }
+  }
+
+  newS3Connector(config: S3Configuration) {
+    logger.info("Using 'S3' connector for storage.");
+    return new S3ConnectorService(config);
+  }
+
+  newLocalConnector(config: LocalConfiguration, type: string) {
+    logger.info(
+      `Using 'local' connector for storage${
+        type === "local" ? "" : " (no other connector recognized from configuration type: '%s')"
+      }.`,
+      type,
+    );
+    logger.trace(`Home directory for the storage: ${this.homeDir}`);
+    return new LocalConnectorService(config);
+  }
+
+  initHomeDirectory() {
+    const type = this.getConnectorType();
+    if (type === "S3") {
+      logger.info("Using 'S3' connector for storage.");
+      try {
+        this.homeDir = this.configuration.get<string>("S3.homeDirectory");
+      } catch (e) {
+        this.logger.warn("Home directory is not set, using S3.bucket instead");
+      }
+      if (!this.homeDir) {
+        this.homeDir = this.configuration.get<string>("S3.bucket");
+      }
+      if (this.homeDir && this.homeDir.startsWith("/")) {
+        this.logger.error("For S3 connector home directory MUST NOT start with '/'");
+        throw new Error("For S3 connector home directory MUST NOT start with '/'");
+      }
+    } else {
+      this.logger.info("For 'local' connector setting home directory to '/tdrive'");
+      this.homeDir = "/tdrive";
+    }
+  }
+
+  getId() {
+    return this.connector.getId();
+  }
 }
+
+type StorageConfiguration = {
+  type: string;
+  S3?: S3Configuration;
+  local?: LocalConfiguration;
+};

@@ -1,4 +1,3 @@
-import { string } from 'prop-types';
 import { atom } from 'recoil';
 
 export type SharedWithMeFilter = {

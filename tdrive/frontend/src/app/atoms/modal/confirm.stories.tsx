@@ -4,7 +4,6 @@ import { action } from '@storybook/addon-actions';
 import { RecoilRoot } from 'recoil';
 import { ComponentStory } from '@storybook/react';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/outline';
-import { Title } from '../text';
 
 import { ConfirmModal, ConfirmModalProps } from './confirm';
 const icons = {
@@ -36,6 +35,7 @@ export default {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Template: ComponentStory<any> = (props: ConfirmModalProps) => {
   const [open, setOpen] = useState(true);
 

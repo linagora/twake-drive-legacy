@@ -4,7 +4,6 @@ import Avatar from '@atoms/avatar';
 import { Base, Info } from '@atoms/text';
 import { atom, useRecoilState } from 'recoil';
 import { useDriveItem } from '@features/drive/hooks/use-drive-item';
-import AlertManager from '@features/global/services/alert-manager-service';
 import { useCurrentUser } from '@features/users/hooks/use-current-user';
 import { useUser } from '@features/users/hooks/use-user';
 import currentUserService from '@features/users/services/current-user-service';
@@ -55,7 +54,7 @@ const UserAccessLevel = ({
 }) => {
   const user = useUser(userId);
   const { user: currentUser } = useCurrentUser();
-  const { item, loading, updateLevel } = useDriveItem(id);
+  const { updateLevel } = useDriveItem(id);
   const [level, setLevel] = useState<DriveFileAccessLevel>(role == "admin" ? "manage" : "read");
   //const level = role == "admin" ? "manage" : "read";
 
@@ -78,7 +77,6 @@ const UserAccessLevel = ({
         <AccessLevel
           disabled={userId === currentUser?.id}
           level={level}
-          canRemove
           onChange={level => {
             setLevel(level);
             updateLevel(userId || '', level);

@@ -9,14 +9,12 @@ export type DriveItemProps = {
   checked: boolean;
   onClick?: () => void;
   onBuildContextMenu: () => Promise<any[]>;
-  inPublicSharing?: boolean;
 };
 
 export type DriveItemOverlayProps = {
   item: DriveItem|null;
   className: string;
 };
-export const menuBuilder = async () => {};
 
 export const CheckableIcon = ({
   show,

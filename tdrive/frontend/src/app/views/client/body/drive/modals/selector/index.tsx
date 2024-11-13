@@ -15,7 +15,7 @@ export type SelectorModalType = {
   parent_id: string;
   mode: 'move' | 'select-file' | 'select-files';
   title: string;
-  onSelected: (ids: string[]) => Promise<void>;
+  onSelected?: (ids: string[]) => Promise<void>;
 };
 
 export const SelectorModalAtom = atom<SelectorModalType>({
@@ -25,7 +25,6 @@ export const SelectorModalAtom = atom<SelectorModalType>({
     parent_id: '',
     mode: 'move',
     title: '',
-    onSelected: async () => {},
   },
 });
 
@@ -39,7 +38,7 @@ export const SelectorModal = () => {
   );
 };
 
-const SelectorModalContent = (key:any,showfiles:boolean) => {
+const SelectorModalContent = (key: any) => {
   const [state, setState] = useRecoilState(SelectorModalAtom);
   const [selected, setSelected] = useState<DriveItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -91,8 +90,8 @@ const SelectorModalContent = (key:any,showfiles:boolean) => {
             </div>
           </div>
         ))}
-        
-        {key.showfiles && ( 
+
+        {key.showfiles && (
         <>
         {files.map(file => (
           <div
@@ -135,7 +134,7 @@ const SelectorModalContent = (key:any,showfiles:boolean) => {
         className="float-right"
         onClick={async () => {
           setLoading(true);
-          await state.onSelected(selected.map(i => i.id));
+          state.onSelected && await state.onSelected(selected.map(i => i.id));
           setState({ ...state, open: false });
           setLoading(false);
         }}

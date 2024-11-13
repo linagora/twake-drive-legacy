@@ -285,7 +285,7 @@ export const getAccessLevel = async (
           );
           if (matchingChannel) return matchingChannel.level;
         } catch (e) {
-          console.log(e);
+          logger.info(e);
         }
       }
 
@@ -406,7 +406,7 @@ export const getSharedByUser = (
       return getGrantorAndThrowIfEmpty(entity);
     }
     if (entity.type === "company" && entity.id === context.company.id && entity.level != "none") {
-      console.log("company", entity);
+      logger.info("company", entity);
       return getGrantorAndThrowIfEmpty(entity);
     }
   }

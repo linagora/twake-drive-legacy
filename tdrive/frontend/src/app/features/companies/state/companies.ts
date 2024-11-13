@@ -1,9 +1,7 @@
 import { atomFamily } from 'recoil';
-import Collections from '@deprecated/CollectionsV1/Collections/Collections';
 
 import { CompanyType } from '@features/companies/types/company';
 import CompanyAPIClient from '@features/companies/api/company-api-client';
-import _ from 'lodash';
 
 const companies: { [key: string]: CompanyType } = {};
 

@@ -35,6 +35,7 @@ import WorkspacePendingUser from "../../entities/workspace_pending_users";
 import { ConsoleCompany, CreateConsoleUser } from "../../../console/types";
 import { hasCompanyAdminLevel } from "../../../../utils/company";
 import gr from "../../../global-resolver";
+import { logger } from "../../../../core/platform/framework";
 
 export class WorkspaceUsersCrudController
   implements
@@ -525,7 +526,7 @@ export class WorkspaceUsersCrudController
 
       return { status: "success" };
     } catch (e) {
-      console.error(e);
+      logger.warn(e);
       return {
         status: "error",
       };

@@ -1,0 +1,21 @@
+{
+
+  "storage": {
+    "secret": "0ea28a329df23220fa814e005bfb671c",
+    "iv": "1234abcd00000000",
+    "strategy": "oneof",
+    "oneof": [
+      {
+        "type": "local",
+        "local": {
+          "path": "-tmp/storage1"
+        }
+      },
+      {
+        "type": "local",
+        "local": {
+          "path": "/tmp/storage2"
+        }
+      }]
+  }
+}

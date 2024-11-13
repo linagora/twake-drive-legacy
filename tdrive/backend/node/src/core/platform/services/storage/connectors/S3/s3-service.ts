@@ -2,8 +2,10 @@ import * as Minio from "minio";
 import { logger } from "../../../../../../core/platform/framework";
 import { Readable } from "stream";
 import { StorageConnectorAPI, WriteMetadata } from "../../provider";
+import { randomUUID } from "crypto";
 
 export type S3Configuration = {
+  id: string;
   bucket: string;
   region: string;
   endPoint: string;
@@ -17,10 +19,20 @@ export type S3Configuration = {
 export default class S3ConnectorService implements StorageConnectorAPI {
   client: Minio.Client;
   minioConfiguration: S3Configuration;
+  id: string;
 
   constructor(S3Configuration: S3Configuration) {
     this.client = new Minio.Client(S3Configuration);
     this.minioConfiguration = S3Configuration;
+    this.id = this.minioConfiguration.id;
+    if (!this.id) {
+      this.id = randomUUID();
+      logger.info(`Identifier for S3 storage haven't been set, initializing to '${this.id}'`);
+    }
+  }
+
+  getId() {
+    return this.id;
   }
 
   write(path: string, stream: Readable): Promise<WriteMetadata> {
@@ -101,7 +113,7 @@ export default class S3ConnectorService implements StorageConnectorAPI {
           break;
         }
       } catch (e) {
-        logger.error("Error getting information from S3", e);
+        logger.error(e, `Error getting information from S3 for path: ${path}`);
       }
 
       if (i === tries) {

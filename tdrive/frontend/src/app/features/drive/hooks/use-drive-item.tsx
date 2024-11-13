@@ -1,7 +1,7 @@
 import { ToasterService } from '@features/global/services/toaster-service';
 import { LoadingStateInitTrue } from '@features/global/state/atoms/Loading';
 import useRouterCompany from '@features/router/hooks/use-router-company';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useRecoilCallback, useRecoilState, useRecoilValue } from 'recoil';
 import { DriveItemAtom, DriveItemChildrenAtom, DriveItemPagination } from '../state/store';
 import { DriveItem } from '../types';
@@ -20,7 +20,7 @@ export const useDriveItem = (id: string) => {
   // const children = useRecoilValue(DriveItemChildrenAtom(id));
   const [children, setChildren] = useRecoilState(DriveItemChildrenAtom(id));
   const [loading, setLoading] = useRecoilState(LoadingStateInitTrue('useDriveItem-' + id));
-  const [_, setPaginateItem] = useRecoilState(DriveItemPagination);
+  const [, setPaginateItem] = useRecoilState(DriveItemPagination);
   const {
     refresh: refreshItem,
     create,
@@ -171,6 +171,7 @@ export const useDriveItem = (id: string) => {
     updateLevel,
     remove,
     refresh,
+    restore,
     loadNextPage,
   };
 };

@@ -24,7 +24,7 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
   const setUploadModalState = useSetRecoilState(UploadModelAtom);
   const { uploadTree, uploadFromUrl } = useDriveUpload();
   const { user } = useCurrentUser();
-  const [parentId, _] = useRecoilState(
+  const [ parentId ] = useRecoilState(
     DriveCurrentFolderAtom({ initialFolderId: initialParentId || 'user_'+user?.id }),
   );
 
@@ -96,7 +96,7 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
 export default () => {
   const { user } = useCurrentUser();
   const { viewId, dirId } = useRouteState();
-  const [parentId, _] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: dirId || viewId || 'user_'+user?.id  }));
+  const [ parentId ] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: dirId || viewId || 'user_'+user?.id  }));
   const { access, item } = useDriveItem(parentId);
   const { children: trashChildren } = useDriveItem(viewId === 'trash' ? 'trash' : 'trash_'+user?.id);
   const uploadZoneRef = useRef<UploadZone | null>(null);

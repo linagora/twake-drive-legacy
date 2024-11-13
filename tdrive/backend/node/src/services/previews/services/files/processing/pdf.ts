@@ -1,6 +1,9 @@
 import { fromPath } from "pdf2pic";
 import { mkdirSync } from "fs";
 import { cleanFiles, getTmpFile } from "../../../../../utils/files";
+import { logger } from "../../../../../core/platform/framework";
+
+class PDFConversionError extends Error {}
 
 export async function convertFromPdf(
   inputPath: string,
@@ -33,11 +36,14 @@ export async function convertFromPdf(
       //Just no more page to convert
     }
   } catch (error) {
-    console.error(error);
+    const pdfConversionError = new PDFConversionError("Can't convert file with pdf-image.", {
+      cause: error,
+    });
+    logger.error(pdfConversionError);
     for (const file of pages) {
       cleanFiles([file]);
     }
-    throw Error("Can't convert file with pdf-image.");
+    throw pdfConversionError;
   }
   return { output: pages, done: true };
 }

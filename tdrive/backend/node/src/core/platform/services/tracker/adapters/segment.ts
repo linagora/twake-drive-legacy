@@ -1,6 +1,7 @@
 import Analytics, { IdentifyParams, TrackParams } from "@segment/analytics-node";
 import { Analytics as AnalyticsAbtract } from "./types";
 import axios, { AxiosInstance } from "axios";
+import { logger } from "../../../framework/logger";
 
 export default class Segment implements AnalyticsAbtract {
   protected version = "5.0.0"; //Segment analytics lib version
@@ -33,7 +34,7 @@ export default class Segment implements AnalyticsAbtract {
     try {
       this.analytics.identify(message as IdentifyParams, callback);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   }
 
@@ -47,7 +48,7 @@ export default class Segment implements AnalyticsAbtract {
     try {
       this.analytics.track(message as TrackParams, callback);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   }
 

@@ -6,18 +6,15 @@ import { useRecoilState } from 'recoil';
 import { DriveApiClient } from '../api-client/api-client';
 import { DriveViewerState } from '../state/viewer';
 import { DriveItem } from '../types';
-import { useHistory } from 'react-router-dom';
-import RouterServices from '@features/router/services/router-service';
 import useRouterCompany from '@features/router/hooks/use-router-company';
 import { DriveCurrentFolderAtom } from 'app/views/client/body/drive/browser';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 
 export const useDrivePreviewModal = () => {
-  const history = useHistory();
   const company = useRouterCompany();
   const [status, setStatus] = useRecoilState(DriveViewerState);
   const { user } = useCurrentUser();
-  const [ parentId, setParentId ] = useRecoilState(
+  const [ , setParentId ] = useRecoilState(
     DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id }),
   );
 

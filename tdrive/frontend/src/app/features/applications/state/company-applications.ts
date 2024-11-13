@@ -1,7 +1,6 @@
 import { atomFamily, selectorFamily } from 'recoil';
 
 import { Application } from 'app/features/applications/types/application';
-import Collections from 'app/deprecated/CollectionsV1/Collections/Collections';
 import _ from 'lodash';
 
 //Retro compatibility

@@ -8,7 +8,7 @@ import {
   useRef,
 } from "react";
 
-let interval: any = null;
+let interval: ReturnType<typeof setInterval> | null = null;
 
 export const AnimatedHeight = memo(
   (props: { children: ReactNode } & InputHTMLAttributes<HTMLDivElement>) => {
@@ -28,7 +28,8 @@ export const AnimatedHeight = memo(
         updateSize();
       }, 200);
       return () => {
-        clearInterval(interval);
+        if (interval)
+          clearInterval(interval);
       };
     }, []);
 

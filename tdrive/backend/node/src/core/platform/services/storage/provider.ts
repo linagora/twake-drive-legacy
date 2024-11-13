@@ -24,6 +24,12 @@ export type DeleteOptions = {
 
 export interface StorageConnectorAPI {
   /**
+   * Returns identifier of a storage that should've been set in configuration.
+   *
+   */
+  getId(): string;
+
+  /**
    * Write a stream to a path
    *
    * @param path

@@ -70,11 +70,16 @@
     }
   },
   "storage": {
+    "strategy": "STORAGE_STRATEGY",
     "secret": "STORAGE_SECRET",
     "iv": "STORAGE_SECRET_BASE_IV",
     "type": "STORAGE_DRIVER",
     "local": {
       "path": "STORAGE_LOCAL_PATH"
+    },
+    "oneof": {
+      "__name": "STORAGE_ONEOF",
+      "__format": "json"
     },
     "S3": {
       "homeDirectory": "STORAGE_S3_HOME_DIRECTORY",

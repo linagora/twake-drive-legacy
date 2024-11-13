@@ -23,7 +23,7 @@ export const useSearchDriveItems = () => {
   const [loading, setLoading] = useRecoilState(LoadingState('useSearchDriveItems'));
 
   const [searched, setSearched] = useRecoilState(SearchDriveItemsResultsState(companyId));
-  const [recent, setRecent] = useRecoilState(RecentDriveItemsState(companyId));
+  const [, setRecent] = useRecoilState(RecentDriveItemsState(companyId));
 
   const opt = _.omitBy(
     {

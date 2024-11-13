@@ -10,13 +10,12 @@ import Menu from '@components/menus/menu';
 import useRouterCompany from '@features/router/hooks/use-router-company';
 import { useDrivePreview } from '@features/drive/hooks/use-drive-preview';
 import { formatBytes } from '@features/drive/utils';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { PublicIcon } from '../components/public-icon';
 import { CheckableIcon, DriveItemOverlayProps, DriveItemProps } from './common';
 import './style.scss';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
-import useRouteState from 'app/features/router/hooks/use-route-state';
 import { DocumentIcon } from './document-icon';
 import { hasAnyPublicLinkAccess } from '@features/files/utils/access-info-helpers';
 import { formatDateShort } from 'app/features/global/utils/Numbers';
@@ -31,11 +30,10 @@ export const DocumentRow = ({
   checked,
   onClick,
   onBuildContextMenu,
-  inPublicSharing,
 }: DriveItemProps) => {
   const history = useHistory();
   const [hover, setHover] = useState(false);
-  const { open, close, isOpen } = useDrivePreview();
+  const {open} = useDrivePreview();
   const company = useRouterCompany();
   const notSafe = ['malicious', 'skipped', 'scan_failed'].includes(item.av_status);
 

@@ -1,6 +1,6 @@
 import { FolderIcon } from '@heroicons/react/solid';
 import Highlighter from 'react-highlight-words';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil';
 import { onDriveItemDownloadClick } from '../common';
 import ResultContext from './result-context';
 import { Button } from '@atoms/button/button';
@@ -15,18 +15,14 @@ import { SearchInputState } from '@features/search/state/search-input';
 import { UserType } from '@features/users/types/user';
 import { useDrivePreview } from '@features/drive/hooks/use-drive-preview';
 import Media from '@molecules/media';
-import { DriveCurrentFolderAtom } from '@views/client/body/drive/browser';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
-import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 import useRouterCompany from 'app/features/router/hooks/use-router-company';
 import { DocumentIcon } from '@views/client/body/drive/documents/document-icon';
 
 export default (props: { driveItem: DriveItem & { user?: UserType }}) => {
   const history = useHistory();
   const input = useRecoilValue(SearchInputState);
-  const { user } = useCurrentUser();
-  const [_, setParentId] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: 'user_'+user?.id }));
   const file = props.driveItem;
   const name = file?.name;
   const extension = name?.split('.').pop();

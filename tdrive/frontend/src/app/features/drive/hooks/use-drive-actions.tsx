@@ -22,7 +22,7 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
   const companyId = useRouterCompany();
   const sharedFilter = useRecoilValue(SharedWithMeFilterState);
   const sortItem = useRecoilValue(DriveItemSort);
-  const [paginateItem, _] = useRecoilState(DriveItemPagination);
+  const [ paginateItem ] = useRecoilState(DriveItemPagination);
   const { getQuota } = useUserQuota();
 
   const refresh = useRecoilCallback(

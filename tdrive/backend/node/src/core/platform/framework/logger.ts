@@ -12,6 +12,12 @@ export const logger = pino({
   mixin() {
     return executionStorage.getStore() ? executionStorage.getStore() : {};
   },
+  formatters: {
+    level(label: string) {
+      return { level: label.toUpperCase() };
+    },
+  },
+  serializers: pino.stdSerializers,
 });
 
 export const getLogger = (name?: string): TdriveLogger =>

@@ -5,16 +5,28 @@ import { rm } from "fs/promises"; // Do not change the import, this is not the s
 import { StorageConnectorAPI, WriteMetadata } from "../../provider";
 import fs from "fs";
 import { logger } from "../../../../framework/logger";
+import { randomUUID } from "crypto";
 
 export type LocalConfiguration = {
+  id: string;
   path: string;
 };
 
 export default class LocalConnectorService implements StorageConnectorAPI {
+  id: string;
   configuration: LocalConfiguration;
 
   constructor(localConfiguration: LocalConfiguration) {
     this.configuration = localConfiguration;
+    this.id = this.configuration.id;
+    if (!this.id) {
+      this.id = randomUUID();
+      logger.info(`Identifier for local storage haven't been set, initializing to '${this.id}'`);
+    }
+  }
+
+  getId() {
+    return this.id;
   }
 
   write(relativePath: string, stream: Readable): Promise<WriteMetadata> {
