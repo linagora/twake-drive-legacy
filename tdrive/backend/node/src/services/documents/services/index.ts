@@ -385,9 +385,8 @@ export class DocumentsService {
         throw Error("User does not have access to this item parent");
       }
 
+      let fileToProcess;
       if (file || driveItem.is_directory === false) {
-        let fileToProcess;
-
         if (file) {
           fileToProcess = file;
         } else if (driveItemVersion.file_metadata.external_id) {
@@ -485,6 +484,20 @@ export class DocumentsService {
             driveItem,
             driveItemVersion,
             async (av_status: AVStatus) => {
+              // Handle preview generation
+              if (av_status === "safe" && fileToProcess) {
+                const file = await globalResolver.services.files.generatePreview(
+                  fileToProcess,
+                  {
+                    waitForThumbnail: true,
+                    ignoreThumbnails: false,
+                  },
+                  context,
+                );
+                driveItemVersion.file_metadata.thumbnails = file.thumbnails;
+                await this.fileVersionRepository.save(driveItemVersion);
+                driveItem.last_version_cache = driveItemVersion;
+              }
               // Update the AV status of the file
               await this.handleAVStatusUpdate(driveItem, av_status, context);
             },
@@ -949,6 +962,13 @@ export class DocumentsService {
       }
 
       const driveItemVersion = getDefaultDriveItemVersion(version, context);
+      const fileToProcess = await globalResolver.services.files.getFile(
+        {
+          id: driveItemVersion.file_metadata.external_id,
+          company_id: context.company.id,
+        },
+        context,
+      );
       const metadata = await getFileMetadata(driveItemVersion.file_metadata.external_id, context);
 
       // if quota is enabled, check if the user has enough space
@@ -995,6 +1015,20 @@ export class DocumentsService {
             item,
             driveItemVersion,
             async (av_status: AVStatus) => {
+              // Handle preview generation
+              if (av_status === "safe" && fileToProcess) {
+                const file = await globalResolver.services.files.generatePreview(
+                  fileToProcess,
+                  {
+                    waitForThumbnail: true,
+                    ignoreThumbnails: false,
+                  },
+                  context,
+                );
+                driveItemVersion.file_metadata.thumbnails = file.thumbnails;
+                await this.fileVersionRepository.save(driveItemVersion);
+                item.last_version_cache = driveItemVersion;
+              }
               // Update the AV status of the file
               await this.handleAVStatusUpdate(item, av_status, context);
             },
