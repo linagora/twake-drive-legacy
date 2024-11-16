@@ -16,6 +16,7 @@ import path from "path";
 import { existsSync } from "fs";
 import axios from "axios";
 import short, { Translator } from "short-uuid";
+import { joinURL } from "../../../../utils/urls";
 
 export default class EmailPusherClass
   extends TdriveService<EmailPusherAPI>
@@ -86,7 +87,14 @@ export default class EmailPusherClass
       const encodedCompanyId = translator.fromUUID(data.notifications[0].item.company_id);
       const encodedItemId = translator.fromUUID(data.notifications[0].item.id);
       const previewType = data.notifications[0].item.is_directory ? "d" : "preview";
-      const encodedUrl = `${this.platformUrl}/client/${encodedCompanyId}/v/shared_with_me/${previewType}/${encodedItemId}`;
+      const encodedUrl = joinURL([
+        this.platformUrl,
+        "client",
+        encodedCompanyId,
+        "v/shared_with_me",
+        previewType,
+        encodedItemId,
+      ]);
 
       if (!existsSync(templatePath)) {
         throw Error(`template not found: ${templatePath}`);
