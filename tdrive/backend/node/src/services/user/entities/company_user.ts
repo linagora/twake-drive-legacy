@@ -1,8 +1,11 @@
 import { merge } from "lodash";
 import { Column, Entity } from "../../../core/platform/services/database/services/orm/decorators";
 import { CompanyUserRole } from "../web/types";
+import { RepositoryManager } from "../../../core/platform/services/database/services/orm/repository/manager";
 
 export const TYPE = "group_user";
+
+RepositoryManager.registerEntityToCacheRegistryBy(TYPE, ["group_id", "user_id"]);
 
 /**
  * Link between a company and a user

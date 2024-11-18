@@ -50,6 +50,16 @@
       "password": "DB_POSTGRES_PASSWORD",
       "port": "DB_POSTGRES_PORT",
       "ssl": "DB_POSTGRES_USE_SSL"
+    },
+    "localMemCache": {
+      "ttlS": "DB_LCM_TTL_S",
+      "maxKeyCount": "DB_LCM_MAX_KEY_COUNT",
+      "printPeriodMs": "DB_LCM_PRINT_PERIOD_MS",
+      "printPeriodIdleMs": "DB_LCM_PRINT_PERIOD_IDLE_MS",
+      "extraNodeCacheConfig": {
+        "__name": "DB_LCM_NODE_CACHE_EXTRA_CONFIG",
+        "__format": "json"
+      }
     }
   },
   "search": {

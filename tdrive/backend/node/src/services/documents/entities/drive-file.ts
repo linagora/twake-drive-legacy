@@ -5,9 +5,13 @@ import { DriveFileAccessLevel, publicAccessLevel } from "../types";
 import { FileVersion } from "./file-version";
 import search from "./drive-file.search";
 import * as UUIDTools from "../../../utils/uuid";
+import { RepositoryManager } from "../../../core/platform/services/database/services/orm/repository/manager";
 
 export const TYPE = "drive_files";
 export type DriveScope = "personal" | "shared";
+
+RepositoryManager.registerEntityToCacheRegistryBy(TYPE, ["id"]);
+
 /**
  * This represents an item in the file hierarchy.
  *

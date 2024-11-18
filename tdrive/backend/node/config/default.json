@@ -68,6 +68,12 @@
     "mongodb": {
       "uri": "mongodb://mongo:27017",
       "database": "tdrive"
+    },
+    "localMemCache": {
+      "ttlS": 5,
+      "maxKeyCount": 10000,
+      "printPeriodMs": 180000,
+      "printPeriodIdleMs": 180000
     }
   },
   "message-queue": {

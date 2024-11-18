@@ -2,9 +2,12 @@ import { isNumber, merge } from "lodash";
 import { Column, Entity } from "../../../core/platform/services/database/services/orm/decorators";
 import search from "./user.search";
 import { uuid } from "../../../utils/types";
+import { RepositoryManager } from "../../../core/platform/services/database/services/orm/repository/manager";
 
 export const TYPE = "user";
 export type UserType = "anonymous" | "tech" | "regular";
+
+RepositoryManager.registerEntityToCacheRegistryBy(TYPE, ["id"]);
 
 @Entity(TYPE, {
   primaryKey: [["id"]],

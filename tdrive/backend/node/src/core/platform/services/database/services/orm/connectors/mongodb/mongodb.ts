@@ -281,7 +281,13 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions> {
         : {};
     }
 
-    logger.debug(`services.database.orm.mongodb.find - Query: ${JSON.stringify(query)}`);
+    logger.debug(
+      {
+        entity: entityDefinition.name,
+        query,
+      },
+      "services.database.orm.mongodb.find",
+    );
 
     const cursor = collection
       .find(query)
