@@ -84,6 +84,13 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
 
   fastify.route({
     method: "POST",
+    url: `${serviceUrl}/:id/check_malware`,
+    preValidation: [fastify.authenticateOptional],
+    handler: documentsController.containsMaliciousFiles.bind(documentsController),
+  });
+
+  fastify.route({
+    method: "POST",
     url: `${serviceUrl}/:id/rescan`,
     preValidation: [fastify.authenticateOptional],
     handler: documentsController.reScan.bind(documentsController),

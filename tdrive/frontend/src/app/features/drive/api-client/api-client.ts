@@ -135,6 +135,13 @@ export class DriveApiClient {
     );
   }
 
+  static async checkMalware(companyId: string, id: string) {
+    return await Api.post<any, DriveItem>(
+      `/internal/services/documents/v1/companies/${companyId}/item/${id}/check_malware${appendTdriveToken()}`,
+      {},
+    );
+  }
+
   static async reScan(companyId: string, id: string) {
     return await Api.post<any, DriveItem>(
       `/internal/services/documents/v1/companies/${companyId}/item/${id}/rescan${appendTdriveToken()}`,

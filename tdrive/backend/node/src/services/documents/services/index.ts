@@ -1067,6 +1067,75 @@ export class DocumentsService {
   };
 
   /**
+   * Checks if directory contains malicious files
+   *
+   * @param {string} id - the dir id to check.
+   * @param {DriveExecutionContext} context - the company execution context
+   * @returns {Promise<boolean>} - the check result
+   */
+  containsMaliciousFiles = async (id: string, context: DriveExecutionContext): Promise<boolean> => {
+    if (!context) {
+      this.logger.error("Invalid execution context");
+      return null;
+    }
+
+    try {
+      // Check user access
+      const hasAccess = await checkAccess(id, null, "read", this.repository, context);
+      if (!hasAccess) {
+        this.logger.error("User does not have access to drive item", id);
+        throw new Error("User does not have access to this item");
+      }
+
+      // Retrieve the item
+      const item = await this.repository.findOne(
+        { company_id: context.company.id, id },
+        {},
+        context,
+      );
+
+      if (!item) {
+        throw new Error("Drive item not found");
+      }
+
+      if (!item.is_directory) {
+        throw new Error("Cannot check malicious files for a file");
+      }
+
+      // Retrieve children
+      const children = await this.repository.find(
+        { company_id: context.company.id, parent_id: id },
+        {},
+        context,
+      );
+
+      const entities = children.getEntities();
+
+      // Check files in the current directory
+      const maliciousFiles = entities.filter(
+        child => !child.is_directory && child.av_status === "malicious",
+      );
+      if (maliciousFiles.length > 0) {
+        return true;
+      }
+
+      // Recursively check subdirectories
+      const subdirectories = entities.filter(child => child.is_directory);
+      for (const subdirectory of subdirectories) {
+        const hasMaliciousFiles = await this.containsMaliciousFiles(subdirectory.id, context);
+        if (hasMaliciousFiles) {
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      this.logger.error({ error: `${error}` }, "Failed to check malicious files");
+      CrudException.throwMe(error, new CrudException("Failed to check malicious files", 500));
+    }
+  };
+
+  /**
    * Triggers an AV Rescan for the document.
    *
    * @param {string} id - the Drive item id to rescan.

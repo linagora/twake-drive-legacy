@@ -336,6 +336,34 @@ export class DocumentsController {
   };
 
   /**
+   * Checks if directory contains malicious files
+   *
+   * @param {FastifyRequest} request
+   * @returns {Promise<boolean>}
+   */
+  containsMaliciousFiles = async (
+    request: FastifyRequest<{
+      Params: ItemRequestParams;
+      Querystring: { public_token?: string };
+    }>,
+  ): Promise<boolean> => {
+    try {
+      const context = getDriveExecutionContext(request);
+      const { id } = request.params;
+
+      if (!id) throw new CrudException("Missing id", 400);
+
+      return await globalResolver.services.documents.documents.containsMaliciousFiles(id, context);
+    } catch (error) {
+      logger.error({ error: `${error}` }, "Failed to check for malicious files in Drive item");
+      CrudException.throwMe(
+        error,
+        new CrudException("Failed to check for malicious files in Drive item", 500),
+      );
+    }
+  };
+
+  /**
    * Triggers an AV Rescan for the document.
    *
    * @param {FastifyRequest} request

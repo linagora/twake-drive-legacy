@@ -66,7 +66,8 @@ export const useOnBuildContextMenu = (
         const inTrash = parent.path?.[0]?.id.includes('trash') || viewId?.includes('trash');
         const isPersonal = item?.scope === 'personal';
         const selectedCount = checked.length;
-        const notSafe = !['uploaded', 'safe'].includes(item?.av_status || '');
+        const notSafe =
+          !item?.is_directory && !['uploaded', 'safe'].includes(item?.av_status || '');
 
         let menu: any[] = [];
 
@@ -114,14 +115,13 @@ export const useOnBuildContextMenu = (
             {
               type: 'menu',
               icon: 'download-alt',
-              hide: notSafe,
               text: Languages.t('components.item_context_menu.download'),
               onClick: () => {
                 if (item && item.is_directory) {
                   downloadZip([item!.id]);
                   console.log(item!.id);
                 } else {
-                  download(item.id);
+                  download(item.id, notSafe);
                 }
               },
             },
@@ -256,8 +256,18 @@ export const useOnBuildContextMenu = (
               type: 'menu',
               text: Languages.t('components.item_context_menu.download_multiple'),
               hide: inTrash,
-              onClick: () =>
-                selectedCount === 1 ? download(checked[0].id) : downloadZip(checked.map(c => c.id)),
+              onClick: () => {
+                const  containsMalicious = checked.some(c => c.av_status === 'malicious');
+                if (selectedCount === 1) {
+                  download(checked[0].id);
+                } else {
+                  downloadZip(
+                    checked.map(c => c.id),
+                    false,
+                    containsMalicious,
+                  );
+                }
+              },
             },
             {
               type: 'menu',
@@ -535,7 +545,9 @@ export const useOnBuildFileContextMenu = () => {
         {
           type: 'menu',
           text: Languages.t('components.item_context_menu.download'),
-          onClick: () => download(item.id),
+          onClick: () => {
+            download(item.id);
+          },
         },
       ];
       return menuItems;

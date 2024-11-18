@@ -10,9 +10,11 @@ import Menu from '@components/menus/menu';
 import useRouterCompany from '@features/router/hooks/use-router-company';
 import { useDrivePreview } from '@features/drive/hooks/use-drive-preview';
 import { formatBytes } from '@features/drive/utils';
+import Languages from '@features/global/services/languages-service';
 import { useState } from 'react';
 import { PublicIcon } from '../components/public-icon';
 import { CheckableIcon, DriveItemOverlayProps, DriveItemProps } from './common';
+
 import './style.scss';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
@@ -89,8 +91,7 @@ export const DocumentRow = ({
       </div>
       {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_AV_ENABLED) && (
         <div className="shrink-0 ml-4 text-right lg:w-24 sm:w-20 ">
-          <BaseSmall title={item?.av_status}>
-            {item?.av_status === 'safe' && <ShieldCheckIcon className="w-5 text-teal-400" />}
+          <BaseSmall title={Languages.t(`scenes.app.drive.document_row.av_${item?.av_status}`)}>
             {item?.av_status === 'scanning' && (
               <ShieldExclamationIcon className="w-5 text-yellow-400" />
             )}

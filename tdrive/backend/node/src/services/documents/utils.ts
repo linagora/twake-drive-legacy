@@ -344,6 +344,11 @@ export const addDriveItemToArchive = async (
 
   if (item.is_in_trash) return;
 
+  // if the av is enabled and the file is not safe, we don't want to download it
+  if (gr.services.av?.avEnabled && item.av_status !== "safe") {
+    return;
+  }
+
   if (!item.is_directory) {
     // random comment
     const file_id = item.last_version_cache.file_metadata.external_id;

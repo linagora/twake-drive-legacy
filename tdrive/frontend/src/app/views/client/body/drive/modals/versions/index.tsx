@@ -49,7 +49,7 @@ const VersionModalContent = ({ id }: { id: string }) => {
   if (!item?.last_version_cache) return <></>;
 
   return (
-    <ModalContent title={Languages.t('components.VersionModalContent_version') + " " + item?.name}>
+    <ModalContent title={Languages.t('components.VersionModalContent_version') + ' ' + item?.name}>
       <UploadZone
         overClassName={'!m-4'}
         disableClick
@@ -66,12 +66,14 @@ const VersionModalContent = ({ id }: { id: string }) => {
         }}
       >
         {access !== 'read' && (
-          <div className={'flex flex-row items-center bg-zinc-100 dark:bg-zinc-900 rounded-md mb-4 p-4'}>
+          <div
+            className={
+              'flex flex-row items-center bg-zinc-100 dark:bg-zinc-900 rounded-md mb-4 p-4'
+            }
+          >
             <div className="flex flex-row">
               <div className="grow flex items-center">
-                <Base>
-                {Languages.t('components.VersionModalContent_version_dec')}
-                </Base>
+                <Base>{Languages.t('components.VersionModalContent_version_dec')}</Base>
               </div>
               <div className="shrink-0 ml-4 flex items-center">
                 <Button
@@ -108,8 +110,11 @@ const VersionModalContent = ({ id }: { id: string }) => {
               <BaseSmall>{formatBytes(version.file_metadata.size || 0)}</BaseSmall>
             </div>
             <div className="shrink-0 ml-4">
-              <Button theme="outline" onClick={() => download(id, version.id)}>
-              {Languages.t('components.VersionModalContent_donwload')}
+              <Button
+                theme="outline"
+                onClick={() => download(id, item.av_status === 'malicious', version.id)}
+              >
+                {Languages.t('components.VersionModalContent_donwload')}
               </Button>
             </div>
           </div>
