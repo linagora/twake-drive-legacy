@@ -1074,8 +1074,6 @@ export class DocumentsService {
    * @returns {Promise<boolean>} - the check result
    */
   containsMaliciousFiles = async (id: string, context: DriveExecutionContext): Promise<boolean> => {
-    const unsafeStatuses = ["malicious", "scanning", "scan_failed", "skipped"];
-
     if (!context) {
       this.logger.error("Invalid execution context");
       return null;
@@ -1115,8 +1113,9 @@ export class DocumentsService {
 
       // Check files in the current directory
       const maliciousFiles = entities.filter(
-        child => !child.is_directory && unsafeStatuses.includes(child.av_status),
+        child => !child.is_directory && child.av_status !== "safe",
       );
+
       if (maliciousFiles.length > 0) {
         return true;
       }
@@ -1146,15 +1145,15 @@ export class DocumentsService {
    */
   reScan = async (id: string, context: DriveExecutionContext): Promise<DriveFile> => {
     if (!context) {
-      this.logger.error("invalid execution context");
-      return null;
+      this.logger.error("Invalid execution context");
+      throw new Error("Execution context is required"); // Explicit error to indicate a fatal issue
     }
 
     try {
       const hasAccess = await checkAccess(id, null, "write", this.repository, context);
       if (!hasAccess) {
-        this.logger.error("user does not have access drive item ", id);
-        throw Error("user does not have access to this item");
+        this.logger.warn(`Access denied for user to drive item ${id}`);
+        throw new Error("User does not have access to this item");
       }
 
       const item = await this.repository.findOne(
@@ -1167,40 +1166,50 @@ export class DocumentsService {
       );
 
       if (!item) {
-        throw Error("Drive item not found");
+        this.logger.warn(`Drive item ${id} not found`);
+        throw new Error("Drive item not found");
       }
 
       if (item.is_directory) {
-        throw Error("cannot create version for a directory");
+        this.logger.warn(`Attempted to rescan a directory ${id}`);
+        throw new Error("Cannot rescan a directory");
       }
 
-      // If AV feature is enabled, scan the file
       if (globalResolver.services.av?.avEnabled) {
         try {
           item.av_status = await globalResolver.services.av.scanDocument(
             item,
             item.last_version_cache,
             async (av_status: AVStatus) => {
-              // Update the AV status of the file
               await this.handleAVStatusUpdate(item, av_status, context);
             },
             context,
           );
+
           await this.repository.save(item);
+
           if (item.av_status === "skipped") {
-            // Notify the user that the document has been skipped
+            this.logger.info(`AV scan skipped for file ${item.id}`);
             await this.notifyAVScanAlert(item, context);
           }
-        } catch (error) {
+        } catch (scanError) {
           this.logger.error(
-            `Error scanning file ${item.last_version_cache.file_metadata.external_id}`,
+            `Error scanning file ${item.last_version_cache.file_metadata.external_id}: ${scanError.message}`,
           );
+          throw new CrudException("Error scanning file", 500);
         }
+      } else {
+        this.logger.error("AV scanning is not enabled");
+        throw new Error("An unexpected error occurred. Please try again later.");
       }
+
       return item;
     } catch (error) {
-      logger.error({ error: `${error}` }, "Failed to create Drive item version");
-      CrudException.throwMe(error, new CrudException("Failed to create Drive item version", 500));
+      this.logger.error(
+        { error: error.message, stack: error.stack },
+        `Failed to rescan drive item ${id}`,
+      );
+      throw new CrudException("Failed to rescan the drive item", 500);
     }
   };
 

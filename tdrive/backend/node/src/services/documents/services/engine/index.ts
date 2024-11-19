@@ -21,7 +21,7 @@ export class DocumentsEngine implements Initializable {
     const emailTemplate = eventToTemplateMap[event];
 
     if (!emailTemplate) {
-      logger.error(`Unknown event type: ${event}`);
+      logger.error(`Error dispatching document event. Unknown event type: ${event}`);
       return; // Early return on unknown event type
     }
 
@@ -72,9 +72,9 @@ export class DocumentsEngine implements Initializable {
     );
 
     localEventBus.subscribe(
-      DocumentEvents.DOCUEMNT_AV_SCAN_ALERT,
+      DocumentEvents.DOCUMENT_AV_SCAN_ALERT,
       async (e: NotificationPayloadType) => {
-        await this.DispatchDocumentEvent(e, DocumentEvents.DOCUEMNT_AV_SCAN_ALERT);
+        await this.DispatchDocumentEvent(e, DocumentEvents.DOCUMENT_AV_SCAN_ALERT);
       },
     );
 
@@ -90,6 +90,6 @@ export class DocumentsEngine implements Initializable {
   }
 
   notifyDocumentAVScanAlert(notificationPayload: NotificationPayloadType) {
-    localEventBus.publish(DocumentEvents.DOCUEMNT_AV_SCAN_ALERT, notificationPayload);
+    localEventBus.publish(DocumentEvents.DOCUMENT_AV_SCAN_ALERT, notificationPayload);
   }
 }

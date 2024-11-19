@@ -31,7 +31,7 @@
                   </div>
                   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
                     <span style="color: #FF0000; font-weight: 600;">
-                      Problème : ${it.notifications[0].item.av_status === "scan_failed" ? "Échec de l'analyse 🔍" : "Contenu malveillant détecté ⚠️"}
+                      Problème: ${ it.notifications[0].item.av_status === "scan_failed" ? "Échec de l'analyse 🔍" : it.notifications[0].item.av_status === "malicious" ? "Contenu malveillant détecté ⚠️" : "Fichier trop volumineux pour être analysé 🚫" }
                     </span>
                   </div>
               </td>

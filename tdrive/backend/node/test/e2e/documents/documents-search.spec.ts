@@ -125,8 +125,6 @@ describe("the Drive Search feature", () => {
     //when
     let documents = await userOne.searchDocument(filters);
 
-    console.log("🚀🚀 documents", documents.entities);
-
     //then
     expect(documents.entities).toHaveLength(3);
     expect(documents.entities[0].name.includes("pdf")).toBeTruthy();

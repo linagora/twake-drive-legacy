@@ -8,7 +8,9 @@ import * as UUIDTools from "../../../utils/uuid";
 
 export const TYPE = "drive_files";
 export type DriveScope = "personal" | "shared";
-export type AVStatus = "uploaded" | "scanning" | "scan_failed" | "safe" | "malicious" | "skipped";
+export type AVStatusSafe = "safe";
+export type AVStatusUnsafe = "uploaded" | "scanning" | "scan_failed" | "malicious" | "skipped";
+export type AVStatus = AVStatusSafe | AVStatusUnsafe;
 
 /**
  * This represents an item in the file hierarchy.

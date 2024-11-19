@@ -70,7 +70,7 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
       this.av.scanStream(readableStream, async (err, { isInfected, viruses }) => {
         if (err) {
           await onScanComplete("scan_failed");
-          this.logger.info(`Scan failed for item ${item.id} due to error: ${err.message}`);
+          this.logger.error(`Scan failed for item ${item.id} due to error: ${err.message}`);
         } else if (isInfected) {
           await onScanComplete("malicious");
           this.logger.info(`Item ${item.id} is malicious. Viruses found: ${viruses.join(", ")}`);

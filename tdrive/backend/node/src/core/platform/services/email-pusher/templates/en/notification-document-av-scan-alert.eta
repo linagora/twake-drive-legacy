@@ -31,7 +31,7 @@
                   </div>
                   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
                     <span style="color: #FF0000; font-weight: 600;">
-                      Issue: ${ it.notifications[0].item.av_status === "scan_failed" ? "Scan Failed 🔍" : it.notifications[0].item.av_status === "malicious" ? "Malicious Content Detected ⚠️" : "Fichier trop volumineux pour être analysé 🚫" }
+                      Issue: ${ it.notifications[0].item.av_status === "scan_failed" ? "Scan Failed 🔍" : it.notifications[0].item.av_status === "malicious" ? "Malicious Content Detected ⚠️" : "File too large to be scanned 🚫" }
                     </span>
                   </div>
               </td>
