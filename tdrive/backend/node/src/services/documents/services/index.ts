@@ -1074,6 +1074,8 @@ export class DocumentsService {
    * @returns {Promise<boolean>} - the check result
    */
   containsMaliciousFiles = async (id: string, context: DriveExecutionContext): Promise<boolean> => {
+    const unsafeStatuses = ["malicious", "scanning", "scan_failed", "skipped"];
+
     if (!context) {
       this.logger.error("Invalid execution context");
       return null;
@@ -1113,7 +1115,7 @@ export class DocumentsService {
 
       // Check files in the current directory
       const maliciousFiles = entities.filter(
-        child => !child.is_directory && child.av_status === "malicious",
+        child => !child.is_directory && unsafeStatuses.includes(child.av_status),
       );
       if (maliciousFiles.length > 0) {
         return true;

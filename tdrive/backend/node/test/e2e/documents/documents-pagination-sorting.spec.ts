@@ -147,6 +147,9 @@ describe("The Documents Browser Window and API", () => {
     it("Should paginate shared with me ", async () => {
       let page_token: any = "1";
       const limitStr = "2";
+
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
       let docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
         paginate: { page_token, limitStr },
       });
