@@ -93,7 +93,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "POST",
     url: `${serviceUrl}/:id/rescan`,
     preValidation: [fastify.authenticateOptional],
-    handler: documentsController.reScan.bind(documentsController),
+    handler: documentsController.rescan.bind(documentsController),
   });
 
   fastify.route({

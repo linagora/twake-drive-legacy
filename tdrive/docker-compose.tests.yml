@@ -19,6 +19,11 @@ services:
     container_name: av
     ports:
       - 3310:3310
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'PING' | nc -w 5 localhost 3310"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   redis:
     image: "redis:alpine"

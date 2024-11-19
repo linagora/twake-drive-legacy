@@ -369,7 +369,7 @@ export class DocumentsController {
    * @param {FastifyRequest} request
    * @returns {Promise<DriveFile>}
    */
-  reScan = async (
+  rescan = async (
     request: FastifyRequest<{
       Params: ItemRequestParams;
       Body: Partial<any>;
@@ -382,7 +382,7 @@ export class DocumentsController {
 
       if (!id) throw new CrudException("Missing id", 400);
 
-      return await globalResolver.services.documents.documents.reScan(id, context);
+      return await globalResolver.services.documents.documents.rescan(id, context);
     } catch (error) {
       logger.error({ error: `${error}` }, "Failed to trigger AV rescan for Drive item");
       CrudException.throwMe(

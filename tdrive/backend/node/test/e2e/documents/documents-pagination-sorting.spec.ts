@@ -35,6 +35,8 @@ describe("The Documents Browser Window and API", () => {
     for (const file of files) {
       await currentUser.shareWithPermissions(file, anotherUser.user.id, "read");
     }
+    // for opensearch to index the files
+    await new Promise(resolve => setTimeout(resolve, 3000));
   });
 
   afterAll(async () => {
@@ -147,8 +149,6 @@ describe("The Documents Browser Window and API", () => {
     it("Should paginate shared with me ", async () => {
       let page_token: any = "1";
       const limitStr = "2";
-
-      await new Promise(resolve => setTimeout(resolve, 3000));
 
       let docs = await anotherUser.browseDocuments(sharedWIthMeFolder, {
         paginate: { page_token, limitStr },

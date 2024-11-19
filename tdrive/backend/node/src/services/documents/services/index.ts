@@ -484,6 +484,8 @@ export class DocumentsService {
             driveItem,
             driveItemVersion,
             async (av_status: AVStatus) => {
+              // Update the AV status of the file
+              await this.handleAVStatusUpdate(driveItem, av_status, context);
               // Handle preview generation
               if (av_status === "safe" && fileToProcess) {
                 const file = await globalResolver.services.files.generatePreview(
@@ -500,8 +502,6 @@ export class DocumentsService {
                   driveItem.last_version_cache = driveItemVersion;
                 }
               }
-              // Update the AV status of the file
-              await this.handleAVStatusUpdate(driveItem, av_status, context);
             },
             context,
           );
@@ -512,6 +512,7 @@ export class DocumentsService {
           }
         } catch (error) {
           this.logger.error(`Error scanning file ${driveItemVersion.file_metadata.external_id}`);
+          CrudException.throwMe(error, new CrudException("Failed to scan file", 500));
         }
       }
 
@@ -1017,6 +1018,8 @@ export class DocumentsService {
             item,
             driveItemVersion,
             async (av_status: AVStatus) => {
+              // Update the AV status of the file
+              await this.handleAVStatusUpdate(item, av_status, context);
               // Handle preview generation
               if (av_status === "safe" && fileToProcess) {
                 const file = await globalResolver.services.files.generatePreview(
@@ -1033,8 +1036,6 @@ export class DocumentsService {
                   item.last_version_cache = driveItemVersion;
                 }
               }
-              // Update the AV status of the file
-              await this.handleAVStatusUpdate(item, av_status, context);
             },
             context,
           );
@@ -1045,6 +1046,7 @@ export class DocumentsService {
           }
         } catch (error) {
           this.logger.error(`Error scanning file ${driveItemVersion.file_metadata.external_id}`);
+          CrudException.throwMe(error, new CrudException("Failed to scan file", 500));
         }
       }
 
@@ -1143,7 +1145,7 @@ export class DocumentsService {
    * @param {DriveExecutionContext} context - the company execution context
    * @returns {Promise<DriveFile>} - the DriveFile after the rescan has been triggered
    */
-  reScan = async (id: string, context: DriveExecutionContext): Promise<DriveFile> => {
+  rescan = async (id: string, context: DriveExecutionContext): Promise<DriveFile> => {
     if (!context) {
       this.logger.error("Invalid execution context");
       throw new Error("Execution context is required"); // Explicit error to indicate a fatal issue
@@ -1205,10 +1207,7 @@ export class DocumentsService {
 
       return item;
     } catch (error) {
-      this.logger.error(
-        { error: error.message, stack: error.stack },
-        `Failed to rescan drive item ${id}`,
-      );
+      this.logger.error({ error: `${error}` }, `Failed to rescan drive item ${id}`);
       throw new CrudException("Failed to rescan the drive item", 500);
     }
   };
