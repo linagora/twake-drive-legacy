@@ -576,13 +576,13 @@ export class DocumentsService {
         throw Error("content mismatch");
       }
 
+      let updatable = ["access_info", "name", "tags", "parent_id", "description", "is_in_trash"];
+
       // Check if AV feature is enabled and file is malicious
       if (globalResolver.services.av?.avEnabled && item.av_status === "malicious") {
-        this.logger.error("Cannot update a malicious file");
-        throw new CrudException("Cannot update a malicious file", 403);
+        updatable = ["is_in_trash"];
       }
 
-      const updatable = ["access_info", "name", "tags", "parent_id", "description", "is_in_trash"];
       let renamedTo: string | undefined;
       for (const key of updatable) {
         if ((content as any)[key]) {
