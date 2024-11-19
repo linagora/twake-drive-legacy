@@ -8,6 +8,10 @@ export class AVException extends Error {
     return new AVException(details, 503);
   }
 
+  static fileNotFound(details: string): AVException {
+    return new AVException(details, 404);
+  }
+
   static scanFailed(details: string): AVException {
     return new AVException(details, 500);
   }

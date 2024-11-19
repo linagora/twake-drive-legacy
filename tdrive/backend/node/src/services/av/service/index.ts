@@ -51,6 +51,11 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
         version.file_metadata.external_id,
         context,
       );
+
+      if (!file) {
+        this.logger.error(`File ${version.file_metadata.external_id} not found`);
+        throw AVException.fileNotFound(`File ${version.file_metadata.external_id} not found`);
+      }
       // check if the file is too large
       if (file.upload_data.size > this.MAX_FILE_SIZE) {
         this.logger.info(

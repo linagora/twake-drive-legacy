@@ -90,7 +90,7 @@ describe("The documents antivirus", () => {
       const oneUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
 
       // Create a default document for the user
-      const document = await oneUser.createDefaultDocument();
+      const document = await oneUser.uploadFileAndCreateDocument("../../common/assets/sample.doc");
 
       // Upload a file and deserialize the response
       const fileUploadResponse = await e2e_createDocumentFile(platform);
@@ -98,6 +98,8 @@ describe("The documents antivirus", () => {
         ResourceUpdateResponse,
         fileUploadResponse.body,
       );
+      console.log("🚀🚀 document:: ", document);
+      console.log("🚀🚀 fileUploadResponseS:: ", fileUploadResponse.body);
 
       // Prepare metadata with the uploaded file's ID
       const fileMetadata = { external_id: fileUploadResult.resource.id };
@@ -111,6 +113,7 @@ describe("The documents antivirus", () => {
       );
       const versionResult = deserialize<FileVersion>(FileVersion, versionResponse.body);
       expect(versionResult).toBeDefined();
+      console.log("🚀🚀 VERSION RESULT IS:: ", versionResponse.body);
 
       // Retrieve the document and verify the antivirus status
       const documentResponse = await oneUser.getDocument(versionResult.drive_item_id);
@@ -118,6 +121,8 @@ describe("The documents antivirus", () => {
         DriveItemDetailsMockClass,
         documentResponse.body,
       );
+
+      console.log("🚀🚀 RESP IS:: ", documentResponse.body);
 
       // Ensure the document has been scanned and is no longer marked as "uploaded"
       expect(deserializedDocument.item.av_status).not.toBe("uploaded");
