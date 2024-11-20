@@ -2,7 +2,12 @@ import globalResolver from "../../../global-resolver";
 import { logger } from "../../../../core/platform/framework";
 import { localEventBus } from "../../../../core/platform/framework/event-bus";
 import { Initializable } from "../../../../core/platform/framework";
-import { DocumentEvents, NotificationPayloadType, eventToTemplateMap } from "../../types";
+import {
+  DocumentEvents,
+  NotificationActionType,
+  NotificationPayloadType,
+  eventToTemplateMap,
+} from "../../types";
 import { DocumentsProcessor } from "./extract-keywords";
 import Repository from "../../../../core/platform/services/database/services/orm/repository/repository";
 import { DriveFile, TYPE } from "../../entities/drive-file";
@@ -36,15 +41,15 @@ export class DocumentsEngine implements Initializable {
     const itemId = isDirectory ? e.item.id : e.item.parent_id;
 
     // Determine the scope
-    let scope;
-    if (e.type === "update") {
-      scope = isPersonalScope ? `user_${receiver.id}` : "root";
+    let view;
+    if (e.type === NotificationActionType.UPDATE) {
+      view = isPersonalScope ? `user_${receiver.id}` : "root";
     } else {
-      scope = "shared_with_me";
+      view = "shared_with_me";
     }
 
     // Build URL components
-    const urlComponents = [...clientPath, scope];
+    const urlComponents = [...clientPath, view];
 
     // Add directory and itemId if applicable
     if (e.type === "update" || isDirectory) {
