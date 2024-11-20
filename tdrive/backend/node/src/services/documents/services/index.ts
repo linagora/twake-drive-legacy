@@ -30,6 +30,7 @@ import {
   DriveFileAccessLevel,
   DriveItemDetails,
   DriveTdriveTab,
+  NotificationActionType,
   RootType,
   SearchDocumentsOptions,
   TrashType,
@@ -457,6 +458,7 @@ export class DocumentsService {
             gr.services.documents.engine.notifyDocumentShared({
               context,
               item: driveItem,
+              type: NotificationActionType.UPDATE,
               notificationEmitter: context.user.id,
               notificationReceiver: parentItem.creator,
             });
@@ -628,6 +630,7 @@ export class DocumentsService {
                 gr.services.documents.engine.notifyDocumentShared({
                   context,
                   item,
+                  type: NotificationActionType.DIRECT,
                   notificationEmitter: context.user.id,
                   notificationReceiver: sharedWith[0].id,
                 });
@@ -1004,6 +1007,7 @@ export class DocumentsService {
         gr.services.documents.engine.notifyDocumentVersionUpdated({
           context,
           item,
+          type: NotificationActionType.UPDATE,
           notificationEmitter: context.user.id,
           notificationReceiver: item.creator,
         });
@@ -1761,6 +1765,7 @@ export class DocumentsService {
     await gr.services.documents.engine.notifyDocumentAVScanAlert({
       context,
       item,
+      type: NotificationActionType.DIRECT,
       notificationEmitter: context.user.id,
       notificationReceiver: context.user.id,
     });

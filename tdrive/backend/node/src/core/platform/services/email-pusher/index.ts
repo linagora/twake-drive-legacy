@@ -15,7 +15,6 @@ import { convert } from "html-to-text";
 import path from "path";
 import { existsSync } from "fs";
 import axios from "axios";
-import short, { Translator } from "short-uuid";
 import { joinURL } from "../../../../utils/urls";
 
 export default class EmailPusherClass
@@ -81,20 +80,10 @@ export default class EmailPusherClass
   ): Promise<EmailBuilderRenderedResult> {
     try {
       language = ["en", "fr"].find(l => language.toLocaleLowerCase().includes(l)) || "en";
-      const translator: Translator = short();
       const templatePath = path.join(__dirname, "templates", language, `${template}.eta`);
       const subjectPath = path.join(__dirname, "templates", language, `${template}.subject.eta`);
-      const encodedCompanyId = translator.fromUUID(data.notifications[0].item.company_id);
-      const encodedItemId = translator.fromUUID(data.notifications[0].item.id);
-      const previewType = data.notifications[0].item.is_directory ? "d" : "preview";
-      const encodedUrl = joinURL([
-        this.platformUrl,
-        "client",
-        encodedCompanyId,
-        "v/shared_with_me",
-        previewType,
-        encodedItemId,
-      ]);
+      const urlComponents = data.notifications[0].urlComponents;
+      const encodedUrl = joinURL([this.platformUrl, ...urlComponents]);
 
       if (!existsSync(templatePath)) {
         throw Error(`template not found: ${templatePath}`);

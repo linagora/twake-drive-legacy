@@ -9,6 +9,7 @@ export type EmailBuilderDataPayload = {
   notifications?: {
     type: string;
     item: DriveFile;
+    urlComponents: string[];
   }[];
 };
 

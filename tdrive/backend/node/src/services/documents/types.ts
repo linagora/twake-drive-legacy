@@ -125,9 +125,15 @@ export const eventToTemplateMap: Record<string, any> = {
   [DocumentEvents.DOCUMENT_SAHRED]: "notification-document-shared",
 };
 
+export enum NotificationActionType {
+  DIRECT = "direct",
+  UPDATE = "update",
+}
+
 export type NotificationPayloadType = {
   context: CompanyExecutionContext;
   item: DriveFile;
+  type: NotificationActionType;
   notificationEmitter: string;
   notificationReceiver: string;
 };

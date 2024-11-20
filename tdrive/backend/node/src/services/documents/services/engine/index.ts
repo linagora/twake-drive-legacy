@@ -7,10 +7,14 @@ import { DocumentsProcessor } from "./extract-keywords";
 import Repository from "../../../../core/platform/services/database/services/orm/repository/repository";
 import { DriveFile, TYPE } from "../../entities/drive-file";
 import { DocumentsFinishedProcess } from "./save-keywords";
+import short, { Translator } from "short-uuid";
+import { getConfigOrDefault } from "../../../../utils/get-config";
 export class DocumentsEngine implements Initializable {
   private documentRepository: Repository<DriveFile>;
+  private platformUrl: string = getConfigOrDefault("drive.defaultUserQuota", 0);
 
   async DispatchDocumentEvent(e: NotificationPayloadType, event: string) {
+    const translator: Translator = short();
     const sender = await globalResolver.services.users.get({ id: e.notificationEmitter });
     const receiver = await globalResolver.services.users.get({ id: e.notificationReceiver });
     const company = await globalResolver.services.companies.getCompany({
@@ -25,6 +29,28 @@ export class DocumentsEngine implements Initializable {
       return; // Early return on unknown event type
     }
 
+    const encodedCompanyId = translator.fromUUID(e.item.company_id);
+    const clientPath = ["client", encodedCompanyId, "v"];
+    const isPersonalScope = e.item.scope === "personal";
+    const isDirectory = e.item.is_directory;
+    const itemId = isDirectory ? e.item.id : e.item.parent_id;
+
+    // Determine the scope
+    let scope;
+    if (e.type === "update") {
+      scope = isPersonalScope ? `user_${receiver.id}` : "root";
+    } else {
+      scope = "shared_with_me";
+    }
+
+    // Build URL components
+    const urlComponents = [...clientPath, scope];
+
+    // Add directory and itemId if applicable
+    if (e.type === "update" || isDirectory) {
+      urlComponents.push("d", itemId);
+    }
+
     try {
       const { html, text, subject } = await globalResolver.platformServices.emailPusher.build(
         emailTemplate,
@@ -37,10 +63,12 @@ export class DocumentsEngine implements Initializable {
             {
               type: event,
               item: e.item,
+              urlComponents,
             },
           ],
         },
       );
+
       logger.info(`Sending email notification to ${receiver.email_canonical}`);
       await globalResolver.platformServices.emailPusher.send(receiver.email_canonical, {
         subject,
