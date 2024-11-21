@@ -78,7 +78,7 @@ export default memo(
       : 'member';
     setTdriveTabToken(tdriveTabContextToken || null);
     const [ filter ] = useRecoilState(SharedWithMeFilterState);
-    const { viewId, dirId } = useRouteState();
+    const { viewId, dirId, itemId } = useRouteState();
     const [sortLabel] = useRecoilState(DriveItemSort)
     const [parentId, _setParentId] = useRecoilState(
       DriveCurrentFolderAtom({
@@ -107,7 +107,7 @@ export default memo(
       children,
       loading: loadingParent,
       path,
-      loadNextPage,
+      loadNextPage
     } = useDriveItem(parentId);
     const { uploadTree } = useDriveUpload();
 
@@ -258,6 +258,25 @@ export default memo(
         scrollViwer.current?.removeEventListener('scroll', handleScroll);
       };
     }, [parentId, loading]);
+
+    // Scroll to item in view
+    const scrollTillItemInView = itemId && itemId?.length > 0;
+    const scrollItemId = itemId || '';
+    
+    useEffect(() => {
+      const itemInChildren = children.find(item => item.id === scrollItemId);
+      if (!loading && scrollTillItemInView && !itemInChildren) {
+        scrollViwer.current?.scrollTo(0, scrollViwer.current?.scrollHeight);
+      } else {
+        if (!loading && itemInChildren) {
+          // scroll to id using id
+          const element = document.getElementById(scrollItemId);
+          element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // set as checked
+          setChecked({ [scrollItemId]: true });
+        }
+      }
+    }, [loading, children]);
 
     return (
       <>

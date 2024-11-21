@@ -54,6 +54,7 @@ export const DocumentRow = ({
           : 'hover:bg-zinc-500 hover:bg-opacity-10 ') +
         (className || '')
       }
+      id={item.id}
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       onClick={e => {

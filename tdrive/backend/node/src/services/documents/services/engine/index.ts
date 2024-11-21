@@ -14,6 +14,7 @@ import { DriveFile, TYPE } from "../../entities/drive-file";
 import { DocumentsFinishedProcess } from "./save-keywords";
 import short, { Translator } from "short-uuid";
 import { getConfigOrDefault } from "../../../../utils/get-config";
+import fs from "fs";
 export class DocumentsEngine implements Initializable {
   private documentRepository: Repository<DriveFile>;
   private platformUrl: string = getConfigOrDefault("drive.defaultUserQuota", 0);
@@ -56,6 +57,11 @@ export class DocumentsEngine implements Initializable {
       urlComponents.push("d", itemId);
     }
 
+    // To highlight the file in the document browser when the user clicks on the notification
+    if (!isDirectory) {
+      urlComponents.push("preview", e.item.id);
+    }
+
     try {
       const { html, text, subject } = await globalResolver.platformServices.emailPusher.build(
         emailTemplate,
@@ -73,6 +79,8 @@ export class DocumentsEngine implements Initializable {
           ],
         },
       );
+
+      fs.writeFileSync("email.html", html);
 
       logger.info(`Sending email notification to ${receiver.email_canonical}`);
       await globalResolver.platformServices.emailPusher.send(receiver.email_canonical, {

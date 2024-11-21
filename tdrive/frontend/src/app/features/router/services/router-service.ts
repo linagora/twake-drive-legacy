@@ -54,7 +54,7 @@ class RouterServices extends Observable {
     '/client/:companyId/v/:viewId',
     '/client/:companyId/v/:viewId/d/:dirId',
     '/client/:companyId/v/:viewId/preview/:itemId',
-    '/client/:companyId/v/:viewId/d/:dirId/preview/:itemId',
+    '/client/:companyId/v/:viewId/d/:dirId/preview/:itemId', // preview item
     '/client/:companyId/w/:workspaceId',
     '/client/:companyId/w/:workspaceId/c/:channelId',
     '/client/:companyId/w/:workspaceId/c/:channelId/t/:threadId',
@@ -79,7 +79,6 @@ class RouterServices extends Observable {
 
   UUIDsToTranslate: Readonly<string[]> = [
     'companyId',
-    'itemId',
     'workspaceId',
     'channelId',
     'messageId',
