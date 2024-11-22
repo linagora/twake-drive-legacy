@@ -13,8 +13,8 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
   version: "1";
   av: NodeClam = null;
   logger: TdriveLogger = getLogger("Antivirus Service");
-  avEnabled = getConfigOrDefault("drive.featureAntivirus", false);
-  private MAX_FILE_SIZE = getConfigOrDefault("av.maxFileSize", 26214400); // 25 MB
+  avEnabled: boolean = getConfigOrDefault<boolean>("drive.featureAntivirus", false);
+  private MAX_FILE_SIZE: number = getConfigOrDefault<number>("av.maxFileSize", 26214400); // 25 MB
 
   async init(): Promise<this> {
     try {
@@ -23,11 +23,11 @@ export class AVServiceImpl implements TdriveServiceProvider, Initializable {
           removeInfected: false, // Do not remove infected files
           quarantineInfected: false, // Do not quarantine, just alert
           scanLog: null, // No log file for this test
-          debugMode: getConfigOrDefault("av.debugMode", false), // Enable debug messages
+          debugMode: getConfigOrDefault<boolean>("av.debugMode", false), // Enable debug messages
           clamdscan: {
-            host: getConfigOrDefault("av.host", "localhost"), // IP of the server
-            port: getConfigOrDefault("av.port", 3310) as number, // ClamAV server port
-            timeout: getConfigOrDefault("av.timeout", 2000), // Timeout for scans
+            host: getConfigOrDefault<string>("av.host", "localhost"), // IP of the server
+            port: getConfigOrDefault<number>("av.port", 3310) as number, // ClamAV server port
+            timeout: getConfigOrDefault<number>("av.timeout", 2000), // Timeout for scans
             localFallback: true, // Use local clamscan if needed
           },
         });

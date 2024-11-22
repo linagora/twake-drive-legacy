@@ -73,9 +73,9 @@ export class DocumentsService {
   userRepository: Repository<User>;
   ROOT: RootType = "root";
   TRASH: TrashType = "trash";
-  quotaEnabled: boolean = getConfigOrDefault("drive.featureUserQuota", false);
-  defaultQuota: number = getConfigOrDefault("drive.defaultUserQuota", 0);
-  manageAccessEnabled: boolean = getConfigOrDefault("drive.featureManageAccess", false);
+  quotaEnabled: boolean = getConfigOrDefault<boolean>("drive.featureUserQuota", false);
+  defaultQuota: number = getConfigOrDefault<number>("drive.defaultUserQuota", 0);
+  manageAccessEnabled: boolean = getConfigOrDefault<boolean>("drive.featureManageAccess", false);
   logger: TdriveLogger = getLogger("Documents Service");
 
   async init(): Promise<this> {
