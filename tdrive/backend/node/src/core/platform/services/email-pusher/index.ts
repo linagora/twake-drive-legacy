@@ -42,6 +42,7 @@ export default class EmailPusherClass
     });
     this.interface = this.configuration.get<string>("email_interface", "");
     this.platformUrl = this.configuration.get<string>("platform_url", "");
+    this.debug = this.configuration.get<boolean>("debug", false);
     if (this.interface === "smtp") {
       const useTLS = this.configuration.get<string>("smtp_tls", "false") == "true";
       const smtpConfig: SMTPClientConfigType = {
@@ -59,7 +60,6 @@ export default class EmailPusherClass
       this.apiUrl = this.configuration.get<string>("endpoint", "");
       this.apiKey = this.configuration.get<string>("api_key", "");
       this.sender = this.configuration.get<string>("sender", "");
-      this.debug = this.configuration.get<boolean>("debug", false);
     }
 
     return this;
@@ -107,7 +107,7 @@ export default class EmailPusherClass
 
       return { html, text, subject };
     } catch (error) {
-      this.logger.error(`Failure when building email template: ${error}`);
+      this.logger.error({ error }, `Failure when building email template: ${error}`);
     }
   }
 
@@ -139,7 +139,7 @@ export default class EmailPusherClass
       };
 
       if (this.debug) {
-        this.logger.info("EMAIL::SENT ", { emailObject });
+        this.logger.info({ emailObject }, "EMAIL::SENT");
       } else {
         if (this.interface === "smtp") {
           try {
