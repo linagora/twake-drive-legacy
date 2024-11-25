@@ -689,19 +689,24 @@ export const generateEncodedUrlComponents = (e: NotificationPayloadType, receive
   const isDirectory = e.item.is_directory;
   const itemId = isDirectory ? e.item.id : e.item.parent_id;
 
-  // Determine the scope
-  let view;
-  if (e.type === NotificationActionType.UPDATE) {
-    view = isPersonalScope ? `user_${receiver}` : "root";
-  } else {
-    view = "shared_with_me";
+  // Determine the scope and base view
+  let view: string;
+  switch (e.type) {
+    case NotificationActionType.UPDATE:
+      view = isPersonalScope ? `user_${receiver}` : "root";
+      break;
+    case NotificationActionType.DIRECT:
+      view = "shared_with_me";
+      break;
+    default:
+      throw new Error(`Unexpected NotificationActionType value: ${e.type}`);
   }
 
   // Build URL components
   const urlComponents = [...clientPath, view];
 
   // Add directory and itemId if applicable
-  if (e.type === "update" || isDirectory) {
+  if (e.type === NotificationActionType.UPDATE || isDirectory) {
     urlComponents.push("d", itemId);
   }
 

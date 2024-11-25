@@ -107,7 +107,7 @@ export default memo(
       children,
       loading: loadingParent,
       path,
-      loadNextPage
+      loadNextPage,
     } = useDriveItem(parentId);
     const { uploadTree } = useDriveUpload();
 
@@ -269,10 +269,11 @@ export default memo(
         scrollViwer.current?.scrollTo(0, scrollViwer.current?.scrollHeight);
       } else {
         if (!loading && itemInChildren) {
-          // scroll to id using id
-          const element = document.getElementById(scrollItemId);
+          // scroll to preview item using id for current preview routes
+          const element = document.getElementById(`DR-${scrollItemId}`);
           element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          // set as checked
+
+          // set it as checked to indicate it is in view
           setChecked({ [scrollItemId]: true });
         }
       }
