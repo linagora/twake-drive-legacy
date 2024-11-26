@@ -1119,7 +1119,8 @@ export class DocumentsService {
 
       // Check files in the current directory
       const maliciousFiles = entities.filter(
-        child => !child.is_directory && child.av_status !== "safe",
+        child =>
+          !child.is_directory && child.av_status && !["uploaded", "safe"].includes(child.av_status),
       );
 
       if (maliciousFiles.length > 0) {

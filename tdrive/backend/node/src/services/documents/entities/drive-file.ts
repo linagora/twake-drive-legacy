@@ -8,8 +8,8 @@ import * as UUIDTools from "../../../utils/uuid";
 
 export const TYPE = "drive_files";
 export type DriveScope = "personal" | "shared";
-export type AVStatusSafe = "safe";
-export type AVStatusUnsafe = "uploaded" | "scanning" | "scan_failed" | "malicious" | "skipped";
+export type AVStatusSafe = "uploaded" | "safe";
+export type AVStatusUnsafe = "scanning" | "scan_failed" | "malicious" | "skipped";
 export type AVStatus = AVStatusSafe | AVStatusUnsafe;
 
 /**
