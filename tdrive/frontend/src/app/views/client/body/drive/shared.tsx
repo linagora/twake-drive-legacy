@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import MenusBodyLayer from '@components/menus/menus-body-layer';
 import Api from '@features/global/framework/api-service';
 import Languages from '@features/global/services/languages-service';
+import { useFeatureToggles } from '@components/locked-features-components/feature-toggles-hooks';
 import { addApiUrlIfNeeded } from '@features/global/utils/URLUtils';
 import RouterService from '@features/router/services/router-service';
 import Drive from '@views/client/body/drive';
@@ -28,6 +29,7 @@ import LocalStorage from 'app/features/global/framework/local-storage-service';
 
 export default () => {
   const companyId = useRouterCompany();
+  const { FeatureToggles, activeFeatureNames } = useFeatureToggles();
 
   //Create a different local storage for shared view
   useEffect(() => {
@@ -61,34 +63,38 @@ export default () => {
   }
 
   return (
-    <div className="flex flex-col h-full w-full dark:bg-zinc-900">
-      <div className="flex flex-row items-center justify-center bg-blue-500 px-4 py-2">
-        <div className="grow flex flex-row items-center">
-          {group.logo && (
-            <Avatar avatar={group.logo} className="inline-block mr-3" size="sm" type="square" />
-          )}
-          <span className="text-white font-semibold" style={{ lineHeight: '32px' }}>
-            Twake Drive
-          </span>
+    <FeatureToggles features={activeFeatureNames}>
+      <>
+        <div className="flex flex-col h-full w-full dark:bg-zinc-900">
+          <div className="flex flex-row items-center justify-center bg-blue-500 px-4 py-2">
+            <div className="grow flex flex-row items-center">
+              {group.logo && (
+                <Avatar avatar={group.logo} className="inline-block mr-3" size="sm" type="square" />
+              )}
+              <span className="text-white font-semibold" style={{ lineHeight: '32px' }}>
+                Twake Drive
+              </span>
+            </div>
+            <div className="shrink-0">
+              <a href="https://twake.app" target="_BLANK" rel="noreferrer" className="!text-white">
+                <span className="nomobile text-white">
+                  {Languages.t('scenes.app.mainview.create_account')}
+                </span>
+                Twake Workplace &nbsp; 👉
+              </a>
+            </div>
+          </div>
+          <div className="h-full main-view public p-4 pb-16">
+            <AccessChecker folderId={documentId} token={token}>
+              <Drive initialParentId={documentId} inPublicSharing={true} />
+            </AccessChecker>
+          </div>
+          <MenusBodyLayer />
+          <UploadsViewer />
+          <CreateModalWithUploadZones initialParentId={documentId} />
         </div>
-        <div className="shrink-0">
-          <a href="https://twake.app" target="_BLANK" rel="noreferrer" className="!text-white">
-            <span className="nomobile text-white">
-              {Languages.t('scenes.app.mainview.create_account')}
-            </span>
-            Twake Workplace &nbsp; 👉
-          </a>
-        </div>
-      </div>
-      <div className="h-full main-view public p-4 pb-16">
-        <AccessChecker folderId={documentId} token={token}>
-          <Drive initialParentId={documentId} inPublicSharing={true} />
-        </AccessChecker>
-      </div>
-      <MenusBodyLayer />
-      <UploadsViewer />
-      <CreateModalWithUploadZones initialParentId={documentId} />
-    </div>
+      </>
+    </FeatureToggles>
   );
 };
 

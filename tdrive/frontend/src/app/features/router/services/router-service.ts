@@ -8,7 +8,7 @@ import Login from '@views/login/login';
 import Logout from '@views/login/logout';
 import Error from '@views/error';
 import Join from '@views/join';
-import PublicMainView from '@views/client/body/drive/shared';
+import PublicMainView from '@views/client/body/drive/shared-view';
 import Observable from '../../../deprecated/Observable/Observable';
 import { getWorkspacesByCompany } from '@features/workspaces/state/workspace-list';
 
