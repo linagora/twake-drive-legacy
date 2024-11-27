@@ -29,7 +29,7 @@ import LocalStorage from 'app/features/global/framework/local-storage-service';
 
 export default () => {
   const companyId = useRouterCompany();
-  const { FeatureToggles, activeFeatureNames } = useFeatureToggles();
+  const { FeatureToggles, activeFeatureNames } = useFeatureToggles(true); // use toggle for anonymous user on public view
 
   //Create a different local storage for shared view
   useEffect(() => {
