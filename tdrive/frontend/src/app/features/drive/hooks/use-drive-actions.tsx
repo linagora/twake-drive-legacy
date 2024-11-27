@@ -17,6 +17,7 @@ import AlertManager from 'app/features/global/services/alert-manager-service';
 import FeatureTogglesService, {
   FeatureNames,
 } from '@features/global/services/feature-toggles-service';
+import Logger from '@features/global/framework/logger-service';
 
 /**
  * Returns the children of a drive item
@@ -54,7 +55,7 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
         document.body.removeChild(downloadLink);
       }
     } catch (error) {
-      console.error('Error during file download:', error);
+      Logger.error('Error during file download:', error);
     }
   };
 
