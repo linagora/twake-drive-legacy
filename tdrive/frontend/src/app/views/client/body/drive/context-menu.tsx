@@ -67,7 +67,9 @@ export const useOnBuildContextMenu = (
         const isPersonal = item?.scope === 'personal';
         const selectedCount = checked.length;
         const notSafe =
-          !item?.is_directory && !['uploaded', 'safe'].includes(item?.av_status || '');
+          !item?.is_directory &&
+          (item?.av_status || '').length > 0 &&
+          !['uploaded', 'scanning', 'safe'].includes(item?.av_status || '');
 
         let menu: any[] = [];
 

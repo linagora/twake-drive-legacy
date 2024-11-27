@@ -93,9 +93,6 @@ export const DocumentRow = ({
       {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_AV_ENABLED) && (
         <div className="shrink-0 ml-4 text-right lg:w-24 sm:w-20 ">
           <BaseSmall title={Languages.t(`scenes.app.drive.document_row.av_${item?.av_status}`)}>
-            {item?.av_status === 'scanning' && (
-              <ShieldExclamationIcon className="w-5 text-yellow-400" />
-            )}
             {item?.av_status === 'malicious' && (
               <ShieldExclamationIcon className="w-5 text-rose-400" />
             )}
