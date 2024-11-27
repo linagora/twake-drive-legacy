@@ -8,6 +8,7 @@ import { FeatureToggles, Feature, withFeatures } from '@paralleldrive/react-feat
 import RouterService from '@features/router/services/router-service';
 import { useCurrentCompany } from '@features/companies/hooks/use-companies';
 import { CompanyType } from 'app/features/companies/types/company';
+import Logger from '@features/global/framework/logger-service';
 
 export const useFeatureToggles = (anonymous = false) => {
   const routeState = RouterService.getStateFromRoute();
@@ -25,11 +26,10 @@ export const useFeatureToggles = (anonymous = false) => {
             `/internal/services/users/v1/companies/${routeState.companyId}`,
           )) as any;
           if (res?.resource) {
-            console.log('Company fetched (anonymous)', res);
             setFetchedCompany(res.resource); // Assuming `res.resource` is structured correctly.
           }
         } catch (error) {
-          console.error('Error fetching company (anonymous):', error);
+          Logger.error('Error fetching company', error);
         }
       };
 
@@ -40,10 +40,7 @@ export const useFeatureToggles = (anonymous = false) => {
   useEffect(() => {
     const companyPlan = company?.plan;
     if (companyPlan) {
-      console.log('Company plan:', companyPlan);
       FeatureTogglesService.setFeaturesFromCompanyPlan(companyPlan as any);
-    } else {
-      console.warn('Company plan is undefined');
     }
   }, [JSON.stringify(company)]);
 
