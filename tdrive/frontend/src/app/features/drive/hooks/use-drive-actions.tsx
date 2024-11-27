@@ -17,6 +17,7 @@ import AlertManager from 'app/features/global/services/alert-manager-service';
 import FeatureTogglesService, {
   FeatureNames,
 } from '@features/global/services/feature-toggles-service';
+
 /**
  * Returns the children of a drive item
  * @returns
@@ -25,9 +26,37 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
   const companyId = useRouterCompany();
   const sharedFilter = useRecoilValue(SharedWithMeFilterState);
   const sortItem = useRecoilValue(DriveItemSort);
-  const [ paginateItem ] = useRecoilState(DriveItemPagination);
+  const [paginateItem] = useRecoilState(DriveItemPagination);
   const { getQuota } = useUserQuota();
   const AVEnabled = FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_AV_ENABLED);
+
+  /**
+   * Downloads a file from the given URL, ensuring compatibility across all browsers, including Safari.
+   *
+   * @param fileUrl - The URL of the file to download.
+   */
+  const downloadFile = (fileUrl: string) => {
+    try {
+      // Attempt to open the URL in a new tab
+      const popupWindow = window.open(fileUrl, '_blank');
+
+      if (popupWindow) {
+        popupWindow.focus();
+      } else {
+        // Fallback for Safari or blocked pop-ups
+        const downloadLink = document.createElement('a');
+        downloadLink.href = fileUrl;
+        downloadLink.download = ''; // Suggests a download instead of navigation
+        downloadLink.target = '_self'; // Ensures it opens in the same tab
+
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      }
+    } catch (error) {
+      console.error('Error during file download:', error);
+    }
+  };
 
   const refresh = useRecoilCallback(
     ({ set, snapshot }) =>
@@ -112,7 +141,7 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
             // toggle confirm for user
             AlertManager.confirm(
               () => {
-                (window as any).open(url, '_blank').focus();
+                downloadFile(url);
               },
               () => {
                 return;
@@ -122,10 +151,10 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
               },
             );
           } else {
-            (window as any).open(url, '_blank').focus();
+            downloadFile(url);
           }
         } else {
-          (window as any).open(url, '_blank').focus();
+          downloadFile(url);
         }
       } catch (e) {
         ToasterService.error(Languages.t('hooks.use-drive-actions.unable_download_file'));
@@ -139,7 +168,7 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
       try {
         const triggerDownload = async () => {
           const url = await DriveApiClient.getDownloadZipUrl(companyId, ids, isDirectory);
-          (window as any).open(url, '_blank').focus();
+          downloadFile(url);
         };
         if (AVEnabled) {
           const containsMaliciousFiles =
@@ -254,7 +283,7 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
       },
     [paginateItem, refresh],
   );
-  
+
   const checkMalware = useCallback(
     async (item: Partial<DriveItem>) => {
       try {
