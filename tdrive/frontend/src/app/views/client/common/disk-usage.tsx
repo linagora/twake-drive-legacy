@@ -16,7 +16,12 @@ const DiskUsage = () => {
   const [usedBytes, setUsedBytes] = useState(0);
   const [totalBytes, setTotalBytes] = useState(0);
 
-  const { quota } = useUserQuota()
+  const { quota, getQuota } = useUserQuota();
+
+  useEffect(() => {
+    getQuota();
+  }, [])
+
   useEffect(() => {
     if (FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_USER_QUOTA)) {
       setUsed(Math.round(quota.used / quota.total * 100))

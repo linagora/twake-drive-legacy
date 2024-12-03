@@ -37,10 +37,5 @@ export const useUserQuota = () => {
     setQuota(data)
   },  []);
 
-  useEffect(() => {
-    getQuota();
-  }, []);
-
-
   return { quota, getQuota };
 };
