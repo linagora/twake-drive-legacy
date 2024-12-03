@@ -77,9 +77,9 @@ export default memo(
       ? (user?.companies || []).find(company => company?.company.id === companyId)?.role
       : 'member';
     setTdriveTabToken(tdriveTabContextToken || null);
-    const [ filter ] = useRecoilState(SharedWithMeFilterState);
+    const [filter] = useRecoilState(SharedWithMeFilterState);
     const { viewId, dirId, itemId } = useRouteState();
-    const [sortLabel] = useRecoilState(DriveItemSort)
+    const [sortLabel] = useRecoilState(DriveItemSort);
     const [parentId, _setParentId] = useRecoilState(
       DriveCurrentFolderAtom({
         context: context,
@@ -94,8 +94,6 @@ export default memo(
         history.push(RouterServices.generateRouteFromState({ viewId: parentId }));
     }, [viewId, dirId]);
 
-
-
     const [loadingParentChange, setLoadingParentChange] = useState(false);
     const {
       sharedWithMe,
@@ -108,6 +106,7 @@ export default memo(
       loading: loadingParent,
       path,
       loadNextPage,
+      paginateItem,
     } = useDriveItem(parentId);
     const { uploadTree } = useDriveUpload();
 
@@ -145,12 +144,13 @@ export default memo(
       if (item?.id) setUploadModalState({ open: true, parent_id: item.id });
     }, [item?.id, setUploadModalState]);
 
-    const items = item?.is_directory === false
+    const items =
+      item?.is_directory === false
         ? //We use this hack for public shared single file
           item
           ? [item]
           : []
-        : children
+        : children;
 
     const documents = items.filter(i => !i.is_directory);
 
@@ -241,32 +241,33 @@ export default memo(
     }
 
     // Infinite scroll
-    const scrollViwer = useRef<HTMLDivElement>(null);
+    const scrollViewer = useRef<HTMLDivElement>(null);
 
     const handleScroll = async () => {
-      const scrollTop = scrollViwer.current?.scrollTop || 0;
-      const scrollHeight = scrollViwer.current?.scrollHeight || 0;
-      const clientHeight = scrollViwer.current?.clientHeight || 0;
+      const scrollTop = scrollViewer.current?.scrollTop || 0;
+      const scrollHeight = scrollViewer.current?.scrollHeight || 0;
+      const clientHeight = scrollViewer.current?.clientHeight || 0;
       if (scrollTop > 0 && scrollTop + clientHeight >= scrollHeight) {
         await loadNextPage(parentId);
       }
     };
 
     useEffect(() => {
-      if(!loading) scrollViwer.current?.addEventListener('scroll', handleScroll, { passive: true });
+      if (!loading)
+        scrollViewer.current?.addEventListener('scroll', handleScroll, { passive: true });
       return () => {
-        scrollViwer.current?.removeEventListener('scroll', handleScroll);
+        scrollViewer.current?.removeEventListener('scroll', handleScroll);
       };
     }, [parentId, loading]);
 
     // Scroll to item in view
     const scrollTillItemInView = itemId && itemId?.length > 0;
     const scrollItemId = itemId || '';
-    
+
     useEffect(() => {
       const itemInChildren = children.find(item => item.id === scrollItemId);
       if (!loading && scrollTillItemInView && !itemInChildren) {
-        scrollViwer.current?.scrollTo(0, scrollViwer.current?.scrollHeight);
+        scrollViewer.current?.scrollTo(0, scrollViewer.current?.scrollHeight);
       } else {
         if (!loading && itemInChildren) {
           // scroll to preview item using id for current preview routes
@@ -278,6 +279,25 @@ export default memo(
         }
       }
     }, [loading, children]);
+
+    // Determine the number of items that can fit within the scroll viewer's visible area before the scrollbar appears.
+    const getItemsPerPage = () => {
+      const scrollViewerElement = scrollViewer?.current || null;
+      const itemHeight = scrollViewerElement?.firstElementChild?.clientHeight || 0;
+      const viewerHeight = scrollViewerElement?.clientHeight || 0;
+      return itemHeight > 0 ? Math.ceil(viewerHeight / itemHeight) : 0;
+    };
+
+    // Load additional pages as needed to ensure the scrollbar remains visible
+    useEffect(() => {
+      const itemsPerPage = getItemsPerPage();
+      const currentPage = Math.floor((paginateItem?.page || 1) / (paginateItem?.limit || 1));
+      const targetPages = Math.ceil(itemsPerPage / (paginateItem?.limit || 1));
+
+      if (!loading && currentPage < targetPages) {
+        loadNextPage(parentId);
+      }
+    }, [paginateItem, loading, parentId]);
 
     return (
       <>
@@ -418,7 +438,9 @@ export default memo(
                         sortLabel.order === 'asc' ? 'transform rotate-180' : ''
                       }`}
                     />
-                    <span>{Languages.t('components.item_context_menu.sorting.selected.' + sortLabel.by)}</span>
+                    <span>
+                      {Languages.t('components.item_context_menu.sorting.selected.' + sortLabel.by)}
+                    </span>
                     <ChevronDownIcon className="h-4 w-4 ml-2 -mr-1" />
                   </Button>
                 </Menu>
@@ -439,7 +461,7 @@ export default memo(
               </div>
 
               <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-                <div className="grow overflow-auto" ref={scrollViwer}>
+                <div className="grow overflow-auto" ref={scrollViewer}>
                   {items.length === 0 && !loading && (
                     <div className="mt-4 text-center border-2 border-dashed rounded-md p-8">
                       <Subtitle className="block mb-2">

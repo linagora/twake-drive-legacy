@@ -20,7 +20,7 @@ export const useDriveItem = (id: string) => {
   // const children = useRecoilValue(DriveItemChildrenAtom(id));
   const [children, setChildren] = useRecoilState(DriveItemChildrenAtom(id));
   const [loading, setLoading] = useRecoilState(LoadingStateInitTrue('useDriveItem-' + id));
-  const [, setPaginateItem] = useRecoilState(DriveItemPagination);
+  const [paginateItem, setPaginateItem] = useRecoilState(DriveItemPagination);
   const {
     refresh: refreshItem,
     create,
@@ -172,6 +172,7 @@ export const useDriveItem = (id: string) => {
     remove,
     refresh,
     restore,
+    paginateItem,
     loadNextPage,
   };
 };
