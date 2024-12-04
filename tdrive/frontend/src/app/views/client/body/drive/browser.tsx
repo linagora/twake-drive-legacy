@@ -10,7 +10,7 @@ import { useDriveUpload } from '@features/drive/hooks/use-drive-upload';
 import { DriveItemSelectedList, DriveItemSort } from '@features/drive/state/store';
 import { formatBytes } from '@features/drive/utils';
 import useRouterCompany from '@features/router/hooks/use-router-company';
-import _ from 'lodash';
+import _, { get, set } from 'lodash';
 import { memo, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { atomFamily, useRecoilState, useSetRecoilState } from 'recoil';
 import { DrivePreview } from '../../viewer/drive-preview';
@@ -288,16 +288,26 @@ export default memo(
       return itemHeight > 0 ? Math.ceil(viewerHeight / itemHeight) : 0;
     };
 
+    const [itemsPerPage, setItemsPerPage] = useState(0);
+
+    useEffect(() => {
+      const handleResize = () => {
+        setItemsPerPage(getItemsPerPage());
+      };
+      handleResize(); // intially set the items per page for the current view
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, [getItemsPerPage]);
+
     // Load additional pages as needed to ensure the scrollbar remains visible
     useEffect(() => {
-      const itemsPerPage = getItemsPerPage();
       const currentPage = Math.floor((paginateItem?.page || 1) / (paginateItem?.limit || 1));
       const targetPages = Math.ceil(itemsPerPage / (paginateItem?.limit || 1));
 
       if (!loading && currentPage < targetPages) {
         loadNextPage(parentId);
       }
-    }, [paginateItem, loading, parentId]);
+    }, [paginateItem, loading, parentId, itemsPerPage]);
 
     return (
       <>
