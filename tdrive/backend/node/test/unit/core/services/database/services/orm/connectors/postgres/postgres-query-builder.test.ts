@@ -93,6 +93,18 @@ describe('The PostgresQueryBuilder', () => {
     expect(query[1]).toEqual(options.$in[0][1]);
   });
 
+  test('buildSelect query "in" options with empty array', async () => {
+    //given
+    const options = { $in: [["added", []] as comparisonType,]};
+
+    //when
+    const query = subj.buildSelect(TestDbEntity, null, options);
+
+    //then
+    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" ORDER BY id DESC LIMIT 100 OFFSET 0`);
+    expect(query[1]).toEqual(options.$in[0][1]);
+  });
+
   test('buildSelect query "like" options', async () => {
     //given
     const options = { $like: [["id", randomUUID()] as comparisonType, ["company_id", randomUUID()] as comparisonType]};

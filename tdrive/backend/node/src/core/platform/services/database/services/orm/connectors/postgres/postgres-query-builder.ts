@@ -83,8 +83,15 @@ export class PostgresQueryBuilder {
 
       // === IN ===
       options.$in?.forEach(e => {
-        whereClause += `${e[0]} IN ($${e[1].map(() => idx++).join(",$")}) AND `;
-        values.push(...e[1]);
+        const [column, valuesArray] = e;
+
+        // Skip if the values array is empty
+        if (!valuesArray || valuesArray.length === 0) {
+          return;
+        }
+
+        whereClause += `${column} IN ($${valuesArray.map(() => idx++).join(",$")}) AND `;
+        values.push(...valuesArray);
       });
 
       // === LIKE ====
