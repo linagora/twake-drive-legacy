@@ -85,9 +85,11 @@ export class PostgresQueryBuilder {
       options.$in?.forEach(e => {
         const [column, valuesArray] = e;
 
-        // Skip if the values array is empty
+        // throw an error if the values array is empty
         if (!valuesArray || valuesArray.length === 0) {
-          return;
+          throw new Error(
+            `The $in operator for column '${column}' requires a non-empty array of values.`,
+          );
         }
 
         whereClause += `${column} IN ($${valuesArray.map(() => idx++).join(",$")}) AND `;

@@ -169,7 +169,7 @@ export class UserServiceImpl {
       pagination,
     };
 
-    if (options?.userIds) {
+    if (Array.isArray(options?.userIds) && options.userIds.length > 0) {
       findOptions.$in = [["id", options.userIds]];
     }
 

@@ -95,14 +95,12 @@ describe('The PostgresQueryBuilder', () => {
 
   test('buildSelect query "in" options with empty array', async () => {
     //given
-    const options = { $in: [["added", []] as comparisonType,]};
+    const options = { $in: [["added", []] as comparisonType] };
 
-    //when
-    const query = subj.buildSelect(TestDbEntity, null, options);
-
-    //then
-    expect(normalizeWhitespace(query[0] as string)).toBe(`SELECT * FROM "test_table" ORDER BY id DESC LIMIT 100 OFFSET 0`);
-    expect(query[1]).toEqual(options.$in[0][1]);
+    // When & Then
+    expect(() => {
+      subj.buildSelect(TestDbEntity, null, options);
+    }).toThrowError("The $in operator for column 'added' requires a non-empty array of values.");
   });
 
   test('buildSelect query "like" options', async () => {
