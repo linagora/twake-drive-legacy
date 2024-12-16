@@ -66,8 +66,11 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
     if (items.length < 2)
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       return () => {};
-    addShortcut({ shortcut: 'Right', handler: handleSwitchRight });
-    addShortcut({ shortcut: 'Left', handler: handleSwitchLeft });
+
+    if (!status.loading) {
+      addShortcut({ shortcut: 'Right', handler: handleSwitchRight });
+      addShortcut({ shortcut: 'Left', handler: handleSwitchLeft });
+    }
 
     return () => {
       removeShortcut({ shortcut: 'Right', handler: handleSwitchRight });
