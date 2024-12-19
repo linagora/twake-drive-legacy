@@ -48,6 +48,7 @@
     "components.disk_usage.in_trash": "в корзине",
     "components.disk_usage.of": "из",
     "components.disk_usage.used": "использовано",
+    "components.disk_usage.title": "хранилище",
     "components.dragndrop_info_move_to": "move to",
     "components.drive_dropzone.uploading": "Загрузка...",
     "components.header_path.my_trash": "Корзина \"Моего диска\"",

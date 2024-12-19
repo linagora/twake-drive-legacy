@@ -20,6 +20,8 @@ export const FolderRow = ({
 }: DriveItemProps) => {
   const [hover, setHover] = useState(false);
 
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
   return (
     <div
       className={
@@ -48,22 +50,22 @@ export const FolderRow = ({
         />
       </div>
       <div className="grow whitespace-nowrap overflow-hidden">
-        <Base className="!font-semibold text-ellipsis overflow-hidden block max-w-full">{item.name}</Base>
+        <Base className="text-ellipsis overflow-hidden block max-w-full">{item.name}</Base>
       </div>
       <div className="shrink-0 ml-4">
         {hasAnyPublicLinkAccess(item) && (
-          <PublicIcon className="h-5 w-5 text-blue-500" />
+          <PublicIcon className="h-5 w-5 text-gray-500 md:text-blue-500" />
         )}
       </div>
       <div className="shrink-0 ml-4 text-right minWidth80">
-        <BaseSmall>{formatBytes(item.size)}</BaseSmall>
+        <BaseSmall className="text-gray-500 dark:md:text-white md:text-black">{formatBytes(item.size)}</BaseSmall>
       </div>
       <div className="shrink-0 ml-4">
-        <Menu menu={onBuildContextMenu} testClassId="folder-row-menu">
+        <Menu menu={onBuildContextMenu} enableMobileMenu={isMobile} testClassId="folder-row-menu">
           <Button
             theme={'secondary'}
             size="sm"
-            className={'!rounded-full '}
+            className={'!rounded-full !text-gray-500 md:!text-blue-500 bg-transparent md:bg-blue-500 md:bg-opacity-25 '}
             icon={DotsHorizontalIcon}
             testClassId="folder-row-button-open-menu"
           />

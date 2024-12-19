@@ -224,7 +224,8 @@ export default memo(
         key: index,
         className:
           (index === 0 ? 'rounded-t-md ' : '-mt-px ') +
-          (index === items.length - 1 ? 'rounded-b-md ' : ''),
+          (index === items.length - 1 ? 'rounded-b-md ' : '') +
+          'border-0 md:border',
         item: child,
         checked: checked[child.id] || false,
         onCheck: (v: boolean) => setChecked(_.pickBy({ ...checked, [child.id]: v }, _.identity)),
@@ -358,7 +359,7 @@ export default memo(
                 (loading && (!items?.length || loadingParentChange) ? 'opacity-50 ' : '')
               }
             >
-              <div className={`flex flex-row shrink-0 items-center mb-4 ${!sharedWithMe ? 'flex-wrap' : ''}`}>
+              <div className={`flex flex-row shrink-0 items-center mb-4 ${!sharedWithMe ? 'flex-wrap' : ''} border-b md:border-b-0 px-4 py-2 md:px-0 md:py-0`}>
                 {sharedWithMe ? (
                   <div>
                     <Title className="mb-4 block">
@@ -445,14 +446,14 @@ export default memo(
                 <div className="grow" />
 
                 {access !== 'read' && (
-                  <BaseSmall>
+                  <BaseSmall className="hidden md:block">
                     {formatBytes(item?.size || 0)} {Languages.t('scenes.app.drive.used')}
                   </BaseSmall>
                 )}
 
                 <Menu menu={() => onBuildSortContextMenu()} sortData={sortLabel} testClassId="browser-menu-sorting">
                   {' '}
-                  <Button theme="outline" className="ml-4 flex flex-row items-center" testClassId="button-sorting">
+                  <Button theme="outline" className="ml-4 flex flex-row items-center border-0 md:border !text-gray-500 md:!text-blue-500 px-0 md:px-4" testClassId="button-sorting">
                     <SortIcon
                       className={`h-4 w-4 mr-2 -ml-1 ${
                         sortLabel.order === 'asc' ? 'transform rotate-180' : ''
@@ -467,7 +468,7 @@ export default memo(
                 {viewId !== 'shared_with_me' && (
                   <Menu menu={() => onBuildContextMenu(details)} testClassId="browser-menu-more">
                     {' '}
-                    <Button theme="secondary" className="ml-4 flex flex-row items-center" testClassId="button-more">
+                    <Button theme="secondary" className="ml-4 flex flex-row items-center bg-transparent md:bg-blue-500 md:bg-opacity-25 !text-gray-500 md:!text-blue-500 px-0 md:px-4" testClassId="button-more">
                       <span>
                         {selectedCount > 1
                           ? `${selectedCount} items`
@@ -510,7 +511,8 @@ export default memo(
                           key={index}
                           className={
                             (index === 0 ? 'rounded-t-md ' : '-mt-px ') +
-                            (index === items.length - 1 ? 'rounded-b-md ' : '')
+                            (index === items.length - 1 ? 'rounded-b-md ' : '') +
+                            'border-0 md:border'
                           }
                           item={child}
                           onClick={() => {

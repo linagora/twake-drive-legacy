@@ -67,7 +67,8 @@ const DiskUsage = () => {
         </div>
       )}
       {!FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_USER_QUOTA) && (
-        <div className="bg-zinc-500 dark:bg-zinc-900 bg-opacity-10 rounded-md p-4 w-auto max-w-md">
+        <div className="md:bg-zinc-500 md:dark:bg-zinc-900 md:bg-opacity-10 rounded-md p-4 w-auto max-w-md">
+          <Base className="!font-medium md:hidden">{Languages.t('components.disk_usage.title')}</Base>
           <div className="w-full">
             <Base className="testid:disk-usage-text">
               {formatBytesToInt(usedBytes)}

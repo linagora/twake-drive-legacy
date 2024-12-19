@@ -52,10 +52,24 @@ export default () => {
       <div className="grow">
         <div className="sm:hidden block mb-2">
           <div className="flex flex-row space-between w-full">
-            <div className="grow">
+            <div className="flex items-center order-1 grow">
+              <img
+                src="/public/img/logo/logo-text-black.svg"
+                className="h-6 ml-1 dark:hidden block"
+                alt="Tdrive"
+              />
+              <img
+                src="/public/img/logo/logo-text-white.svg"
+                className="h-6 ml-1 dark:block hidden"
+                alt="Tdrive"
+              />
+            </div>
+            <div className="md:grow order-3 md:order-2">
               <Account />
             </div>
-            <AppGrid />
+            <div className="order-2 md:order-3 mr-2 md:mr-0">
+              <AppGrid />
+            </div>
           </div>
 
           <div className="mt-6" />

@@ -73,7 +73,7 @@ export default React.memo((): JSX.Element => {
                   onClick={() => setMenuIsOpen(false)}
                   className="absolute left-0 top-0 h-full w-full bg-black bg-opacity-50 transition-all z-40 opacity-0"
                 ></div>
-                <div className="bg-white dark:bg-zinc-900 flex grow sm:rounded-lg p-4 sm:w-2/3 overflow-x-hidden">
+                <div className="bg-white dark:bg-zinc-900 flex grow sm:rounded-lg sm:w-2/3 overflow-x-hidden p-0 md:p-4">
                   <Suspense fallback={<></>}>
                     <MainView className={classNames({ collapsed: menuIsOpen })} />
                   </Suspense>

@@ -3,7 +3,7 @@ import { useRecoilState } from 'recoil';
 import { CreateModalAtom } from '.';
 import { Button } from '@atoms/button/button';
 import { Input } from '@atoms/input/input-text';
-import { Info } from '@atoms/text';
+import { Base } from '@atoms/text';
 import { useDriveActions } from '@features/drive/hooks/use-drive-actions';
 import Languages from "features/global/services/languages-service";
 
@@ -29,7 +29,7 @@ export const CreateFolder = () => {
 
   return (
     <>
-      <Info>{ Languages.t('components.create_folder_modal.hint')}</Info>
+      <Base className="!font-medium">{ Languages.t('components.create_folder_modal.hint')}</Base>
       <div ref={inputRef}>
         <Input
           disabled={loading}

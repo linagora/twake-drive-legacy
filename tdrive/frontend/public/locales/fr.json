@@ -48,6 +48,7 @@
     "components.disk_usage.in_trash": "dans la corbeille",
     "components.disk_usage.of": "sur",
     "components.disk_usage.used": "utilisé(s)",
+    "components.disk_usage.title": "Stockage",
     "components.dragndrop_info_move_to": "déplacé vers",
     "components.drive_dropzone.uploading": "Téléchargement...",
     "components.header_path.my_trash": "Ma corbeille",

@@ -1,9 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import MenusManager from '@components/menus/menus-manager.jsx';
-import MenuComponent from './menu-component.jsx';
+import MenusManager from '@components/menus/menus-manager';
+import MenuComponent from './menu-component';
 import OutsideClickHandler from 'react-outside-click-handler';
+import MobileMenu from './mobile-menu';
 
 /*
   Where the menu will be displayed, this component should be in app.js (menus should be over all elements of the page)
@@ -194,24 +195,45 @@ export default class MenusBodyLayer extends React.Component {
                     marginLeft: item.position.marginLeft,
                   }}
                 >
-                  <MenuComponent
-                    withFrame
-                    menu={item.menu}
-                    openAt={item.openAt}
-                    level={item.level}
-                    animationClass={
-                      this.state.menus_manager.willClose || item.willClose
-                        ? 'fade_out'
-                        : item.level === 0 || item.positionType
-                        ? item.positionType === 'bottom'
-                          ? 'skew_in_bottom_nobounce'
-                          : item.left
-                          ? 'skew_in_left_nobounce'
-                          : 'skew_in_right_nobounce'
-                        : 'fade_in'
-                    }
-                    testClassId={item.menuTestClassId}
-                  />
+                  {item.enableMobileMenu ? (
+                    <MobileMenu
+                      withFrame
+                      menu={item.menu}
+                      openAt={item.openAt}
+                      level={item.level}
+                      animationClass={
+                        this.state.menus_manager.willClose || item.willClose
+                          ? 'fade_out'
+                          : item.level === 0 || item.positionType
+                          ? item.positionType === 'bottom'
+                            ? 'skew_in_bottom_nobounce'
+                            : item.left
+                            ? 'skew_in_left_nobounce'
+                            : 'skew_in_right_nobounce'
+                          : 'fade_in'
+                      }
+                      testClassId={item.menuTestClassId}
+                    />
+                  ) : (
+                    <MenuComponent
+                      withFrame
+                      menu={item.menu}
+                      openAt={item.openAt}
+                      level={item.level}
+                      animationClass={
+                        this.state.menus_manager.willClose || item.willClose
+                          ? 'fade_out'
+                          : item.level === 0 || item.positionType
+                          ? item.positionType === 'bottom'
+                            ? 'skew_in_bottom_nobounce'
+                            : item.left
+                            ? 'skew_in_left_nobounce'
+                            : 'skew_in_right_nobounce'
+                          : 'fade_in'
+                      }
+                      testClassId={item.menuTestClassId}
+                    />
+                  )}
                 </div>
               </OutsideClickHandler>
             );
