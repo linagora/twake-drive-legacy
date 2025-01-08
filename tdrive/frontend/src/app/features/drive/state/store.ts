@@ -11,9 +11,9 @@ export const DriveItemAtom = atomFamily<Partial<DriveItemDetails> | null, string
   default: () => null,
 });
 
-export const DriveItemSelectedList = atom<{[key: string]: boolean }>({
+export const DriveItemSelectedList = atom<{ [key: string]: boolean }>({
   key: 'DriveItemSelectedList',
-  default: {}
+  default: {},
 });
 
 export const DriveItemSort = atom<BrowseSort>({

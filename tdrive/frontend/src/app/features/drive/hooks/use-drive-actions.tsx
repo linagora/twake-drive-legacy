@@ -70,11 +70,12 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
           let pagination = await snapshot.getPromise(DriveItemPagination);
 
           if (resetPagination) {
-            pagination = { page: 0, limit: pagination.limit };
+            pagination = { page: 0, limit: pagination.limit, nextPage: pagination.nextPage };
             set(DriveItemPagination, pagination);
           }
+          let details: any;
           try {
-            const details = await DriveApiClient.browse(
+            details = await DriveApiClient.browse(
               companyId,
               parentId,
               filter,
@@ -94,7 +95,13 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
           } catch (e) {
             ToasterService.error(Languages.t('hooks.use-drive-actions.unable_load_file'));
           } finally {
-            set(DriveItemPagination, { page: pagination.limit, limit: pagination.limit });
+            set(DriveItemPagination, {
+              page: pagination.limit,
+              limit: pagination.limit,
+              nextPage: {
+                page_token: details?.nextPage?.page_token || '',
+              },
+            });
           }
         }
       },

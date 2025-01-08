@@ -213,6 +213,7 @@ export class DocumentsController {
       onlyUploadedNotByMe: true,
       sort: request.body.sort,
       pagination: request.body.paginate,
+      nextPage: request.body.nextPage,
     };
 
     return {

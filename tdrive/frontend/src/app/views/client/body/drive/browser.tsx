@@ -137,7 +137,6 @@ export default memo(
     useEffect(() => {
       setChecked({});
       refresh(parentId);
-      if (!inPublicSharing) refresh('trash');
     }, [parentId, refresh, filter]);
 
     const uploadItemModal = useCallback(() => {

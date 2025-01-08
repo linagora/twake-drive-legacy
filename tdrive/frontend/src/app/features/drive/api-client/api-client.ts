@@ -70,7 +70,13 @@ export class DriveApiClient {
     );
   }
 
-  static async browse(companyId: string, id: string | 'trash' | '', filter: BrowseFilter, sort: BrowseSort, paginate: BrowsePaginate) {
+  static async browse(
+    companyId: string,
+    id: string | 'trash' | '',
+    filter: BrowseFilter,
+    sort: BrowseSort,
+    paginate: BrowsePaginate,
+  ) {
     return await Api.post<BrowseQuery, DriveItemDetails>(
       `/internal/services/documents/v1/companies/${companyId}/browse/${id}${appendTdriveToken()}`,
       {
@@ -79,7 +85,10 @@ export class DriveApiClient {
         paginate: {
           page_token: paginate.page.toString(),
           limitStr: paginate.limit.toString(),
-        }
+        },
+        nextPage: {
+          page_token: paginate.nextPage?.page_token || '',
+        },
       },
     );
   }
@@ -93,7 +102,7 @@ export class DriveApiClient {
   static async restore(companyId: string, id: string | 'trash' | '') {
     return await Api.post<any, any>(
       `/internal/services/documents/v1/companies/${companyId}/item/${id}/restore${appendTdriveToken()}`,
-      {}
+      {},
     );
   }
 
@@ -111,13 +120,10 @@ export class DriveApiClient {
     if (!data.version) data.version = {} as Partial<DriveItemVersion>;
 
     return new Promise<DriveItem>((resolve, reject) => {
-      Api.post<
-        { item: Partial<DriveItem>; version: Partial<DriveItemVersion> },
-        DriveItem
-      >(
+      Api.post<{ item: Partial<DriveItem>; version: Partial<DriveItemVersion> }, DriveItem>(
         `/internal/services/documents/v1/companies/${companyId}/item${appendTdriveToken()}`,
         data as { item: Partial<DriveItem>; version: Partial<DriveItemVersion> },
-        (res) => {
+        res => {
           if ((res as any)?.statusCode || (res as any)?.error) {
             reject(res);
           }
@@ -151,7 +157,9 @@ export class DriveApiClient {
 
   static getDownloadUrl(companyId: string, id: string, versionId?: string) {
     if (versionId)
-      return Api.route(`/internal/services/documents/v1/companies/${companyId}/item/${id}/download?version_id=${versionId}`);
+      return Api.route(
+        `/internal/services/documents/v1/companies/${companyId}/item/${id}/download?version_id=${versionId}`,
+      );
     return Api.route(`/internal/services/documents/v1/companies/${companyId}/item/${id}/download`);
   }
 

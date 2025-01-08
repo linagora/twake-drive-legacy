@@ -57,12 +57,18 @@ export type SearchDocumentsOptions = {
   onlyDirectlyShared?: boolean;
   onlyUploadedNotByMe?: boolean;
   pagination?: Paginable;
+  nextPage?: {
+    page_token: string;
+  };
 };
 
 export type BrowseDocumentsOptions = {
   filter?: SearchDocumentsBody;
   sort?: SortType;
   paginate?: Paginable;
+  nextPage?: {
+    page_token: string;
+  };
 };
 
 export type SearchDocumentsBody = {
