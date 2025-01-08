@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types */
+import { SearchDocumentsOptions } from "src/services/documents/types";
 import { TdriveServiceProvider } from "../../framework";
 import { ListResult } from "../../framework/api/crud-service";
 import {
@@ -62,6 +63,7 @@ export interface SearchServiceAPI extends TdriveServiceProvider {
   getRepository<Entity>(table: string, entityType: EntityTarget<Entity>): SearchRepository<Entity>;
   upsert(entities: any[]): Promise<void>;
   remove(entities: any[]): Promise<void>;
+  handlePagination(options: SearchDocumentsOptions): void;
   type: SearchConfiguration["type"];
 }
 

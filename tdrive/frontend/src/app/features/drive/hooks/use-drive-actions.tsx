@@ -9,7 +9,7 @@ import {
   DriveItemPagination,
   DriveItemSort,
 } from '../state/store';
-import { BrowseFilter, DriveItem, DriveItemVersion } from '../types';
+import { BrowseFilter, DriveItem, DriveItemDetails, DriveItemVersion } from '../types';
 import { SharedWithMeFilterState } from '../state/shared-with-me-filter';
 import Languages from 'features/global/services/languages-service';
 import { useUserQuota } from 'features/users/hooks/use-user-quota';
@@ -73,7 +73,7 @@ export const useDriveActions = (inPublicSharing?: boolean) => {
             pagination = { page: 0, limit: pagination.limit, nextPage: pagination.nextPage };
             set(DriveItemPagination, pagination);
           }
-          let details: any;
+          let details: DriveItemDetails | undefined;
           try {
             details = await DriveApiClient.browse(
               companyId,

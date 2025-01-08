@@ -15,6 +15,7 @@ import { DatabaseServiceAPI } from "../database/api";
 import SearchRepository from "./repository";
 import { Client as OpenClient } from "@opensearch-project/opensearch";
 import { Client as ESClient } from "@elastic/elasticsearch";
+import { SearchDocumentsOptions } from "src/services/documents/types";
 
 @ServiceName("search")
 @Consumes(["database"])
@@ -95,5 +96,31 @@ export default class Search extends TdriveService<SearchServiceAPI> {
 
   api(): SearchServiceAPI {
     return this;
+  }
+
+  handlePagination(options: SearchDocumentsOptions): void {
+    if (this.type === "mongodb") {
+      // No custom pagination logic for MongoDB
+      return;
+    }
+
+    if (this.type === "elasticsearch" || this.type === "opensearch") {
+      if (options.nextPage?.page_token) {
+        // Set the scroll ID as the page token
+        options.pagination = {
+          ...options.pagination,
+          page_token: options.nextPage.page_token,
+        };
+      } else {
+        // Clear pagination if no nextPage token is provided
+        options.pagination = {
+          limitStr: options.pagination?.limitStr,
+        };
+      }
+      return;
+    }
+
+    // Handle unsupported platform types
+    throw new Error(`Pagination handling is not implemented for platform type: ${this.type}`);
   }
 }

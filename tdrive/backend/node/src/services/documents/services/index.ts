@@ -134,22 +134,7 @@ export class DocumentsService {
     }
 
     // Handle pagination differently for non-MongoDB platforms
-    if (globalResolver.platformServices.search.type !== "mongodb") {
-      if (options.nextPage?.page_token) {
-        // For Elasticsearch/OpenSearch, set the scroll ID as the page token
-        options.pagination = {
-          ...options.pagination,
-          page_token: options.nextPage.page_token,
-        };
-      } else {
-        // Clear pagination if no nextPage token is provided
-        options.pagination = {
-          limitStr: options.pagination?.limitStr,
-        };
-      }
-    }
-
-    console.log("🚀🚀 loading with:: ", options);
+    globalResolver.platformServices.search.handlePagination(options);
 
     const fileList: ListResult<DriveFile> = await this.search(options, context);
     const result = fileList.getEntities();

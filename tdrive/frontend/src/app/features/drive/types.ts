@@ -39,6 +39,9 @@ export type DriveItemDetails = {
     room: string;
     token?: string;
   }[];
+  nextPage?: {
+    page_token: string;
+  }
 };
 
 export type DriveItem = {
