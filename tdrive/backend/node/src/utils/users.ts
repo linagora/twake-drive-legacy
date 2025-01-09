@@ -87,3 +87,7 @@ export async function formatUser(
 
   return resUser;
 }
+
+export function formatUsername(value: string) {
+  return (value?.replace(/[^a-z0-9_-]/, "") || "").toLocaleLowerCase();
+}

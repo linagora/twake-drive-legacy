@@ -51,12 +51,11 @@ describe("The /users API", () => {
       username: "adminuser",
       firstName: "admin",
     });
-    await testDbService.createUser([workspacePk]);
-
+    await testDbService.createUser([workspacePk], { password: "123456" });
   });
 
-  afterAll(async () => {
-  });
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  afterAll(async () => {});
 
   describe("The GET /users/:id route", () => {
     it("should 401 when not authenticated", async () => {
@@ -136,7 +135,6 @@ describe("The /users API", () => {
           }),
         ]),
       );
-
     });
 
     it("should 200 and short response for another user", async () => {
@@ -222,7 +220,7 @@ describe("The /users API", () => {
         },
         query: {
           search: "anon",
-          company_ids: oneUser.workspace.company_id
+          company_ids: oneUser.workspace.company_id,
         },
       });
 
@@ -232,9 +230,7 @@ describe("The /users API", () => {
       const resources = json.resources;
       console.log(resources);
       expect(resources.length).toBe(0);
-
     });
-
   });
 
   describe("The GET /users/:user_id/companies route", () => {
@@ -354,7 +350,6 @@ describe("The /users API", () => {
         total_guests: expect.any(Number),
         total_messages: expect.any(Number),
       });
-
     });
   });
 
@@ -473,7 +468,6 @@ describe("The /users API", () => {
 
         user = await testDbService.getUserFromDb({ id: firstId });
         expect(user.devices).toMatchObject([]);
-
       });
     });
     describe("List registered devices (GET)", () => {
@@ -545,8 +539,94 @@ describe("The /users API", () => {
         expect(user.devices).toMatchObject([]);
         const device = await testDbService.getDeviceFromDb(deviceToken);
         expect(device).toBeFalsy();
-
       });
+    });
+  });
+
+  describe("The PUT /users/:id route", () => {
+    it("should 200 and response for updated user", async () => {
+      const myId = testDbService.users[0].id;
+      const updatedUserId = testDbService.users[1].id;
+
+      const jwtToken = await platform.auth.getJWTToken({ sub: myId });
+      const response = await platform.app.inject({
+        method: "PUT",
+        url: `${url}/users/${updatedUserId}`,
+        headers: {
+          authorization: `Bearer ${jwtToken}`,
+        },
+        body: {
+          email: "newvalue@gmail.com",
+          first_name: "New",
+          last_name: "Value",
+          picture: "null",
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
+
+      const resource = response.json()["resource"];
+
+      console.log("resource: ", resource);
+
+      expect(resource).toMatchObject({
+        id: updatedUserId,
+        provider: expect.any(String),
+        provider_id: expect.any(String),
+        email: expect.any(String),
+        username: expect.any(String),
+        is_verified: expect.any(Boolean),
+        picture: expect.any(String),
+        first_name: expect.any(String),
+        last_name: expect.any(String),
+        full_name: expect.any(String),
+        created_at: expect.any(Number),
+        deleted: expect.any(Boolean),
+        status: null,
+        cache: { companies: expect.any(Array) },
+      });
+
+      // Separate check for last_activity
+      expect([null, expect.any(Number)]).toContainEqual(resource.last_activity);
+
+      expect(resource).not.toMatchObject({
+        locale: expect.anything(),
+        timezone: expect.anything(),
+        companies: expect.anything(),
+      });
+    });
+
+    it("should login with new email", async () => {
+      const myId = testDbService.users[0].id;
+      const updatedUserId = testDbService.users[1].id;
+
+      const jwtToken = await platform.auth.getJWTToken({ sub: myId });
+      await platform.app.inject({
+        method: "PUT",
+        url: `${url}/users/${updatedUserId}`,
+        headers: {
+          authorization: `Bearer ${jwtToken}`,
+        },
+        body: {
+          email: "newvalue@gmail.com",
+          first_name: "New",
+          last_name: "Value",
+          picture: "null",
+        },
+      });
+
+      const response = await platform.app.inject({
+        method: "POST",
+        url: "/internal/services/console/v1/login",
+        body: {
+          email: "newvalue@gmail.com",
+          password: "123456",
+          remember_me: true,
+          device: {},
+        },
+      });
+
+      expect(response.statusCode).toBe(200);
     });
   });
 });

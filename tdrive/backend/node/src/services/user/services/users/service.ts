@@ -31,6 +31,8 @@ import { isNumber, isString } from "lodash";
 import NodeCache from "node-cache";
 import gr from "../../../global-resolver";
 import { TYPE as DriveFileType, DriveFile } from "../../../documents/entities/drive-file";
+import { UpdateUser } from "./types";
+import { formatUsername } from "../../../../utils/users";
 
 export class UserServiceImpl {
   version: "1";
@@ -77,14 +79,29 @@ export class UserServiceImpl {
     }
   }
 
+  private async updateExtRepositoryInCaseChangeEmail(user: User, context?: ExecutionContext) {
+    if (user.identity_provider_id === "null") {
+      return;
+    }
+
+    const extUser = await this.extUserRepository.findOne({ user_id: user.id }, {}, context);
+    if (extUser) {
+      await this.extUserRepository.remove(extUser, context);
+    }
+
+    const newExtUser = getExternalUserInstance({
+      service_id: user.identity_provider || "null",
+      external_id: user.identity_provider_id || "null",
+      user_id: user.id,
+    });
+    await this.extUserRepository.save(newExtUser, context);
+  }
+
   private assignDefaults(user: User) {
     user.creation_date = !isNumber(user.creation_date) ? Date.now() : user.creation_date;
     if (user.identity_provider_id && !user.identity_provider) user.identity_provider = "console";
     if (user.email_canonical) user.email_canonical = user.email_canonical.toLocaleLowerCase();
-    if (user.username_canonical)
-      user.username_canonical = (user.username_canonical || "")
-        .toLocaleLowerCase()
-        .replace(/[^a-z0-9_-]/, "");
+    if (user.username_canonical) user.username_canonical = formatUsername(user.username_canonical);
   }
 
   async create(user: User, context?: ExecutionContext): Promise<CreateResult<User>> {
@@ -92,8 +109,35 @@ export class UserServiceImpl {
     return new CreateResult("user", user);
   }
 
-  update(pk: Partial<User>, item: User, context?: ExecutionContext): Promise<UpdateResult<User>> {
-    throw new Error("Method not implemented.");
+  async update(
+    instance: User,
+    user: UpdateUser,
+    context?: ExecutionContext,
+  ): Promise<UpdateResult<User>> {
+    let isChangeEmail = false;
+    if (instance.email_canonical !== user.email) {
+      isChangeEmail = true;
+    }
+
+    instance.email_canonical = user.email || instance.email_canonical;
+    instance.first_name = user.first_name || instance.first_name;
+    instance.last_name = user.last_name || instance.last_name;
+    instance.picture = user.picture || instance.picture;
+    instance.creation_date = !isNumber(instance.creation_date)
+      ? Date.now()
+      : instance.creation_date;
+    if (isChangeEmail) {
+      instance.username_canonical = formatUsername(user.email);
+      instance.identity_provider_id =
+        instance.identity_provider_id !== "null" ? user.email : "null";
+    }
+
+    await this.repository.save(instance, context);
+    if (isChangeEmail) {
+      await this.updateExtRepositoryInCaseChangeEmail(instance, context);
+    }
+
+    return new UpdateResult("user", instance);
   }
 
   async save(user: User, context?: ExecutionContext): Promise<SaveResult<User>> {

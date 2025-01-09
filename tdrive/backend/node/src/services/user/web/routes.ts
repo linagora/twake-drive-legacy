@@ -143,6 +143,13 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     handler: usersController.recent.bind(usersController),
   });
 
+  fastify.route({
+    method: "PUT",
+    url: `${usersUrl}/:id`,
+    preValidation: [fastify.authenticateOptional],
+    handler: usersController.update.bind(usersController),
+  });
+
   next();
 };
 

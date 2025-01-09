@@ -8,3 +8,10 @@ export type SearchUserOptions = {
   workspaceId?: string;
   channelId?: string;
 };
+
+export type UpdateUser = {
+  email: string;
+  picture: string;
+  first_name: string;
+  last_name: string;
+};

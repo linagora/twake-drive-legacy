@@ -37,6 +37,7 @@ import { formatUser } from "../../../utils/users";
 import gr from "../../global-resolver";
 import config from "config";
 import { getLogger } from "../../../core/platform/framework";
+import { UpdateUser } from "../services/users/types";
 
 export class UsersCrudController
   implements
@@ -365,6 +366,35 @@ export class UsersCrudController
       remaining: isNaN(total) ? NaN : total - quota,
       used: quota,
     } as UserQuota;
+  }
+
+  async update(
+    request: FastifyRequest<{ Body: UpdateUser; Params: UserParameters }>,
+    reply: FastifyReply,
+  ): Promise<ResourceCreateResponse<UserObject>> {
+    const context = getExecutionContext(request);
+
+    const id = request.params.id;
+    const user = await gr.services.users.get({ id });
+    if (!user) {
+      reply.notFound(`User ${id} not found`);
+      return;
+    }
+
+    const body = { ...request.body };
+    if (user.email_canonical !== body.email) {
+      const userByEmail = await gr.services.users.getByEmail(body.email, context);
+      if (userByEmail) {
+        reply.conflict(`Email ${body.email} is existed`);
+        return;
+      }
+    }
+
+    await gr.services.users.update(user, body, context);
+
+    return {
+      resource: await formatUser(user),
+    };
   }
 }
 
