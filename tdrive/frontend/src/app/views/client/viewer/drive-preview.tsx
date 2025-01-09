@@ -25,6 +25,8 @@ import Controls from './controls';
 interface DrivePreviewProps {
   items: DriveItem[];
 }
+let currentItemIndex: number | undefined;
+
 export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
   const history = useHistory();
   const company = useRouterCompany();
@@ -37,21 +39,33 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
   const { type = '' } = useDrivePreviewDisplayData();
   const name = status.details?.item.name;
 
+  useEffect(() => {
+    if (!isOpen) {
+      currentItemIndex = undefined;
+      return;
+    }
+
+    if (currentItemIndex === undefined && items && status.item?.id) {
+      currentItemIndex = items.findIndex(x => x.id === status.item?.id);
+    }
+  }, [status.item?.id, items, isOpen]);
 
   const handleSwitchRight = () => {
-    const currentItem = status.item;
-    if (currentItem) {
-      const currentItemPos = items.findIndex(x => x.id === currentItem.id);
-      switchPreview(items[(currentItemPos + 1) % items.length]);
+    if (currentItemIndex === undefined || currentItemIndex < 0) {
+      return;
     }
+
+    currentItemIndex = (currentItemIndex + 1) % items.length;
+    switchPreview(items[currentItemIndex]);
   };
 
   const handleSwitchLeft = () => {
-    const currentItem = status.item;
-    if (currentItem) {
-      const currentItemPos = items.findIndex(x => x.id === currentItem.id);
-      switchPreview(items[(currentItemPos - 1 + items.length) % items.length]);
+    if (currentItemIndex === undefined || currentItemIndex < 0) {
+      return;
     }
+
+    currentItemIndex = (currentItemIndex - 1 + items.length) % items.length;
+    switchPreview(items[currentItemIndex]);
   };
 
   useEffect(() => {
@@ -67,16 +81,14 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       return () => {};
 
-    if (!status.loading) {
-      addShortcut({ shortcut: 'Right', handler: handleSwitchRight });
-      addShortcut({ shortcut: 'Left', handler: handleSwitchLeft });
-    }
+    addShortcut({ shortcut: 'Right', handler: handleSwitchRight });
+    addShortcut({ shortcut: 'Left', handler: handleSwitchLeft });
 
     return () => {
-      removeShortcut({ shortcut: 'Right', handler: handleSwitchRight });
-      removeShortcut({ shortcut: 'Left', handler: handleSwitchLeft });
+      removeShortcut({ shortcut: 'Right' });
+      removeShortcut({ shortcut: 'Left' });
     };
-  }, [status]);
+  }, [items?.map((item) => item.id).join(',')]);
 
   useEffect(() => {
     clearTimeout(animationTimeout);
@@ -89,7 +101,6 @@ export const DrivePreview: React.FC<DrivePreviewProps> = ({ items }) => {
   }, [loading]);
 
   const switchPreview = async (item: DriveItem) => {
-    close();
     //TODO[ASH] fix state management for this component
     //right now changing the routing leads to a lot of components rerender
     //and galery become unusable

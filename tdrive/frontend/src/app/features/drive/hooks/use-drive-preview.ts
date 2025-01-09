@@ -61,7 +61,7 @@ export const useDrivePreview = () => {
         });
       }
     },
-    [status.item?.id],
+    [status.item?.id, modal.isOpen],
   );
 
   return {
