@@ -135,7 +135,7 @@ export const CreateModal = ({
                       onClick={() =>
                         addFromUrl(app.emptyFile.url, app.emptyFile.filename || app.emptyFile.name)
                       }
-                      testClassId={app.emptyFile.name}
+                      testClassId={app.emptyFile.name.replaceAll(' ' ,'-').toLocaleLowerCase()}
                     />
                   );
                 })}

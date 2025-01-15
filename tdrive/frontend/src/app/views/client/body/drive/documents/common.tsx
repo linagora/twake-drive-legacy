@@ -33,7 +33,7 @@ export const CheckableIcon = ({
     <div className={className}>
       {show && (
         <div className="w-6 text-center">
-          <Checkbox value={checked} onChange={onCheck} />
+          <Checkbox value={checked} onChange={onCheck} testClassId="checkable-icon" />
         </div>
       )}
       {!show && <div className="w-6 flex flew-row justify-center">{fallback}</div>}
