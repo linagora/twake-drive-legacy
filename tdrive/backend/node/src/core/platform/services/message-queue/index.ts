@@ -63,9 +63,6 @@ export class MessageQueueService implements MessageQueueServiceAPI {
 
   @SkipCLI()
   async init(): Promise<this> {
-    logger.info("Initializing message-queue adapter %o", this.adapter.type);
-    await this.adapter?.init?.();
-
     return this;
   }
 
@@ -74,7 +71,8 @@ export class MessageQueueService implements MessageQueueServiceAPI {
     logger.info("Starting message-queue adapter %o", this.adapter.type);
     await this.adapter?.start?.();
     await this.processor.start();
-
+    logger.info("Initializing message-queue adapter %o", this.adapter.type);
+    await this.adapter?.init?.();
     return this;
   }
 

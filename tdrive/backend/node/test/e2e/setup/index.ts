@@ -16,6 +16,7 @@ import StorageAPI from "../../../src/core/platform/services/storage/provider";
 import {SearchServiceAPI} from "../../../src/core/platform/services/search/api";
 import Session from "../../../src/services/console/entities/session";
 import EmailPusherAPI from "../../../src/core/platform/services/email-pusher/provider";
+import PreviewsService from "../../../src/services/previews";
 
 type TokenPayload = {
   sub: string;
@@ -48,6 +49,7 @@ export interface TestPlatform {
   messageQueue: MessageQueueServiceAPI;
   authService: AuthServiceAPI;
   filesService: FileServiceImpl;
+  previews: PreviewsService;
   auth: {
     getJWTToken(payload?: TokenPayload): Promise<string>;
   };
@@ -61,13 +63,44 @@ export interface TestPlatformConfiguration {
 
 let testPlatform: TestPlatform = null;
 
+// init platform with default services list
+export async function initWithDefaults(): Promise<TestPlatform> {
+  return await init({
+    services: [
+      "auth",
+      "push",
+      "storage",
+      "webserver",
+      "database",
+      "cron",
+      "search",
+      "message-queue",
+      "tracker",
+      "general",
+      "user",
+      "files",
+      "workspaces",
+      "console",
+      "previews",
+      "counter",
+      "statistics",
+      "cron",
+      "email-pusher",
+      "documents",
+      "applications",
+      "applications-api",
+      "tags"
+    ],
+  });
+}
+
 export async function init(
   testConfig?: TestPlatformConfiguration,
   prePlatformStartCallback?: (fastify: FastifyInstance) => void,
 ): Promise<TestPlatform> {
   if (!testPlatform) {
     const configuration: TdrivePlatformConfiguration = {
-      services: config.get("services"),
+      services: testConfig.services,
       servicesPath: pathResolve(__dirname, "../../../src/services/"),
     };
     const platform = new TdrivePlatform(configuration);
@@ -89,6 +122,7 @@ export async function init(
     const storage: StorageAPI = platform.getProvider<StorageAPI>("storage");
     const search: SearchServiceAPI = platform.getProvider<SearchServiceAPI>("search");
     const emailPusher: EmailPusherAPI = platform.getProvider<EmailPusherAPI>("email-pusher");
+    const previews = platform.getProvider<PreviewsService>("previews")
 
     testPlatform = {
       platform,
@@ -107,6 +141,7 @@ export async function init(
       },
       tearDown,
       search,
+      previews
     };
   }
 

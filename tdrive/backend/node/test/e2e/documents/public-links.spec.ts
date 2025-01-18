@@ -35,6 +35,9 @@ describe("the public links feature", () => {
   beforeAll(async () => {
     platform = await init({
       services: [
+        "cron",
+        "tracker",
+        "email-pusher",
         "webserver",
         "database",
         "applications",
@@ -44,17 +47,16 @@ describe("the public links feature", () => {
         "user",
         "search",
         "files",
-        "messages",
         "auth",
-        "channels",
         "counter",
         "statistics",
-        "platform-services",
         "documents",
+        "previews",
+        "console"
       ],
     });
     currentUser = await UserApi.getInstance(platform);
-  });
+  }, 300000000);
 
   afterAll(async () => {
     await platform?.tearDown();
@@ -287,6 +289,6 @@ describe("the public links feature", () => {
       await anotherUser.getDocumentOKCheck(doc.id);
 
       expect((await anotherUser.zipDocument(doc.id)).statusCode).toBe(200);
-    });
+    }, 30000000);
   });
 });

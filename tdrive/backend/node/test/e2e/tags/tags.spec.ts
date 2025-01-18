@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import { Tag } from "../../../src/services/tags/entities/tags";
 import { deserialize } from "class-transformer";
@@ -17,9 +17,7 @@ describe("The Tag feature", () => {
   const tagIds: string[] = [];
 
   beforeAll(async () => {
-    platform = await init({
-      services: ["webserver", "database", "storage", "message-queue", "tags"],
-    });
+    platform = await initWithDefaults();
     testDbService = await TestDbService.getInstance(platform, true);
   });
 

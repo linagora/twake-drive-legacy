@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import { v1 as uuidv1 } from "uuid";
 
@@ -8,23 +8,7 @@ describe("The /users API", () => {
   let platform: TestPlatform;
 
   beforeEach(async () => {
-    platform = await init({
-      services: [
-        "database",
-        "search",
-        "message-queue",
-        "webserver",
-        "user",
-        "auth",
-        "applications",
-        "storage",
-        "counter",
-        "workspaces",
-        "console",
-        "statistics",
-        "platform-services",
-      ],
-    });
+    platform = await initWithDefaults();
   });
 
   afterEach(async () => {

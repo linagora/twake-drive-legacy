@@ -1,0 +1,152 @@
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: tdrive
+      POSTGRES_PASSWORD: tdrive_secret
+      POSTGRES_USER: tdrive_user
+    ports:
+      - "5432:5432"
+    networks:
+      - tdrive_network
+
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+    networks:
+      - tdrive_network
+
+  redis:
+    image: "redis:alpine"
+    command: redis-server --requirepass some_password
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      - tdrive_network
+
+  av:
+    image: clamav/clamav:latest
+    container_name: av
+    ports:
+      - 3310:3310
+    networks:
+      - tdrive_network
+
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./test/.minio/data:/export
+      - ./test/.minio/config:/root/.minio
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=adminminio
+    command: server /export
+    healthcheck:
+      test: MC_HOST_custom=http://localhost:9000 mc ready local
+    networks:
+      - tdrive_network
+
+  createbucket:
+    image: minio/mc
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 admin adminminio;
+      /usr/bin/mc rm -r --force myminio/drive;
+      /usr/bin/mc mb myminio/drive;
+      exit 0;
+      "
+    networks:
+      - tdrive_network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.4
+    environment:
+      - xpack.security.enabled=false
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    healthcheck:
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:9200/
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - 9200:9200
+    networks:
+      - tdrive_network
+
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: rabbitmq
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - tdrive_network
+
+  onlyoffice:
+    image: docker.io/onlyoffice/documentserver
+    ports:
+      - 8090:80
+    environment:
+      - AMQP_URI=amqp://guest:guest@rabbitmq
+      - JWT_ENABLED=false
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./onlyoffice_data:/var/www/onlyoffice/Data
+    networks:
+      - tdrive_network
+
+  opensearch-node1:
+    image: opensearchproject/opensearch:2.11.0 # Specifying the latest available image - modify if you want a specific version
+    container_name: opensearch-node1
+    environment:
+      - cluster.name=opensearch-cluster # Name the cluster
+      - node.name=opensearch-node1 # Name the node that will run in this container
+      - discovery.seed_hosts=opensearch-node1 # Nodes to look for when discovering the cluster
+      - cluster.initial_cluster_manager_nodes=opensearch-node1 # Nodes eligible to serve as cluster manager
+      - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+      #      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=admin
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
+    ulimits:
+      memlock:
+        soft: -1 # Set memlock to unlimited (no soft or hard limit)
+        hard: -1
+      nofile:
+        soft: 65536 # Maximum number of open files for the opensearch user - set to at least 65536
+        hard: 65536
+    #    volumes:˚
+    #      - opensearch-data1:/usr/share/opensearch/data # Creates volume called opensearch-data1 and mounts it to the container
+    ports:
+      - 9200:9200 # REST API
+      - 9600:9600 # Performance Analyzer
+    networks:
+      - tdrive_network
+
+networks:
+  tdrive_network:
+    driver: bridge

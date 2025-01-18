@@ -1,6 +1,6 @@
 import { describe, beforeAll, beforeEach, it, expect, afterAll, jest } from "@jest/globals";
 
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 
 import { DriveFile, TYPE as DriveFileType } from "../../../src/services/documents/entities/drive-file";
@@ -15,28 +15,7 @@ describe("the Drive's documents' editing session kind-of-lock", () => {
   let temporaryDocument: DriveFile;
 
   beforeAll(async () => {
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "search",
-        "files",
-        "websocket",
-        "messages",
-        "auth",
-        "realtime",
-        "channels",
-        "counter",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
     currentUser = await UserApi.getInstance(platform);
     currentUserRoot = `user_${currentUser.user.id}`;
   });

@@ -1,5 +1,5 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect} from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { afterAll, afterEach, beforeEach, describe, expect} from "@jest/globals";
+import { init, initWithDefaults, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 
 describe("The /users/quota API", () => {
@@ -7,34 +7,14 @@ describe("The /users/quota API", () => {
   let currentUser: UserApi;
 
   beforeEach(async () => {
-    platform = await init();
+    platform = await initWithDefaults();
     currentUser = await UserApi.getInstance(platform);
-  }, 30000000);
+  });
 
   afterEach(async () => {
     await platform.tearDown();
     platform = null;
   });
-
-  beforeAll(async () => {
-    const platform = await init({
-      services: [
-        "database",
-        "search",
-        "message-queue",
-        "applications",
-        "webserver",
-        "user",
-        "auth",
-        "storage",
-        "counter",
-        "console",
-        "workspaces",
-        "statistics",
-        "platform-services",
-      ],
-    });
-  }, 30000000);
 
   afterAll(async () => {
   });
@@ -51,7 +31,7 @@ describe("The /users/quota API", () => {
     expect(quota.total).toBe(userQuota);
     expect(quota.remaining).toBe(userQuota - doc.size); //198346196 //198342406
     expect(quota.used).toBe(doc.size);
-  }, 30000000);
+  });
 
   test("should return 200 with all empty space", async () => {
     //given

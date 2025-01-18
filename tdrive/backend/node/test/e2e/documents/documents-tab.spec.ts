@@ -1,7 +1,7 @@
 import { afterAll, beforeEach, describe, expect, it } from "@jest/globals";
 import { deserialize } from "class-transformer";
 import { AccessInformation } from "../../../src/services/documents/entities/drive-file";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import UserApi from "../common/user-api";
 
@@ -28,26 +28,7 @@ describe("the Drive Tdrive tabs feature", () => {
   }
 
   beforeEach(async () => {
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "search",
-        "files",
-        "messages",
-        "auth",
-        "channels",
-        "counter",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
     currentUser = await UserApi.getInstance(platform);
   });
 

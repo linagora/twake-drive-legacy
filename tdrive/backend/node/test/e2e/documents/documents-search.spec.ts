@@ -1,5 +1,5 @@
 import { describe, it, expect, afterAll } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 import { DriveFileMockClass } from "../common/entities/mock_entities";
 import { DriveFile } from "../../../src/services/documents/entities/drive-file";
@@ -14,25 +14,7 @@ describe("the Drive Search feature", () => {
   const uploadedByUserTwo = [];
 
   beforeAll(async () => {
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "search",
-        "files",
-        "messages",
-        "auth",
-        "channels",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
   });
 
   afterAll(async () => {

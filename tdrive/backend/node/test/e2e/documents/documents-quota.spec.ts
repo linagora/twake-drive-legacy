@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 import config from "config";
 import { e2e_createDocumentFile, e2e_createVersion } from "./utils";
@@ -33,26 +33,7 @@ describe("the Drive feature", () => {
       }
       return jest.requireActual("config").get(setting);
     });
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "search",
-        "files",
-        "messages",
-        "auth",
-        "channels",
-        "counter",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
     currentUser = await UserApi.getInstance(platform);
   });
 

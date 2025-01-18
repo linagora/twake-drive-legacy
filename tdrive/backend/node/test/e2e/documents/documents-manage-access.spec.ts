@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 import config from "config";
 
@@ -28,26 +28,7 @@ describe("The Drive feature", () => {
     });
 
     // Initialize platform with required services
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "search",
-        "files",
-        "messages",
-        "auth",
-        "channels",
-        "counter",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
   });
 
   afterEach(async () => {

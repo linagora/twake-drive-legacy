@@ -1,6 +1,6 @@
 import { describe, beforeEach, afterEach, it, expect, afterAll } from "@jest/globals";
 import { deserialize } from "class-transformer";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import {
   e2e_updateDocument,
@@ -21,38 +21,8 @@ describe("the My Drive feature", () => {
     is_directory: boolean;
   }
 
-  class DriveItemDetailsMockClass {
-    path: string[];
-    item: DriveFileMockClass;
-    children: DriveFileMockClass[];
-    versions: Record<string, unknown>[];
-  }
-
-  class SearchResultMockClass {
-    entities: DriveFileMockClass[];
-  }
-
   beforeEach(async () => {
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "search",
-        "files",
-        "messages",
-        "auth",
-        "channels",
-        "counter",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
     currentUser = await UserApi.getInstance(platform);
   });
 

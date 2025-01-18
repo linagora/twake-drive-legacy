@@ -27,6 +27,7 @@
   },
   "webserver": {
     "host": "TWAKE_DRIVE_HOST",
+    "port": "TWAKE_DRIVE_PORT",
     "logger": {
       "level": "LOG_LEVEL"
     },
@@ -153,5 +154,9 @@
     "debugMode": "AV_DEBUG_MODE",
     "timeout": "AV_TIMEOUT",
     "maxFileSize": "AV_MAX_FILE_SIZE"
+  },
+  "services": {
+    "__name": "SERVICES_LIST",
+    "__format": "json"
   }
 }

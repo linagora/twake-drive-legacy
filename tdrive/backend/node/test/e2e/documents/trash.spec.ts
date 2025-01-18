@@ -1,7 +1,7 @@
 import { describe, beforeAll, it, expect, afterAll } from "@jest/globals";
 import { deserialize } from "class-transformer";
 
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import UserApi from "../common/user-api";
 import {
@@ -15,28 +15,7 @@ describe("the Drive's documents' trash feature", () => {
   let currentUserTrash: string | undefined;
 
   beforeAll(async () => {
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "search",
-        "files",
-        "websocket",
-        "messages",
-        "auth",
-        "realtime",
-        "channels",
-        "counter",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
     currentUser = await UserApi.getInstance(platform);
     currentUserRoot = `user_${currentUser.user.id}`;
     currentUserTrash = `trash_${currentUser.user.id}`;

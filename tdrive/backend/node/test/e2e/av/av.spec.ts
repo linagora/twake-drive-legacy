@@ -1,7 +1,7 @@
 import "./load_test_config";
 import "reflect-metadata";
 import { afterAll, beforeEach, describe, expect, it, jest } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { init, initWithDefaults, TestPlatform } from "../setup";
 import { deserialize } from "class-transformer";
 import UserApi from "../common/user-api";
 import { DriveItemDetailsMockClass } from "../common/entities/mock_entities";
@@ -19,22 +19,7 @@ describe("The documents antivirus", () => {
   );
 
   beforeEach(async () => {
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "files",
-        "auth",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
   });
 
   afterAll(async () => {

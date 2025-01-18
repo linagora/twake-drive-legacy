@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import { v1 as uuidv1 } from "uuid";
 
@@ -13,23 +13,7 @@ describe("The /workspaces API", () => {
   let companyId = "";
 
   beforeAll(async () => {
-    platform = await init({
-      services: [
-        "database",
-        "message-queue",
-        "webserver",
-        "user",
-        "search",
-        "workspaces",
-        "auth",
-        "console",
-        "counter",
-        "storage",
-        "applications",
-        "statistics",
-        "platform-services",
-      ],
-    });
+    platform = await initWithDefaults();
 
     companyId = platform.workspace.company_id;
 

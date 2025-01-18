@@ -1,0 +1,70 @@
+version: "3.4"
+
+services:
+
+  node:
+    build:
+      context: .
+      dockerfile: docker/tdrive-node/Dockerfile
+      target: development
+    container_name: tdrive-node
+    hostname: tdrive_node
+    ports:
+      - 4000:4000
+      - 9229:9229
+    environment:
+      - DEV=dev
+      - SEARCH_DRIVER=mongodb
+      - DB_DRIVER=mongodb
+      - PUBSUB_TYPE=amqp
+      - SERVICES_LIST=[ "webserver", "database",  "tracker",   "applications",   "search",   "storage",   "message-queue",   "user",   "files",   "auth",   "documents",   "counter",   "cron",   "general",   "email-pusher" ]
+      - ./docker-data/documents/:/storage/
+    volumes:
+      - ./backend/node/profiles:/usr/src/app/profiles
+      - ./backend/node/src:/usr/src/app/src
+      - ./docker-data/documents/:/storage/
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      node_preview:
+        condition: service_started
+    links:
+      - mongo
+
+  node_preview:
+    build:
+      context: .
+      dockerfile: docker/tdrive-node/Dockerfile
+      target: development
+    container_name: tdrive-preview-node
+    hostname: tdrive_preview_node
+    ports:
+      - 4001:4001
+      - 9229:9229
+    environment:
+      - DEV=dev
+      - TWAKE_DRIVE_PORT="4001"
+      - SEARCH_DRIVER=mongodb
+      - DB_DRIVER=mongodb
+      - PUBSUB_TYPE=amqp
+      - SERVICES_LIST=[ "webserver", "previews",  "database",  "tracker",   "applications",   "search",   "storage",   "message-queue",   "user",   "files",   "auth",   "documents",   "counter",   "cron",   "general",   "email-pusher" ]
+      - ./docker-data/documents/:/storage/
+    volumes:
+      - ./backend/node/profiles:/usr/src/app/profiles
+      - ./backend/node/src:/usr/src/app/src
+      - ./docker-data/documents/:/storage/
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    links:
+      - mongo
+
+
+
+
+
+         

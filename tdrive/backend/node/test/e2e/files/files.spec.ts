@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { afterAll, beforeAll, afterEach, describe, expect, it } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import { getFilePath } from "../../../src/services/files/services";
 import UserApi from "../common/user-api";
 import LocalConnectorService from "../../../src/core/platform/services/storage/connectors/local/service"
@@ -13,9 +13,7 @@ describe("The Files feature", () => {
   let helpers: UserApi;
 
   beforeAll(async () => {
-    platform = await init({
-      services: ["webserver", "database", "storage", "files", "previews"],
-    });
+    platform = await initWithDefaults();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     await platform.database.getConnector().init();

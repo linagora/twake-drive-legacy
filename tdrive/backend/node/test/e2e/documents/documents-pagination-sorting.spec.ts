@@ -1,5 +1,5 @@
 import { describe, beforeAll, afterAll, it, expect } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { init, initWithDefaults, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 
 describe("The Documents Browser Window and API", () => {
@@ -11,22 +11,7 @@ describe("The Documents Browser Window and API", () => {
   let files: any;
 
   beforeAll(async () => {
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "files",
-        "auth",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
     currentUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
     anotherUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
     myDriveId = "user_" + currentUser.user.id;

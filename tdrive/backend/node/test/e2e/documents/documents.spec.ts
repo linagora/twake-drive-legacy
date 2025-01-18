@@ -2,7 +2,7 @@ import { describe, beforeEach, it, expect, afterAll } from "@jest/globals";
 import { deserialize } from "class-transformer";
 import { File } from "../../../src/services/files/entities/file";
 import { ResourceUpdateResponse } from "../../../src/utils/types";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import {
   e2e_createDocumentFile,
@@ -21,26 +21,7 @@ describe("the Drive feature", () => {
   let currentUser: UserApi;
 
   beforeEach(async () => {
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "search",
-        "files",
-        "messages",
-        "auth",
-        "channels",
-        "counter",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
     currentUser = await UserApi.getInstance(platform);
   });
 

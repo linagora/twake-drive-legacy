@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { init, initWithDefaults, TestPlatform } from "../setup";
 import { TestDbService } from "../utils.prepare.db";
 import UserApi from "../common/user-api";
 
@@ -15,24 +15,7 @@ describe("The /backchannel_logout API", () => {
   });
 
   beforeAll(async () => {
-    platform = await init({
-      services: [
-        "database",
-        "search",
-        "message-queue",
-        "websocket",
-        "applications",
-        "webserver",
-        "user",
-        "auth",
-        "storage",
-        "counter",
-        "console",
-        "workspaces",
-        "statistics",
-        "platform-services",
-      ],
-    });
+    platform = await initWithDefaults();
     testDbService = await TestDbService.getInstance(platform);
   });
 

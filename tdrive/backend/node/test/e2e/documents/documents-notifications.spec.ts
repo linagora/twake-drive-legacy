@@ -1,5 +1,5 @@
 import { describe, beforeEach, it, expect, afterAll, jest } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 import * as utils from "../../../src/services/documents/utils";
 import { DocumentsEngine } from "../../../src/services/documents/services/engine";
@@ -22,27 +22,7 @@ describe("the Drive feature", () => {
   let currentUser: UserApi;
 
   beforeEach(async () => {
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "search",
-        "files",
-        "messages",
-        "auth",
-        "channels",
-        "counter",
-        "statistics",
-        "platform-services",
-        "documents",
-        "email-pusher",
-      ],
-    });
+    platform = await initWithDefaults();
     currentUser = await UserApi.getInstance(platform);
   });
 

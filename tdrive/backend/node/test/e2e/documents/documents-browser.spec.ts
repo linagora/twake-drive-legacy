@@ -1,6 +1,5 @@
 import { describe, beforeEach, afterEach, it, expect, afterAll } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
-import { TestDbService } from "../utils.prepare.db";
+import {initWithDefaults, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 
 describe("The Documents Browser Window and API", () => {
@@ -11,22 +10,7 @@ describe("The Documents Browser Window and API", () => {
   let files: any;
 
   beforeEach(async () => {
-    platform = await init({
-      services: [
-        "webserver",
-        "database",
-        "applications",
-        "search",
-        "storage",
-        "message-queue",
-        "user",
-        "files",
-        "auth",
-        "statistics",
-        "platform-services",
-        "documents",
-      ],
-    });
+    platform = await initWithDefaults();
     currentUser = await UserApi.getInstance(platform);
     sharedWIthMeFolder = "shared_with_me";
     myDriveId = "user_" + currentUser.user.id;
@@ -37,7 +21,7 @@ describe("The Documents Browser Window and API", () => {
     expect(Array.from(files.entries())).toHaveLength(UserApi.ALL_FILES.length);
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await platform?.tearDown();
     // @ts-ignore
     platform = null;

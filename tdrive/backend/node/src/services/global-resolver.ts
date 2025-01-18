@@ -8,7 +8,6 @@ import { CronAPI } from "../core/platform/services/cron/api";
 import { DatabaseServiceAPI } from "../core/platform/services/database/api";
 import EmailPusherAPI from "../core/platform/services/email-pusher/provider";
 import { MessageQueueServiceAPI } from "../core/platform/services/message-queue/api";
-import { PushServiceAPI } from "../core/platform/services/push/api";
 import { SearchServiceAPI } from "../core/platform/services/search/api";
 import StorageAPI from "../core/platform/services/storage/provider";
 import TrackerAPI from "../core/platform/services/tracker/provider";
@@ -32,7 +31,6 @@ import { UserServiceImpl } from "./user/services/users/service";
 import { WorkspaceServiceImpl } from "./workspaces/services/workspace";
 import { AVServiceImpl } from "./av/service";
 
-import { PreviewEngine } from "./previews/services/files/engine";
 import { I18nService } from "./i18n";
 import { getConfigOrDefault } from "../utils/get-config";
 
@@ -41,7 +39,6 @@ type PlatformServices = {
   counter: CounterAPI;
   cron: CronAPI;
   messageQueue: MessageQueueServiceAPI;
-  push: PushServiceAPI;
   search: SearchServiceAPI;
   storage: StorageAPI;
   tracker: TrackerAPI;
@@ -96,7 +93,6 @@ class GlobalResolver {
       counter: platform.getProvider<CounterAPI>("counter"),
       cron: platform.getProvider<CronAPI>("cron"),
       messageQueue: platform.getProvider<MessageQueueServiceAPI>("message-queue"),
-      push: platform.getProvider<PushServiceAPI>("push"),
       search: platform.getProvider<SearchServiceAPI>("search"),
       storage: platform.getProvider<StorageAPI>("storage"),
       tracker: platform.getProvider<TrackerAPI>("tracker"),
@@ -110,8 +106,6 @@ class GlobalResolver {
       const service = this.platformServices[key];
       assert(service, `Platform service ${key} was not initialized`);
     });
-
-    await new PreviewEngine().init();
 
     this.services = {
       workspaces: await new WorkspaceServiceImpl().init(),

@@ -1,7 +1,7 @@
 import "./load_test_config"
 import "reflect-metadata";
 import { afterAll, beforeAll, afterEach, describe, expect, it } from "@jest/globals";
-import { init, TestPlatform } from "../setup";
+import { initWithDefaults, TestPlatform } from "../setup";
 import UserApi from "../common/user-api";
 import LocalConnectorService from "../../../src/core/platform/services/storage/connectors/local/service"
 import { StorageConnectorAPI } from "../../../src/core/platform/services/storage/provider";
@@ -12,11 +12,9 @@ describe("The OneOf Storage feature", () => {
   let helpers: UserApi;
 
   beforeAll(async () => {
-    platform = await init({
-      services: ["webserver", "database", "storage", "files", "previews"],
-    });
+    platform = await initWithDefaults();
     helpers = await UserApi.getInstance(platform);
-  }, 300000000);
+  });
 
   afterEach(async () => {
     jest.restoreAllMocks();

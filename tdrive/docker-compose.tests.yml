@@ -1,64 +1,4 @@
-version: "3"
-
 services:
-  # rabbitmq:
-  #   image: rabbitmq:3
-  #   ports:
-  #     - 5672:5672
-  #     - 15672:15672
-
-  mongo:
-    container_name: mongo
-    image: mongo
-    ports:
-      - 27017:27017
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-  av:
-    image: clamav/clamav:latest
-    container_name: av
-    ports:
-      - 3310:3310
-    healthcheck:
-      test: ["CMD-SHELL", "echo 'PING' | nc -w 5 localhost 3310"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-  redis:
-    image: "redis:alpine"
-    command: redis-server --requirepass some_password
-    ports:
-      - "6379:6379"
-    environment:
-      - REDIS_REPLICATION_MODE=master
-
-  minio:
-    image: minio/minio
-    ports:
-      - "9000:9000"
-    volumes:
-      - ./test/.minio/data:/export
-      - ./test/.minio/config:/root/.minio
-    environment:
-      - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=adminminio
-    command: server /export
-    healthcheck:
-      test: MC_HOST_custom=http://localhost:9000 mc ready local
-
-  createbucket:
-    image: minio/mc
-    depends_on:
-      minio:
-        condition: service_healthy
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc config host add myminio http://minio:9000 admin adminminio;
-      /usr/bin/mc rm -r --force myminio/drive;
-      /usr/bin/mc mb myminio/drive;
-      exit 0;
-      "
 
   node:
     image: tdrive/tdrive-node:test
@@ -92,32 +32,17 @@ services:
         condition: service_healthy
       av:
         condition: service_healthy
-      # rabbitmq:
-      #   condition: service_started
+      rabbitmq:
+        condition: service_started
       elasticsearch:
         condition: service_healthy
       createbucket:
         condition: service_completed_successfully
     links:
       - mongo
-      - av
+    networks:
+      - tdrive_network
       # - rabbitmq
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.4
-    environment:
-      - xpack.security.enabled=false
-      - bootstrap.memory_lock=true
-      - discovery.type=single-node
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    healthcheck:
-      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:9200/
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    ports:
-      - 9200:9200
 
   nginx:
     image: tdrive/tdrive-frontend
