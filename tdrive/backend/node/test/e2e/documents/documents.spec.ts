@@ -15,6 +15,7 @@ import {
   DriveItemDetailsMockClass,
 } from "../common/entities/mock_entities";
 import { Open } from "unzipper";
+import { randomUUID } from "crypto";
 
 describe("the Drive feature", () => {
   let platform: TestPlatform;
@@ -128,7 +129,7 @@ describe("the Drive feature", () => {
 
     //update creator files
     const update = await currentUser.platform.documentService.repository.findOne({id: doc.id})
-    update.creator = "ldap_sync";
+    update.creator = randomUUID();
     await currentUser.platform.documentService.repository.save(update)
 
     const updated = await currentUser.getDocumentOKCheck(doc.id);
