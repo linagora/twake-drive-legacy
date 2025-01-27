@@ -419,9 +419,9 @@ export const getItemScope = async (
   context: CompanyExecutionContext,
 ): Promise<"personal" | "shared"> => {
   let scope: "personal" | "shared";
-  if (item.parent_id.startsWith("user_")) {
+  if (item.parent_id.startsWith("user_") || item.parent_id.startsWith("trash_")) {
     scope = "personal";
-  } else if (item.parent_id === "root") {
+  } else if (item.parent_id === "root" || item.parent_id === "trash") {
     scope = "shared";
   } else {
     const driveItemParent = await repository.findOne(
