@@ -10,7 +10,8 @@ import { UploadStateEnum } from 'app/features/files/services/file-upload-service
 const getFilteredRoots = (keys: string[], roots: UploadRootListType) => {
   const inProgress = keys.filter(key => roots[key].status === 'uploading');
   const completed = keys.filter(key => roots[key].status === 'completed');
-  return { inProgress, completed };
+  const paused = keys.filter(key => roots[key].status === 'paused');
+  return { inProgress, completed, paused };
 };
 
 interface ModalHeaderProps {
@@ -86,16 +87,18 @@ const PendingRootList = ({
   const { pauseOrResumeUpload, cancelUpload } = useUpload();
   const keys = useMemo(() => Object.keys(roots || {}), [roots]);
 
-  const { inProgress: rootsInProgress, completed: rootsCompleted } = useMemo(
-    () => getFilteredRoots(keys, roots),
-    [keys, roots],
-  );
+  const {
+    inProgress: rootsInProgress,
+    completed: rootsCompleted,
+    paused: rootsPaused,
+  } = useMemo(() => getFilteredRoots(keys, roots), [keys, roots]);
 
   const isPaused = useCallback(() => status === UploadStateEnum.Paused, [status]);
 
   const totalRoots = keys.length;
   const uploadingCount = rootsInProgress.length;
   const completedCount = rootsCompleted.length;
+  const pausedCount = rootsPaused.length;
   const uploadingPercentage = Math.floor((uploadingCount / totalRoots) * 100) || 100;
 
   const toggleModal = useCallback(() => setModalExpanded(prev => !prev), []);
@@ -105,7 +108,7 @@ const PendingRootList = ({
       {totalRoots > 0 && (
         <div className="fixed bottom-4 right-4 w-1/3 shadow-lg rounded-sm overflow-hidden">
           <ModalHeader
-            uploadingCount={uploadingCount}
+            uploadingCount={uploadingCount + pausedCount}
             completedCount={completedCount}
             totalRoots={totalRoots}
             uploadingPercentage={uploadingPercentage}
@@ -130,7 +133,7 @@ const PendingRootList = ({
                 pauseOrResumeUpload={pauseOrResumeUpload}
                 cancelUpload={cancelUpload}
                 isPaused={isPaused}
-                uploadingCount={uploadingCount}
+                uploadingCount={uploadingCount + pausedCount}
               />
             </div>
           )}

@@ -39,8 +39,7 @@ const PendingRootRow = ({
   // Callback function to open the folder after the upload is completed
   const handleShowFolder = useCallback(() => {
     if (!showFolder || isFileRoot) return;
-    const parentId = firstPendingFile.parentId;
-    RouterService.push(RouterService.generateRouteFromState({ dirId: parentId || '' }));
+    RouterService.push(RouterService.generateRouteFromState({ dirId: root.id || '' }));
     clearRoots();
   }, [showFolder, isFileRoot, root, clearRoots]);
 
@@ -72,7 +71,6 @@ const PendingRootRow = ({
   useEffect(() => {
     const postProcess = async () => {
       if (isUploadCompleted && !restoredFolder) {
-        console.log("THE UPLOAD FINISHED WILL REFRESH");
         await new Promise(resolve => setTimeout(resolve, 1000));
         await restore(root.id, parentId);
         await new Promise(resolve => setTimeout(resolve, 1000));

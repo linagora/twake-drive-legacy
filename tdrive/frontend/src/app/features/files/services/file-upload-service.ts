@@ -52,7 +52,6 @@ class FileUploadService {
     while (this.uploadStatus === UploadStateEnum.Paused || (id && this.pausedRoots[id])) {
       if (this.uploadStatus === UploadStateEnum.Cancelled) return;
       await new Promise(resolve => setTimeout(resolve, 100)); // Check every 100ms
-      console.log('waiting while paused:: ', id);
     }
   }
 
@@ -102,13 +101,6 @@ class FileUploadService {
     tree: FileTreeObject,
     context: { companyId: string; parentId: string },
   ) {
-    // init everything
-    // this.currentTaskId = '';
-    // this.pendingFiles = [];
-    // this.GroupedPendingFiles = {};
-    // this.GroupIds = {};
-    // this.pausedRoots = {};
-    // this.notify();
     const root = tree.tree;
     this.RootSizes = this.RootSizes = {
       ...this.RootSizes,
@@ -515,6 +507,16 @@ class FileUploadService {
     for (const file of filesToProcess) {
       if (file.status === 'success') continue;
       this.pauseOrResumeFile(file);
+    }
+
+    // update the status of the roots
+    const roots = Object.keys(this.GroupedPendingFiles);
+    for (const root of roots) {
+      if (this.uploadStatus === UploadStateEnum.Paused) {
+        this.pausedRoots[root] = true;
+      } else {
+        this.pausedRoots[root] = false;
+      }
     }
 
     this.notify();

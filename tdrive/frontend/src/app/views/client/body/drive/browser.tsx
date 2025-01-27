@@ -341,6 +341,8 @@ export default memo(
                 companyId,
                 parentId,
               });
+              await new Promise (resolve => setTimeout(resolve, 1000));
+              refresh(parentId);
             }}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
