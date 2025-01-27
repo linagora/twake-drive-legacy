@@ -121,6 +121,28 @@ describe("the Drive feature", () => {
     expect(zip.files.map(f => f.path).sort()).toEqual(fileNames.sort())
   });
 
+
+  it("Delete document that was uploaded by an application", async () => {
+    const doc = await currentUser.uploadRandomFileAndCreateDocument();
+    expect(doc.id).toBeDefined();
+
+    //update creator files
+    const update = await currentUser.platform.documentService.repository.findOne({id: doc.id})
+    update.creator = "ldap_sync";
+    await currentUser.platform.documentService.repository.save(update)
+
+    const updated = await currentUser.getDocumentOKCheck(doc.id);
+
+    expect(updated.item.creator).toBe(update.creator);
+
+    let deleteResponse = await currentUser.delete(doc.id);
+    expect(deleteResponse.statusCode).toEqual(200);
+
+    //delete from trash
+    deleteResponse = await currentUser.delete(doc.id);
+    expect(deleteResponse.statusCode).toEqual(200);
+  });
+
   it("did create a version for a drive item", async () => {
     const item = await currentUser.createDefaultDocument();
     const fileUploadResponse = await e2e_createDocumentFile(platform);

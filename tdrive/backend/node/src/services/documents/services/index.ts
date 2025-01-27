@@ -821,7 +821,8 @@ export class DocumentsService {
         // Check item belongs to someone
         if (item.creator !== context?.user?.id) {
           const creator = await this.userRepository.findOne({ id: item.creator });
-          if (creator.type === "anonymous") {
+          //if the file was created by an application or anonymous user
+          if (creator == null || creator.type === "anonymous") {
             const loadedCreators = new Map<string, User>();
             let firstOwnedItem: DriveFile | undefined;
             for (let i = path.length - 1; i >= 0; i--) {

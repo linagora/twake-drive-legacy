@@ -16,6 +16,7 @@ import StorageAPI from "../../../src/core/platform/services/storage/provider";
 import {SearchServiceAPI} from "../../../src/core/platform/services/search/api";
 import Session from "../../../src/services/console/entities/session";
 import EmailPusherAPI from "../../../src/core/platform/services/email-pusher/provider";
+import { DocumentsService } from "../../../src/services/documents/services";
 
 type TokenPayload = {
   sub: string;
@@ -48,6 +49,7 @@ export interface TestPlatform {
   messageQueue: MessageQueueServiceAPI;
   authService: AuthServiceAPI;
   filesService: FileServiceImpl;
+  documentService: DocumentsService;
   auth: {
     getJWTToken(payload?: TokenPayload): Promise<string>;
   };
@@ -102,6 +104,7 @@ export async function init(
       currentSession: uuidv1(),
       authService: auth,
       filesService: globalResolver.services.files,
+      documentService: globalResolver.services.documents.documents,
       auth: {
         getJWTToken,
       },
