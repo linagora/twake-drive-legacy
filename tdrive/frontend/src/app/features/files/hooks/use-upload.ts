@@ -20,7 +20,7 @@ export const useUpload = () => {
 
   const cancelUpload = () => FileUploadService.cancelUpload();
 
-  const cancelRootUpload = (id: string) => FileUploadService.cancelRoot(id);
+  const cancelRootUpload = (id: string) => FileUploadService.cancelRootUpload(id);
 
   const getOnePendingFile = (id: string) => FileUploadService.getPendingFile(id);
 

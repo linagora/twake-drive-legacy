@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { CreateModalAtom } from '.';
 import FileUploadService from 'features/files/services/file-upload-service';
-import Languages from "features/global/services/languages-service";
+import Languages from 'features/global/services/languages-service';
 
 export const CreateLink = () => {
   const [name, setName] = useState<string>('');
@@ -25,7 +25,8 @@ export const CreateLink = () => {
       context: {
         parentId: state.parent_id,
       },
-      callback: (file, context) => {
+      callback: (filePayload, context) => {
+        const file = filePayload?.file;
         if (file)
           create(
             { name, parent_id: context.parentId, size: file.upload_data?.size },
@@ -50,7 +51,7 @@ export const CreateLink = () => {
     <>
       <Input
         disabled={loading}
-        placeholder={ Languages.t('components.create_link_modal.hint')}
+        placeholder={Languages.t('components.create_link_modal.hint')}
         className="w-full mt-4"
         onChange={e => setName(e.target.value)}
         testClassId="create-link-name-input"
@@ -74,7 +75,7 @@ export const CreateLink = () => {
         }}
         testClassId="create-link-button"
       >
-        { Languages.t('components.create_link_modal.button')}
+        {Languages.t('components.create_link_modal.button')}
       </Button>
     </>
   );

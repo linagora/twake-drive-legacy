@@ -21,7 +21,8 @@ export const useDriveUpload = () => {
           companyId: context.companyId,
           id: context.id,
         },
-        callback: async (file, context) => {
+        callback: async (filePayload, context) => {
+          const file = filePayload.file;
           if (file) {
             const version = {
               drive_item_id: context.id,
@@ -72,7 +73,8 @@ export const useDriveUpload = () => {
             companyId: context.companyId,
             parentId: context.parentId,
           },
-          callback: (file, context) => {
+          callback: (filePayload, context) => {
+            const file = filePayload.file;
             if (file) {
               create(
                 {
