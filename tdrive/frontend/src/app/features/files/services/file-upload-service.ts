@@ -574,6 +574,18 @@ class FileUploadService {
   }
 
   public pauseOrResumeRoot(id: string) {
+    const completedRoots = Object.keys(this.rootStates.completed);
+    const roots = Object.keys(this.rootSizes);
+    const isOnlyRootInProgress = roots.length - completedRoots.length === 1;
+
+    // Check if this is the only root in progress
+    if (!this.rootStates.completed[id] && isOnlyRootInProgress) {
+      this.uploadStatus =
+        this.uploadStatus === UploadStateEnum.Progress
+          ? UploadStateEnum.Paused
+          : UploadStateEnum.Progress;
+    }
+
     // set the pause status for the root
     if (Object.keys(this.rootStates.paused).includes(id)) {
       this.rootStates.paused[id] = !this.rootStates.paused[id];
