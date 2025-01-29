@@ -240,7 +240,11 @@ class FileUploadService {
             // create the document
             const documentId = await DriveApiClient.create(context.companyId, { item, version });
             // assign the group id with the document id
-            if (isFileRoot) this.groupIds[root] = documentId.id;
+            if (isFileRoot) {
+              this.groupIds[root] = documentId.id;
+              // set the id for the root
+              this.notify();
+            }
           }
         },
       });
