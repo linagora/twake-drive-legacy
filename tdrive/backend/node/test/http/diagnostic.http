@@ -1,0 +1,6 @@
+POST http://localhost:4000/diagnostics/heap?secret=diag-secret
+Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+}

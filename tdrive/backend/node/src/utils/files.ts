@@ -43,7 +43,7 @@ export const writeToTemporaryFile = async (input: Readable, extension: string): 
 
     input.pipe(writable);
 
-    await new Promise(r => {
+    await new Promise<void>(r => {
       writable.on("finish", r);
     });
 

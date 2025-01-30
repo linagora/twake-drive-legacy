@@ -1,6 +1,6 @@
 import { logger } from "../../framework";
 import { Readable, Transform } from "node:stream";
-import { Session } from "node:inspector";
+import { Session } from "node:inspector/promises";
 
 /** Time the execution of the callback, and return its duration in ms with the result */
 export async function timeCallback<T>(
@@ -15,7 +15,7 @@ export async function timeCallback<T>(
  * synchroneously (because of session.post) pipe it to a stream
  * readable from the first argument of the callback.
  */
-export function getHeapSnapshotSync(cb: (readable: Readable) => void) {
+export async function getHeapSnapshotSync(cb: (readable: Readable) => void) {
   logger.info({ gcExposed: !!global.gc }, "Beginning heap snapshot");
   if (global.gc) global.gc();
   const session = new Session();
@@ -24,12 +24,13 @@ export function getHeapSnapshotSync(cb: (readable: Readable) => void) {
     const transform = new Transform();
     try {
       let size = 0;
+      await session.post("HeapProfiler.enable");
       session.on("HeapProfiler.addHeapSnapshotChunk", message => {
         size += message.params.chunk.length;
         transform.push(message.params.chunk);
       });
       cb(transform);
-      session.post("HeapProfiler.takeHeapSnapshot", null);
+      await session.post("HeapProfiler.takeHeapSnapshot", null);
       logger.info({ size }, "Heap snapshot sent");
     } finally {
       transform.end();

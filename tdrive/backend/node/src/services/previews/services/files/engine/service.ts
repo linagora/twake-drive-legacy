@@ -71,7 +71,7 @@ export class PreviewProcessor
 
     readable.pipe(writable);
 
-    await new Promise(r => {
+    await new Promise<void>(r => {
       writable.on("finish", r);
     });
 

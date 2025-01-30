@@ -6,11 +6,10 @@ services:
     image: mongo
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 2m
+      interval: 10s
       timeout: 2m
       retries: 30
       start_period: 10s
-      start_interval: 3s
     volumes:
       - ./docker-data/mongo:/data/db
     ports:

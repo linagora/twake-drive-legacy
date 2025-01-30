@@ -17,7 +17,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _opts, next) =>
         `attachment; filename="twake-drive-snap-${filenameTimestamp}.heapsnapshot"`,
       );
       let replyResult;
-      getHeapSnapshotSync(readable => (replyResult = reply.send(readable)));
+      await getHeapSnapshotSync(readable => (replyResult = reply.send(readable)));
       return replyResult;
     });
   }
