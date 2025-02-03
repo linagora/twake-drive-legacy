@@ -13,7 +13,7 @@ export let options = {
     { duration: "10s", target: 0 },
   ],
   thresholds: {
-    upload_duration: ["p(95)<17000"], // 95% of uploads should be faster than 500ms
+    upload_duration: ["p(95)<500"], // 95% of uploads should be faster than 500ms
   },
 };
 
@@ -29,7 +29,7 @@ function uploadFile(filePath, fileType, JWT, companyID) {
   const formData = new FormData();
   const randomInt = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
   const fileName = `${randomInt.toString(36)}.${fileType.split("/")[1]}`; // Extract extension from MIME type
-  formData.append("file", http.file(open(filePath), fileName, fileType));
+  formData.append("file", http.file(filePath, fileName, fileType));
 
   const headers = {
     Authorization: `Bearer ${JWT}`,
@@ -55,6 +55,8 @@ export default function () {
     "response is successful": body => body.resource !== undefined,
     "company_id is present": body => body.resource.company_id !== undefined,
   });
+
+
 
   sleep(1);
 }
