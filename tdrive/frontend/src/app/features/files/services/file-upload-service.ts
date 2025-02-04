@@ -25,6 +25,7 @@ export enum UploadStateEnum {
   Completed = 'completed',
   Paused = 'paused',
   Cancelled = 'cancelled',
+  Failed = 'failed',
 }
 
 type RootState = { [key: string]: boolean };
@@ -39,10 +40,12 @@ class FileUploadService {
     paused: RootState;
     cancelled: RootState;
     completed: RootState;
+    failed: RootState;
   } = {
     paused: {},
     cancelled: {},
     completed: {},
+    failed: {},
   };
   public currentTaskId = '';
   public parentId = '';
@@ -79,27 +82,34 @@ class FileUploadService {
 
   notify() {
     const updatedState = Object.keys(this.groupedPendingFiles).reduce((acc: any, key: string) => {
-      // uploaded size
+      // Calculate the uploaded size
       const uploadedSize = this.groupedPendingFiles[key]
-        .map((f: PendingFileType) => {
-          // if the file is successful and originalFile exists, add the size to the accumulator
-          if (f.status === 'success' && f.originalFile?.size) {
-            return f.originalFile.size;
-          }
-          return 0;
-        })
+        .map((f: PendingFileType) =>
+          f.status === 'success' && f.originalFile?.size ? f.originalFile.size : 0,
+        )
         .reduce((acc: number, size: number) => acc + size, 0);
-      // Determine the upload status based on paused, completed, or uploading states
-      const status = this.rootStates.cancelled[key]
+
+      // Check for failed files
+      const failedFiles = this.groupedPendingFiles[key].filter(f => f.status === 'error');
+      if (failedFiles.length > 0) {
+        this.rootStates.failed[key] = true;
+      }
+
+      // Determine the upload status based on failed, cancelled, paused, completed, or uploading states
+      const status = this.rootStates.failed[key]
+        ? 'failed'
+        : this.rootStates.cancelled[key]
         ? 'cancelled'
         : this.rootStates.paused[key]
         ? 'paused'
         : uploadedSize === this.rootSizes[key]
         ? 'completed'
         : 'uploading';
+
       if (status === 'completed') {
         this.rootStates.completed[key] = true;
       }
+
       // Add to the accumulator object
       acc[key] = {
         id: this.groupIds[key],
@@ -108,8 +118,10 @@ class FileUploadService {
         uploadedSize,
         status,
       };
+
       return acc;
     }, {});
+
     this.recoilHandler(_.cloneDeep(updatedState));
   }
 
@@ -387,13 +399,6 @@ class FileUploadService {
         const intendedFilename =
           (pendingFile.originalFile || {}).name ||
           (pendingFile.backendFile || { metadata: {} }).metadata.name;
-        ToasterService.error(
-          Languages.t(
-            'services.file_upload_service.toaster.upload_file_error',
-            [intendedFilename],
-            'Error uploading file ' + intendedFilename,
-          ),
-        );
         options?.callback?.({ root: file.root, file: null }, options?.context || {});
         this.notify();
       });
@@ -639,6 +644,7 @@ class FileUploadService {
       testChunks: testChunks || false,
       simultaneousUploads: simultaneousUploads || 5,
       maxChunkRetries: maxChunkRetries || 2,
+      xhrTimeout: 60000,
       query,
     });
   }

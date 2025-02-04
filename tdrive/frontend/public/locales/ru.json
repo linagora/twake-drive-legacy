@@ -188,6 +188,7 @@
     "general.uploaded": "Загружено",
     "general.close": "Закрыть",
     "general.files": "файлы",
+    "general.upload_failed": "Загрузка не удалась",
     "general.user.anonymous": "Анонимный",
     "general.user.deactivated": "Пользователь больше не состоит в этой компании",
     "general.user.deleted": "Удаленная учетная запись",

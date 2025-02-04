@@ -14,6 +14,7 @@ import {
 import { fileTypeIconsMap } from './file-type-icon-map';
 import { useDriveActions } from 'app/features/drive/hooks/use-drive-actions';
 import { useDriveItem } from 'app/features/drive/hooks/use-drive-item';
+import Languages from 'app/features/global/services/languages-service';
 
 const PendingRootRow = ({
   rootKey,
@@ -119,10 +120,13 @@ const PendingRootRow = ({
           </div>
           <p className="ml-4">
             <span className="font-bold">{truncateRootName(rootKey)} </span>
-            {root.uploadedSize > 0 && (
+            {root.status !== 'failed' && root.uploadedSize > 0 && (
               <span className="ml-4 text-sm">
                 ({formatFileSize(root.uploadedSize)} / {formatFileSize(root.size)})
               </span>
+            )}
+            {root.status === 'failed' && (
+              <span className="ml-4 text-red-500">{Languages.t('general.upload_failed')}</span>
             )}
           </p>
 
@@ -151,7 +155,7 @@ const PendingRootRow = ({
                 )}
               </button>
             ) : (
-              root.status !== 'cancelled' &&
+              !['cancelled', 'failed'].includes(root.status) &&
               firstPendingFile?.status !== 'error' && (
                 <>
                   <button
@@ -182,10 +186,16 @@ const PendingRootRow = ({
           <div className="w-full h-[3px] bg-[#F0F2F3]">
             <div
               className={`testid:upload-modal-row-progress h-full ${
-                root.status === 'cancelled' ? 'bg-[#FF0000]' : 'bg-[#00A029]'
+                root.status === 'failed'
+                  ? 'bg-[#FF0000]' // Red color for failed uploads
+                  : root.status === 'cancelled'
+                  ? 'bg-[#FFA500]' // Orange for cancelled uploads
+                  : 'bg-[#00A029]' // Green for successful uploads
               }`}
               style={{
-                width: `${root.status === 'cancelled' ? 100 : uploadProgress}%`,
+                width: `${
+                  root.status === 'failed' || root.status === 'cancelled' ? 100 : uploadProgress
+                }%`,
               }}
             ></div>
           </div>

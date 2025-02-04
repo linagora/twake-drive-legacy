@@ -181,6 +181,7 @@
     "general.uploading": "Téléchargement en cours",
     "general.uploaded": "Téléversé",
     "general.files": "fichiers",
+    "general.upload_failed": "Échec de l'envoi",
     "general.user.anonymous": "Compte anonyme",
     "general.user.deactivated": "Cet utilisateur n'est plus dans cette l'entreprise",
     "general.user.deleted": "Compte supprimé",
