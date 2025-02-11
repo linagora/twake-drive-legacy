@@ -6,13 +6,13 @@
     "node": ">=18 <19"
   },
   "dependencies": {
-    "pino-pretty": "^12.1.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-commonjs": "^28.0.2",
     "rollup": "^4.9.5",
-    "rollup-plugin-esbuild-minify": "^1.2.0"
+    "rollup-plugin-esbuild-minify": "^1.2.0",
+    "@rollup/plugin-json": "^6.1.0"
   },
   "scripts": {
     "rollup": "rollup --config",
