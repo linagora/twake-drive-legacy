@@ -110,11 +110,11 @@ const PendingRootRow = ({
   };
 
   return (
-    <div className="root-row">
+    <div className="root-row testid:upload-root-modal-row">
       <div className="root-details mt-2">
         <div className="flex items-center">
           <div className="w-10 h-10 flex items-center justify-center bg-[#f3f3f7] rounded-md">
-            <div className="w-full h-full flex items-center justify-center testid:upload-modal-row-type">
+            <div className="w-full h-full flex items-center justify-center testid:upload-root-modal-row-type">
               {itemTypeIcon(firstPendingFile?.type)}
             </div>
           </div>
@@ -134,7 +134,7 @@ const PendingRootRow = ({
             {isUploadCompleted ? (
               <button
                 onClick={handleShowFolder}
-                className="hover:bg-gray-100 p-2 rounded-md transition-all duration-200 testid:upload-modal-row-show-folder"
+                className="hover:bg-gray-100 p-2 rounded-md transition-all duration-200 testid:upload-root-modal-row-show-folder"
               >
                 {!isFileRoot && (
                   <>
@@ -158,18 +158,23 @@ const PendingRootRow = ({
               !['cancelled', 'failed'].includes(root.status) &&
               firstPendingFile?.status !== 'error' && (
                 <>
-                  <button
-                    onClick={() => pauseOrResumeRootUpload(rootKey)}
-                    className="hover:bg-blue-100 p-2 rounded-md transition-all duration-200 testid:upload-modal-row-pause-resume"
-                  >
-                    {root.status === 'paused' ? (
+                  {root.status === 'paused' ? (
+                    <button
+                      onClick={() => pauseOrResumeRootUpload(rootKey)}
+                      className="hover:bg-blue-100 p-2 rounded-md transition-all duration-200 testid:upload-root-modal-row-resume"
+                    >
                       <ResumeIcon className="hover:scale-110 transition-transform duration-200" />
-                    ) : (
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => pauseOrResumeRootUpload(rootKey)}
+                      className="hover:bg-blue-100 p-2 rounded-md transition-all duration-200 testid:upload-root-modal-row-pause"
+                    >
                       <PauseIcon className="hover:scale-110 transition-transform duration-200" />
-                    )}
-                  </button>
+                    </button>
+                  )}
                   <button
-                    className="ml-2 hover:bg-red-100 p-2 rounded-md transition-all duration-200 testid:upload-modal-row-cancel"
+                    className="ml-2 hover:bg-red-100 p-2 rounded-md transition-all duration-200 testid:upload-root-modal-row-cancel"
                     onClick={() => cancelRootUpload(rootKey)}
                   >
                     <CancelIcon className="hover:scale-110 transition-transform duration-200" />
@@ -185,7 +190,7 @@ const PendingRootRow = ({
         {!showFolder && (
           <div className="w-full h-[3px] bg-[#F0F2F3]">
             <div
-              className={`testid:upload-modal-row-progress h-full ${
+              className={`testid:upload-root-modal-row-progress h-full ${
                 root.status === 'failed'
                   ? 'bg-[#FF0000]' // Red color for failed uploads
                   : root.status === 'cancelled'
