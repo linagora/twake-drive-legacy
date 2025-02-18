@@ -131,7 +131,7 @@ const PendingRootList = ({
                   style={{ width: '100%', maxHeight: 300 }}
                 >
                   {keys.map(key => (
-                    <PendingRootRow key={key} rootKey={key} root={roots[key]} parentId={parentId} />
+                    <PendingRootRow key={key} rootKey={key} root={roots[key]} />
                   ))}
                 </PerfectScrollbar>
               </div>

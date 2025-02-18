@@ -1,7 +1,7 @@
 import { ToasterService } from '@features/global/services/toaster-service';
 import { LoadingStateInitTrue } from '@features/global/state/atoms/Loading';
 import useRouterCompany from '@features/router/hooks/use-router-company';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useRecoilCallback, useRecoilState, useRecoilValue } from 'recoil';
 import { DriveItemAtom, DriveItemChildrenAtom, DriveItemPagination } from '../state/store';
 import { DriveItem } from '../types';
@@ -153,6 +153,12 @@ export const useDriveItem = (id: string) => {
     item?.path?.some(i => i?.parent_id?.includes('trash')) ||
     item?.item?.is_in_trash;
   const sharedWithMe = id == 'shared_with_me';
+
+  useEffect(() => {
+    if (id) {
+      refresh(id, true); // Re-fetch from backend and update Recoil state
+    }
+  }, [id, refresh]);
 
   return {
     sharedWithMe,
