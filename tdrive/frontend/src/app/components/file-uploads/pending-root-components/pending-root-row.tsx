@@ -26,7 +26,7 @@ const PendingRootRow = ({
   const { pauseOrResumeRootUpload, cancelRootUpload, clearRoots } = useUpload();
   const [showFolder, setShowFolder] = useState(false);
   const [restoredFolder, setRestoredFolder] = useState(false);
-  const { item } = useDriveItem(root.id);
+  const { item } = useDriveItem(root?.id || '');
   const { restore } = useDriveActions();
   const { refresh, children } = useDriveItem(item?.parent_id || '');
 
@@ -41,6 +41,7 @@ const PendingRootRow = ({
     if (!showFolder || isFileRoot) {
       const redirectionURL = RouterService.generateRouteFromState({
         itemId: root.id,
+        dirId: item?.parent_id || '',
       });
       window.open(redirectionURL, '_blank');
     } else {
