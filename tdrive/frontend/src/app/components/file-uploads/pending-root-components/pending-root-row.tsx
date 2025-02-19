@@ -19,17 +19,16 @@ import Languages from 'app/features/global/services/languages-service';
 const PendingRootRow = ({
   rootKey,
   root,
-  parentId,
 }: {
   rootKey: string;
   root: UploadRootType;
-  parentId: string;
 }): JSX.Element => {
   const { pauseOrResumeRootUpload, cancelRootUpload, clearRoots } = useUpload();
   const [showFolder, setShowFolder] = useState(false);
   const [restoredFolder, setRestoredFolder] = useState(false);
+  const { item } = useDriveItem(root?.id || '');
   const { restore } = useDriveActions();
-  const { refresh } = useDriveItem(parentId || '');
+  const { refresh, children } = useDriveItem(item?.parent_id || '');
 
   const firstPendingFile = root.items[0];
   const uploadedFilesSize = root.uploadedSize;
@@ -42,6 +41,7 @@ const PendingRootRow = ({
     if (!showFolder || isFileRoot) {
       const redirectionURL = RouterService.generateRouteFromState({
         itemId: root.id,
+        dirId: item?.parent_id || '',
       });
       window.open(redirectionURL, '_blank');
     } else {
@@ -74,16 +74,23 @@ const PendingRootRow = ({
     }
   }, [isUploadCompleted]);
 
+  const waitForChild = async (itemId: string, retries = 5, interval = 1000) => {
+    for (let attempt = 0; attempt < retries; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, interval));
+      if (children.some(child => child.id === itemId)) return true;
+    }
+    return false;
+  };
+
   useEffect(() => {
     const postProcess = async () => {
       if (isUploadCompleted && !restoredFolder) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await restore(root.id, parentId);
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await refresh(parentId);
+        if (!isFileRoot) await restore(root.id, item?.parent_id || '');
+        const found = isFileRoot || (await waitForChild(root.id));
+        if (found) await refresh(item?.parent_id || '');
       }
     };
-    if (isUploadCompleted && !restoredFolder) {
+    if (isUploadCompleted && root.id && !restoredFolder) {
       setRestoredFolder(true);
       postProcess();
     }

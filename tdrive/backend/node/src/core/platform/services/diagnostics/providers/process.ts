@@ -8,7 +8,7 @@ export const e2eTestOverride = {
 export default () =>
   diagnostics.registerProviders({
     key: "process",
-    tags: ["live", "ready"],
+    tags: ["live", "ready", "stats"],
     async get() {
       return {
         ok: !e2eTestOverride.forceFail,

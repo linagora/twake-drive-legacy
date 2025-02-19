@@ -1,3 +1,17 @@
+# Twake Drive v1.0.7
+
+## Features
+
+- Big folder upload with new upload modal
+- Added root folder for all uploads, document creation, and cleanup after
+- Add testing identifier to new upload modal
+
+## Fixes and Improvements
+
+- Print memory usage periodically in the backend
+- Rollup final script file to add dependencies after
+- Made performance test runnable
+
 # Twake Drive v1.0.6
 
 ## Features
