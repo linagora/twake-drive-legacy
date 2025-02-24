@@ -104,4 +104,10 @@ export default class LocalConnectorService implements StorageConnectorAPI {
     const fullPath = this.getFullPath(path);
     return fs.existsSync(fullPath);
   }
+
+  async enumeratePathsForFile(filePath: string): Promise<string[]> {
+    return (await fs.promises.readdir(this.getFullPath(filePath), { recursive: true })).map(
+      item => filePath + "/" + item,
+    );
+  }
 }

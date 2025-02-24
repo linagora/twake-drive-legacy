@@ -40,6 +40,10 @@ export class DefaultStorageStrategy implements StorageConnectorAPI {
     return this.connector.exists(path, options, context);
   };
 
+  enumeratePathsForFile = (filePath: string): Promise<string[]> => {
+    return this.connector.enumeratePathsForFile(filePath);
+  };
+
   remove = (
     path: string,
     options?: DeleteOptions,

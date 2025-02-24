@@ -149,4 +149,12 @@ export default class S3ConnectorService implements StorageConnectorAPI {
     }
     return true;
   }
+
+  async enumeratePathsForFile(filePath: string): Promise<string[]> {
+    return (
+      await (
+        await this.client.listObjectsV2(this.minioConfiguration.bucket, filePath, true)
+      ).toArray()
+    ).map(({ name }) => name as string);
+  }
 }

@@ -63,6 +63,11 @@ export interface StorageConnectorAPI extends IServiceDiagnosticProvider {
    * @param path
    */
   remove(path: string, options?: DeleteOptions, context?: ExecutionContext): Promise<boolean>;
+
+  /**
+   * Enumerate all physical storage paths related to the provided file path
+   */
+  enumeratePathsForFile(filePath: string): Promise<string[]>;
 }
 
 export default interface StorageAPI extends TdriveServiceProvider, StorageConnectorAPI {

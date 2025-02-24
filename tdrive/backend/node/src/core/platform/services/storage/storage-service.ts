@@ -77,6 +77,10 @@ export default class StorageService extends TdriveService<StorageAPI> implements
     return this.getConnector().exists(path + "/chunk1", options);
   }
 
+  enumeratePathsForFile(filePath: string): Promise<string[]> {
+    return this.getConnector().enumeratePathsForFile(filePath);
+  }
+
   async write(path: string, stream: Stream, options?: WriteOptions): Promise<WriteMetadata> {
     try {
       if (options?.encryptionKey) {
