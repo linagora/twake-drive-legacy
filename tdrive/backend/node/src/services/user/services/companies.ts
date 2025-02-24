@@ -310,7 +310,11 @@ export class CompanyServiceImpl {
       for (const company of companies) {
         logger.warn(`User ${userPk.id} is deleted so removed from company ${company.id}`);
         await this.removeUserFromCompany(company, user);
-        await gr.services.workspaces.ensureUserNotInCompanyIsNotInWorkspace(userPk, company.id);
+        try {
+          await gr.services.workspaces.ensureUserNotInCompanyIsNotInWorkspace(userPk, company.id);
+        } catch (err) {
+          logger.error({ err }, "Error removing user from company from workspace");
+        }
       }
     }
   }

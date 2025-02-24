@@ -170,6 +170,7 @@ export class UserServiceImpl {
       user.thumbnail_id = null;
       user.status_icon = null;
       user.deleted = true;
+      user.delete_process_started_epoch = new Date().getTime();
 
       await this.save(user);
 

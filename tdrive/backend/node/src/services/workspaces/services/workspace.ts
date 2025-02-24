@@ -732,9 +732,11 @@ export class WorkspaceServiceImpl implements TdriveServiceProvider, Initializabl
         logger.warn(
           `User ${userPk.id} is not in company ${workspace.company_id} so removing from workspace ${workspace.id}`,
         );
-        this.removeUser({ workspaceId: workspace.id, userId: userPk.id }, companyId, context).then(
-          () => null,
-        );
+        await this.removeUser(
+          { workspaceId: workspace.id, userId: userPk.id },
+          companyId,
+          context,
+        ).then(() => null);
       }
     }
   }

@@ -131,6 +131,8 @@ export class TestDbService {
       identity_provider?: string;
       type?: UserType;
       preferences?: User["preferences"];
+      deleted?: boolean;
+      delete_process_started_epoch?: number;
     } = {},
     id: string = uuidv1(),
   ): Promise<User> {
@@ -149,6 +151,8 @@ export class TestDbService {
       locale: "en",
       timezone: 0,
     };
+    user.deleted = options.deleted ?? false;
+    user.delete_process_started_epoch = options.delete_process_started_epoch;
 
     //Fixme this is cheating, we should correctly set the cache in internal mode in the code
     user.cache.companies = [

@@ -16,6 +16,9 @@
   "logger": {
     "level": "LOG_LEVEL"
   },
+  "admin": {
+    "endpointSecret": "ADMIN_ENDPOINT_SECRET"
+  },
   "diagnostics": {
     "skipKeys": {
       "__name": "DIAG_SKIP_KEYS",

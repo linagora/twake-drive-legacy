@@ -35,6 +35,9 @@
   "logger": {
     "level": "debug"
   },
+  "admin": {
+    "endpointSecret": ""
+  },
   "diagnostics": {
     "skipKeys": [],
     "probeSecret": "",
@@ -231,6 +234,7 @@
     ]
   },
   "services": [
+    "admin",
     "auth",
     "diagnostics",
     "push",

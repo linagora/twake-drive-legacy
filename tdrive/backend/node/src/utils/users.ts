@@ -30,6 +30,7 @@ export async function formatUser(
     full_name: [user.first_name, user.last_name].join(" "),
     created_at: user.creation_date,
     deleted: Boolean(user.deleted),
+    delete_process_started_epoch: user.delete_process_started_epoch,
     status: user.status_icon,
     last_activity: user.last_activity,
     cache: { companies: user.cache?.companies || [] },

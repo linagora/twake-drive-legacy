@@ -32,6 +32,8 @@ export type User = {
   id: string;
   first_name?: string;
   isWorkspaceModerator?: boolean;
+  deleted?: boolean,
+  delete_process_started_epoch?: number,
   preferences?: {
     language?: string;
   };

@@ -78,6 +78,12 @@ export default class User {
   @Column("deleted", "tdrive_boolean")
   deleted: boolean;
 
+  /**
+   * If set, a restartable suppression process is currently incomplete.
+   */
+  @Column("delete_process_started_epoch", "number")
+  delete_process_started_epoch?: number;
+
   @Column("mail_verified", "tdrive_boolean")
   mail_verified: boolean;
 

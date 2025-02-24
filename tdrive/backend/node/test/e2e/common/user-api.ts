@@ -197,6 +197,22 @@ export default class UserApi {
     return this.platform.authService.sign(payload);
   }
 
+  public async getUser(userId?: string, expectedStatus?: undefined | 200): Promise<User>;
+  public async getUser(userId: string | undefined, expectedStatus: number): Promise<Response>;
+  public async getUser(userId: string = this.user.id, expectedStatus: number = 200): Promise<Response | User> {
+    const response = await this.platform.app.inject({
+      method: "GET",
+      url: `/internal/services/users/v1/users/${encodeURIComponent(userId)}`,
+      headers: {
+        authorization: `Bearer ${this.jwt}`,
+      },
+    });
+    expect(response.statusCode).toBe(expectedStatus);
+    if (expectedStatus === 200)
+      return response.json()["resource"];
+    return response;
+  }
+
   async uploadEicarTestFile(filename: string) {
     // EICAR test file content
     const eicarContent = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
