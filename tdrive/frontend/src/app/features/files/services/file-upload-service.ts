@@ -200,7 +200,7 @@ class FileUploadService {
               item: item,
               version: {},
             });
-            this.groupIds[directory] = driveItem.id;
+            if (!this.groupIds[directory]) this.groupIds[directory] = driveItem.id;
             this.logger.debug(`Directory ${directory} created`);
             pendingFile.status = 'success';
             this.notify();
