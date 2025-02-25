@@ -30,11 +30,11 @@ const PendingRootRow = ({
   const { restore } = useDriveActions();
   const { refresh, children } = useDriveItem(item?.parent_id || '');
 
-  const firstPendingFile = root.items[0];
   const uploadedFilesSize = root.uploadedSize;
   const uploadProgress = Math.floor((uploadedFilesSize / root.size) * 100);
   const isUploadCompleted = root.status === 'completed';
   const isFileRoot = rootKey.includes('.');
+  const fileType = isFileRoot ? rootKey.split('.').pop() : '';
 
   // Callback function to open the folder after the upload is completed
   const handleShowFolder = useCallback(() => {
@@ -122,7 +122,7 @@ const PendingRootRow = ({
         <div className="flex items-center">
           <div className="w-10 h-10 flex items-center justify-center bg-[#f3f3f7] rounded-md">
             <div className="w-full h-full flex items-center justify-center testid:upload-root-modal-row-type">
-              {itemTypeIcon(firstPendingFile?.type)}
+              {itemTypeIcon(fileType || '')}
             </div>
           </div>
           <p className="ml-4">
@@ -163,9 +163,9 @@ const PendingRootRow = ({
               </button>
             ) : (
               !['cancelled', 'failed'].includes(root.status) &&
-              firstPendingFile?.status !== 'error' && (
+              root?.status !== 'error' && (
                 <>
-                  {root.status === 'paused' ? (
+                  {root.status === 'failed' ? (
                     <button
                       onClick={() => pauseOrResumeRootUpload(rootKey)}
                       className="hover:bg-blue-100 p-2 rounded-md transition-all duration-200 testid:upload-root-modal-row-resume"
