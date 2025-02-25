@@ -50,6 +50,7 @@ class FileUploadService {
   public currentTaskId = '';
   public parentId = '';
   public uploadStatus = UploadStateEnum.Progress;
+  private companyId = '';
   private recoilHandler: Function = () => undefined;
   private logger: Logger.Logger = Logger.getLogger('FileUploadService');
 
@@ -131,6 +132,7 @@ class FileUploadService {
   ) {
     // reset the upload status
     this.uploadStatus = UploadStateEnum.Progress;
+    this.companyId = context.companyId;
 
     const root = tree.tree;
     this.rootSizes = this.rootSizes = {
@@ -250,12 +252,16 @@ class FileUploadService {
             } as Partial<DriveItemVersion>;
 
             // create the document
-            const documentId = await DriveApiClient.create(context.companyId, { item, version });
-            // assign the group id with the document id
-            if (isFileRoot) {
-              this.groupIds[root] = documentId.id;
-              // set the id for the root
-              this.notify();
+            try {
+              const documentId = await DriveApiClient.create(context.companyId, { item, version });
+              // assign the group id with the document id
+              if (isFileRoot) {
+                this.groupIds[root] = documentId.id;
+                // set the id for the root
+                this.notify();
+              }
+            } catch (error) {
+              logger.error('Error while creating document', error);
             }
           }
         },
@@ -427,6 +433,8 @@ class FileUploadService {
 
   public cancelUpload() {
     this.uploadStatus = UploadStateEnum.Cancelled;
+    // copy the group ids
+    const rootItemIds = _.cloneDeep(this.groupIds);
 
     // pause or resume the resumable tasks
     const fileToCancel = this.pendingFiles;
@@ -455,6 +463,17 @@ class FileUploadService {
       }
     }
 
+    // delete the roots in progress
+    for (const rootItem of Object.keys(rootItemIds)) {
+      const rootItemId = rootItemIds[rootItem];
+      // check if the root completed skip it
+      if (this.rootStates.completed[rootItem]) continue;
+      this.deleteOneDriveItem({
+        companyId: this.companyId,
+        id: rootItemId,
+      });
+    }
+
     // clean everything
     this.pendingFiles = [];
     this.groupedPendingFiles = {};
@@ -466,6 +485,7 @@ class FileUploadService {
 
   public cancelRootUpload(id: string) {
     this.rootStates.cancelled[id] = true;
+    const rootItemId = this.groupIds[id];
     // if it's 1 root, cancel the upload
     if (Object.keys(this.groupedPendingFiles).length === 1) {
       this.cancelUpload();
@@ -507,6 +527,12 @@ class FileUploadService {
       // remove the root id
       delete this.groupIds[id];
       this.notify();
+
+      // delete the root
+      this.deleteOneDriveItem({
+        companyId: this.companyId,
+        id: rootItemId,
+      });
     }
   }
 
@@ -663,6 +689,20 @@ class FileUploadService {
       this.notify();
     } else {
       logger.error(`Error while processing delete for file`, fileId);
+    }
+  }
+
+  public async deleteOneDriveItem({
+    companyId,
+    id,
+  }: {
+    companyId: string;
+    id: string;
+  }): Promise<void> {
+    try {
+      await DriveApiClient.remove(companyId, id);
+    } catch (error) {
+      logger.error('Error while deleting drive item ', error);
     }
   }
 
