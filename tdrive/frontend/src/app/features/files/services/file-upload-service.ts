@@ -84,9 +84,17 @@ class FileUploadService {
     const updatedState = Object.keys(this.groupedPendingFiles).reduce((acc: any, key: string) => {
       // Calculate the uploaded size
       const uploadedSize = this.groupedPendingFiles[key]
-        .map((f: PendingFileType) =>
-          f.status === 'success' && f.originalFile?.size ? f.originalFile.size : 0,
-        )
+        .map((file: PendingFileType) => {
+          const fileSize = file.originalFile?.size ?? 0;
+
+          if (file.status === 'success') {
+            return fileSize;
+          } else if (file.status === 'pending') {
+            return fileSize * (file.progress ?? 0); // Ensure progress is defined
+          }
+
+          return 0;
+        })
         .reduce((acc: number, size: number) => acc + size, 0);
 
       // Check for failed files
