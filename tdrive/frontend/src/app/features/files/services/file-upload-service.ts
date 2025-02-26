@@ -291,6 +291,13 @@ class FileUploadService {
       callback?: (file: { root: string; file: FileType | null }, context: any) => void;
     },
   ): Promise<PendingFileType[]> {
+    // if we're uploading one file directly, do the size calc first
+    for (const file of fileList) {
+      if (file.root && file.file?.name && file.root === file.file.name) {
+        this.rootSizes[file.root] = file.file.size;
+      }
+    }
+
     const { companyId } = RouterServices.getStateFromRoute();
 
     if (!fileList || !companyId) {
