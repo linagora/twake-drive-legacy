@@ -60,18 +60,20 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
   isPaused,
   uploadingCount,
 }) => (
-  <div className="w-full flex bg-[#F0F2F3] text-black p-4 items-center justify-between">
-    <div className="flex space-x-4 ml-auto">
+  <div className="w-full flex flex-wrap bg-[#F0F2F3] text-black p-4 items-center justify-between">
+    <div className="w-full flex flex-wrap gap-2 justify-center sm:justify-end">
       {uploadingCount > 0 && (
         <button
-          className="text-blue-500 px-4 py-2 rounded hover:bg-blue-600 hover:text-white testid:upload-root-modal-pause-resume"
+          className="text-blue-500 px-4 py-2 rounded bg-transparent transition-all duration-300 ease-in-out 
+          hover:bg-blue-600 hover:text-white w-full sm:w-auto testid:upload-root-modal-pause-resume"
           onClick={pauseOrResumeUpload}
         >
           {isPaused() ? Languages.t('general.resume') : Languages.t('general.pause')}
         </button>
       )}
       <button
-        className="text-blue-500 px-4 py-2 rounded hover:bg-blue-600 hover:text-white testid:upload-root-modal-cancel-close"
+        className="text-blue-500 min-w-[100px] px-4 py-2 rounded bg-transparent transition-all duration-300 ease-in-out 
+        hover:bg-blue-600 hover:text-white w-full sm:w-auto testid:upload-root-modal-cancel-close"
         onClick={cancelUpload}
       >
         {uploadingCount ? Languages.t('general.cancel') : Languages.t('general.close')}
@@ -112,7 +114,10 @@ const PendingRootList = ({
   return (
     <>
       {totalRoots > 0 && (
-        <div className="fixed bottom-4 right-4 w-1/3 shadow-lg rounded-sm overflow-hidden testid:upload-root-modal">
+        <div
+          className="fixed bottom-4 right-4 w-full sm:w-1/2 md:w-1/3 max-w-lg shadow-lg rounded-sm overflow-hidden testid:upload-root-modal 
+                sm:right-4 sm:left-auto sm:translate-x-0 left-1/2 -translate-x-1/2"
+        >
           <ModalHeader
             uploadingCount={uploadingCount + pausedCount}
             completedCount={completedCount}
