@@ -291,6 +291,11 @@ class FileUploadService {
       callback?: (file: { root: string; file: FileType | null }, context: any) => void;
     },
   ): Promise<PendingFileType[]> {
+    // reset the upload status
+    if (this.uploadStatus === UploadStateEnum.Paused) {
+      this.pauseOrResume();
+    }
+
     const { companyId } = RouterServices.getStateFromRoute();
 
     if (!fileList || !companyId) {
