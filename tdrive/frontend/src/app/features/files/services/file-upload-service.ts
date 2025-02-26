@@ -291,8 +291,8 @@ class FileUploadService {
       callback?: (file: { root: string; file: FileType | null }, context: any) => void;
     },
   ): Promise<PendingFileType[]> {
-    // reset the upload status
-    if (this.uploadStatus === UploadStateEnum.Paused) {
+    // reset the upload status when creating a new document
+    if (fileList.length === 1 && fileList[0].root === fileList[0].file.name) {
       this.pauseOrResume();
     }
 
