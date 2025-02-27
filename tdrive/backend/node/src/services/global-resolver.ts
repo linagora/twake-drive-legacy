@@ -35,8 +35,10 @@ import { AVServiceImpl } from "./av/service";
 import { PreviewEngine } from "./previews/services/files/engine";
 import { I18nService } from "./i18n";
 import { getConfigOrDefault } from "../utils/get-config";
+import type AdminServiceAPI from "../core/platform/services/admin/service-provider";
 
 type PlatformServices = {
+  admin: AdminServiceAPI;
   auth: AuthServiceAPI;
   counter: CounterAPI;
   cron: CronAPI;
@@ -92,6 +94,7 @@ class GlobalResolver {
     this.database = platform.getProvider<DatabaseServiceAPI>("database");
 
     this.platformServices = {
+      admin: platform.getProvider<AdminServiceAPI>("admin"),
       auth: platform.getProvider<AuthServiceAPI>("auth"),
       counter: platform.getProvider<CounterAPI>("counter"),
       cron: platform.getProvider<CronAPI>("cron"),

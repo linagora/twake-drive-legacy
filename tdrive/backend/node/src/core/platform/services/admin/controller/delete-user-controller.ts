@@ -1,58 +1,37 @@
 import gr from "../../../../../services/global-resolver";
-import { getLogger } from "../../../../../core/platform/framework";
-import User, { TYPE as UserType } from "../../../../../services/user/entities/user";
-import type { DatabaseServiceAPI } from "../../database/api";
+
 import type { ExecutionContext } from "../../../../platform/framework/api/crud-service";
-import type { SearchServiceAPI } from "../../search/api";
-import {
-  DriveFile,
-  TYPE as DriveFileType,
-} from "../../../../../services/documents/entities/drive-file";
-import { File } from "../../../../../services/files/entities/file";
-import {
-  FileVersion,
-  TYPE as FileVersionType,
-} from "../../../../../services/documents/entities/file-version";
-import ExternalUser, {
-  TYPE as ExternalUserType,
-} from "../../../../../services/user/entities/external_user";
-import CompanyUser, {
-  TYPE as CompanyUserType,
-} from "../../../../../services/user/entities/company_user";
-const FileType = "files";
 
-const logger = getLogger("AdminDeleteUserController");
+import { adminLogger, buildUserDeletionRepositories } from "../utils";
 
-/**
- * Create all repositories required for deleting a user
- * @deprecated Do not use this outside of this file, it is exported exclusively for e2e tests
- */
-export async function buildUserDeletionRepositories(
-  db: DatabaseServiceAPI,
-  search: SearchServiceAPI,
-) {
-  return {
-    driveFile: await db.getRepository<DriveFile>(DriveFileType, DriveFile),
-    file: await db.getRepository<File>(FileType, File),
-    fileVersion: await db.getRepository<FileVersion>(FileVersionType, FileVersion),
+// /**
+//  * Create all repositories required for deleting a user
+//  * @deprecated Do not use this outside of this file, it is exported exclusively for e2e tests
+//  */
+// export async function buildUserDeletionRepositories(
+//   db: DatabaseServiceAPI,
+//   search: SearchServiceAPI,
+// ) {
+//   return {
+//     driveFile: await db.getRepository<DriveFile>(DriveFileType, DriveFile),
+//     file: await db.getRepository<File>(FileType, File),
+//     fileVersion: await db.getRepository<FileVersion>(FileVersionType, FileVersion),
 
-    user: await db.getRepository<User>(UserType, User),
-    companyUser: await db.getRepository<CompanyUser>(CompanyUserType, CompanyUser),
-    externalUser: await db.getRepository<ExternalUser>(ExternalUserType, ExternalUser),
+//     user: await db.getRepository<User>(UserType, User),
+//     companyUser: await db.getRepository<CompanyUser>(CompanyUserType, CompanyUser),
+//     externalUser: await db.getRepository<ExternalUser>(ExternalUserType, ExternalUser),
 
-    // group_entity
-    // group_user
-    // missed_drive_files
-    // session
-    // user
-    // user_online
+//     // company: await db.getRepository<Company>(CompanyType, Company),
+//     // missed_drive_files
+//     // session
+//     // user_online
 
-    search: {
-      driveFile: await search.getRepository<DriveFile>(DriveFileType, DriveFile),
-      user: await search.getRepository<User>(UserType, User),
-    },
-  };
-}
+//     search: {
+//       driveFile: await search.getRepository<DriveFile>(DriveFileType, DriveFile),
+//       user: await search.getRepository<User>(UserType, User),
+//     },
+//   };
+// }
 
 export class AdminDeleteUserController {
   private constructor(
@@ -77,7 +56,8 @@ export class AdminDeleteUserController {
         if (existingUser.delete_process_started_epoch > 0) return "deleting";
       }
     } catch (err) {
-      logger.error({ err, userId }, "User deletion error");
+      adminLogger.error({ err, userId }, "User deletion error");
+      console.log(err); //TODO: NONONO
       return "failed";
     }
     return "done";
