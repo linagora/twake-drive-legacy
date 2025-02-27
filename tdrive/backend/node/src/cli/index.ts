@@ -2,6 +2,7 @@ import "reflect-metadata";
 import yargs from "yargs";
 import { logger } from "../core/platform/framework/logger";
 import printConfigSummary from "./lib/print-config-summary";
+import version from "../version";
 
 process.env.NODE_ENV = "cli";
 
@@ -37,7 +38,7 @@ yargs
   .demandCommand(1, "Please supply a valid command")
   .alias("help", "h")
   .help("help")
-  .version()
+  .version(version.current)
   .completion("completion")
   .epilogue("for more information, go to https://tdrive.app")
   .example("$0 <command> --help", "show help of the issue command").argv;
