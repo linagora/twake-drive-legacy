@@ -12,8 +12,6 @@ import FileUploadAPIClient from '../api/file-upload-api-client';
 import { isPendingFileStatusPending } from '../utils/pending-files';
 import { FileTreeObject } from 'components/uploads/file-tree-utils';
 import { DriveApiClient } from 'features/drive/api-client/api-client';
-import { ToasterService } from 'app/features/global/services/toaster-service';
-import Languages from 'app/features/global/services/languages-service';
 import { DriveItem, DriveItemVersion } from 'app/features/drive/types';
 
 export enum Events {
@@ -270,7 +268,7 @@ class FileUploadService {
 
     // tree promises
     const treePromises = rootTrees.map(tree => {
-      return traverserTreeLevel(tree, context.parentId, true);
+      return traverserTreeLevel(tree, context.parentId, false);
     });
 
     try {
