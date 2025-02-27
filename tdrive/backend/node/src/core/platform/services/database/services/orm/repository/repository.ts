@@ -149,8 +149,8 @@ export default class Repository<EntityType> {
     await Promise.all(entities.map(entity => this.manager.persist(entity)));
   }
 
-  async remove(entity: EntityType, _context?: ExecutionContext): Promise<void> {
-    await this.manager.remove(entity);
+  async remove(entity: EntityType, _context?: ExecutionContext): Promise<boolean> {
+    return this.manager.remove(entity);
   }
 
   //Avoid using this except when no choice

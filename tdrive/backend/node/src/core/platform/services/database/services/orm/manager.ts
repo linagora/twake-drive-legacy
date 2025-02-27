@@ -70,7 +70,7 @@ export default class EntityManager<EntityType extends Record<string, any>> {
     return this;
   }
 
-  public async remove(entity: EntityType, entityType?: EntityType): Promise<this> {
+  public async remove(entity: EntityType, entityType?: EntityType): Promise<boolean> {
     if (entityType) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       entity = _.merge(new (entityType as any)(), entity);
@@ -79,12 +79,12 @@ export default class EntityManager<EntityType extends Record<string, any>> {
       throw Error("Cannot remove this object: it is not an entity.");
     }
 
-    await this.connector.remove([entity]);
+    const result = await this.connector.remove([entity]);
 
     localEventBus.publish("database:entities:saved", {
       entities: [entity],
     } as DatabaseEntitiesRemovedEvent);
 
-    return this;
+    return result[0];
   }
 }

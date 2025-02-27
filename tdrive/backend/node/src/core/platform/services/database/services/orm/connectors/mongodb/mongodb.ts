@@ -291,7 +291,7 @@ export class MongoConnector extends AbstractConnector<MongoConnectionOptions> {
       });
 
       Promise.all(promises).then(results => {
-        resolve(results.map(result => result.acknowledged));
+        resolve(results.map(result => result.acknowledged && result.deletedCount == 1));
       });
     });
   }

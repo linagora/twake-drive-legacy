@@ -478,7 +478,9 @@ export class FileServiceImpl {
     return this.algorithm;
   }
 }
-export const getFilePath = (entity: File): string => {
+export const getFilePath = (
+  entity: File | { company_id: string; user_id?: string; id: string },
+): string => {
   return `${gr.platformServices.storage.getHomeDir()}/files/${entity.company_id}/${
     entity.user_id || "anonymous"
   }/${entity.id}`;
