@@ -35,6 +35,8 @@ export default async function runWithPlatform(
     spinner.fail(err.stack || err);
     process.exitCode = 1;
   }
+  // Spinner seems to interrupt still buffered output otherwise
+  await new Promise(resolve => setTimeout(resolve, 200));
   spinner.start("Platform: shutting down...");
   await platform.stop();
   spinner.succeed("Platform: shutdown");
