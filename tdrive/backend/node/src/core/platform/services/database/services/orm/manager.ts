@@ -81,7 +81,7 @@ export default class EntityManager<EntityType extends Record<string, any>> {
 
     await this.connector.remove([entity]);
 
-    localEventBus.publish("database:entities:saved", {
+    localEventBus.publish("database:entities:removed", {
       entities: [entity],
     } as DatabaseEntitiesRemovedEvent);
 
