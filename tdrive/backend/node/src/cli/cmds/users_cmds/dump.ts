@@ -15,9 +15,9 @@ import { EntityByKind } from "../../utils/print-entities";
 let globalArgv: {
   verbose: boolean;
 
-  user_id: string;
-  json_output: boolean;
-  with_storage_paths: boolean;
+  userId: string;
+  jsonOutput: boolean;
+  withStoragePaths: boolean;
 
   user?: User; // Not an argument per say, hydrated in handler
 };
@@ -32,7 +32,7 @@ const entityToHeaderString = <K extends keyof typeof EntityByKind>(
   entity: Parameters<(typeof EntityByKind)[K]["headerOf"]>[0],
   depth: number = 0,
 ): string => {
-  if (globalArgv.json_output) return kind + " " + JSON.stringify(entity); // Can't really print out json directly, valid json seems to get prettified by pino
+  if (globalArgv.jsonOutput) return kind + " " + JSON.stringify(entity); // Can't really print out json directly, valid json seems to get prettified by pino
   // ts doesn't seem to infer entityHeaderPrinter[kind] correctly even with help
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return `${kind.padEnd(lengthOfLongestEntityKind)} ${entity.id} ${new Array(depth + 1).join(
@@ -51,12 +51,12 @@ async function dumpAccount(repos: TUserDeletionRepos): Promise<number> {
         const versionsAssets = await loadRawVersionsOfItemForDeletion(
           repos,
           item,
-          globalArgv.with_storage_paths,
+          globalArgv.withStoragePaths,
         );
         for (const { version, file, paths } of versionsAssets) {
           const outputPath = (path: string) =>
             console.log(entityToHeaderString("s3", { id: file.id, path }, depth + 2));
-          if (globalArgv.json_output) {
+          if (globalArgv.jsonOutput) {
             for (const path of paths || []) outputPath(path);
           } else if (paths) {
             paths.sort((a, b) => a.localeCompare(b));
@@ -76,21 +76,21 @@ async function dumpAccount(repos: TUserDeletionRepos): Promise<number> {
 }
 
 export default {
-  command: "dump <user_id>",
+  command: "dump <userId>",
   describe: "Output a list of entities related to a user",
   builder: {
-    user_id: {
+    userId: {
       demandOption: true,
       type: "string",
       describe:
         "id of the user, or a search string for the email.\n(if the id doesn't match, will print the matching users and exit)",
     },
-    json_output: {
+    jsonOutput: {
       type: "boolean",
       alias: "j",
       describe: "Output in lines of '[kind] [json_object]'.",
     },
-    with_storage_paths: {
+    withStoragePaths: {
       type: "boolean",
       alias: "p",
       describe: "If set, also query the storage to include all relevant paths in the output",
@@ -104,9 +104,9 @@ export default {
     }
     await runWithPlatform("dump_account", async ({ spinner: _spinner, platform: _platform }) => {
       const repos = await buildUserDeletionRepositories(gr.database, gr.platformServices.search);
-      argv.user = await repos.user.findOne({ id: argv.user_id });
+      argv.user = await repos.user.findOne({ id: argv.userId });
       if (!argv.user) {
-        console.error(`Error, unknown user ${JSON.stringify(argv.user_id)}`);
+        console.error(`Error, unknown user ${JSON.stringify(argv.userId)}`);
         return 1;
       }
       await dumpAccount(repos);

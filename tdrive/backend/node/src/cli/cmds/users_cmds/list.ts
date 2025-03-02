@@ -9,8 +9,8 @@ import { EntityByKind } from "../../utils/print-entities";
 let globalArgv: {
   verbose: boolean;
 
-  email_like: string;
-  json_output: boolean;
+  emailLike: string;
+  jsonOutput: boolean;
 
   user?: User; // Not an argument per say, hydrated in handler
 };
@@ -19,7 +19,7 @@ const entityToHeaderString = <K extends keyof typeof EntityByKind>(
   kind: K & string,
   entity: Parameters<(typeof EntityByKind)[K]["headerOf"]>[0],
 ): string => {
-  if (globalArgv.json_output) return kind + " " + JSON.stringify(entity); // Can't really print out json directly, valid json seems to get prettified by pino
+  if (globalArgv.jsonOutput) return kind + " " + JSON.stringify(entity); // Can't really print out json directly, valid json seems to get prettified by pino
   // ts doesn't seem to infer entityHeaderPrinter[kind] correctly even with help
   // eslint-disable-next-line  @typescript-eslint/no-explicit-any
   return `${entity.id} ${EntityByKind[kind].headerOf(entity as any)}`;
@@ -29,13 +29,13 @@ export default {
   command: "list",
   describe: "list users",
   builder: {
-    email_like: {
+    emailLike: {
       alias: "e",
       type: "string",
       describe:
         "id of the user, or a search string for the email.\n(if the id doesn't match, will print the matching users and exit)",
     },
-    json_output: {
+    jsonOutput: {
       type: "boolean",
       alias: "j",
       describe: "Output in lines of '[kind] [json_object]'.",
@@ -54,7 +54,7 @@ export default {
           await repos.user.find(
             {},
             {
-              ...(argv.email_like ? { $like: [["email_canonical", argv.email_like]] } : {}),
+              ...(argv.emailLike ? { $like: [["email_canonical", argv.emailLike]] } : {}),
               sort: { email_canonical: "asc" },
             },
           )
