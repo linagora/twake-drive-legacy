@@ -127,27 +127,25 @@ const PendingRootList = ({
             modalExpanded={modalExpanded}
           />
 
-          {modalExpanded && (
-            <div className="modal-body">
-              <div className="bg-white px-4 py-2">
-                <PerfectScrollbar
-                  options={{ suppressScrollX: true, suppressScrollY: false }}
-                  component="div"
-                  style={{ width: '100%', maxHeight: 300 }}
-                >
-                  {keys.map(key => (
-                    <PendingRootRow key={key} rootKey={key} root={roots[key]} />
-                  ))}
-                </PerfectScrollbar>
-              </div>
-              <ModalFooter
-                pauseOrResumeUpload={pauseOrResumeUpload}
-                cancelUpload={cancelUpload}
-                isPaused={isPaused}
-                uploadingCount={uploadingCount + pausedCount}
-              />
+          <div className={`modal-body ${modalExpanded ? 'block' : 'hidden'}`}>
+            <div className="bg-white px-4 py-2">
+              <PerfectScrollbar
+                options={{ suppressScrollX: true, suppressScrollY: false }}
+                component="div"
+                style={{ width: '100%', maxHeight: 300 }}
+              >
+                {keys.map(key => (
+                  <PendingRootRow key={key} rootKey={key} root={roots[key]} />
+                ))}
+              </PerfectScrollbar>
             </div>
-          )}
+            <ModalFooter
+              pauseOrResumeUpload={pauseOrResumeUpload}
+              cancelUpload={cancelUpload}
+              isPaused={isPaused}
+              uploadingCount={uploadingCount + pausedCount}
+            />
+          </div>
         </div>
       )}
     </>
