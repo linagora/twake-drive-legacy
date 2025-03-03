@@ -27,8 +27,9 @@ export const useUploadZones = (zoneId: string) => {
     list: File[],
     options?: { uploader?: (file: File, context: any) => Promise<FileType>; context?: any },
   ) => {
+    FileUploadService.resetStates(list.map((file) => file.name));
     const newFiles = await FileUploadService.upload(
-      list.map((file, index) => {
+      list.map((file) => {
         return {
           root: file.name,
           file,

@@ -1,4 +1,4 @@
-import { FileTreeObject } from '@components/uploads/file-tree-utils';
+import { FileTreeObject, getFileIdsInTree } from '@components/uploads/file-tree-utils';
 import FileUploadService from '@features/files/services/file-upload-service';
 import { ToasterService } from '@features/global/services/toaster-service';
 import { DriveApiClient } from '../api-client/api-client';
@@ -16,6 +16,7 @@ export const useDriveUpload = () => {
 
   const uploadVersion = async (file: File, context: { companyId: string; id: string }) => {
     return new Promise(r => {
+      FileUploadService.resetStates([file.name]);
       FileUploadService.upload([{ root: file.name, file }], {
         context: {
           companyId: context.companyId,
@@ -49,6 +50,7 @@ export const useDriveUpload = () => {
     context: { companyId: string; parentId: string },
   ) => {
     logger.debug('Start creating directories and file upload ...');
+    FileUploadService.resetStates(getFileIdsInTree(tree.tree));
     await FileUploadService.createDirectories(tree, context);
     await refresh(context.parentId, true);
   };
@@ -68,6 +70,7 @@ export const useDriveUpload = () => {
             `Unexpected response status code: ${request.status} from ${JSON.stringify(url)}`,
           );
         const file = new File([request.response], name);
+        FileUploadService.resetStates([file.name]);
         FileUploadService.upload([{ root: file.name, file }], {
           context: {
             companyId: context.companyId,

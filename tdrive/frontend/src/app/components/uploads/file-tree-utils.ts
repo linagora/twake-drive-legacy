@@ -263,3 +263,16 @@ export const getFilesTree = (
     }
   });
 };
+
+export const getFileIdsInTree = (tree: FileTreeObject['tree']): string[] => {
+  const fileIds: string[] = [];
+  for (const directory of Object.keys(tree)) {
+    if (tree[directory].root) {
+      fileIds.push(tree[directory].root as string);
+    } else {
+      getFileIdsInTree(tree[directory] as FileTreeObject['tree']);
+    }
+  }
+
+  return fileIds;
+}

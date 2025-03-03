@@ -12,8 +12,6 @@ import FileUploadAPIClient from '../api/file-upload-api-client';
 import { isPendingFileStatusPending } from '../utils/pending-files';
 import { FileTreeObject } from 'components/uploads/file-tree-utils';
 import { DriveApiClient } from 'features/drive/api-client/api-client';
-import { ToasterService } from 'app/features/global/services/toaster-service';
-import Languages from 'app/features/global/services/languages-service';
 import { DriveItem, DriveItemVersion } from 'app/features/drive/types';
 
 export enum Events {
@@ -63,6 +61,9 @@ class FileUploadService {
    * @private
    */
   async _waitWhilePaused(id?: string) {
+    logger.debug('===== _waitWhilePaused ======');
+    logger.debug('rootStates: ', this.rootStates);
+    logger.debug('status: ', this.uploadStatus)
     while (this.uploadStatus === UploadStateEnum.Paused || (id && this.rootStates.paused[id])) {
       if (this.uploadStatus === UploadStateEnum.Cancelled || (id && this.rootStates.cancelled[id]))
         return;
@@ -305,10 +306,14 @@ class FileUploadService {
       callback?: (file: { root: string; file: FileType | null }, context: any) => void;
     },
   ): Promise<PendingFileType[]> {
+    logger.debug('===== upload =====');
+    logger.debug('uploadStatus: ', this.uploadStatus);
     
     // reset the upload status when creating a new document
     if (fileList.length === 1 && fileList[0].root === fileList[0].file.name) {
-      this.pauseOrResume();
+      if (this.uploadStatus === UploadStateEnum.Paused) {
+        this.uploadStatus = UploadStateEnum.Progress;
+      }
     }
 
     // if we're uploading one file directly, do the size calc first
@@ -745,6 +750,28 @@ class FileUploadService {
     this.groupedPendingFiles = {};
     this.groupIds = {};
     this.notify();
+  }
+
+  public resetStates(ids: string[]) {
+    this.logger.debug('===== START resetStates =====');
+    this.logger.debug('groupedPendingFiles: ', this.groupedPendingFiles);
+    this.logger.debug('groupIds: ', this.groupIds);
+    this.logger.debug('rootStates: ', this.rootStates);
+
+    this.uploadStatus = UploadStateEnum.Progress;
+    for (const id of ids) {
+      delete this.groupedPendingFiles[id];
+      delete this.groupIds[id];
+      delete this.rootStates.paused[id];
+      delete this.rootStates.completed[id];
+      delete this.rootStates.failed[id];
+      delete this.rootStates.cancelled[id];
+    }
+
+    this.logger.debug('===== END resetStates =====');
+    this.logger.debug('groupedPendingFiles: ', this.groupedPendingFiles);
+    this.logger.debug('groupIds: ', this.groupIds);
+    this.logger.debug('rootStates: ', this.rootStates);
   }
 }
 
