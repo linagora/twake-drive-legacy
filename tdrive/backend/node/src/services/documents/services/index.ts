@@ -3,6 +3,7 @@ import { getLogger, logger, TdriveLogger } from "../../../core/platform/framewor
 import {
   CrudException,
   ListResult,
+  Paginable,
   Pagination,
 } from "../../../core/platform/framework/api/crud-service";
 import Repository, {
@@ -1612,7 +1613,7 @@ export class DocumentsService {
   /**
    * Search for Drive items.
    *
-   * @param {SearchDocumentsOptions} options - the search optins.
+   * @param {SearchDocumentsOptions} options - the search options.
    * @param {DriveExecutionContext} context - the execution context.
    * @returns {Promise<ListResult<DriveFile>>} - the search result.
    */
@@ -1620,76 +1621,96 @@ export class DocumentsService {
     options: SearchDocumentsOptions,
     context?: DriveExecutionContext,
   ): Promise<ListResult<DriveFile>> => {
-    const result = await this.searchRepository.search(
-      {},
-      {
-        pagination: options.pagination
-          ? Pagination.fromPaginable(options.pagination)
-          : new Pagination(),
-        $in: [
-          ...(options.onlyDirectlyShared ? [["access_entities", [context.user.id]] as inType] : []),
-          ...(options.company_id ? [["company_id", [options.company_id]] as inType] : []),
-          ...(options.creator ? [["creator", [options.creator]] as inType] : []),
-          ...(options.mime_type
-            ? [
-                [
-                  "mime_type",
-                  Array.isArray(options.mime_type) ? options.mime_type : [options.mime_type],
-                ] as inType,
-              ]
-            : []),
-        ],
-        $nin: [...(options.onlyUploadedNotByMe ? [["creator", [context.user.id]] as inType] : [])],
-        $lte: [
-          ...(options.last_modified_lt
-            ? [["last_modified", options.last_modified_lt] as comparisonType]
-            : []),
-          ...(options.added_lt ? [["added", options.added_lt] as comparisonType] : []),
-        ],
-        $gte: [
-          ...(options.last_modified_gt
-            ? [["last_modified", options.last_modified_gt] as comparisonType]
-            : []),
-          ...(options.added_gt ? [["added", options.added_gt] as comparisonType] : []),
-        ],
-        ...(options.search
-          ? {
-              $text: {
-                $search: options.search,
-              },
-            }
-          : {}),
-        ...(options.sort ? { $sort: options.sort } : {}),
-      },
-      context,
-    );
+    let allResults: DriveFile[] = [];
+    let nextPage = options.pagination
+      ? Pagination.fromPaginable(options.pagination)
+      : new Pagination();
+    let resultType: string | null = null; // Step 1: Declare before loop
 
-    // if this flag is on, the access permissions were checked inside the database
-    if (!options.onlyDirectlyShared) {
-      const filteredResult = await this.filter(result.getEntities(), async item => {
-        try {
-          //skip all the fiels
-          return (
-            !item.is_in_trash &&
-            (await checkAccess(item.id, null, "read", this.repository, context))
-          );
-        } catch (error) {
-          this.logger.warn("failed to check item access", error);
-          return false;
-        }
-      });
+    // loop through all pages until we get results
+    do {
+      const result = await this.searchRepository.search(
+        {},
+        {
+          pagination: nextPage,
+          $in: [
+            ...(options.onlyDirectlyShared
+              ? [["access_entities", [context.user.id]] as inType]
+              : []),
+            ...(options.company_id ? [["company_id", [options.company_id]] as inType] : []),
+            ...(options.creator ? [["creator", [options.creator]] as inType] : []),
+            ...(options.mime_type
+              ? [
+                  [
+                    "mime_type",
+                    Array.isArray(options.mime_type) ? options.mime_type : [options.mime_type],
+                  ] as inType,
+                ]
+              : []),
+          ],
+          $nin: [
+            ...(options.onlyUploadedNotByMe ? [["creator", [context.user.id]] as inType] : []),
+          ],
+          $lte: [
+            ...(options.last_modified_lt
+              ? [["last_modified", options.last_modified_lt] as comparisonType]
+              : []),
+            ...(options.added_lt ? [["added", options.added_lt] as comparisonType] : []),
+          ],
+          $gte: [
+            ...(options.last_modified_gt
+              ? [["last_modified", options.last_modified_gt] as comparisonType]
+              : []),
+            ...(options.added_gt ? [["added", options.added_gt] as comparisonType] : []),
+          ],
+          ...(options.search
+            ? {
+                $text: {
+                  $search: options.search,
+                },
+              }
+            : {}),
+          ...(options.sort ? { $sort: options.sort } : {}),
+        },
+        context,
+      );
 
-      return new ListResult(result.type, filteredResult, result.nextPage);
-    }
+      if (!resultType) {
+        resultType = result.type; // Capture type from the first result
+      }
 
-    if (options.onlyUploadedNotByMe) {
-      const filteredResult = await this.filter(result.getEntities(), async item => {
-        return item.creator != context.user.id && !item.is_in_trash;
-      });
+      let filteredResult = result.getEntities();
 
-      return new ListResult(result.type, filteredResult, result.nextPage);
-    }
-    return result;
+      if (filteredResult.length === 0) {
+        break;
+      }
+
+      // if this flag is on, the access permissions were checked inside the database
+      if (!options.onlyDirectlyShared) {
+        filteredResult = await this.filter(filteredResult, async item => {
+          try {
+            return (
+              !item.is_in_trash &&
+              (await checkAccess(item.id, null, "read", this.repository, context))
+            );
+          } catch (error) {
+            this.logger.warn("failed to check item access", error);
+            return false;
+          }
+        });
+      }
+
+      if (options.onlyUploadedNotByMe) {
+        filteredResult = filteredResult.filter(
+          item => item.creator !== context.user.id && !item.is_in_trash,
+        );
+      }
+
+      allResults.push(...filteredResult);
+      nextPage = result.nextPage ? Pagination.fromPaginable(result.nextPage) : undefined;
+    } while (allResults.length === 0 && nextPage?.page_token); // Continue only if results are empty and there's a next page.
+
+    return new ListResult(resultType, allResults, nextPage);
   };
 
   private async filter(arr, callback) {
