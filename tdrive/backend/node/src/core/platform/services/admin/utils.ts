@@ -45,7 +45,6 @@ async function runInBatches<T, R>(
   let batch;
   const result = [] as R[];
   while ((batch = listCopy.splice(0, batchSize)).length) {
-    console.error("batch", batch);
     result.push(await map(batch));
   }
   return result;
