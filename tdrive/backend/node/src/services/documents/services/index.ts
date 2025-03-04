@@ -1626,6 +1626,7 @@ export class DocumentsService {
       ? Pagination.fromPaginable(options.pagination)
       : new Pagination();
     let resultType: string | null = null; // Step 1: Declare before loop
+    const resultPageSize = parseInt(options.pagination?.limitStr || "100");
 
     // loop through all pages until we get results
     do {
@@ -1685,7 +1686,7 @@ export class DocumentsService {
         break;
       }
 
-      // if this flag is on, the access permissions were checked inside the database
+      // Check access permissions
       if (!options.onlyDirectlyShared) {
         filteredResult = await this.filter(filteredResult, async item => {
           try {
@@ -1708,7 +1709,7 @@ export class DocumentsService {
 
       allResults.push(...filteredResult);
       nextPage = result.nextPage ? Pagination.fromPaginable(result.nextPage) : undefined;
-    } while (allResults.length === 0 && nextPage?.page_token); // Continue only if results are empty and there's a next page.
+    } while (allResults.length !== resultPageSize && nextPage?.page_token); // Continue only if results are empty and there's a next page.
 
     return new ListResult(resultType, allResults, nextPage);
   };
