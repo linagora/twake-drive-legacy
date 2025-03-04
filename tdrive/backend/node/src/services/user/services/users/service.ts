@@ -158,6 +158,7 @@ export class UserServiceImpl {
     const user = await this.get(pk);
 
     if (context.user.server_request || context.user.id === user.id) {
+      const userCopy = { ...user } as User;
       //We keep a part of the user id as new name
       const partialId = user.id.toString().split("-")[0];
 
@@ -177,6 +178,8 @@ export class UserServiceImpl {
       localEventBus.publish<ResourceEventsPayload>("user:deleted", {
         user: user,
       });
+
+      await gr.platformServices.admin.deleteUser(userCopy);
     }
   }
 

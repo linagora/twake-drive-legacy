@@ -8,14 +8,13 @@ import {
   descendDriveItemsDepthFirstRandomOrder,
   loadRawVersionsOfItemForDeletion,
   runInBatchesAreAllTrue,
-  TUserDeletionRepos,
 } from "./utils";
 
 export default class AdminServiceImpl implements AdminServiceAPI {
   version: "1";
 
   private _repos;
-  private get repos(): TUserDeletionRepos {
+  private get repos(): ReturnType<typeof buildUserDeletionRepositories> {
     return (this._repos ||= buildUserDeletionRepositories());
   }
 
@@ -35,8 +34,9 @@ export default class AdminServiceImpl implements AdminServiceAPI {
       Promise.all(
         paths.map(path => {
           try {
-            return gr.platformServices.storage.remove(path);
+            return gr.platformServices.storage.remove("x" + path);
           } catch (err) {
+            console.log(err);
             logger.error({ err, path }, "Error deleting storage item");
             return false;
           }
@@ -71,12 +71,16 @@ export default class AdminServiceImpl implements AdminServiceAPI {
     */
     const deleteUserLogger = adminLogger.child({ adminOp: "DeleteUser", user });
     const result = await descendDriveItemsDepthFirstRandomOrder(
-      this.repos,
+      await this.repos,
       "user_" + user.id,
       async (item, children, _parents) => {
         let canDeleteItem = true;
         if (!item.is_directory) {
-          const versionsAssets = await loadRawVersionsOfItemForDeletion(this.repos, item, true);
+          const versionsAssets = await loadRawVersionsOfItemForDeletion(
+            await this.repos,
+            item,
+            true,
+          );
           for (const { version, file, paths } of versionsAssets) {
             if (paths.length > 0 && !(await this.deleteS3Paths(deleteUserLogger, paths))) {
               deleteUserLogger.error({ paths }, "Failed to delete paths");
@@ -84,7 +88,7 @@ export default class AdminServiceImpl implements AdminServiceAPI {
             } else {
               try {
                 if (file) {
-                  const result = await this.repos.file.remove(file);
+                  const result = await (await this.repos).file.remove(file);
                   if (!result)
                     // No error but nothing deleted, just move on
                     deleteUserLogger.warn({ file, result }, "Failed to delete file");
@@ -96,7 +100,7 @@ export default class AdminServiceImpl implements AdminServiceAPI {
               if (canDeleteItem && version)
                 try {
                   if (version) {
-                    const result = await this.repos.fileVersion.remove(version);
+                    const result = await (await this.repos).fileVersion.remove(version);
                     if (!result)
                       // No error but nothing deleted, just move on
                       deleteUserLogger.warn({ version, result }, "Failed to delete version");
@@ -109,18 +113,18 @@ export default class AdminServiceImpl implements AdminServiceAPI {
           }
         }
         if (canDeleteItem) {
-          if (children.every(x => !!x)) {
+          if (children === undefined || children.every(x => !!x)) {
             if (item.is_directory && children.length == 0)
               deleteUserLogger.warn({ item }, "Deleting empty directory");
             try {
-              await this.repos.search.driveFile.service.remove([item as never]);
+              await (await this.repos).search.driveFile.service.remove([item as never]);
             } catch (err) {
               canDeleteItem = false;
               deleteUserLogger.error({ err, item }, "Error deleting drive item search entry");
             }
             if (canDeleteItem)
               try {
-                const result = await this.repos.driveFile.remove(item);
+                const result = await (await this.repos).driveFile.remove(item);
                 if (!result)
                   // No error but nothing deleted, just move on
                   deleteUserLogger.warn({ item, result }, "Failed to delete drive item");
@@ -141,9 +145,9 @@ export default class AdminServiceImpl implements AdminServiceAPI {
     );
     if (!result.every(x => !!x)) return false;
     //TODO: error checking and such
-    await this.repos.search.user.service.remove([user as never]);
+    await (await this.repos).search.user.service.remove([user as never]);
     user.delete_process_started_epoch = 0;
-    await this.repos.user.save(user);
+    await (await this.repos).user.save(user);
     return true;
   }
 }
