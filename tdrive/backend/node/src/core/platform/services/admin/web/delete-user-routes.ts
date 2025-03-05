@@ -27,7 +27,7 @@ function getUserIfValidQuery(request: FastifyRequest, reply: FastifyReply) {
 
 const routes: FastifyPluginCallback = async (fastify: FastifyInstance, _opts, next) => {
   const config = getConfig();
-  const controller = await AdminDeleteUserController.create();
+  const controller = new AdminDeleteUserController();
   if (config?.endpointSecret?.length) {
     fastify.post("/user/delete", async (request, reply) => {
       const userId = getUserIfValidQuery(request, reply);
