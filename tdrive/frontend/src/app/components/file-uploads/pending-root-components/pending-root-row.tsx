@@ -116,6 +116,8 @@ const PendingRootRow = ({
     return rootName;
   };
 
+  const showFileFolderTestId = !showFolder || isFileRoot ? 'testid:upload-root-modal-row-show-file' : 'testid:upload-root-modal-row-show-folder';
+
   return (
     <div className="root-row testid:upload-root-modal-row">
       <div className="root-details mt-2">
@@ -141,7 +143,7 @@ const PendingRootRow = ({
             {isUploadCompleted ? (
               <button
                 onClick={handleShowFolder}
-                className="hover:bg-gray-100 p-2 rounded-md transition-all duration-200 testid:upload-root-modal-row-show-folder"
+                className={`hover:bg-gray-100 p-2 rounded-md transition-all duration-200 ${showFileFolderTestId}`}
               >
                 {!isFileRoot && (
                   <>

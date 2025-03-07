@@ -59,28 +59,33 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
   cancelUpload,
   isPaused,
   uploadingCount,
-}) => (
-  <div className="w-full flex flex-wrap bg-[#F0F2F3] text-black p-4 items-center justify-between">
-    <div className="w-full flex flex-wrap gap-2 justify-center sm:justify-end">
-      {uploadingCount > 0 && (
+}) => {
+  const pauseResumeBtnTestId = isPaused() ? 'testid:upload-root-modal-pause' : 'testid:upload-root-modal-resume';
+  const cancelCloseBtnTestId = uploadingCount ? 'testid:upload-root-modal-cancel' : 'testid:upload-root-modal-close';
+
+  return (
+    <div className="w-full flex flex-wrap bg-[#F0F2F3] text-black p-4 items-center justify-between">
+      <div className="w-full flex flex-wrap gap-2 justify-center sm:justify-end">
+        {uploadingCount > 0 && (
+          <button
+            className={`text-blue-500 px-4 py-2 rounded bg-transparent transition-all duration-300 ease-in-out 
+            hover:bg-blue-600 hover:text-white w-full sm:w-auto ${pauseResumeBtnTestId}`}
+            onClick={pauseOrResumeUpload}
+          >
+            {isPaused() ? Languages.t('general.resume') : Languages.t('general.pause')}
+          </button>
+        )}
         <button
-          className="text-blue-500 px-4 py-2 rounded bg-transparent transition-all duration-300 ease-in-out 
-          hover:bg-blue-600 hover:text-white w-full sm:w-auto testid:upload-root-modal-pause-resume"
-          onClick={pauseOrResumeUpload}
+          className={`text-blue-500 min-w-[100px] px-4 py-2 rounded bg-transparent transition-all duration-300 ease-in-out 
+          hover:bg-blue-600 hover:text-white w-full sm:w-auto ${cancelCloseBtnTestId}`}
+          onClick={cancelUpload}
         >
-          {isPaused() ? Languages.t('general.resume') : Languages.t('general.pause')}
+          {uploadingCount ? Languages.t('general.cancel') : Languages.t('general.close')}
         </button>
-      )}
-      <button
-        className="text-blue-500 min-w-[100px] px-4 py-2 rounded bg-transparent transition-all duration-300 ease-in-out 
-        hover:bg-blue-600 hover:text-white w-full sm:w-auto testid:upload-root-modal-cancel-close"
-        onClick={cancelUpload}
-      >
-        {uploadingCount ? Languages.t('general.cancel') : Languages.t('general.close')}
-      </button>
+      </div>
     </div>
-  </div>
-);
+  );
+}
 
 const PendingRootList = ({
   roots,
