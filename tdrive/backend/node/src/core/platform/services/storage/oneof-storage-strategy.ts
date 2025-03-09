@@ -172,8 +172,15 @@ export class OneOfStorageStrategy implements StorageConnectorAPI {
    * @param path - The path of the file to be removed.
    * @param options
    */
-  remove = async (path: string, options?: DeleteOptions): Promise<boolean> => {
-    return Promise.all(this.storages.map(storage => storage.remove(path, options))).then(array => {
+  remove = async (
+    path: string,
+    options?: DeleteOptions,
+    context?: undefined,
+    deletionCause?: "admin:user_account_deletion",
+  ): Promise<boolean> => {
+    return Promise.all(
+      this.storages.map(storage => storage.remove(path, options, context, deletionCause)),
+    ).then(array => {
       return array.reduce((a, b) => a && b);
     });
   };

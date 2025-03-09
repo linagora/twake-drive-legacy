@@ -110,7 +110,10 @@ export class WorkspaceServiceImpl implements TdriveServiceProvider, Initializabl
     //If user deleted from a company, remove it from all workspace
     localEventBus.subscribe<ResourceEventsPayload>("company:user:deleted", async data => {
       if (data?.user?.id && data?.company?.id)
-        gr.services.workspaces.ensureUserNotInCompanyIsNotInWorkspace(data.user, data.company.id);
+        gr.services.workspaces.ensureUserNotInCompanyIsNotInWorkspace(
+          data.user.id,
+          data.company.id,
+        );
     });
 
     return this;
@@ -717,7 +720,7 @@ export class WorkspaceServiceImpl implements TdriveServiceProvider, Initializabl
   }
 
   async ensureUserNotInCompanyIsNotInWorkspace(
-    userPk: UserPrimaryKey,
+    userId: string,
     companyId: string,
     context?: ExecutionContext,
   ): Promise<void> {
@@ -725,15 +728,15 @@ export class WorkspaceServiceImpl implements TdriveServiceProvider, Initializabl
     for (const workspace of workspaces) {
       const companyUser = await gr.services.companies.getCompanyUser(
         { id: workspace.company_id },
-        userPk,
+        { id: userId },
         context,
       );
       if (!companyUser) {
         logger.warn(
-          `User ${userPk.id} is not in company ${workspace.company_id} so removing from workspace ${workspace.id}`,
+          `User ${userId} is not in company ${workspace.company_id} so removing from workspace ${workspace.id}`,
         );
         await this.removeUser(
-          { workspaceId: workspace.id, userId: userPk.id },
+          { workspaceId: workspace.id, userId: userId },
           companyId,
           context,
         ).then(() => null);

@@ -15,7 +15,13 @@ export type S3Configuration = {
   useSSL: boolean;
   accessKey: string;
   secretKey: string;
+  /** If `true`, S3 file removal is disabled (see exception of {@link overrideDisableRemoveForUserAccountDeletion}) */
   disableRemove: boolean;
+  /**
+   * If {@link disableRemove} is `true`, but the deletion is in the context of a user account deletion by an administrator,
+   * then override and delete from S3 if `overrideDisableRemoveForUserAccountDeletion` is also `true`.
+   */
+  overrideDisableRemoveForUserAccountDeletion: boolean;
 };
 
 export default class S3ConnectorService implements StorageConnectorAPI {
@@ -31,6 +37,12 @@ export default class S3ConnectorService implements StorageConnectorAPI {
     if (confCopy.useSSL && typeof confCopy.useSSL === "string") {
       confCopy.useSSL = !(!confCopy.useSSL || confCopy.useSSL === "false");
     }
+    if (
+      confCopy.overrideDisableRemoveForUserAccountDeletion &&
+      typeof confCopy.overrideDisableRemoveForUserAccountDeletion === "string"
+    )
+      confCopy.overrideDisableRemoveForUserAccountDeletion =
+        confCopy.overrideDisableRemoveForUserAccountDeletion === "true";
     this.client = new Minio.Client(confCopy);
     this.minioConfiguration = confCopy;
     this.id = this.minioConfiguration.id;
@@ -114,16 +126,28 @@ export default class S3ConnectorService implements StorageConnectorAPI {
     return this.client.getObject(this.minioConfiguration.bucket, path);
   }
 
-  async remove(path: string): Promise<boolean> {
+  async remove(
+    path: string,
+    _options?: undefined,
+    _context?: undefined,
+    deletionCause?: "admin:user_account_deletion",
+  ): Promise<boolean> {
     try {
-      if (this.minioConfiguration.disableRemove) {
+      if (
+        this.minioConfiguration.disableRemove &&
+        (!this.minioConfiguration.overrideDisableRemoveForUserAccountDeletion ||
+          deletionCause !== "admin:user_account_deletion")
+      ) {
         logger.info(`File ${path} wasn't removed, file removal is disabled in configuration`);
         return true;
       } else {
+        // This call never fails, whether path exists or not
         await this.client.removeObject(this.minioConfiguration.bucket, path);
         return true;
       }
-    } catch (err) {}
+    } catch (err) {
+      logger.error({ err, path }, "Error deleting S3 path");
+    }
     return false;
   }
 

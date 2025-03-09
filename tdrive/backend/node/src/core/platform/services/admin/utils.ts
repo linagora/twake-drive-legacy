@@ -70,7 +70,7 @@ export async function buildUserDeletionRepositories(
   db: DatabaseServiceAPI = gr.database,
   search: SearchServiceAPI = gr.platformServices.search,
 ) {
-  return {
+  const result = {
     driveFile: await db.getRepository<DriveFile>(DriveFileTYPE, DriveFile),
     file: await db.getRepository<File>(FileTYPE, File),
     fileVersion: await db.getRepository<FileVersion>(FileVersionTYPE, FileVersion),
@@ -81,13 +81,22 @@ export async function buildUserDeletionRepositories(
     company: await db.getRepository<Company>(CompanyType, Company),
     // This one is not typical because it's only valid for remote account type:
     session: gr.services.console.getSessionRepo() as Repository<Session> | null,
-    //TODO: checkout what to do with session and user_online (seen in prod)
+    //TODO: checkout what to do with user_online (seen in prod)
 
     search: {
       driveFile: await search.getRepository<DriveFile>(DriveFileTYPE, DriveFile),
       user: await search.getRepository<User>(UserTYPE, User),
     },
   };
+  await Promise.all(Object.values(result).map(item => "init" in item && item.init()));
+  return result;
+}
+
+export async function findFileOfVersion(
+  repos: TUserDeletionRepos,
+  version: FileVersion,
+): Promise<File> {
+  return await repos.file.findOne({ id: version.file_metadata.external_id });
 }
 
 /** Return versions, sorted by oldest first, and related DB and S3 entries for a given DriveFile */
@@ -106,7 +115,7 @@ export async function loadRawVersionsOfItemForDeletion(
     (await repos.fileVersion.find({ drive_item_id: item.id }, { sort: { date_added: "asc" } }))
       .getEntities()
       .map(async version => {
-        const file = await repos.file.findOne({ id: version.file_metadata.external_id });
+        const file = await findFileOfVersion(repos, version);
         if (!loadStoragePaths) return { version, file };
         const paths = file
           ? await gr.platformServices.storage.enumeratePathsForFile(getFilePath(file))

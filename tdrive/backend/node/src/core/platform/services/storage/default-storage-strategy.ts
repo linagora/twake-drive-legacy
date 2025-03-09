@@ -48,7 +48,8 @@ export class DefaultStorageStrategy implements StorageConnectorAPI {
     path: string,
     options?: DeleteOptions,
     context?: ExecutionContext,
+    deletionCause?: undefined | "admin:user_account_deletion",
   ): Promise<boolean> => {
-    return this.connector.remove(path, options, context);
+    return this.connector.remove(path, options, context, deletionCause);
   };
 }

@@ -478,10 +478,17 @@ export class FileServiceImpl {
     return this.algorithm;
   }
 }
+
+/** Get the storage path prefix specific to a user of a company */
+export const getUserPath = (user_id: string, company_id: string): string => {
+  return `${gr.platformServices.storage.getHomeDir()}/files/${company_id}/${
+    user_id || "anonymous"
+  }/`;
+};
+
+/** Get the storage path prefix specific to a given File of a user of a company */
 export const getFilePath = (
   entity: File | { company_id: string; user_id?: string; id: string },
 ): string => {
-  return `${gr.platformServices.storage.getHomeDir()}/files/${entity.company_id}/${
-    entity.user_id || "anonymous"
-  }/${entity.id}`;
+  return `${getUserPath(entity.user_id, entity.company_id)}${entity.id}`;
 };

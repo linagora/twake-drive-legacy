@@ -1,25 +1,21 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "@jest/globals";
+import { afterAll, beforeAll, describe, expect, it } from "@jest/globals";
 import { init, TestPlatform } from "../setup";
-import { CompanyLimitsEnum } from "../../../src/services/user/web/types";
 import UserApi from "../common/user-api";
-import type { DriveExecutionContext } from "../../../src/services/documents/types";
 import { DriveFile, TYPE as DriveFileType } from "../../../src/services/documents/entities/drive-file";
 import { File } from "../../../src/services/files/entities/file";
 import { FileVersion, TYPE as FileVersionType } from "../../../src/services/documents/entities/file-version";
-import User, { TYPE as UserType } from "../../../src/services/user/entities/user";
-import ExternalUser, { TYPE as ExternalUserType } from "../../../src/services/user/entities/external_user";
-import { getThumbnailRoute } from "../../../src/services/files/web/routes";
+import type User from "../../../src/services/user/entities/user";
 import { getFilePath } from "../../../src/services/files/services";
-const FileType = "files";
-import { buildUserDeletionRepositories, descendDriveItemsDepthFirstRandomOrder } from "../../../src/core/platform/services/admin/utils";
+import { buildUserDeletionRepositories } from "../../../src/core/platform/services/admin/utils";
 import { getConfig } from "../../../src/core/platform/framework/api/admin";
 
 const loadRepositories = async (platform: TestPlatform) => buildUserDeletionRepositories(platform!.database, platform!.search);
 
 describe("The users deletion API", () => {
-  const url = "/internal/services/users/v1";
   let platform: TestPlatform | undefined;
+  let adminUser: UserApi;
   let currentUser: UserApi;
+  let userToTestPending: UserApi;
   let myUserId: string;
   let myDriveId: string;
   let myCompanyId: string;
@@ -31,7 +27,7 @@ describe("The users deletion API", () => {
       driveFileByCreator: async (userId: string) => repos.driveFile.find({ creator: userId }),
       driveFileByParent: async (userId: string) => repos.driveFile.find({ parent_id: "user_" + userId }),
       fileVersion: async (userId: string) => repos.fileVersion.find({ creator_id: userId }),
-      // file: async (userId: string) => repos.file.find({ user_id: userId }), // user_id is encrypted for reasons
+      file: async (userId: string) => repos.file.find({ user_id: userId }),
       missedDriveFile: async (userId: string) => repos.missedDriveFile.find({ creator: userId }),
       // user: async (userId: string) => repos.user.find({ id: userId }), // ignored because it stays with deleted=true
       companyUser: async (userId: string) => repos.companyUser.find({ user_id: userId }),
@@ -126,6 +122,15 @@ describe("The users deletion API", () => {
     }
   }
 
+  async function getSearchEntriesFromFoundEntries(items: ReturnType<typeof findEntriesInUserTree>) {
+    const searchDoc = async ({id}) => (await repos.search.driveFile.search({ id }, { pagination: {limitStr: "100"} })).getEntities()[0];
+    return {
+      fileAtRoot: await searchDoc(items.fileAtRoot!.driveFile),
+      fileInRootFolder: await searchDoc(items.fileInRootFolder!.driveFile),
+      fileInSubRoot: await searchDoc(items.fileInSubRoot!.driveFile),
+    }
+  }
+
   beforeAll(async () => {
     platform = await init({
       services: [
@@ -146,7 +151,9 @@ describe("The users deletion API", () => {
       ],
     });
 
+    adminUser = await UserApi.getInstance(platform, true, { companyRole: "admin" });
     currentUser = await UserApi.getInstance(platform);
+    userToTestPending = await UserApi.getInstance(platform, true);
     myUserId = currentUser.user.id;
     myDriveId = "user_" + currentUser.user.id;
     myCompanyId = currentUser.workspace.company_id;
@@ -154,15 +161,15 @@ describe("The users deletion API", () => {
   });
 
   afterAll(async () => {
-    await platform!.tearDown();
+    platform && await platform.tearDown();
     platform = undefined;
   });
 
-  async function sendDeleteUser(secret: string, userId: string, expected: number = 200) {
+  async function sendDeleteUser(secret: string, userId: string, expected: number = 200, deleteData: boolean = true) {
     const response = await platform!.app.inject({
       method: "POST",
-      url: `/admin/user/delete`,
-      body: { secret, userId },
+      url: `/admin/api/user/delete`,
+      body: { secret, userId, deleteData },
     });
     expect(response.statusCode).toBe(expected);
     if (expected === 200) return JSON.parse(response.body);
@@ -172,7 +179,7 @@ describe("The users deletion API", () => {
   async function requestPendingUserDeletions(secret: string, expected: number = 200) {
     const response = await platform!.app.inject({
       method: "POST",
-      url: `/admin/user/delete/pending`,
+      url: `/admin/api/user/delete/pending`,
       body: { secret },
     });
     expect(response.statusCode).toBe(expected);
@@ -180,12 +187,11 @@ describe("The users deletion API", () => {
     return response;
   }
 
-  describe("The DELETE /users/:id route", () => {
+  describe("admin/api/user/delete routes", () => {
     it("should have a secret setup or none of this test will work and we should know", () => {
       expect(adminConfig.endpointSecret).toBeTruthy();
     });
 
-    //TODO: NONONONO
     it("should start with a non deleted user with some files", async () => {
       const user = await currentUser.getUser();
       expect(user).toMatchObject({
@@ -201,49 +207,21 @@ describe("The users deletion API", () => {
       expect(initialFakeFiles.fileInRootFolder.id).toBeTruthy();
       expect(initialFakeFiles.fileInSubRoot.id).toBeTruthy();
 
-      // const docs = await currentUser.browseDocuments(myDriveId, {});
-      // console.error(JSON.stringify(docs, null, 2)); // works, but projected values
-      // const docs = await platform!.documentService.browse(myDriveId, { }, { user: { id: myUserId }, company: { id: "string" } } as DriveExecutionContext);
-      // console.error(JSON.stringifya(docs, null, 2)); // doesn't work, empty children
+      // Wait for indexing, inspired by ../documents/documents-search.spec.ts
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
-      // await currentUser.uploadAllFilesOneByOne("user_" + currentUser.user.id);
-
-      // Wait for indexing, inspired by tdrive/backend/node/test/e2e/documents/documents-search.spec.ts
-  //     await new Promise(resolve => setTimeout(resolve, 10000)); // TODO: search doesn't work anyway
-  //     const searchResult = await currentUser.searchDocument({search: "d"});
-  //     console.log({searchResult});
-  // const a = (await repos.search.driveFile.search({}, { $text: { $search: "d" } })).getEntities()[0];
-  //     console.log({a});
       const tree = await loadDriveFiles(myDriveId);
-      console.log((await userTreeToString(tree)));
-
-      const lines: string[] = [];
-      const res = await descendDriveItemsDepthFirstRandomOrder(repos, myDriveId, async (item, children, parents) => {
-        //TODO: NONONO: 
-        // recurse each drive item
-        //    delete all s3
-        //    then the version
-        //    then files
-        // search for file by user id after deletion
-        // search s3 for prefix company/userid
-        // 
-        const indent = new Array(parents.length + 1).join("\t");
-        lines.push(`${indent} ${item.is_directory ? "📂" : "📄"} ${item.name} (${item.id}) (${children?.length ?? 0} children)`);
-        return children;
-      });
-      console.error(lines.join('\n'));
-      console.error(JSON.stringify(res, null, 2));
-
-
-      console.log((await repos.search.driveFile.search({}, { $text: { $search: "" } }, undefined)).getEntities());
-      // console.log((await repos.search.user.search({}, { $text: { $search: "" } }, undefined)).getEntities());
-
       const foundEntries = findEntriesInUserTree(tree);
       expect(foundEntries.rootFolder?.driveFile).toMatchObject({ id: initialFakeFiles.rootFolder.id, parent_id: myDriveId, name: "root_folder" });
       expect(foundEntries.subRootFolder?.driveFile).toMatchObject({ id: initialFakeFiles.subRootFolder.id, parent_id: initialFakeFiles.rootFolder.id, name: "sub_root_folder" });
       expect(foundEntries.fileAtRoot?.driveFile).toMatchObject({ id: initialFakeFiles.fileAtRoot.id });
       expect(foundEntries.fileInRootFolder?.driveFile).toMatchObject({ id: initialFakeFiles.fileInRootFolder.id });
       expect(foundEntries.fileInSubRoot?.driveFile).toMatchObject({ id: initialFakeFiles.fileInSubRoot.id });
+
+      const searchDocs = await getSearchEntriesFromFoundEntries(foundEntries);
+      expect(searchDocs.fileAtRoot).toMatchObject({ id: initialFakeFiles.fileAtRoot.id });
+      expect(searchDocs.fileInRootFolder).toMatchObject({ id: initialFakeFiles.fileInRootFolder.id });
+      expect(searchDocs.fileInSubRoot).toMatchObject({ id: initialFakeFiles.fileInSubRoot.id });
     });
 
     it("should reject queries without valid secret", async () => {
@@ -260,54 +238,73 @@ describe("The users deletion API", () => {
       expect(responseBody).toStrictEqual([]);
     });
 
-    it("should be immediately listed after deletion", async () => {
-      console.log({myCompanyId, myUserId});
-      await sendDeleteUser(adminConfig.endpointSecret!, myUserId, 200);
-      // TODO: wait for message queue stuff ?
-      const responseBody = await requestPendingUserDeletions(adminConfig.endpointSecret!, 200);
-      expect(responseBody).toStrictEqual([myUserId]);
+    it("should timeout with temp test user ID", async () => {
+      let isResolved = false;
+      const waitable = sendDeleteUser(adminConfig.endpointSecret!, "e2e_simulate_timeout", 400);
+      waitable.then(() => isResolved = true, () => isResolved = true);
+      expect(new Promise(resolve => setTimeout(() => resolve(isResolved), 3000))).resolves.toBeFalsy();
     });
 
-    it("the user should be marked at least as pending deletion", async () => {
-      const user = await currentUser.getUser();
+    it("should be immediately listed after deletion", async () => {
+      const deleteResult = await sendDeleteUser(adminConfig.endpointSecret!, userToTestPending.user.id, 200, false);
+      expect(deleteResult).toMatchObject({ status: "deleting" });
+      const pendingDeletes = await requestPendingUserDeletions(adminConfig.endpointSecret!, 200);
+      expect(pendingDeletes).toHaveLength(1);
+      expect(pendingDeletes[0]).toHaveLength(2);
+      expect(pendingDeletes[0][0]).toBe(userToTestPending.user.id);
+      expect(pendingDeletes[0][1]).toBeGreaterThan(0);
+      const userBefore = await adminUser.getUser(userToTestPending.user.id);
+      expect(userBefore).toMatchObject({
+        id: userToTestPending.user.id,
+        deleted: true,
+      });
+      expect((userBefore as unknown as User).delete_process_started_epoch).toBeGreaterThan(0);
+      const actualDeleteResult = await sendDeleteUser(adminConfig.endpointSecret!, userToTestPending.user.id, 200, true);
+      expect(actualDeleteResult).toMatchObject({ status: "done" });
+      expect(await requestPendingUserDeletions(adminConfig.endpointSecret!, 200)).toStrictEqual([ ]);
+      const userAfter = await adminUser.getUser(userToTestPending.user.id);
+      expect(userAfter).toMatchObject({
+        id: userToTestPending.user.id,
+        deleted: true,
+      });
+      expect((userAfter as unknown as User).delete_process_started_epoch).toBe(0);
+    });
+
+    it("the user deletion should complete inline in e2e", async () => {
+      const deleteResult = await sendDeleteUser(adminConfig.endpointSecret!, myUserId, 200, true);
+      expect(deleteResult).toMatchObject({ status: "done" });
+    });
+
+    it("the user should no longer have any documents", async () => {
+      const tree = await loadDriveFiles(myDriveId);
+      const foundEntries = findEntriesInUserTree(tree);
+      expect(foundEntries.rootFolder?.driveFile).toBeUndefined();
+      expect(foundEntries.subRootFolder?.driveFile).toBeUndefined();
+      expect(foundEntries.fileAtRoot?.driveFile).toBeUndefined();
+      expect(foundEntries.fileInRootFolder?.driveFile).toBeUndefined();
+      expect(foundEntries.fileInSubRoot?.driveFile).toBeUndefined();
+    });
+
+    it("the user should be marked deleted", async () => {
+      const user = await adminUser.getUser(currentUser.user.id);
       expect(user).toMatchObject({
         id: myUserId,
         deleted: true,
       });
-      expect((user as unknown as User).delete_process_started_epoch).toBeGreaterThan(0);
+      expect((user as unknown as User).delete_process_started_epoch).toBe(0);
     });
 
-    // TODO: NONONO
-    it.skip("the user should not be able to login", async () => {
-      expect((await currentUser.login()).statusCode).toBe(401);
+    it("the user should not be able to continue with API", async () => {
+      expect(await currentUser.browseDocuments(myDriveId)).toMatchObject({
+        "error": "Unauthorized",
+      });
     });
 
-    //TODO: NONONONO
-    it.skip("should have no objects left other than user (and untestable files)", async () => {
-      let totalCount = 0;
-      for (const [key, fn] of Object.entries(listByUserIn)) {
-        const result = (await fn(myUserId)).getEntities();
-        totalCount += result.length;
-        if (result.length)
-          console.error(`unexpected ${key} still there`, result);
-      }
-      expect(totalCount).toBe(0);
+    it("should have no objects left other than user (and untestable files)", async () => {
+      expect(await (await Promise.all(
+        Object.entries(listByUserIn)
+          .flatMap(async ([key, fn]) => (await fn(myUserId)).getEntities().map(e => ({"": e.constructor.name, ...e})))
+        )).flat()).toHaveLength(0);
     });
-
-    //TODO: NONONONO
-    it.skip("test todo wip messy thing", async () => {
-      const tree = await loadDriveFiles(myDriveId);
-      console.log(await userTreeToString(tree));
-      const foundEntries = findEntriesInUserTree(tree);
-      const allPaths = foundEntries.fileAtRoot?.versions?.flatMap(({storagePaths}) => storagePaths);
-      console.error({allPaths})
-    });
-
-    it("in the end the user should have nothing, and be deleted with no process epoch", async () => {
-      const tree = await loadDriveFiles(myDriveId);
-      return; //TODO: NONONO Don't check user deletion until it's done etc
-
-    });
-
   });
 });

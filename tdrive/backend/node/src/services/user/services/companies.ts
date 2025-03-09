@@ -13,7 +13,7 @@ import {
 import Repository, {
   FindOptions,
 } from "../../../core/platform/services/database/services/orm/repository/repository";
-import { UserPrimaryKey } from "../entities/user";
+import User, { UserPrimaryKey } from "../entities/user";
 import Company, {
   CompanyPrimaryKey,
   CompanySearchKey,
@@ -178,13 +178,13 @@ export class CompanyServiceImpl {
 
   async removeUserFromCompany(
     companyPk: CompanyPrimaryKey,
-    userPk: UserPrimaryKey,
+    userId: string,
     context?: ExecutionContext,
   ): Promise<DeleteResult<CompanyUser>> {
     const entity = await this.companyUserRepository.findOne(
       {
         group_id: companyPk.id,
-        user_id: userPk.id,
+        user_id: userId,
       },
       {},
       context,
@@ -192,7 +192,7 @@ export class CompanyServiceImpl {
     if (entity) {
       await Promise.all([this.companyUserRepository.remove(entity, context)]);
 
-      const user = await gr.services.users.get(userPk);
+      const user = await gr.services.users.get({ id: userId });
       if ((user.cache?.companies || []).includes(companyPk.id)) {
         // Update user cache with companies
         user.cache.companies = user.cache.companies.filter(id => id != companyPk.id);
@@ -304,14 +304,17 @@ export class CompanyServiceImpl {
   }
 
   async ensureDeletedUserNotInCompanies(userPk: UserPrimaryKey): Promise<void> {
-    const user = await gr.services.users.get(userPk);
-    if (user.deleted) {
-      const companies = await this.getAllForUser(user.id);
+    const user = await gr.services.users.get({ id: userPk.id });
+    if (user?.deleted ?? (userPk as User).deleted) {
+      const companies = await this.getAllForUser(user?.id ?? userPk.id);
       for (const company of companies) {
         logger.warn(`User ${userPk.id} is deleted so removed from company ${company.id}`);
-        await this.removeUserFromCompany(company, user);
+        await this.removeUserFromCompany(company, user?.id ?? userPk.id);
         try {
-          await gr.services.workspaces.ensureUserNotInCompanyIsNotInWorkspace(userPk, company.id);
+          await gr.services.workspaces.ensureUserNotInCompanyIsNotInWorkspace(
+            user?.id ?? userPk.id,
+            company.id,
+          );
         } catch (err) {
           logger.error({ err }, "Error removing user from company from workspace");
         }

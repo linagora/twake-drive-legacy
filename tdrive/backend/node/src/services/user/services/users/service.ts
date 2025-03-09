@@ -14,7 +14,7 @@ import Repository, {
   FindFilter,
   FindOptions,
 } from "../../../../core/platform/services/database/services/orm/repository/repository";
-import User, { UserPrimaryKey } from "../../entities/user";
+import User, { getInstance as getUserInstance, UserPrimaryKey } from "../../entities/user";
 import { ListUserOptions, SearchUserOptions } from "./types";
 import CompanyUser from "../../entities/company_user";
 import SearchRepository from "../../../../core/platform/services/search/repository";
@@ -154,32 +154,38 @@ export class UserServiceImpl {
     return new DeleteResult<User>("user", instance, !!instance);
   }
 
-  async anonymizeAndDelete(pk: UserPrimaryKey, context?: ExecutionContext) {
+  /** If `deleteData` is false, then the user is only marked deleted and no data is actually deleted */
+  async anonymizeAndDelete(pk: UserPrimaryKey, context?: ExecutionContext, deleteData?: boolean) {
     const user = await this.get(pk);
 
     if (context.user.server_request || context.user.id === user.id) {
-      const userCopy = { ...user } as User;
-      //We keep a part of the user id as new name
-      const partialId = user.id.toString().split("-")[0];
+      const userCopy = getUserInstance(user);
 
-      user.username_canonical = `deleted-user-${partialId}`;
-      user.email_canonical = `${partialId}@tdrive.removed`;
-      user.first_name = "";
-      user.last_name = "";
-      user.phone = "";
-      user.picture = "";
-      user.thumbnail_id = null;
-      user.status_icon = null;
-      user.deleted = true;
-      user.delete_process_started_epoch = new Date().getTime();
+      if (!user.deleted) {
+        //We keep a part of the user id as new name
+        const partialId = user.id.toString().split("-")[0];
 
-      await this.save(user);
+        user.username_canonical = `deleted-user-${partialId}`;
+        user.email_canonical = `${partialId}@tdrive.removed`;
+        user.first_name = "";
+        user.last_name = "";
+        user.phone = "";
+        user.picture = "";
+        user.thumbnail_id = null;
+        user.status_icon = null;
+        user.deleted = true;
+        user.delete_process_started_epoch = new Date().getTime();
+
+        await gr.services.console.getClient().userWasDeletedForceLogout(user.id);
+
+        await this.save(user);
+      }
 
       localEventBus.publish<ResourceEventsPayload>("user:deleted", {
         user: user,
       });
 
-      await gr.platformServices.admin.deleteUser(userCopy);
+      return deleteData && (await gr.platformServices.admin.deleteUser(userCopy));
     }
   }
 

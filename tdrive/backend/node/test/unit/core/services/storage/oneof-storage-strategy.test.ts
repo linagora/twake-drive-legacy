@@ -168,8 +168,8 @@ describe('OneOfStorageStrategy', () => {
     it('should remove the file from all storages', async () => {
       const result = await oneOfStorageStrategy.remove('test/path');
 
-      expect(storage1.remove).toHaveBeenCalledWith('test/path', undefined);
-      expect(storage2.remove).toHaveBeenCalledWith('test/path', undefined);
+      expect(storage1.remove).toHaveBeenCalledWith('test/path', undefined, undefined, undefined);
+      expect(storage2.remove).toHaveBeenCalledWith('test/path', undefined, undefined, undefined);
       expect(result).toBe(true);
     });
 

@@ -12,31 +12,35 @@ export class AdminDeleteUserController {
     return this._repos;
   }
 
-  /** Begin or forward the deletion process of a user */
-  async deleteUser(userId: string): Promise<"failed" | "deleting" | "done"> {
+  /** Begin or forward the deletion process of a user, if `deleteData` is false, only anonymises the user entry */
+  async deleteUser(userId: string, deleteData: boolean): Promise<"failed" | "deleting" | "done"> {
     try {
-      await gr.services.users.anonymizeAndDelete({ id: userId }, {
-        user: { server_request: true },
-        company: { id: "// TODO: REPLACE WITH COMPANY ID" },
-      } as unknown as ExecutionContext);
+      if (
+        await gr.services.users.anonymizeAndDelete(
+          { id: userId },
+          {
+            user: { server_request: true },
+          } as unknown as ExecutionContext,
+          deleteData,
+        )
+      )
+        return "done";
       const existingUser = await (await this.getRepos()).user.findOne({ id: userId });
       if (existingUser?.deleted) {
         if (existingUser.delete_process_started_epoch > 0) return "deleting";
       }
     } catch (err) {
       adminLogger.error({ err, userId }, "User deletion error");
-      console.log(err); //TODO: NONONO
       return "failed";
     }
     return "done";
   }
 
-  /** Get an array of user IDs that are incompletely deleted */
+  /** Get an array of 2 item arrays with `[ user IDs, delete_process_started_epoch ]` that are incompletely deleted */
   async listUsersPendingDeletion() {
-    return (
+    const users = (
       await (await this.getRepos()).user.find({}, { $gt: [["delete_process_started_epoch", 0]] })
-    )
-      .getEntities()
-      .map(({ id }) => id);
+    ).getEntities();
+    return users.map(({ id, delete_process_started_epoch }) => [id, delete_process_started_epoch]);
   }
 }

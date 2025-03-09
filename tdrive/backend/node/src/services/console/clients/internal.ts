@@ -115,6 +115,11 @@ export class ConsoleInternalClient implements ConsoleServiceClient {
     throw new Error("Method should not be implemented.");
   }
 
+  async userWasDeletedForceLogout(_userId: string) {
+    logger.info("Internal: userWasDeletedForceLogout");
+    throw new Error("Method should not be implemented.");
+  }
+
   async verifyJwtSid(_sid: string): Promise<void> {
     logger.info("Internal: verifyJwtSid");
   }

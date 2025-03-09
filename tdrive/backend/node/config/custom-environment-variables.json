@@ -102,7 +102,8 @@
       "useSSL": "STORAGE_S3_USE_SSL",
       "accessKey": "STORAGE_S3_ACCESS_KEY",
       "secretKey": "STORAGE_S3_SECRET_KEY",
-      "disableRemove": "STORAGE_S3_DISABLE_REMOVE"
+      "disableRemove": "STORAGE_S3_DISABLE_REMOVE",
+      "overrideDisableRemoveForUserAccountDeletion": "STORAGE_S3_OVERRIDE_DISABLE_REMOVE_FOR_USER_ACCOUNT_DELETION"
     }
   },
   "email-pusher": {
