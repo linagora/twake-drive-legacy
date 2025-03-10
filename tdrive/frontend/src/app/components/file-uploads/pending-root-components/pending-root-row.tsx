@@ -167,7 +167,7 @@ const PendingRootRow = ({
               !['cancelled', 'failed'].includes(root.status) &&
               root?.status !== 'error' && (
                 <>
-                  {root.status === 'failed' ? (
+                  {root.status === 'paused' ? (
                     <button
                       onClick={() => pauseOrResumeRootUpload(rootKey)}
                       className="hover:bg-blue-100 p-2 rounded-md transition-all duration-200 testid:upload-root-modal-row-resume"
