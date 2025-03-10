@@ -242,8 +242,12 @@ class FileUploadService {
           parentId: parentId,
         },
         callback: async (filePayload, context) => {
-          const isFileRoot = filePayload.root.includes('.');
           const root = filePayload.root;
+          const isUnknownFormat =
+            this.groupedPendingFiles[root]?.length === 1 &&
+            this.groupedPendingFiles[root][0].originalFile?.name === root;
+          const isFileRoot = isUnknownFormat || filePayload.root.includes('.');
+
           const file = filePayload.file;
           if (file) {
             const item = {
