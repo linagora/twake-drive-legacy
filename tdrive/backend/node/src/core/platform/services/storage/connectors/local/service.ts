@@ -96,7 +96,13 @@ export default class LocalConnectorService implements StorageConnectorAPI {
   }
 
   delete(path: string): Promise<void> {
-    return rm(this.getFullPath(path), { recursive: false, force: true });
+    try {
+      return rm(this.getFullPath(path), { recursive: false, force: true });
+    } catch (err) {
+      // Follow S3 convention of silently ignoring missing paths
+      if (err?.code === "ENOENT") return;
+      throw err;
+    }
   }
 
   async exists(path: string): Promise<boolean> {
@@ -106,8 +112,15 @@ export default class LocalConnectorService implements StorageConnectorAPI {
   }
 
   async enumeratePathsForFile(filePath: string): Promise<string[]> {
-    return (await fs.promises.readdir(this.getFullPath(filePath), { recursive: true })).map(
-      item => filePath + "/" + item,
-    );
+    try {
+      return (await fs.promises.readdir(this.getFullPath(filePath), { recursive: true })).map(
+        item => filePath + "/" + item,
+      );
+    } catch (err) {
+      logger.error({ err, filePath }, "Error enumerating local folder");
+      // Follow S3 convention of silently ignoring missing paths
+      if (err?.code === "ENOENT") return [];
+      throw err;
+    }
   }
 }
