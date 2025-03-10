@@ -33,7 +33,7 @@ const PendingRootRow = ({
   const uploadedFilesSize = root.uploadedSize;
   const uploadProgress = Math.floor((uploadedFilesSize / root.size) * 100);
   const isUploadCompleted = root.status === 'completed';
-  const isFileRoot = rootKey.includes('.');
+  const isFileRoot = root.isUnknownFormat || rootKey.includes('.');
   const fileType = isFileRoot ? rootKey.split('.').pop() : '';
 
   // Callback function to open the folder after the upload is completed
