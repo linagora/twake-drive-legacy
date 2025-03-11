@@ -332,10 +332,11 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
     const sessionRepository = gr.services.console.getSessionRepo();
     if (!sessionRepository) return;
     const sessions = (await sessionRepository.find({ sub: userId })).getEntities();
-    for (const session of sessions) {
-      session.revoked_at = new Date().getTime();
-      await sessionRepository.save(session);
-    }
+    for (const session of sessions)
+      if (!session.revoked_at) {
+        session.revoked_at = new Date().getTime();
+        await sessionRepository.save(session);
+      }
   }
 
   async verifyJwtSid(sid: string): Promise<void> {
