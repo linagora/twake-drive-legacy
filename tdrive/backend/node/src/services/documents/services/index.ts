@@ -3,7 +3,6 @@ import { getLogger, logger, TdriveLogger } from "../../../core/platform/framewor
 import {
   CrudException,
   ListResult,
-  Paginable,
   Pagination,
 } from "../../../core/platform/framework/api/crud-service";
 import Repository, {
@@ -1621,7 +1620,7 @@ export class DocumentsService {
     options: SearchDocumentsOptions,
     context?: DriveExecutionContext,
   ): Promise<ListResult<DriveFile>> => {
-    let allResults: DriveFile[] = [];
+    const allResults: DriveFile[] = [];
     let nextPage = options.pagination
       ? Pagination.fromPaginable(options.pagination)
       : new Pagination();
