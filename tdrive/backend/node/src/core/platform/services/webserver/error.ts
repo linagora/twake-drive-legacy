@@ -1,10 +1,22 @@
 import { FastifyInstance } from "fastify";
 import { logger } from "../../framework/logger";
+import { CrudException } from "../../framework/api/crud-service";
 
 function serverErrorHandler(server: FastifyInstance): void {
   server.setErrorHandler(async (err, request, reply) => {
-    logger.error(`Got ${reply.statusCode} error on request ${request.id} : `, err);
-    server.log.debug(`Got ${reply.statusCode} error on request ${request.id} : ${err.toString()}`);
+    if (reply.statusCode == 200 || !reply.statusCode) {
+      const status = err.statusCode || (err as any).status;
+      reply.status(status < 400 ? 500 : status);
+    }
+    logger.error(
+      err instanceof CrudException
+        ? {
+            type: "CrudException",
+            message: err.message,
+          }
+        : { err },
+      `Got ${reply.statusCode} error on request ${request.id} : ${err.toString()}`,
+    );
     await reply.send(
       reply.statusCode == 500
         ? {
