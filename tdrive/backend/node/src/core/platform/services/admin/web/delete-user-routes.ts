@@ -14,15 +14,19 @@ function authenticateAdminQuery(request: FastifyRequest, reply: FastifyReply) {
   return true;
 }
 
-type TUserDeleteQueryBody = TQueryBody & { userId: string; deleteData: boolean };
+type TUserDeleteQueryBody = TQueryBody & { userId: string; deleteData: boolean; username?: string };
 function getUserIfValidQuery(request: FastifyRequest, reply: FastifyReply) {
   if (!authenticateAdminQuery(request, reply)) return { userId: "", deleteData: false };
   const body = request.body as TUserDeleteQueryBody;
-  if (!body.userId?.length) {
+  if (!body.userId?.length && !body.username) {
     reply.status(400).send();
-    return { userId: "", deleteData: false };
+    return { userId: "", username: "", deleteData: false };
   }
-  return body;
+  return {
+    userId: body.userId || "",
+    username: body.username,
+    deleteData: body.deleteData,
+  };
 }
 
 const routes: FastifyPluginCallback = async (fastify: FastifyInstance, _opts, next) => {
@@ -31,13 +35,13 @@ const routes: FastifyPluginCallback = async (fastify: FastifyInstance, _opts, ne
   const controller = new AdminDeleteUserController();
   if (config?.endpointSecret?.length) {
     fastify.post(urlRoot, async (request, reply) => {
-      const { userId, deleteData } = getUserIfValidQuery(request, reply);
-      if (!userId) return false;
+      const { userId, deleteData, username } = getUserIfValidQuery(request, reply);
+      if (!userId && !username) return false;
       if (userId == "e2e_simulate_timeout")
         return new Promise(() => {
           return;
         });
-      return { status: await controller.deleteUser(userId, deleteData) };
+      return await controller.deleteUser(userId, deleteData, username);
     });
 
     fastify.post(`${urlRoot}/pending`, async (request, reply) => {

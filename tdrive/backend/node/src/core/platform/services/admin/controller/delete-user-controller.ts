@@ -1,3 +1,4 @@
+import { UserPrimaryKey } from "src/services/user/entities/user";
 import gr from "../../../../../services/global-resolver";
 
 import type { ExecutionContext } from "../../../../platform/framework/api/crud-service";
@@ -13,27 +14,50 @@ export class AdminDeleteUserController {
   }
 
   /** Begin or forward the deletion process of a user, if `deleteData` is false, only anonymises the user entry */
-  async deleteUser(userId: string, deleteData: boolean): Promise<"failed" | "deleting" | "done"> {
+  async deleteUser(
+    userId: string,
+    deleteData: boolean,
+    username?: string,
+  ): Promise<{ status: "failed" | "deleting" | "done"; userId?: string }> {
     try {
-      if (
-        await gr.services.users.anonymizeAndDelete(
-          { id: userId },
-          {
-            user: { server_request: true },
-          } as unknown as ExecutionContext,
-          deleteData,
-        )
-      )
-        return "done";
+      let pk: UserPrimaryKey = { id: userId };
+      if (username) {
+        pk = { username_canonical: username };
+      }
+
+      const data = await gr.services.users.anonymizeAndDelete(
+        pk,
+        {
+          user: { server_request: true },
+        } as unknown as ExecutionContext,
+        deleteData,
+      );
+
+      if (data.isDeleted)
+        return {
+          status: "done",
+          userId: data.userId,
+        };
       const existingUser = await (await this.getRepos()).user.findOne({ id: userId });
       if (existingUser?.deleted) {
-        if (existingUser.delete_process_started_epoch > 0) return "deleting";
+        if (existingUser.delete_process_started_epoch > 0) {
+          return {
+            status: "deleting",
+            userId: existingUser.id,
+          };
+        }
       }
     } catch (err) {
-      adminLogger.error({ err, userId }, "User deletion error");
-      return "failed";
+      adminLogger.error("[DELETE USER] ", JSON.stringify({ err, userId }), "User deletion error");
+      return {
+        status: "failed",
+        userId,
+      };
     }
-    return "done";
+    return {
+      status: "done",
+      userId,
+    };
   }
 
   /** Get an array of 2 item arrays with `[ user IDs, delete_process_started_epoch ]` that are incompletely deleted */

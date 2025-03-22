@@ -185,7 +185,10 @@ export class UserServiceImpl {
         user: user,
       });
 
-      return deleteData && (await gr.platformServices.admin.deleteUser(userCopy));
+      return {
+        isDeleted: deleteData && (await gr.platformServices.admin.deleteUser(userCopy)),
+        userId: user.id,
+      };
     }
   }
 

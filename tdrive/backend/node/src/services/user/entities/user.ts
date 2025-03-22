@@ -149,9 +149,12 @@ export type UserNotificationPreferences = {
   };
 };
 
-export type UserPrimaryKey = Pick<User, "id">;
+export type UserPrimaryKey = {
+  id?: uuid;
+  username_canonical?: string;
+};
 
 export function getInstance(user: Partial<User>): User {
-  user.creation_date = !isNumber(user.creation_date) ? Date.now() : user.creation_date;
+  user.creation_date = !isNumber(user?.creation_date) ? Date.now() : user?.creation_date;
   return merge(new User(), user);
 }
