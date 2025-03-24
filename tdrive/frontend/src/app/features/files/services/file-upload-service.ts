@@ -105,8 +105,8 @@ class FileUploadService {
         this.rootStates.failed[key] = true;
       }
 
-      // Check if the root is a file with unknow format
-      const isUnknownFormat =
+      // Check if the root is a file regardless of the file format
+      const isFileRoot =
         this.groupedPendingFiles[key]?.length === 1 &&
         this.groupedPendingFiles[key][0].originalFile?.name === key;
 
@@ -142,7 +142,7 @@ class FileUploadService {
         size: this.rootSizes[key],
         uploadedSize,
         status,
-        isUnknownFormat,
+        isFileRoot,
       };
 
       return acc;
@@ -253,10 +253,9 @@ class FileUploadService {
         },
         callback: async (filePayload, context) => {
           const root = filePayload.root;
-          const isUnknownFormat =
+          const isFileRoot =
             this.groupedPendingFiles[root]?.length === 1 &&
             this.groupedPendingFiles[root][0].originalFile?.name === root;
-          const isFileRoot = isUnknownFormat || filePayload.root.includes('.');
 
           const file = filePayload.file;
           if (file) {

@@ -9,7 +9,7 @@ export const RootPendingFilesListState = atom<
         uploadedSize: number;
         status: string;
         items: PendingFileRecoilType[];
-        isUnknownFormat: boolean;
+        isFileRoot: boolean;
       };
     }
   | undefined

@@ -94,7 +94,7 @@ export type UploadRootType = {
   uploadedSize: number;
   status: string;
   items: PendingFileRecoilType[];
-  isUnknownFormat: boolean;
+  isFileRoot: boolean;
 };
 
 export type UploadRootListType = {

@@ -33,8 +33,8 @@ const PendingRootRow = ({
   const uploadedFilesSize = root.uploadedSize;
   const uploadProgress = Math.floor((uploadedFilesSize / root.size) * 100);
   const isUploadCompleted = root.status === 'completed';
-  const isFileRoot = root.isUnknownFormat || rootKey.includes('.');
-  const fileType = isFileRoot ? rootKey.split('.').pop() : '';
+  const isFileRoot = root.isFileRoot;
+  const fileType = isFileRoot && rootKey.includes('.') ? rootKey.split('.').pop() : '';
 
   // Callback function to open the folder after the upload is completed
   const handleShowFolder = useCallback(() => {
@@ -116,7 +116,10 @@ const PendingRootRow = ({
     return rootName;
   };
 
-  const showFileFolderTestId = !showFolder || isFileRoot ? 'testid:upload-root-modal-row-show-file' : 'testid:upload-root-modal-row-show-folder';
+  const showFileFolderTestId =
+    !showFolder || isFileRoot
+      ? 'testid:upload-root-modal-row-show-file'
+      : 'testid:upload-root-modal-row-show-folder';
 
   return (
     <div className="root-row testid:upload-root-modal-row">
