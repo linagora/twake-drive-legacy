@@ -48,7 +48,7 @@ export class AdminDeleteUserController {
         }
       }
     } catch (err) {
-      adminLogger.error("[DELETE USER] ", JSON.stringify({ err, userId }), "User deletion error");
+      adminLogger.error({ err, userId }, "[DELETE USER] User deletion error");
       return {
         status: "failed",
         userId,
@@ -66,5 +66,11 @@ export class AdminDeleteUserController {
       await (await this.getRepos()).user.find({}, { $gt: [["delete_process_started_epoch", 0]] })
     ).getEntities();
     return users.map(({ id, delete_process_started_epoch }) => [id, delete_process_started_epoch]);
+  }
+
+  async getUserIdByUsername(username: string) {
+    const user = await gr.services.users.get({ username_canonical: username });
+
+    return user?.id;
   }
 }

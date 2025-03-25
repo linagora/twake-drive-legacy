@@ -29,6 +29,8 @@ function getUserIfValidQuery(request: FastifyRequest, reply: FastifyReply) {
   };
 }
 
+type TUserGetIdByUsernameBody = TQueryBody & { username: string };
+
 const routes: FastifyPluginCallback = async (fastify: FastifyInstance, _opts, next) => {
   const urlRoot = "/api/user/delete";
   const config = getConfig();
@@ -47,6 +49,19 @@ const routes: FastifyPluginCallback = async (fastify: FastifyInstance, _opts, ne
     fastify.post(`${urlRoot}/pending`, async (request, reply) => {
       if (!authenticateAdminQuery(request, reply)) return false;
       return await controller.listUsersPendingDeletion();
+    });
+
+    fastify.post("/api/user-id", async (request, reply) => {
+      if (!authenticateAdminQuery(request, reply)) return false;
+
+      const { username } = request.body as TUserGetIdByUsernameBody;
+      const userId = await controller.getUserIdByUsername(username);
+
+      if (!userId) {
+        return reply.status(404).send({ message: "User not found" });
+      }
+
+      return { id: userId };
     });
   }
   next();
