@@ -151,7 +151,7 @@ export type UserNotificationPreferences = {
 
 export type UserPrimaryKey = {
   id?: uuid;
-  username_canonical?: string;
+  email_canonical?: string;
 };
 
 export function getInstance(user: Partial<User>): User {

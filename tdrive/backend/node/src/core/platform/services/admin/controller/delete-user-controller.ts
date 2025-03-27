@@ -17,16 +17,10 @@ export class AdminDeleteUserController {
   async deleteUser(
     userId: string,
     deleteData: boolean,
-    username?: string,
   ): Promise<{ status: "failed" | "deleting" | "done"; userId?: string }> {
     try {
-      let pk: UserPrimaryKey = { id: userId };
-      if (username) {
-        pk = { username_canonical: username };
-      }
-
       const data = await gr.services.users.anonymizeAndDelete(
-        pk,
+        { id: userId },
         {
           user: { server_request: true },
         } as unknown as ExecutionContext,
@@ -68,8 +62,8 @@ export class AdminDeleteUserController {
     return users.map(({ id, delete_process_started_epoch }) => [id, delete_process_started_epoch]);
   }
 
-  async getUserIdByUsername(username: string) {
-    const user = await gr.services.users.get({ username_canonical: username });
+  async getUserIdByEmail(email: string) {
+    const user = await gr.services.users.get({ email_canonical: email });
 
     return user?.id;
   }
