@@ -14,7 +14,7 @@ export class Loader {
           try {
             return await import(modulePath);
           } catch (err) {
-            platformLogger.debug(
+            platformLogger.error(
               { err },
               `${modulePath} can not be loaded (file was found but we were unable to import the module)`,
             );

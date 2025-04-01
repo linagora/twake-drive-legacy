@@ -52,6 +52,13 @@ describe("The /users API", () => {
       firstName: "admin",
     });
     await testDbService.createUser([workspacePk], { password: "123456" });
+    await testDbService.createUser([workspacePk], {
+      workspaceRole: "moderator",
+      companyRole: "member",
+      email: "member@admin.admin",
+      username: "memberuser",
+      firstName: "member",
+    });
   });
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -544,6 +551,31 @@ describe("The /users API", () => {
   });
 
   describe("The PUT /users/:id route", () => {
+    it("should deny update if user is not an admin in company", async () => {
+      const myId = testDbService.users[2].id;
+      const updatedUserId = testDbService.users[1].id;
+
+      const jwtToken = await platform.auth.getJWTToken({ sub: myId });
+      const response = await platform.app.inject({
+        method: "PUT",
+        url: `${url}/users/${updatedUserId}`,
+        headers: {
+          authorization: `Bearer ${jwtToken}`,
+        },
+        body: {
+          email: "newvalue@gmail.com",
+          first_name: "New",
+          last_name: "Value",
+          picture: "null",
+        },
+      });
+
+      expect(response.statusCode).toBe(401);
+      expect(response.json().message).toBe(
+        `User ${myId} is not allowed to update user ${updatedUserId}`,
+      );
+    });
+
     it("should 200 and response for updated user", async () => {
       const myId = testDbService.users[0].id;
       const updatedUserId = testDbService.users[1].id;
@@ -566,8 +598,6 @@ describe("The /users API", () => {
       expect(response.statusCode).toBe(200);
 
       const resource = response.json()["resource"];
-
-      console.log("resource: ", resource);
 
       expect(resource).toMatchObject({
         id: updatedUserId,
