@@ -15,6 +15,7 @@ import { fileTypeIconsMap } from './file-type-icon-map';
 import { useDriveActions } from 'app/features/drive/hooks/use-drive-actions';
 import { useDriveItem } from 'app/features/drive/hooks/use-drive-item';
 import Languages from 'app/features/global/services/languages-service';
+import useRouteState from 'app/features/router/hooks/use-route-state';
 
 const PendingRootRow = ({
   rootKey,
@@ -23,6 +24,7 @@ const PendingRootRow = ({
   rootKey: string;
   root: UploadRootType;
 }): JSX.Element => {
+  const { dirId } = useRouteState();
   const { pauseOrResumeRootUpload, cancelRootUpload, clearRoots } = useUpload();
   const [showFolder, setShowFolder] = useState(false);
   const [restoredFolder, setRestoredFolder] = useState(false);
@@ -121,6 +123,8 @@ const PendingRootRow = ({
       ? 'testid:upload-root-modal-row-show-file'
       : 'testid:upload-root-modal-row-show-folder';
 
+  const showCheckGreenIconOpenFile = isFileRoot && ((dirId && item?.parent_id === dirId) || !dirId);
+
   return (
     <div className="root-row testid:upload-root-modal-row">
       <div className="root-details mt-2">
@@ -143,7 +147,7 @@ const PendingRootRow = ({
           </p>
 
           <div className="progress-check flex items-center justify-center ml-auto">
-            {isUploadCompleted ? (
+            {isUploadCompleted && root.id ? (
               <button
                 onClick={handleShowFolder}
                 className={`hover:bg-gray-100 p-2 rounded-md transition-all duration-200 ${showFileFolderTestId}`}
@@ -162,7 +166,7 @@ const PendingRootRow = ({
                     />
                   </>
                 )}
-                {isFileRoot && (
+                {showCheckGreenIconOpenFile && (
                   <CheckGreenIcon className="opacity-1 hover:scale-110 transition-transform duration-200" />
                 )}
               </button>
