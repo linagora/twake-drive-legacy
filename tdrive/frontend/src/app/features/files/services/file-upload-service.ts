@@ -304,7 +304,7 @@ class FileUploadService {
 
     // Reset existing uploads
     for (const rootKey of rootKeys) {
-      if (rootKey in this.groupIds) {
+      if (rootKey in this.groupIds || rootKey in this.rootStates.cancelled) {
         this.resetStates([rootKey]);
       } else {
         // remove from completed states
