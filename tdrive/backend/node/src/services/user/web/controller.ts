@@ -373,47 +373,37 @@ export class UsersCrudController
     request: FastifyRequest<{ Body: UpdateUser; Params: UserParameters }>,
     reply: FastifyReply,
   ): Promise<ResourceCreateResponse<UserObject>> {
-    const id = request.params.id;
-    const context = getExecutionContext(request);
+    try {
+      const id = request.params.id;
+      const context = getExecutionContext(request);
 
-    const [currentUserCompanies, requestedUserCompanies] = await Promise.all(
-      [context.user.id, request.params.id].map(userId =>
-        gr.services.users.getUserCompanies({ id: userId }),
-      ),
-    );
-    const currentUserCompaniesIds = new Set(currentUserCompanies.map(a => a.group_id));
-    const sameCompanies = requestedUserCompanies.filter(a =>
-      currentUserCompaniesIds.has(a.group_id),
-    );
-    const roles = await Promise.all(
-      sameCompanies.map(a => gr.services.companies.getUserRole(a.group_id, context.user?.id)),
-    );
+      const [currentUserCompanies, requestedUserCompanies] = await Promise.all(
+        [context.user.id, request.params.id].map(userId =>
+          gr.services.users.getUserCompanies({ id: userId }),
+        ),
+      );
+      const currentUserCompaniesIds = new Set(currentUserCompanies.map(a => a.group_id));
+      const sameCompanies = requestedUserCompanies.filter(a =>
+        currentUserCompaniesIds.has(a.group_id),
+      );
+      const roles = await Promise.all(
+        sameCompanies.map(a => gr.services.companies.getUserRole(a.group_id, context.user?.id)),
+      );
 
-    if (!roles.some(role => hasCompanyAdminLevel(role) === true)) {
-      reply.unauthorized(`User ${context.user?.id} is not allowed to update user ${id}`);
-      return;
-    }
-
-    const user = await gr.services.users.get({ id });
-    if (!user) {
-      reply.notFound(`User ${id} not found`);
-      return;
-    }
-
-    const body = { ...request.body };
-    if (user.email_canonical !== body.email) {
-      const userByEmail = await gr.services.users.getByEmail(body.email, context);
-      if (userByEmail) {
-        reply.conflict(`Email ${body.email} is existed`);
+      if (!roles.some(role => hasCompanyAdminLevel(role) === true)) {
+        reply.unauthorized(`User ${context.user?.id} is not allowed to update user ${id}`);
         return;
       }
+
+      const body = { ...request.body };
+      const user = await gr.services.users.update(id, body, context);
+
+      return {
+        resource: await formatUser(user.entity),
+      };
+    } catch (error) {
+      return error;
     }
-
-    await gr.services.users.update(user, body, context);
-
-    return {
-      resource: await formatUser(user),
-    };
   }
 }
 

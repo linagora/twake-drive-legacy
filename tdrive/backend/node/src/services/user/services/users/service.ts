@@ -110,34 +110,43 @@ export class UserServiceImpl {
   }
 
   async update(
-    instance: User,
-    user: UpdateUser,
+    id: string,
+    body: UpdateUser,
     context?: ExecutionContext,
   ): Promise<UpdateResult<User>> {
+    const user = await gr.services.users.get({ id });
+    if (!user) {
+      throw CrudException.notFound(`User ${id} not found`);
+    }
+
+    if (user.email_canonical !== body.email) {
+      const userByEmail = await gr.services.users.getByEmail(body.email, context);
+      if (userByEmail) {
+        throw CrudException.badRequest(`Email ${body.email} is existed`);
+      }
+    }
+
     let isChangeEmail = false;
-    if (instance.email_canonical !== user.email) {
+    if (user.email_canonical !== body.email) {
       isChangeEmail = true;
     }
 
-    instance.email_canonical = user.email || instance.email_canonical;
-    instance.first_name = user.first_name || instance.first_name;
-    instance.last_name = user.last_name || instance.last_name;
-    instance.picture = user.picture || instance.picture;
-    instance.creation_date = !isNumber(instance.creation_date)
-      ? Date.now()
-      : instance.creation_date;
+    user.email_canonical = body.email || user.email_canonical;
+    user.first_name = body.first_name || user.first_name;
+    user.last_name = body.last_name || user.last_name;
+    user.picture = body.picture || user.picture;
+    user.creation_date = !isNumber(user.creation_date) ? Date.now() : user.creation_date;
     if (isChangeEmail) {
-      instance.username_canonical = formatUsername(user.email);
-      instance.identity_provider_id =
-        instance.identity_provider_id !== "null" ? user.email : "null";
+      user.username_canonical = formatUsername(body.email);
+      user.identity_provider_id = user.identity_provider_id !== "null" ? body.email : "null";
     }
 
-    await this.repository.save(instance, context);
+    await this.repository.save(user, context);
     if (isChangeEmail) {
-      await this.updateExtRepositoryInCaseChangeEmail(instance, context);
+      await this.updateExtRepositoryInCaseChangeEmail(user, context);
     }
 
-    return new UpdateResult("user", instance);
+    return new UpdateResult("user", user);
   }
 
   async save(user: User, context?: ExecutionContext): Promise<SaveResult<User>> {
