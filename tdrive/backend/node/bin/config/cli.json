@@ -1,0 +1,261 @@
+{
+  "general": {
+    "help_url": false,
+    "pricing_plan_url": "",
+    "app_download_url": "https://twake.app/download",
+    "mobile": {
+      "mobile_redirect": "mobile.twake.app",
+      "mobile_appstore": "https://apps.apple.com/fr/app/tdrive/id1588764852?l=en",
+      "mobile_googleplay": "https://play.google.com/store/apps/details?id=com.tdrive.tdrive&gl=FR"
+    },
+    "accounts": {
+      "type": "internal",
+      "internal": {
+        "disable_account_creation": false
+      },
+      "remote": {
+        "authority": "http://auth.example.com/",
+        "client_id": "tdriveweb",
+        "client_secret": "",
+        "issuer": "",
+        "audience": "",
+        "redirect_uris": [""],
+        "account_management_url": "http://web.tdrive-console.local/profile?company-code={company_id}",
+        "collaborators_management_url": "http://web.tdrive-console.local/compaies/{company_id}/users?company-code={company_id}",
+        "company_management_url": "http://web.tdrive-console.local/companies?company-code={company_id}"
+      }
+    }
+  },
+  "console": {
+    "type": "internal"
+  },
+  "sentry": {
+    "dsn": ""
+  },
+  "logger": {
+    "level": "debug"
+  },
+  "admin": {
+    "endpointSecret": ""
+  },
+  "diagnostics": {
+    "skipKeys": [],
+    "probeSecret": "",
+    "statsLogPeriodMs": 120000,
+    "statsFullStatsLogPeriodMs": 600000
+  },
+  "tracker": {
+    "type": "segment",
+    "segment": {
+      "key": ""
+    }
+  },
+  "webserver": {
+    "host": "localhost",
+    "port": 4000,
+    "logger": {
+      "level": "info"
+    },
+    "cors": {
+      "origin": "*"
+    },
+    "static": {
+      "root": "./public"
+    }
+  },
+  "auth": {
+    "jwt": {
+      "secret": "supersecret",
+      "expiration": 3600,
+      "refresh_expiration": 2592000
+    }
+  },
+  "database": {
+    "secret": "",
+    "type": "mongodb",
+    "encryption": "aes-256-cbc",
+    "mongodb": {
+      "uri": "mongodb://localhost:27017",
+      "database": "tdrive"
+    }
+  },
+  "message-queue": {
+    "type": "local",
+    "amqp": {
+      "urls": ["amqp://guest:guest@rabbitmq:5672"]
+    }
+  },
+  "search": {
+    "type": "mongodb",
+    "elasticsearch": {
+      "endpoint": "http://elasticsearch:9200"
+    }
+  },
+  "push": {
+    "type": false,
+    "fcm": {
+      "endpoint": "https://fcm.googleapis.com/fcm/send",
+      "key": ""
+    }
+  },
+  "storage": {
+    "secret": "0ea28a329df23220fa814e005bfb671c",
+    "iv": "1234abcd00000000",
+    "strategy": "local",
+    "type": "local",
+    "S3": {
+      "endPoint": "play.min.io",
+      "port": 9000,
+      "useSSL": false,
+      "accessKey": "ABCD",
+      "secretKey": "x1yz",
+      "disableRemove": false
+    },
+    "local": {
+      "path": "/Users/shepilov/dev/linagora/TDrive/tdrive/docker-data/"
+    }
+  },
+  "email-pusher": {
+    "endpoint": "https://api.smtp2go.com/v3/email/send",
+    "api_key": "secret",
+    "sender": "noreply@twake.app",
+    "debug": true
+  },
+  "drive": {
+    "featureSharedDrive": true,
+    "featureDisplayEmail": true,
+    "featureUserQuota": false,
+    "featureManageAccess": true,
+    "defaultCompany": "00000000-0000-4000-0000-000000000000",
+    "defaultUserQuota": 200000000,
+    "featureAntivirus": false
+  },
+  "av": {
+    "host": "av",
+    "port": 3310,
+    "debugMode": false,
+    "timeout": 2000,
+    "maxFileSize": 26214400
+  },
+  "applications": {
+    "grid": [
+      {
+        "name": "Chat",
+        "logo": "/public/img/grid/twake.svg",
+        "url": "https://web.twake.app/"
+      },
+      {
+        "name": "Mail",
+        "logo": "/public/img/grid/mail.svg",
+        "url": "https://tmail.linagora.com/"
+      },
+      {
+        "name": "Drive",
+        "logo": "/public/img/grid/drive.svg",
+        "url": "https://tdrive.qa.lin-saas.com/"
+      },
+      {
+        "name": "Calendar",
+        "logo": "/public/img/grid/calendar.svg",
+        "url": "https://openpaas.linagora.com/calendar/"
+      },
+      {
+        "name": "Contacts",
+        "logo": "/public/img/grid/contacts.svg",
+        "url": "https://openpaas.linagora.com/contacts"
+      },
+      {
+        "name": "Visio",
+        "logo": "/public/img/grid/visio.svg",
+        "url": "https://jitsi.linagora.com/"
+      }
+    ],
+    "plugins": [
+      {
+        "api": {
+          "private_key": "c1cc66db78e1d3bb4713c55d5ab2"
+        },
+        "display": {
+          "tdrive": {
+            "files": {
+              "editor": {
+                "edition_url": "http://localhost:5000/plugins/onlyoffice/",
+                "empty_files": [
+                  {
+                    "filename": "Untitled.docx",
+                    "name": "ONLYOFFICE Word Document",
+                    "url": "/plugins/onlyoffice/assets/empty.docx"
+                  },
+                  {
+                    "filename": "Untitled.xlsx",
+                    "name": "ONLYOFFICE Excel Document",
+                    "url": "/plugins/onlyoffice/assets/empty.xlsx"
+                  },
+                  {
+                    "filename": "Untitled.pptx",
+                    "name": "ONLYOFFICE PowerPoint Document",
+                    "url": "/plugins/onlyoffice/assets/empty.pptx"
+                  }
+                ],
+                "extensions": [
+                  "xlsx",
+                  "pptx",
+                  "docx",
+                  "xls",
+                  "ppt",
+                  "doc",
+                  "odt",
+                  "ods",
+                  "odp",
+                  "txt",
+                  "html",
+                  "csv"
+                ],
+                "preview_url": "http://localhost:5000/plugins/onlyoffice/?preview=1"
+              }
+            },
+            "version": 1
+          }
+        },
+        "external_prefix": "/plugins/onlyoffice/",
+        "id": "tdrive_onlyoffice",
+        "identity": {
+          "categories": [],
+          "code": "only_office",
+          "compatibility": ["tdrive"],
+          "description": null,
+          "icon": "/plugins/onlyoffice/assets/logo.png",
+          "name": "Only Office",
+          "website": "http://twake.app/"
+        },
+        "internal_domain": "http://localhost:5000/"
+      }
+    ]
+  },
+  "services": [
+    "admin",
+    "auth",
+    "diagnostics",
+    "push",
+    "storage",
+    "webserver",
+    "database",
+    "cron",
+    "search",
+    "message-queue",
+    "tracker",
+    "general",
+    "user",
+    "files",
+    "workspaces",
+    "console",
+    "counter",
+    "statistics",
+    "cron",
+    "email-pusher",
+    "documents",
+    "applications",
+    "applications-api",
+    "tags"
+  ]
+}

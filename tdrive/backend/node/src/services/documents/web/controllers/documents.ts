@@ -67,7 +67,7 @@ export class DocumentsController {
           ignoreThumbnails: true,
         };
 
-        createdFile = await globalResolver.services.files.save(null, file, options, context);
+        createdFile = await globalResolver.services.files.save(null, file?.file, options, context);
       }
 
       const { item, version } = request.body;

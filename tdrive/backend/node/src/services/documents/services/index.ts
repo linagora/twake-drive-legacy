@@ -1405,7 +1405,7 @@ export class DocumentsService {
     if (file) {
       const fileEntity = await globalResolver.services.files.save(
         null,
-        file,
+        file.file,
         {
           ...options,
           filename: options.filename ?? driveFile.name,

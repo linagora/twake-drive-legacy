@@ -34,7 +34,7 @@ export class FileController {
     };
 
     const id = request.params.id;
-    const result = await gr.services.files.save(id, file, options, context);
+    const result = await gr.services.files.save(id, file?.file, options, context);
 
     return {
       resource: result.getPublicObject(),

@@ -73,7 +73,7 @@ export class FileServiceImpl {
 
   async save(
     id: string,
-    file: MultipartFile,
+    file: Readable,
     options: UploadOptions,
     context: CompanyExecutionContext,
   ): Promise<File> {
@@ -136,10 +136,10 @@ export class FileServiceImpl {
       }
 
       let totalUploadedSize = 0;
-      file.file.on("data", function (chunk) {
+      file.on("data", function (chunk) {
         totalUploadedSize += chunk.length;
       });
-      await gr.platformServices.storage.write(getFilePath(entity), file.file, {
+      await gr.platformServices.storage.write(getFilePath(entity), file, {
         chunkNumber: options.chunkNumber,
         encryptionAlgo: this.algorithm,
         encryptionKey: entity.encryption_key,
