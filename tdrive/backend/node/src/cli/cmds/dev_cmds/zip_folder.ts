@@ -21,7 +21,7 @@ type ZipCommandArgs = {
  */
 export default {
   command: "zip",
-  describe: "Zips specified folder and puts it to users r˚oot directory",
+  describe: "Zips specified folder and puts it to users root directory",
   builder: {
     user: {
       alias: "u",
