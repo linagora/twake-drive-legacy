@@ -99,7 +99,7 @@
     }
   },
   "storage": {
-    "secret": "0ea28a329df23220fa814e005bfb671c",
+    "secret": "",
     "iv": "1234abcd00000000",
     "strategy": "local",
     "type": "local",
@@ -173,7 +173,7 @@
     "plugins": [
       {
         "api": {
-          "private_key": "c1cc66db78e1d3bb4713c55d5ab2"
+          "private_key": ""
         },
         "display": {
           "tdrive": {
