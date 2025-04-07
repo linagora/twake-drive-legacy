@@ -9,7 +9,7 @@ import globalResolver from "../../../services/global-resolver";
 import fs from "fs";
 import { CompanyExecutionContext, DriveItemDetails } from "../../../services/documents/types";
 import { randomUUID } from "crypto";
-import { getYesNo } from "cli-interact";
+import { keyInYN } from "readline-sync";
 
 type ZipCommandArgs = {
   verbose: boolean;
@@ -52,7 +52,7 @@ export default {
       await zipFolder(toZip, tmpFilePath, context);
       _spinner.info(`Folder successfully zipped to "${tmpFilePath}"`);
       //create a new document with this file in users root directory
-      if (getYesNo("Do you want to upload file?")) {
+      if (keyInYN("Do you want to upload file?")) {
         await saveFile(tmpFilePath, `${toZip.item.name}.zip`, context);
         _spinner.info(`"${toZip.item.name}.zip" saved to users home directory`);
         fs.rmSync(tmpFilePath);
