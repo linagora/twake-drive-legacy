@@ -1170,6 +1170,13 @@
     "@types/node" "*"
     "@types/responselike" "^1.0.0"
 
+"@types/cli-interact@^0.1.4":
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/@types/cli-interact/-/cli-interact-0.1.4.tgz"
+  integrity sha512-ApnXGFz+j6Yb6v6UvD3c9eEMQG+4YARy/+ZkwQIMBW+HTuwtAw6QknlE2rdkVHuPdt+dn4WsArQjS1K/LT6L/w==
+  dependencies:
+    "@types/readline-sync" "*"
+
 "@types/cli-table@^0.3.0":
   version "0.3.4"
   resolved "https://registry.npmjs.org/@types/cli-table/-/cli-table-0.3.4.tgz"
@@ -1439,6 +1446,11 @@
   integrity sha512-raiuEPUYqXu+nvtY2Pe8s8FEmZ3x5yAH4VkLdihcPdalvsHltomrRC9BzuStrJ9yk06470hS0Crw0f1pXqD+Hg==
   dependencies:
     "@types/node" "*"
+
+"@types/readline-sync@*":
+  version "1.4.8"
+  resolved "https://registry.npmjs.org/@types/readline-sync/-/readline-sync-1.4.8.tgz"
+  integrity sha512-BL7xOf0yKLA6baAX6MMOnYkoflUyj/c7y3pqMRfU0va7XlwHAOTOIo4x55P/qLfMsuaYdJJKubToLqRVmRtRZA==
 
 "@types/responselike@^1.0.0":
   version "1.0.3"
@@ -2379,6 +2391,13 @@ cli-cursor@^3.1.0:
   integrity sha512-I/zHAwsKf9FqGoXM4WWRACob9+SNukZTd94DWF57E4toouRulbCxcUh6RKUEOQlYTHJnzkPMySvPNaaSLNfLZw==
   dependencies:
     restore-cursor "^3.1.0"
+
+cli-interact@^0.1.9:
+  version "0.1.9"
+  resolved "https://registry.npmjs.org/cli-interact/-/cli-interact-0.1.9.tgz"
+  integrity sha512-QHrR2djQOfT1WfHSj9DidBGp+ImgV3t9dTP4cPWTnt9fnOcZqBzCoqd2RysWSIgUXuer5WpmKuT1jqjvwoxdCQ==
+  dependencies:
+    readline-sync "~0.4.9"
 
 cli-spinners@^2.5.0:
   version "2.9.2"
@@ -6247,6 +6266,11 @@ readdirp@~3.6.0:
   integrity sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==
   dependencies:
     picomatch "^2.2.1"
+
+readline-sync@~0.4.9:
+  version "0.4.10"
+  resolved "https://registry.npmjs.org/readline-sync/-/readline-sync-0.4.10.tgz"
+  integrity sha512-q/RyXCZ+49a7octyBMENisHi11JVcnNORLDKEdKEzUnBBiszElOtdCY+wJKPCnwHuh/8+yfDoptGL7D79yUOLw==
 
 real-require@^0.2.0:
   version "0.2.0"
