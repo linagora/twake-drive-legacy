@@ -147,7 +147,7 @@ const PendingRootRow = ({
           </p>
 
           <div className="progress-check flex items-center justify-center ml-auto">
-            {isUploadCompleted && root.id ? (
+            {isUploadCompleted ? (
               <button
                 onClick={handleShowFolder}
                 className={`hover:bg-gray-100 p-2 rounded-md transition-all duration-200 ${showFileFolderTestId}`}
