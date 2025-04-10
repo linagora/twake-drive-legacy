@@ -23,6 +23,7 @@ import { formatDateShort } from 'app/features/global/utils/Numbers';
 import FeatureTogglesService, {
   FeatureNames,
 } from '@features/global/services/feature-toggles-service';
+import { Tooltip } from 'antd';
 
 export const DocumentRow = ({
   item,
@@ -94,13 +95,13 @@ export const DocumentRow = ({
       </div>
       {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_AV_ENABLED) && (
         <div className="shrink-0 ml-4 text-right lg:w-24 sm:w-20 ">
-          <BaseSmall title={Languages.t(`scenes.app.drive.document_row.av_${item?.av_status}`)}>
+          <Tooltip className="w-5 block" placement="top" title={Languages.t(`scenes.app.drive.document_row.av_${item?.av_status}_hint`)}>
             {item?.av_status === 'malicious' && (
               <ShieldExclamationIcon className="w-5 text-rose-400" />
             )}
             {item?.av_status === 'skipped' && <BanIcon className="w-5 text-gray-400" />}
             {item?.av_status === 'scan_failed' && <BanIcon className="w-5 text-gray-400" />}
-          </BaseSmall>
+          </Tooltip>
         </div>
       )}
       <div className="shrink-0 ml-auto md:ml-4">

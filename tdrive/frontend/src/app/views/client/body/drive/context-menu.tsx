@@ -121,7 +121,7 @@ export const useOnBuildContextMenu = (
               testClassId: 'download',
               type: 'menu',
               icon: 'download-alt',
-              text: Languages.t('components.item_context_menu.download'),
+              text: notSafe ? Languages.t('components.item_context_menu.download_anyway') : Languages.t('components.item_context_menu.download'),
               onClick: () => {
                 if (item && item.is_directory) {
                   downloadZip([item!.id]);

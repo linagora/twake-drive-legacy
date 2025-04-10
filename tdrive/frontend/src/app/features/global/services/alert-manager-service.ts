@@ -27,6 +27,8 @@ class AlertServiceService {
       onOk: onConfirm,
       onCancel: onClose || undefined,
       cancelButtonProps: onClose ? {} : { style: { display: 'none' } },
+      okText: Languages.t('general.ok'),
+      cancelText: Languages.t('general.cancel'),
     });
   }
 }
