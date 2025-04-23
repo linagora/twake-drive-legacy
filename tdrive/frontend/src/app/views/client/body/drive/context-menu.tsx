@@ -73,14 +73,14 @@ export const useOnBuildContextMenu = (
         
         const avStatusAllowed: { [key: string]: string[] } = FeatureTogglesService.getFeatureValue(FeatureNames.COMPANY_AV_STATUS_ALLOWED);
         const isCheckFileActionByAvStatus = !item?.is_directory && (item?.av_status || '').length > 0;
-        const isAllowToShare = isCheckFileActionByAvStatus && avStatusAllowed['share']?.includes(item?.av_status as string);
-        const isAllowToManageAccess = isCheckFileActionByAvStatus && avStatusAllowed['manage_access']?.includes(item?.av_status as string);
-        const isAllowToRescan = isCheckFileActionByAvStatus && avStatusAllowed['rescan']?.includes(item?.av_status as string);
-        const isAllowToDownload = isCheckFileActionByAvStatus && avStatusAllowed['download']?.includes(item?.av_status as string);
-        const isAllowToMove = isCheckFileActionByAvStatus && avStatusAllowed['move']?.includes(item?.av_status as string);
-        const isAllowToRename = isCheckFileActionByAvStatus && avStatusAllowed['rename']?.includes(item?.av_status as string);
-        const isAllowToCopyLink = isCheckFileActionByAvStatus && avStatusAllowed['copy_link']?.includes(item?.av_status as string);
-        const isAllowToCreateVersion = isCheckFileActionByAvStatus && avStatusAllowed['version']?.includes(item?.av_status as string);
+        const isAllowToShare = avStatusAllowed['share']?.includes(item?.av_status as string);
+        const isAllowToManageAccess = avStatusAllowed['manage_access']?.includes(item?.av_status as string);
+        const isAllowToRescan = avStatusAllowed['rescan']?.includes(item?.av_status as string);
+        const isAllowToDownload = avStatusAllowed['download']?.includes(item?.av_status as string);
+        const isAllowToMove = avStatusAllowed['move']?.includes(item?.av_status as string);
+        const isAllowToRename = avStatusAllowed['rename']?.includes(item?.av_status as string);
+        const isAllowToCopyLink = avStatusAllowed['copy_link']?.includes(item?.av_status as string);
+        const isAllowToCreateVersion = avStatusAllowed['version']?.includes(item?.av_status as string);
 
         let menu: any[] = [];
 
@@ -100,7 +100,7 @@ export const useOnBuildContextMenu = (
               type: 'menu',
               icon: 'share-alt',
               text: Languages.t('components.item_context_menu.share'),
-              hide: hideShareItem || !isAllowToShare,
+              hide: hideShareItem || (isCheckFileActionByAvStatus && !isAllowToShare),
               onClick: () => setPublicLinkModalState({ open: true, id: item.id }),
             },
             {
@@ -108,7 +108,7 @@ export const useOnBuildContextMenu = (
               type: 'menu',
               icon: 'users-alt',
               text: Languages.t('components.item_context_menu.manage_access'),
-              hide: hideManageAccessItem || !isAllowToManageAccess,
+              hide: hideManageAccessItem || (isCheckFileActionByAvStatus && !isAllowToManageAccess),
               onClick: () => setAccessModalState({ open: true, id: item.id }),
             },
             {
@@ -116,7 +116,7 @@ export const useOnBuildContextMenu = (
               type: 'menu',
               icon: 'shield-check',
               text: Languages.t('components.item_context_menu.rescan_document'),
-              hide: !isAllowToRescan,
+              hide: isCheckFileActionByAvStatus && !isAllowToRescan,
               onClick: () => {
                 reScan(item);
               },
@@ -126,14 +126,15 @@ export const useOnBuildContextMenu = (
               hide:
                 inTrash ||
                 (hideShareItem && hideManageAccessItem) ||
-                (notSafe && !(item.av_status === 'scan_failed')),
+                (isCheckFileActionByAvStatus && !isAllowToShare && !isAllowToManageAccess && !isAllowToRescan),
+                //(notSafe && !(item.av_status === 'scan_failed')),
             },
             {
               testClassId: 'download',
               type: 'menu',
               icon: 'download-alt',
               text: Languages.t('components.item_context_menu.download'),
-              hide: !isAllowToDownload,
+              hide: isCheckFileActionByAvStatus && !isAllowToDownload,
               onClick: () => {
                 if (item && item.is_directory) {
                   downloadZip([item!.id]);
@@ -155,13 +156,13 @@ export const useOnBuildContextMenu = (
                 window.open(route, '_blank');
               }
             }, // */
-            { type: 'separator', hide: notSafe },
+            { type: 'separator', hide: isCheckFileActionByAvStatus && !isAllowToDownload },
             {
               testClassId: 'move',
               type: 'menu',
               icon: 'folder-question',
               text: Languages.t('components.item_context_menu.move'),
-              hide: access === 'read' || inTrash || inPublicSharing || !isAllowToMove,
+              hide: access === 'read' || inTrash || inPublicSharing || (isCheckFileActionByAvStatus && !isAllowToMove),
               onClick: () =>
                 setSelectorModalState({
                   open: true,
@@ -187,7 +188,7 @@ export const useOnBuildContextMenu = (
               type: 'menu',
               icon: 'file-edit-alt',
               text: Languages.t('components.item_context_menu.rename'),
-              hide: access === 'read' || inTrash || !isAllowToRename,
+              hide: access === 'read' || inTrash || (isCheckFileActionByAvStatus && !isAllowToRename),
               onClick: () => setPropertiesModalState({ open: true, id: item.id, inPublicSharing }),
             },
             {
@@ -199,7 +200,7 @@ export const useOnBuildContextMenu = (
                 !item.access_info.public?.level ||
                 item.access_info.public?.level === 'none' ||
                 inTrash ||
-                !isAllowToCopyLink,
+                (isCheckFileActionByAvStatus && !isAllowToCopyLink),
               onClick: () => {
                 copyToClipboard(getPublicLink(item || parent?.item));
                 ToasterService.success(
@@ -212,10 +213,15 @@ export const useOnBuildContextMenu = (
               type: 'menu',
               icon: 'history',
               text: Languages.t('components.item_context_menu.versions'),
-              hide: item.is_directory || inTrash || !isAllowToCreateVersion,
+              hide: item.is_directory || inTrash || (isCheckFileActionByAvStatus && !isAllowToCreateVersion),
               onClick: () => setVersionModal({ open: true, id: item.id }),
             },
-            { type: 'separator', hide: access !== 'manage' || inTrash || notSafe },
+            {
+              type: 'separator',
+              hide: access !== 'manage' ||
+                inTrash ||
+                (isCheckFileActionByAvStatus && !isAllowToMove && !isAllowToCreateVersion),
+            },
             {
               testClassId: 'move-to-trash',
               type: 'menu',
