@@ -116,7 +116,7 @@ export const useOnBuildContextMenu = (
               type: 'menu',
               icon: 'shield-check',
               text: Languages.t('components.item_context_menu.rescan_document'),
-              hide: isCheckFileActionByAvStatus && !isAllowToRescan,
+              hide: item?.is_directory || (isCheckFileActionByAvStatus && !isAllowToRescan),
               onClick: () => {
                 reScan(item);
               },
@@ -126,8 +126,8 @@ export const useOnBuildContextMenu = (
               hide:
                 inTrash ||
                 (hideShareItem && hideManageAccessItem) ||
-                (isCheckFileActionByAvStatus && !isAllowToShare && !isAllowToManageAccess && !isAllowToRescan),
-                //(notSafe && !(item.av_status === 'scan_failed')),
+                (isCheckFileActionByAvStatus && !isAllowToShare && !isAllowToManageAccess && !isAllowToRescan) ||
+                (isCheckFileActionByAvStatus && !isAllowToShare && !isAllowToManageAccess && item?.is_directory),
             },
             {
               testClassId: 'download',
