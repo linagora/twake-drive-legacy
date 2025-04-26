@@ -44,6 +44,7 @@ export class AdminDeleteUserController {
         } as unknown as ExecutionContext,
         deleteData,
       );
+      adminLogger.info({ data }, "Anonymize and delete data");
 
       if (data.isDeleted)
         return {
@@ -51,6 +52,7 @@ export class AdminDeleteUserController {
           userId: data.userId,
         };
       const existingUser = await (await this.getRepos()).user.findOne({ id: userId });
+      adminLogger.info({ existingUser }, "Existing user data");
       if (existingUser?.deleted) {
         if (existingUser.delete_process_started_epoch > 0) {
           return {
@@ -66,6 +68,7 @@ export class AdminDeleteUserController {
         userId,
       };
     }
+    adminLogger.info({ userId }, "Return delete result");
     return {
       status: "done",
       userId,

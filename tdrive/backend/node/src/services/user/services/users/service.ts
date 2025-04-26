@@ -33,6 +33,7 @@ import gr from "../../../global-resolver";
 import { TYPE as DriveFileType, DriveFile } from "../../../documents/entities/drive-file";
 import { UpdateUser } from "./types";
 import { formatUsername } from "../../../../utils/users";
+import { logger } from "../../../../core/platform/framework";
 
 export class UserServiceImpl {
   version: "1";
@@ -166,6 +167,7 @@ export class UserServiceImpl {
   /** If `deleteData` is false, then the user is only marked deleted and no data is actually deleted */
   async anonymizeAndDelete(pk: UserPrimaryKey, context?: ExecutionContext, deleteData?: boolean) {
     const user = await this.get(pk);
+    logger.info({ user }, "Delete user data");
 
     if (context.user.server_request || context.user.id === user.id) {
       const userCopy = getUserInstance(user);
@@ -188,6 +190,8 @@ export class UserServiceImpl {
         await gr.services.console.getClient().userWasDeletedForceLogout(user.id);
 
         await this.save(user);
+
+        logger.info({ user }, "User was updated");
       }
 
       localEventBus.publish<ResourceEventsPayload>("user:deleted", {
