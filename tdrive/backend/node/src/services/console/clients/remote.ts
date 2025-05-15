@@ -328,10 +328,32 @@ export class ConsoleRemoteClient implements ConsoleServiceClient {
     }
   }
 
-  async userWasDeletedForceLogout(userId: string) {
+  async userWasDeletedForceLogout(payload: { userId?: string; email?: string }) {
     const sessionRepository = gr.services.console.getSessionRepo();
     if (!sessionRepository) return;
-    const sessions = (await sessionRepository.find({ sub: userId })).getEntities();
+
+    const { userId, email } = payload;
+    if (!userId && !email) {
+      logger.info("Missing query condition for session");
+      return;
+    }
+
+    /* Get sessions by userId or email
+     * Use condition to query for each criterias
+     * In case DB type is postgres we could not query by using IN as mongodb
+     * due to the function validate query of postgres do not allow to use array for column type string
+     */
+    let sessions: Session[] = [];
+    if (userId) {
+      const results = (await sessionRepository.find({ sub: userId })).getEntities();
+      sessions = sessions.concat(results);
+    }
+    if (email) {
+      const results = (await sessionRepository.find({ sub: email })).getEntities();
+      sessions = sessions.concat(results);
+    }
+
+    logger.info({ sessions }, "Sessions to delete");
     for (const session of sessions)
       if (!session.revoked_at) {
         session.revoked_at = new Date().getTime();

@@ -33,7 +33,7 @@ import gr from "../../../global-resolver";
 import { TYPE as DriveFileType, DriveFile } from "../../../documents/entities/drive-file";
 import { UpdateUser } from "./types";
 import { formatUsername } from "../../../../utils/users";
-import { logger } from "../../../../core/platform/framework";
+import { Configuration, logger } from "../../../../core/platform/framework";
 
 export class UserServiceImpl {
   version: "1";
@@ -44,6 +44,7 @@ export class UserServiceImpl {
   driveFileRepository: Repository<DriveFile>;
   private deviceRepository: Repository<Device>;
   private cache: NodeCache;
+  private configuration: Configuration;
 
   async init(): Promise<this> {
     this.searchRepository = gr.platformServices.search.getRepository<User>("user", User);
@@ -61,6 +62,8 @@ export class UserServiceImpl {
     this.driveFileRepository = await gr.database.getRepository<DriveFile>(DriveFileType, DriveFile);
 
     this.cache = new NodeCache({ stdTTL: 0.2, checkperiod: 120 });
+
+    this.configuration = new Configuration("general.accounts");
 
     //If user deleted from Tdrive, remove it from all companies
     localEventBus.subscribe<ResourceEventsPayload>("user:deleted", async data => {
@@ -124,7 +127,10 @@ export class UserServiceImpl {
     const isChangeEmail = currentEmail !== body.email;
 
     if (isChangeEmail) {
-      await gr.services.console.getClient().userWasDeletedForceLogout(currentEmail);
+      const accType = this.configuration.get("type");
+      if (accType === "remote") {
+        await gr.services.console.getClient().userWasDeletedForceLogout({ email: currentEmail });
+      }
       const userByEmail = await gr.services.users.getByEmail(body.email, context);
       if (userByEmail) {
         throw CrudException.badRequest(`Email ${body.email} is existed`);
@@ -186,7 +192,10 @@ export class UserServiceImpl {
         user.deleted = true;
         user.delete_process_started_epoch = new Date().getTime();
 
-        await gr.services.console.getClient().userWasDeletedForceLogout(user.id);
+        await gr.services.console.getClient().userWasDeletedForceLogout({
+          userId: user.id,
+          email: userCopy.email_canonical,
+        });
 
         await this.save(user);
 

@@ -16,7 +16,7 @@ export class AdminDeleteUserController {
     userId: string,
   ): Promise<{ status: "failed" | "deleting" | "done"; userId?: string }> {
     try {
-      await gr.services.console.getClient().userWasDeletedForceLogout(userId);
+      await gr.services.console.getClient().userWasDeletedForceLogout({ userId });
       await gr.services.users.markToDeleted({ id: userId });
     } catch (err) {
       adminLogger.error({ err, userId }, "[DELETE USER] Error dustin updating user ");

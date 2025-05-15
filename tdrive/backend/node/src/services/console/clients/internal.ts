@@ -115,7 +115,7 @@ export class ConsoleInternalClient implements ConsoleServiceClient {
     throw new Error("Method should not be implemented.");
   }
 
-  async userWasDeletedForceLogout(_userId: string) {
+  async userWasDeletedForceLogout(_payload: { userId?: string; email?: string }) {
     logger.info("Internal: userWasDeletedForceLogout");
     throw new Error("Method should not be implemented.");
   }

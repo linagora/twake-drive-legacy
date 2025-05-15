@@ -72,7 +72,7 @@ export interface ConsoleServiceClient {
    * Similar to backChannelLogout, but must be called by administrative authorized
    * code in case of user immediate kick out
    */
-  userWasDeletedForceLogout(userId: string): Promise<void>;
+  userWasDeletedForceLogout(payload: { userId?: string; email?: string }): Promise<void>;
 
   resendVerificationEmail(email: string): Promise<void>;
 }
