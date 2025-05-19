@@ -165,6 +165,7 @@
   },
   "migration": {
     "cozyDomain": "COZY_DOMAIN",
+    "cozyOffer": "COZY_OFFER",
     "cozyManagerUrl": "COZY_MANAGER_URL",
     "cozyManagerToken": "COZY_MANAGER_TOKEN",
     "pollInterval": "MIGRATUION_POLL_INTERVAL",

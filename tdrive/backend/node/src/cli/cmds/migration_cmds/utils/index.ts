@@ -4,6 +4,7 @@ import config from "config";
 
 export const DEFAULT_COMPANY = config.get<string>("drive.defaultCompany");
 export const COZY_DOMAIN = config.get<string>("migration.cozyDomain");
+const COZY_OFFER = config.get<string>("migration.cozyOffer");
 const COZY_MANAGER_URL = config.get<string>("migration.cozyManagerUrl");
 const COZY_MANAGER_TOKEN = config.get<string>("migration.cozyManagerToken");
 const POLL_INTERVAL_MS = config.get<number>("migration.pollInterval");
@@ -45,7 +46,7 @@ export async function createCozyInstance(user: {
     const { data: createInstanceData } = await axios.post(
       `${COZY_MANAGER_URL}/instances`,
       {
-        offer: "twake",
+        offer: COZY_OFFER,
         slug: user.id,
         domain: COZY_DOMAIN,
         email: user.email,
