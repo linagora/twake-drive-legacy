@@ -71,7 +71,7 @@ const purgeIndexesCommand: yargs.CommandModule<unknown, unknown> = {
           for (const userFile of userFiles.getEntities()) {
             let fileObject: any = {};
             try {
-              if (userFile.migrated) {
+              if (userFile.migrated || userFile.is_in_trash) {
                 continue;
               }
               const filePathItems = await getPath(userFile.id, documentsRepo, true, {
