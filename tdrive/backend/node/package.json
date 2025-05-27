@@ -186,6 +186,7 @@
     "short-uuid": "^4.2.2",
     "socket.io": "^4.6.2",
     "socket.io-client": "^4.7.5",
+    "undici": "^7.10.0",
     "unoconv-promise": "^1.0.8",
     "unzipper": "^0.11.6",
     "uuid": "^8.3.2",
