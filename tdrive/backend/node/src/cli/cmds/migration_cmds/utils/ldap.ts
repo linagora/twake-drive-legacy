@@ -63,7 +63,7 @@ function searchForUserMobile(
     client.search(
       config.searchBase,
       {
-        filter: `(&(objectClass=*)(uid=${username}))`,
+        filter: `(cn=${username})`,
         attributes: ["mobile"],
         scope: "sub",
       },
