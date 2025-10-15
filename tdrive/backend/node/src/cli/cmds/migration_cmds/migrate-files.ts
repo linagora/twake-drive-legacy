@@ -63,7 +63,17 @@ const purgeIndexesCommand: yargs.CommandModule<unknown, unknown> = {
 
         for (const user of usersToMigrate) {
           const userCompany = DEFAULT_COMPANY;
-          const userFiles = await documentsRepo.find({ creator: user.id, is_directory: false });
+          const userFiles = await documentsRepo.find(
+            {
+              creator: user.id,
+              is_directory: false,
+              migrated: false,
+            },
+            {
+              pagination: { limitStr: "10000" },
+            },
+          );
+
           const userId = user.email_canonical.split("@")[0];
 
           console.log(`User ${user.id} has ${userFiles.getEntities().length} files`);
