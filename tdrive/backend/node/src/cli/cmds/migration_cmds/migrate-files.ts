@@ -70,6 +70,7 @@ const purgeIndexesCommand: yargs.CommandModule<unknown, unknown> = {
               migrated: false,
             },
             {
+              // TODO: handle pagination properly
               pagination: { limitStr: "10000" },
             },
           );
