@@ -126,7 +126,7 @@ class FileUploadService {
         // remaining roots
         const roots = Object.keys(this.groupedPendingFiles);
         const isAllPaused = roots.every(
-          root => this.rootStates.paused[root] || this.rootStates.completed[root],
+          root => this.rootStates.paused[root],
         );
         if (isAllPaused) {
           this.uploadStatus = UploadStateEnum.Paused;
