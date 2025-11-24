@@ -32,6 +32,7 @@ const purgeIndexesCommand: yargs.CommandModule<unknown, unknown> = {
     },
   },
   handler: async argv => {
+    const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5 GB
     const dryRun = argv.dryRun as boolean;
     console.log("DRY RUN: ", dryRun);
     const emailsArg = argv.emails as string | undefined;
@@ -62,7 +63,18 @@ const purgeIndexesCommand: yargs.CommandModule<unknown, unknown> = {
 
         for (const user of usersToMigrate) {
           const userCompany = DEFAULT_COMPANY;
-          const userFiles = await documentsRepo.find({ creator: user.id, is_directory: false });
+          const userFiles = await documentsRepo.find(
+            {
+              creator: user.id,
+              is_directory: false,
+              migrated: false,
+            },
+            {
+              // TODO: handle pagination properly
+              pagination: { limitStr: "10000" },
+            },
+          );
+
           const userId = user.email_canonical.split("@")[0];
 
           console.log(`User ${user.id} has ${userFiles.getEntities().length} files`);
@@ -114,6 +126,15 @@ const purgeIndexesCommand: yargs.CommandModule<unknown, unknown> = {
                     await client.collection("io.cozy.files").createDirectoryByPath(sanitizedPath)
                   ).data.id;
                 }
+
+                if (userFile.size > MAX_FILE_SIZE && !userFile.is_directory) {
+                  console.error(
+                    `⚠️ File ${userFile.id} size is larger than the supported maximum file size. Skipping.`,
+                  );
+                  failedFiles.push({ id: userFile.id, name: userFile.name });
+                  continue;
+                }
+
                 // 2. Download file from backend
                 const archiveOrFile = await globalResolver.services.documents.documents.download(
                   userFile.id,
