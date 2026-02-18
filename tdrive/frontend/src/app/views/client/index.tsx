@@ -19,6 +19,7 @@ import SearchPopup from 'components/search-popup/search-popup';
 import MainView from './body';
 
 import DownloadAppBanner from '@components/download-app-banner/download-app-banner';
+import ReadOnlyBanner from '@components/read-only-banner/read-only-banner';
 import DesktopRedirect from '../../components/desktop-redirect';
 import Header from './header';
 import SideBar from './side-bar';
@@ -39,7 +40,8 @@ export default React.memo((): JSX.Element => {
     page = (
       <DesktopRedirect>
         <div className="fade_in bg-zinc-100 dark:bg-black flex flex-col gap-2 h-full testid:header">
-          <DownloadAppBanner/>
+          <ReadOnlyBanner />
+          <DownloadAppBanner />
           <NewVersionComponent />
 
           <FeatureToggles features={activeFeatureNames}>

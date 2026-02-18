@@ -146,7 +146,8 @@
     "featureUserQuota": "ENABLE_FEATURE_USER_QUOTA",
     "featureManageAccess": "ENABLE_FEATURE_MANAGE_ACCESS",
     "featureAntivirus": "ENABLE_FEATURE_ANTIVIRUS",
-    "readOnly": "DRIVE_READ_ONLY"
+    "readOnly": "DRIVE_READ_ONLY",
+    "readOnlyMessage": "DRIVE_READ_ONLY_MESSAGE"
   },
   "av": {
     "host": "AV_HOST",

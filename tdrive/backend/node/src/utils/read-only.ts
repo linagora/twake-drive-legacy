@@ -27,7 +27,7 @@ export async function readOnlyMiddleware(
     reply.code(403).send({
       statusCode: 403,
       error: "Forbidden",
-      message: "Drive is in read-only mode. Write operations are not allowed.",
+      message: "Drive is in read-only mode. Write operation s are not allowed.",
     });
   }
 }
