@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginCallback } from "fastify";
 import { FileController } from "./controllers";
 import { File } from "../entities/file";
+import { readOnlyMiddleware } from "../../../utils/read-only";
 
 const filesUrl = "/companies/:company_id/files";
 
@@ -11,6 +12,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     method: "POST",
     url: filesUrl,
     preValidation: [fastify.authenticate],
+    preHandler: [readOnlyMiddleware],
     handler: fileController.save.bind(fileController),
   });
 
@@ -18,6 +20,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     method: "POST",
     url: `${filesUrl}/:id`,
     preValidation: [fastify.authenticate],
+    preHandler: [readOnlyMiddleware],
     handler: fileController.save.bind(fileController),
   });
 
@@ -44,6 +47,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     method: "DELETE",
     url: `${filesUrl}/:id`,
     preValidation: [fastify.authenticate],
+    preHandler: [readOnlyMiddleware],
     handler: fileController.delete.bind(fileController),
   });
   fastify.route({
@@ -64,6 +68,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, options, next) 
     method: "POST",
     url: "/S3/restore/:id",
     preValidation: [fastify.authenticate],
+    preHandler: [readOnlyMiddleware],
     handler: fileController.restoreFileS3.bind(fileController),
   });
 

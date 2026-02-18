@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginCallback } from "fastify";
 import { DocumentsController } from "./controllers";
 import { createDocumentSchema, createVersionSchema, beginEditingSchema } from "./schemas";
+import { readOnlyMiddleware } from "../../../utils/read-only";
 
 const baseUrl = "/companies/:company_id";
 const serviceUrl = `${baseUrl}/item`;
@@ -27,6 +28,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "POST",
     url: serviceUrl,
     preValidation: [fastify.authenticateOptional],
+    preHandler: [readOnlyMiddleware],
     schema: createDocumentSchema,
     handler: documentsController.create.bind(documentsController),
   });
@@ -35,6 +37,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "POST",
     url: `${serviceUrl}/:id`,
     preValidation: [fastify.authenticateOptional],
+    preHandler: [readOnlyMiddleware],
     handler: documentsController.update.bind(documentsController),
   });
 
@@ -42,6 +45,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "POST",
     url: `${serviceUrl}/:id/level`,
     preValidation: [fastify.authenticateOptional],
+    preHandler: [readOnlyMiddleware],
     handler: documentsController.updateLevel.bind(documentsController),
   });
 
@@ -49,6 +53,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "DELETE",
     url: `${serviceUrl}/:id`,
     preValidation: [fastify.authenticateOptional],
+    preHandler: [readOnlyMiddleware],
     handler: documentsController.delete.bind(documentsController),
   });
 
@@ -56,6 +61,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "POST",
     url: `${serviceUrl}/:id/restore`,
     preValidation: [fastify.authenticateOptional],
+    preHandler: [readOnlyMiddleware],
     handler: documentsController.restore.bind(documentsController),
   });
 
@@ -70,6 +76,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "POST",
     url: `${serviceUrl}/:id/version`,
     preValidation: [fastify.authenticateOptional],
+    preHandler: [readOnlyMiddleware],
     schema: createVersionSchema,
     handler: documentsController.createVersion.bind(documentsController),
   });
@@ -78,6 +85,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "POST",
     url: `${serviceUrl}/:id/editing_session`,
     preValidation: [fastify.authenticateOptional],
+    preHandler: [readOnlyMiddleware],
     schema: beginEditingSchema,
     handler: documentsController.beginEditing.bind(documentsController),
   });
@@ -107,6 +115,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "POST",
     url: editingSessionBase,
     preValidation: [fastify.authenticateOptional],
+    preHandler: [readOnlyMiddleware],
     handler: documentsController.updateEditing.bind(documentsController),
   });
 
@@ -114,6 +123,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "DELETE",
     url: editingSessionBase,
     preValidation: [fastify.authenticateOptional],
+    preHandler: [readOnlyMiddleware],
     handler: documentsController.cancelEditing.bind(documentsController),
   });
 
@@ -163,6 +173,7 @@ const routes: FastifyPluginCallback = (fastify: FastifyInstance, _options, next)
     method: "POST",
     url: `${baseUrl}/tabs/:tab_id`,
     preValidation: [fastify.authenticate],
+    preHandler: [readOnlyMiddleware],
     handler: documentsController.setTab.bind(documentsController),
   });
 
