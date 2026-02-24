@@ -1,5 +1,5 @@
 # Common node machine
-FROM node:lts-alpine AS node-base
+FROM node:22-alpine AS node-base
 
 ### Install dependencies
 RUN apk add --update-cache \
