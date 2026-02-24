@@ -4,6 +4,7 @@ import { languages } from "../languages";
 import { Languages, ServerConfiguration } from "../types";
 import version from "../../../version";
 import config from "config";
+import { isReadOnly } from "../../../utils/read-only";
 
 const routes: FastifyPluginCallback<{ configuration: ServerConfiguration["configuration"] }> = (
   fastify: FastifyInstance,
@@ -43,6 +44,12 @@ const routes: FastifyPluginCallback<{ configuration: ServerConfiguration["config
               "disable_account_creation",
               "disable_email_verification",
             ),
+          },
+          drive: {
+            readOnly: isReadOnly(),
+            readOnlyMessage: config.has("drive.readOnlyMessage")
+              ? config.get<string>("drive.readOnlyMessage")
+              : "",
           },
         },
       };

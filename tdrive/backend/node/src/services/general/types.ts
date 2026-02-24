@@ -37,5 +37,9 @@ export type ServerConfiguration = {
         disable_email_verification: boolean;
       };
     };
+    drive: {
+      readOnly: boolean;
+      readOnlyMessage: string;
+    };
   };
 };

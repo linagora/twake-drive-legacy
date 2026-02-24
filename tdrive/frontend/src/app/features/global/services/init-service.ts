@@ -20,6 +20,11 @@ export type InternalConfiguration = {
   disable_email_verification: boolean;
 };
 
+export type DriveConfiguration = {
+  readOnly: boolean;
+  readOnlyMessage?: string;
+};
+
 export type ServerInfoType = null | {
   status: 'ready';
   version: {
@@ -49,6 +54,7 @@ export type ServerInfoType = null | {
       remote?: ConsoleConfiguration;
       internal?: InternalConfiguration;
     };
+    drive?: DriveConfiguration;
   };
 };
 
