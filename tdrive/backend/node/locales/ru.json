@@ -2,5 +2,51 @@
     "hello": "Привет",
     "virtual-folder.my-drive": "Мой Диск",
     "virtual-folder.shared-drive": "Общий Диск",
-    "virtual-folder.trash": "Корзина"
+    "virtual-folder.trash": "Корзина",
+
+    "email.footer.follow-us": "Follow us on social media",
+    "email.footer.sent-by": "Sent by LINAGORA | 37 Rue Pierre Poli, 92130 Issy-les-Moulineaux, France",
+    "email.footer.help": "Help center",
+    "email.footer.privacy": "Privacy Policy",
+    "email.footer.terms": "Terms of Service",
+
+    "email.document-shared.heading": "You've got some updates on your Twake Drive!",
+    "email.document-shared.body": "shared a %s with you!",
+    "email.document-shared.cta": "See on Twake Drive",
+    "email.document-shared.cta-multiple": "See all %s messages",
+    "email.document-shared.subject": "Missed notifications in your Twake Drive",
+
+    "email.document-version-updated.heading": "While you were away",
+    "email.document-version-updated.body": "updated this %s!",
+    "email.document-version-updated.cta": "See on Twake Drive",
+    "email.document-version-updated.cta-multiple": "See all %s messages",
+    "email.document-version-updated.subject": "Missed notifications in your Twake Drive",
+
+    "email.av-scan-alert.heading": "Important: Antivirus Alert on Your Twake Drive",
+    "email.av-scan-alert.body": "Antivirus scan for a file on your Twake Drive has flagged an issue.",
+    "email.av-scan-alert.file-label": "File",
+    "email.av-scan-alert.issue-label": "Issue",
+    "email.av-scan-alert.scan-failed": "Scan Failed",
+    "email.av-scan-alert.malicious": "Malicious Content Detected",
+    "email.av-scan-alert.too-large": "File too large to be scanned",
+    "email.av-scan-alert.cta": "View File Details",
+    "email.av-scan-alert.subject": "Twake Drive Antivirus Alert",
+
+    "email.infected-document-deletion.heading": "Important: Antivirus Alert on Your Twake Drive",
+    "email.infected-document-deletion.body": "A file on your Twake Drive was flagged during an antivirus scan and has been deleted to protect your account.",
+    "email.infected-document-deletion.file-label": "File",
+    "email.infected-document-deletion.issue-label": "Issue",
+    "email.infected-document-deletion.scan-failed": "Scan Failed",
+    "email.infected-document-deletion.malicious": "Malicious Content Detected",
+    "email.infected-document-deletion.too-large": "File too large to be scanned",
+    "email.infected-document-deletion.subject": "Twake Drive Infected Document Deletion Alert",
+
+    "email.digest.heading": "While you were away",
+    "email.digest.body": "You have received new messages!",
+    "email.digest.cta": "See on Twake Drive",
+    "email.digest.cta-multiple": "See all %s messages",
+    "email.digest.subject": "Missed notifications in your Twake Drive",
+
+    "email.common.folder": "folder",
+    "email.common.file": "file"
 }

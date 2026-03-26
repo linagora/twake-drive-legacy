@@ -1,0 +1,12 @@
+<%~ includeFile("./common/_structure.eta", Object.assign(it, {
+   follow_us: it.t("email.footer.follow-us"),
+   sent_by: it.t("email.footer.sent-by"),
+   help: it.t("email.footer.help"),
+   privacy: it.t("email.footer.privacy"),
+   terms: it.t("email.footer.terms"),
+   links: {
+       help: "#",
+       privacy: "#",
+       terms: "#"
+   }
+})) %>

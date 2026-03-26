@@ -21,7 +21,10 @@ export type EmailBuilderRenderedResult = {
 
 export type EmailBuilderTemplateName =
   | "notification-document-shared"
-  | "notification-document-version-updated";
+  | "notification-document-version-updated"
+  | "notification-document-av-scan-alert"
+  | "notification-infected-document-deletion-alert"
+  | "notification-digest";
 
 export type EmailPusherPayload = {
   subject: string;
