@@ -107,7 +107,7 @@ const VersionModalContent = ({ id }: { id: string }) => {
               <Base className="testid:name">{version.file_metadata.name}</Base>
             </div>
             <div className="shrink-0 ml-4">
-              <BaseSmall className="testid:date-added">{formatDate(version.date_added || 0)}</BaseSmall>
+              <BaseSmall className="testid:date-added">{formatDate(version.date_added)}</BaseSmall>
             </div>
             <div className="shrink-0 ml-4">
               <BaseSmall className="testid:file-size">{formatBytes(version.file_metadata.size || 0)}</BaseSmall>

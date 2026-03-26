@@ -1,14 +1,15 @@
 export const formatDate = (date?: number) => {
-  return date
-    ? new Intl.DateTimeFormat(navigator.languages[0], {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        weekday: 'short',
-        hour12: false,
-      }).format(new Date(date))
-    : '';
+  if (date === null || date === undefined || isNaN(date)) return '-';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '-';
+  return new Intl.DateTimeFormat(navigator.languages[0], {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    weekday: 'short',
+    hour12: false,
+  }).format(d);
 };
