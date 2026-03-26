@@ -24,8 +24,11 @@ export const SharedFilesTable = () => {
   const buildFileContextMenu = useOnBuildFileContextMenu();
   const buildDateContextMenu = useOnBuildDateContextMenu();
 
-  const fileAddedDate = (timestamp: number) => {
-    const [formattedDate] = new Date(timestamp).toLocaleString().split(', ');
+  const fileAddedDate = (timestamp?: number | null) => {
+    if (timestamp === null || timestamp === undefined) return '-';
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return '-';
+    const [formattedDate] = date.toLocaleString().split(', ');
     return formattedDate;
   };
   return (

@@ -106,13 +106,15 @@ export default class Numbers {
 }
 
 export const formatTime = (
-  time: number | string,
+  time?: number | string | null,
   locale?: string,
   options: { keepTime?: boolean; keepSeconds?: boolean; keepDate?: boolean } = {
     keepTime: true,
   }
 ) => {
+  if (time === null || time === undefined) return '-';
   time = new Date(time).getTime();
+  if (isNaN(time)) return '-';
   locale = locale || navigator.language;
   const now = Date.now();
   const year = new Date(time).getFullYear();
@@ -127,8 +129,10 @@ export const formatTime = (
     second: options?.keepSeconds ? "numeric" : undefined,
   }).format(new Date(time));
 };
-export const formatDateShort = (time : number | string) => {
+export const formatDateShort = (time?: number | string | null) => {
+  if (time === null || time === undefined) return '-';
   const date = new Date(time);
+  if (isNaN(date.getTime())) return '-';
   const padZero = (num :number) => num.toString().padStart(2, '0');
 
   const month = padZero(date.getMonth() + 1); // Months are zero-indexed
