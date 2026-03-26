@@ -17,6 +17,7 @@ import path from "path";
 import { existsSync } from "fs";
 import axios from "axios";
 import { joinURL } from "../../../../utils/urls";
+import globalResolver from "../../../../services/global-resolver";
 
 export default class EmailPusherClass
   extends TdriveService<EmailPusherAPI>
@@ -69,6 +70,9 @@ export default class EmailPusherClass
   /**
    * Generate a rendered HTML and text email
    *
+   * Uses a single template per email type with i18n translation keys,
+   * rather than per-language duplicate templates.
+   *
    * @param {EmailBuilderTemplateName} template - the Eta template name
    * @param {String} language - the template language
    * @param {EmailBuilderDataPayload} data - the data
@@ -80,9 +84,10 @@ export default class EmailPusherClass
     data: EmailBuilderDataPayload,
   ): Promise<EmailBuilderRenderedResult> {
     try {
-      language = ["en", "fr"].find(l => language.toLocaleLowerCase().includes(l)) || "en";
-      const templatePath = path.join(__dirname, "templates", language, `${template}.eta`);
-      const subjectPath = path.join(__dirname, "templates", language, `${template}.subject.eta`);
+      const locale =
+        ["en", "fr"].find(l => language.toLocaleLowerCase().includes(l)) || "en";
+      const templatePath = path.join(__dirname, "templates", `${template}.eta`);
+      const subjectPath = path.join(__dirname, "templates", `${template}.subject.eta`);
       const urlComponents = data.notifications[0].urlComponents;
       const encodedUrl = joinURL([this.platformUrl, ...urlComponents]);
 
@@ -93,9 +98,14 @@ export default class EmailPusherClass
       if (!existsSync(subjectPath)) {
         throw Error(`subject template not found: ${subjectPath}`);
       }
+
+      const t = (key: string): string =>
+        globalResolver.services.i18n.translate(key, locale);
+
       const html = await Eta.renderFile(templatePath, {
         ...data,
         encodedUrl,
+        t,
       });
 
       if (!html || !html.length) {
@@ -104,7 +114,9 @@ export default class EmailPusherClass
 
       const text = convert(html);
 
-      const subject = convert((await Eta.renderFile(subjectPath, data)) as string);
+      const subject = convert(
+        (await Eta.renderFile(subjectPath, { ...data, t })) as string,
+      );
 
       return { html, text, subject };
     } catch (error) {

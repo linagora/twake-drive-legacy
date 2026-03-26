@@ -2,5 +2,51 @@
     "hello": "Bonjour",
     "virtual-folder.my-drive": "Mon disque",
     "virtual-folder.shared-drive": "Disque Partagé",
-    "virtual-folder.trash": "Corbeille"
+    "virtual-folder.trash": "Corbeille",
+
+    "email.footer.follow-us": "Retrouvez nous sur les réseaux",
+    "email.footer.sent-by": "Envoyé par LINAGORA | 37 Rue Pierre Poli, 92130 Issy-les-Moulineaux, France",
+    "email.footer.help": "Centre d'aide",
+    "email.footer.privacy": "Confidentialité",
+    "email.footer.terms": "CGU",
+
+    "email.document-shared.heading": "Vous avez des nouvelles concernant votre Twake Drive !",
+    "email.document-shared.body": "a partagé un %s avec vous!",
+    "email.document-shared.cta": "Voir sur Twake Drive",
+    "email.document-shared.cta-multiple": "Voir les %s messages",
+    "email.document-shared.subject": "Notifications non reçues dans votre Twake Drive",
+
+    "email.document-version-updated.heading": "Vous avez des nouvelles concernant votre Twake Drive !",
+    "email.document-version-updated.body": "a mis à jour ce %s!",
+    "email.document-version-updated.cta": "Voir sur Twake Drive",
+    "email.document-version-updated.cta-multiple": "Voir les %s messages",
+    "email.document-version-updated.subject": "Notifications non reçues dans votre Twake Drive",
+
+    "email.av-scan-alert.heading": "Important: Alerte Antivirus dans votre Twake Drive",
+    "email.av-scan-alert.body": "L'analyse antivirus d'un fichier dans votre Twake Drive a signalé un problème.",
+    "email.av-scan-alert.file-label": "Fichier",
+    "email.av-scan-alert.issue-label": "Problème",
+    "email.av-scan-alert.scan-failed": "Échec de l'analyse",
+    "email.av-scan-alert.malicious": "Contenu malveillant détecté",
+    "email.av-scan-alert.too-large": "Fichier trop volumineux pour être analysé",
+    "email.av-scan-alert.cta": "Voir sur Twake Drive",
+    "email.av-scan-alert.subject": "Alerte Antivirus dans votre Twake Drive",
+
+    "email.infected-document-deletion.heading": "Important : Alerte antivirus sur votre Twake Drive",
+    "email.infected-document-deletion.body": "Un fichier sur votre Twake Drive a été signalé lors d'une analyse antivirus et a été supprimé afin de protéger votre compte.",
+    "email.infected-document-deletion.file-label": "Fichier",
+    "email.infected-document-deletion.issue-label": "Problème",
+    "email.infected-document-deletion.scan-failed": "Échec de l'analyse",
+    "email.infected-document-deletion.malicious": "Contenu Malveillant Détecté",
+    "email.infected-document-deletion.too-large": "Fichier trop volumineux pour être analysé",
+    "email.infected-document-deletion.subject": "Alerte de suppression de document infecté sur Twake Drive",
+
+    "email.digest.heading": "Pendant votre absense",
+    "email.digest.body": "Vous avez reçu de nouveaux messages!",
+    "email.digest.cta": "Voir sur Twake Drive",
+    "email.digest.cta-multiple": "Voir les %s messages",
+    "email.digest.subject": "Notifications non reçues dans votre Twake Drive",
+
+    "email.common.folder": "dossier",
+    "email.common.file": "fichier"
 }

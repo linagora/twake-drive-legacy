@@ -1,15 +1,15 @@
 <% layout('./_structure') %>
-<% it.title = 'Alerte Antivirus dans votre Twake Drive' %>
+<% it.title = 'Missed notifications from company '  %>
 
-<%~ includeFile("../common/_body.eta", {
+<%~ includeFile("./common/_body.eta", {
   paragraphs: [
   `
   <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top;" width="100%" >
       <tbody>
           <tr>
               <td align="center" style="font-size:0px;padding:0 0 8px;word-break:break-word;">
-                  <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:24px;font-weight:800;line-height:29px;text-align:center;color:#FF0000;">
-                    Important: Alerte Antivirus dans votre Twake Drive
+                  <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:24px;font-weight:800;line-height:29px;text-align:center;color:#000000;">
+                    ${it.t("email.document-version-updated.heading")}
                   </div>
               </td>
           </tr>
@@ -22,16 +22,11 @@
           <tr>
               <td align="center" style="font-size:0px;padding:0 0 16px;word-break:break-word;" >
                   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
-                    <span style="font-weight: 500">L'analyse antivirus d'un fichier dans votre Twake Drive a signalé un problème.</span>
+                    <span style="text-transform: capitalize; font-weight: 500">${it.sender.first_name}</span> ${it.t("email.document-version-updated.body").replace("%s", it.notifications[0].item.is_directory ? it.t("email.common.folder") : it.t("email.common.file"))} ${it.notifications[0].item.is_directory ? "📁" : "📄" }
                   </div>
                   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
                     <span style="font-weight: 500">
-                      Fichier: ${it.notifications[0].item.name}
-                    </span>
-                  </div>
-                  <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:16px;line-height:29px;text-align:center;color:#000000;">
-                    <span style="color: #FF0000; font-weight: 600;">
-                      Problème: ${ it.notifications[0].item.av_status === "scan_failed" ? "Échec de l'analyse 🔍" : it.notifications[0].item.av_status === "malicious" ? "Contenu malveillant détecté ⚠️" : "Fichier trop volumineux pour être analysé 🚫" }
+                      ${!it.notifications[0].item.is_directory ? `${it.notifications[0].item.name}.${it.notifications[0].item.extension}` : `${it.notifications[0].item.name}.${it.notifications[0].item.extension}`}
                     </span>
                   </div>
               </td>
@@ -40,7 +35,7 @@
   </table>
   <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:13px;line-height:1;text-align:left;color:#000000;">
     <a class="main-button" href="${it.encodedUrl}">
-      Voir sur Twake Drive
+    ${it.notifications.length>1 ? it.t("email.document-version-updated.cta-multiple").replace("%s", it.notifications.length) : it.t("email.document-version-updated.cta")}
     </a>
   </div>
   `
