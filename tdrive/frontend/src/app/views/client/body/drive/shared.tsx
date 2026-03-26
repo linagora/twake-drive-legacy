@@ -157,6 +157,7 @@ const AccessChecker = ({
           <br />
           <div className="flex items-center mt-2">
             <Input
+              type="password"
               theme="outline"
               placeholder="Password"
               className="-mr-px rounded-r-none border-r-none"

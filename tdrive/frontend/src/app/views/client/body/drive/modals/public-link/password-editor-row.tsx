@@ -100,6 +100,7 @@ return <>
       suffix={isEditingPassword
         ? <>
             <Input
+              type="password"
               inputRef={inputRef}
               disabled={disabled}
               className="max-w-xs mr-4 mt-1"
