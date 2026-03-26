@@ -10,6 +10,7 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/outline';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import useRouterCompany from '@features/router/hooks/use-router-company';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 import { useRecoilState } from 'recoil';
@@ -22,12 +23,12 @@ import DiskUsage from '../common/disk-usage';
 import Actions from './actions';
 import { useHistory } from 'react-router-dom';
 import RouterServices from '@features/router/services/router-service';
-import Languages from 'features/global/services/languages-service';
 import FeatureTogglesService, {
   FeatureNames,
 } from '@features/global/services/feature-toggles-service';
 
 export default () => {
+  const { t } = useTranslation();
   const history = useHistory();
   const { user } = useCurrentUser();
   const company = useRouterCompany();
@@ -102,7 +103,7 @@ export default () => {
           }
           testClassId="sidebar-menu-my-drive"
         >
-          <UserIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.my_drive')}
+          <UserIcon className="w-5 h-5 mr-4" /> {t('components.side_menu.my_drive')}
         </Button>
         {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_SHARED_DRIVE) && (
           <Button
@@ -124,7 +125,7 @@ export default () => {
             }
             testClassId="sidebar-menu-shared-drive"
           >
-            <CloudIcon className="w-5 h-5 mr-4" /> {Languages.t('components.side_menu.home')}
+            <CloudIcon className="w-5 h-5 mr-4" /> {t('components.side_menu.home')}
           </Button>
         )}
         {FeatureTogglesService.isActiveFeatureName(FeatureNames.COMPANY_MANAGE_ACCESS) && (
@@ -149,7 +150,7 @@ export default () => {
             testClassId="sidebar-menu-share-with-me"
           >
             <UserGroupIcon className="w-5 h-5 mr-4" />{' '}
-            {Languages.t('components.side_menu.shared_with_me')}
+            {t('components.side_menu.shared_with_me')}
           </Button>
         )}
         {false && (
@@ -188,7 +189,7 @@ export default () => {
           testClassId="sidebar-menu-trash"
         >
           <TrashIcon className="w-5 h-5 mr-4 text-rose-500" />{' '}
-          {Languages.t('components.side_menu.trash')}
+          {t('components.side_menu.trash')}
         </Button>
 
         {false && (

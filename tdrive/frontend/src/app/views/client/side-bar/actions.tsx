@@ -12,7 +12,7 @@ import { ConfirmDeleteModalAtom } from '../body/drive/modals/confirm-delete';
 import { CreateModal, CreateModalAtom } from '../body/drive/modals/create';
 import { UploadModelAtom, UploadModal } from '../body/drive/modals/upload'
 import { Button } from '@atoms/button/button';
-import Languages from "features/global/services/languages-service";
+import { useTranslation } from 'react-i18next';
 import { useCurrentUser } from 'app/features/users/hooks/use-current-user';
 import useRouteState from 'app/features/router/hooks/use-route-state';
 
@@ -96,6 +96,7 @@ export const CreateModalWithUploadZones = ({ initialParentId }: { initialParentI
 };
 
 export default () => {
+  const { t } = useTranslation();
   const { user } = useCurrentUser();
   const { viewId, dirId } = useRouteState();
   const [ parentId ] = useRecoilState(DriveCurrentFolderAtom({ initialFolderId: dirId || viewId || 'user_'+user?.id  }));
@@ -139,7 +140,7 @@ export default () => {
                 disabled={!(trashChildren.length > 0)}
                 testClassId="create-modal-in-trash-button-empty-trash"
               >
-                <TruckIcon className="w-5 h-5 mr-2" /> { Languages.t('components.side_menu.buttons.empty_trash') }
+                <TruckIcon className="w-5 h-5 mr-2" /> { t('components.side_menu.buttons.empty_trash') }
               </Button>
             </>
           )}
@@ -173,7 +174,7 @@ export default () => {
                 style={{ boxShadow: '0 0 10px 0 rgba(0, 122, 255, 0.5)' }}
                 testClassId="button-upload"
               >
-                <UploadIcon className="w-5 h-5 mr-2" /> {Languages.t('components.side_menu.buttons.upload')}
+                <UploadIcon className="w-5 h-5 mr-2" /> {t('components.side_menu.buttons.upload')}
               </Button>
               <Button
                 onClick={() => openItemModal()}
@@ -183,7 +184,7 @@ export default () => {
                 className="w-full mb-2 justify-center"
                 testClassId="button-open-create-modal"
               >
-                <PlusIcon className="w-5 h-5 mr-2" /> {Languages.t('components.side_menu.buttons.create')}
+                <PlusIcon className="w-5 h-5 mr-2" /> {t('components.side_menu.buttons.create')}
               </Button>
             </>
           )}
