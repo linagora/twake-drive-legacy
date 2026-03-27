@@ -178,6 +178,27 @@ export class PostgresQueryBuilder {
     return [query, fields.map(f => f[1])];
   }
 
+  buildInsertOnConflictDoNothing<Entity>(entity: Entity): Query {
+    const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
+
+    const fields = Object.keys(columnsDefinition)
+      .filter(key => entity[columnsDefinition[key].nodename] !== undefined)
+      .map(key => this.toValueKeyDBStringPairFromEntity(entity, columnsDefinition, key));
+    const query = `INSERT INTO "${entityDefinition.name}" (${fields.map(e => e[0]).join(", ")})
+              VALUES (${fields.map((e, idx) => `$${idx + 1}`).join(", ")})
+              ON CONFLICT DO NOTHING`;
+    return [query, fields.map(f => f[1])];
+  }
+
+  hasNonPrimaryKeyFields<Entity>(entity: Entity): boolean {
+    const { columnsDefinition, entityDefinition } = getEntityDefinition(entity);
+    const primaryKey = unwrapPrimarykey(entityDefinition);
+
+    return Object.keys(columnsDefinition)
+      .filter(key => primaryKey.indexOf(key) === -1)
+      .some(key => entity[columnsDefinition[key].nodename] !== undefined);
+  }
+
   private buildWhereClause(startIndex: number, where: [string, any[]][]): Query {
     const equalsOrIs = ([key, value]) =>
       [key, value === null ? "IS" : "=", value === null ? "NULL" : `$${startIndex++}`].join(" ");
