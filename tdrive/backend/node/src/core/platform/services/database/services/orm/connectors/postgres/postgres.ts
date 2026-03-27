@@ -331,6 +331,14 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
       const query = this.queryBuilder.buildInsert(entity);
       return this.execute(query);
     } else if (_options.action == "UPDATE") {
+      // When the entity only has primary key fields (no non-PK fields to update),
+      // buildUpdate would generate an invalid empty SET clause (e.g. UPDATE ... SET WHERE ...).
+      // In this case, skip the UPDATE and just ensure the row exists via INSERT ON CONFLICT DO NOTHING.
+      if (!this.queryBuilder.hasNonPrimaryKeyFields(entity)) {
+        const query = this.queryBuilder.buildInsertOnConflictDoNothing(entity);
+        await this.execute(query);
+        return true;
+      }
       if (!(await this.execute(this.queryBuilder.buildUpdate(entity)))) {
         return this.execute(this.queryBuilder.buildInsert(entity));
       }
