@@ -26,10 +26,18 @@ export interface PostgresConnectionOptions {
   query_timeout: number; // number of milliseconds before a query call will time out, default is no timeout
 }
 
+/** Reconnection tuning constants */
+const RECONNECT_BASE_DELAY_MS = 500;
+const RECONNECT_MAX_DELAY_MS = 30_000;
+const RECONNECT_MAX_RETRIES = 10;
+
 export class PostgresConnector extends AbstractConnector<PostgresConnectionOptions> {
   private logger = getLogger("PostgresConnector");
-  private client: Client = new Client(this.options);
+  private client: Client;
   private connected = false;
+  private reconnecting = false;
+  private reconnectPromise: Promise<void> | null = null;
+  private intentionalDisconnect = false;
   private dataTransformer = new PostgresDataTransformer({ secret: this.secret });
   private queryBuilder = new PostgresQueryBuilder(this.secret);
 
@@ -41,26 +49,148 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     this.logger.info(`DB connection is fine, current time is ${result.rows[0].now}`);
   }
 
-  async connect(): Promise<this> {
-    if (this.client) {
-      this.logger.info("Connecting to DB");
-      this.client.on("error", err => {
-        this.logger.error(err, "PostgreSQL connection error");
-      });
-      this.client.on("end", () => (this.connected = false));
+  /**
+   * Create a fresh pg Client and attach error/end listeners that
+   * trigger automatic reconnection when the server drops the connection.
+   */
+  private createClient(): Client {
+    const client = new Client(this.options);
 
-      await this.client.connect();
-      this.connected = true;
-      this.logger.info("Connection pool created");
-      await this.healthcheck();
-    }
+    client.on("error", (err: Error) => {
+      this.logger.error(
+        { err },
+        "PostgreSQL connection lost — server terminated the connection",
+      );
+      this.connected = false;
+      if (!this.intentionalDisconnect) {
+        this.scheduleReconnect();
+      }
+    });
+
+    client.on("end", () => {
+      this.connected = false;
+      if (!this.intentionalDisconnect) {
+        this.logger.warn("PostgreSQL connection ended unexpectedly");
+        this.scheduleReconnect();
+      }
+    });
+
+    return client;
+  }
+
+  async connect(): Promise<this> {
+    this.intentionalDisconnect = false;
+    this.client = this.createClient();
+    this.logger.info("Connecting to DB");
+    await this.client.connect();
+    this.connected = true;
+    this.logger.info("Connection pool created");
+    await this.healthcheck();
     return this;
   }
 
   async disconnect(): Promise<this> {
-    if (this.client) await this.client.end();
+    this.intentionalDisconnect = true;
+    if (this.client) {
+      await this.client.end();
+    }
     this.client = null;
+    this.connected = false;
     return this;
+  }
+
+  /**
+   * Trigger a reconnect attempt if one is not already in progress.
+   * Safe to call multiple times — subsequent calls share the same promise.
+   */
+  private scheduleReconnect(): void {
+    if (this.reconnecting) return;
+    this.reconnectPromise = this.reconnectWithBackoff();
+  }
+
+  /**
+   * Attempt to re-establish the connection with exponential back-off.
+   * Retries up to RECONNECT_MAX_RETRIES times before giving up.
+   */
+  private async reconnectWithBackoff(): Promise<void> {
+    if (this.reconnecting) return;
+    this.reconnecting = true;
+
+    let attempt = 0;
+    while (attempt < RECONNECT_MAX_RETRIES) {
+      attempt++;
+      const delay = Math.min(
+        RECONNECT_BASE_DELAY_MS * Math.pow(2, attempt - 1),
+        RECONNECT_MAX_DELAY_MS,
+      );
+
+      this.logger.info(
+        `PostgreSQL reconnect attempt ${attempt}/${RECONNECT_MAX_RETRIES} in ${delay}ms`,
+      );
+      await this.sleep(delay);
+
+      try {
+        // Dispose the old client silently — it is already dead
+        try {
+          this.client?.end().catch(() => {});
+        } catch {
+          // ignore cleanup errors on dead client
+        }
+
+        this.client = this.createClient();
+        await this.client.connect();
+        this.connected = true;
+        this.reconnecting = false;
+        this.reconnectPromise = null;
+        this.logger.info(
+          `PostgreSQL connection recovered after ${attempt} attempt(s)`,
+        );
+        return;
+      } catch (err) {
+        this.logger.warn(
+          { err },
+          `PostgreSQL reconnect attempt ${attempt}/${RECONNECT_MAX_RETRIES} failed`,
+        );
+      }
+    }
+
+    this.reconnecting = false;
+    this.reconnectPromise = null;
+    this.logger.error(
+      `PostgreSQL reconnection failed after ${RECONNECT_MAX_RETRIES} attempts — giving up. ` +
+        "Manual restart may be required.",
+    );
+  }
+
+  /**
+   * Ensure the client is connected before running a query.
+   * If a reconnect is in progress, wait for it to finish.
+   * If the connection is down and no reconnect is running, trigger one.
+   */
+  private async ensureConnection(): Promise<void> {
+    if (this.connected) return;
+
+    if (this.reconnectPromise) {
+      await this.reconnectPromise;
+    }
+
+    if (!this.connected) {
+      // No reconnect was in progress and we are still disconnected — try now
+      this.scheduleReconnect();
+      if (this.reconnectPromise) {
+        await this.reconnectPromise;
+      }
+    }
+
+    if (!this.connected) {
+      throw new Error(
+        "PostgreSQL connection is not available and reconnection failed",
+      );
+    }
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   private async ping(): Promise<boolean> {
@@ -74,6 +204,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const safeRequest = async (query: string, values?: any[], singleRow = false) => {
       try {
+        await this.ensureConnection();
         const rows = (await this.client.query(query, values)).rows;
         return singleRow && rows?.length === 1 ? rows[0] : rows;
       } catch (err) {
@@ -145,6 +276,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
       this.logger.debug(
         `service.database.orm.createTable - Creating table ${entity.name} : ${query}`,
       );
+      await this.ensureConnection();
       const result: QueryResult = await this.client.query(query);
       this.logger.info(`Table is created with the result ${JSON.stringify(result)}`);
     } catch (err) {
@@ -176,6 +308,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
 
         try {
           this.logger.debug(`Creating index ${indexName} (${indexDbName}) : ${query}`);
+          await this.ensureConnection();
           await this.client.query(query);
         } catch (err) {
           this.logger.warn(
@@ -204,6 +337,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
         END IF;
         end $$;`;
       try {
+        await this.ensureConnection();
         await this.client.query(query);
       } catch (err) {
         this.logger.warn(err, `Error creating primary key for "${entity.name}"`);
@@ -224,6 +358,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
 
       if (alterQueryColumns.length > 0) {
         const alterQuery = `ALTER TABLE "${entity.name}" ${alterQueryColumns}`;
+        await this.ensureConnection();
         const queryResult: QueryResult = await this.client.query(alterQuery);
         this.logger.info(`Table is altered with the result ${queryResult}`);
       }
@@ -242,6 +377,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
           END LOOP;
         END $$;`;
     logger.debug(`service.database.orm.postgres.drop - Query: "${query}"`);
+    await this.ensureConnection();
     await this.client.query(query);
     return this;
   }
@@ -258,6 +394,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
           END LOOP;
         END $$;`;
     logger.debug(`service.database.orm.postgres.dropTables - Query: "${query}"`);
+    await this.ensureConnection();
     await this.client.query(query);
     return this;
   }
@@ -271,6 +408,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
 
     logger.debug(`services.database.orm.postgres.find - Query: ${query}`);
 
+    await this.ensureConnection();
     const results = await this.client.query(query[0] as string, query[1] as never[]);
 
     const { columnsDefinition, entityDefinition } = getEntityDefinition(
@@ -314,6 +452,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
   async removeOne<Entity>(entity: Entity): Promise<boolean> {
     const query = this.queryBuilder.buildDelete(entity);
     logger.debug(`service.database.orm.postgres.remove - Query: "${query}"`);
+    await this.ensureConnection();
     const result = await this.client.query(query[0] as string, query[1] as never[]);
     return result.rowCount > 0;
   }
@@ -389,6 +528,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
   private async executeRaw(query: Query): Promise<QueryResult | null> {
     logger.debug(`service.database.orm.postgres - Query: "${query[0]}"`);
     try {
+      await this.ensureConnection();
       return await this.client.query(query[0] as string, query[1] as never[]);
     } catch (err) {
       logger.error({ err }, `services.database.orm.postgres - Error with SQL query: ${query[0]}`);
@@ -411,6 +551,7 @@ export class PostgresConnector extends AbstractConnector<PostgresConnectionOptio
            information_schema.columns
         WHERE
            table_name = $1`;
+      await this.ensureConnection();
       const dbResult: QueryResult<TableRowInfo> = await this.client.query(query, [name]);
       return dbResult.rows.map(row => row.column_name);
     } catch (err) {
