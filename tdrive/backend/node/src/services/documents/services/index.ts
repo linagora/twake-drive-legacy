@@ -1641,10 +1641,9 @@ export class DocumentsService {
           $in: [
             ...(options.onlyDirectlyShared
               ? [["access_entities", [context.user.id]] as inType]
-              : options.onlyUploadedNotByMe
-              ? []
-              : [["creator", [options.creator || context.user.id]] as inType]),
+              : []),
             ...(options.company_id ? [["company_id", [options.company_id]] as inType] : []),
+            ...(options.creator ? [["creator", [options.creator]] as inType] : []),
             ...(options.mime_type
               ? [
                   [
@@ -1694,8 +1693,6 @@ export class DocumentsService {
       // Check access permissions
       if (!options.onlyDirectlyShared) {
         filteredResult = await this.filter(filteredResult, async item => {
-          // Creator always has access to their own documents — skip the recursive parent traversal
-          if (item.creator === context.user.id) return !item.is_in_trash;
           try {
             return (
               !item.is_in_trash &&
